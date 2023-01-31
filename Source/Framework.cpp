@@ -53,7 +53,7 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 {
 	//別スレッド中にデバイスコンテキストが使われていた場合に
 	//同時アクセスしないように排他制御する
-	//std::lock_guard<std::mutex> lock(graphics.GetMutex());
+	std::lock_guard<std::mutex> lock(graphics.GetMutex());
 
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
