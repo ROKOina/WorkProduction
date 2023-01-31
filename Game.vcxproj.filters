@@ -129,28 +129,7 @@
     <ClInclude Include="Source\Camera.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Enemy.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\EnemyManager.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\EnemySlime.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Collision.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Projectile.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ProjectileManager.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ProjectileStraite.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ProjectileHoming.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\EffectManager.h">
@@ -178,9 +157,6 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\StageManager.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\StageMoveFloor.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\ResourceManager.h" />
@@ -270,28 +246,7 @@
     <ClCompile Include="Source\CameraController.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\EnemyManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\EnemySlime.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Enemy.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Collision.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Projectile.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ProjectileManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ProjectileSraite.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ProjectileHoming.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\EffectManager.cpp">
@@ -316,9 +271,6 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\StageManager.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\StageMoveFloor.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\ResourceManager.cpp">

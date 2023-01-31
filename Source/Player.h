@@ -3,7 +3,6 @@
 #include "Graphics/Shader.h"
 #include "Graphics/Model.h"
 #include "Character.h"
-#include "ProjectileManager.h"
 #include "Effect.h"
 
 //プレイヤー
@@ -21,12 +20,6 @@ public: //関数
 
     //描画処理
     void Render(ID3D11DeviceContext* dc, Shader* shader);
-
-    //プレイヤーとエネミーとの衝突処理
-    void CollisionPlayerVsEnemies();
-
-    //弾丸と敵の衝突処理
-    void CollisionProjectileVsEnemies();
 
     //デバッグ用GUI描画
     void DrawDebugGUI();
@@ -50,17 +43,11 @@ private:    //関数
     //移動入力処理
     bool InputMove(float elapsedTime);
 
-    //弾丸入力処理
-    void InputProjectile();
-
     //攻撃入力処理
     bool InputAttack();
 
     ////旋回処理
     //void Turn(float elapsedTime, float vx, float vz, float speed);
-
-    //ノードとエネミーの衝突判定
-    void CollisionNodeVsEnemies(const char* nodeName, float nodeRadius);
 
 protected:
     //着地した時に呼ばれる
@@ -79,13 +66,9 @@ private:    //変数
 
     //ジャンプ
     float jumpSpeed = 20.0f;
-    //float gravity = -1.0f;
-    //DirectX::XMFLOAT3 velocity = { 0,0,0 }; //速力
 
     int JumpCount = 0;
     int JumpLimit = 2;
-
-    ProjectileManager projectileManager;
 
     //ボーン
     float leftHandRadius = 0.4f;
