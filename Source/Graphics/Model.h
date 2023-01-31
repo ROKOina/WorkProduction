@@ -51,6 +51,9 @@ public:
 
 	//現在のアニメーション再生時間取得
 	float GetCurrentAnimationSecoonds()const { return currentAnimationSeconds; }
+
+	//アニメーション追加
+	void ImportFbxAnimation(const char* filename);
 private:
 	std::shared_ptr<ModelResource>	resource;
 	std::shared_ptr<FbxModelResource>	modelResource;	//fbx用
