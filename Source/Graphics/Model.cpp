@@ -2,13 +2,10 @@
 #include "Graphics/Model.h"
 #include "ResourceManager.h"
 
-// コンストラクタ
-Model::Model(const char* filename)
+//コンストラクタで呼ぶイニシャライザ
+void Model::ModelInitialize(std::shared_ptr<ModelResource> resource)
 {
-	// リソース読み込み
-	//resource = std::make_shared<ModelResource>();
-	//resource->Load(Graphics::Instance().GetDevice(), filename);
-	resource = ResourceManager::Instance().LoadModelResource(filename);
+	this->resource = resource;
 
 	// ノード
 	const std::vector<ModelResource::Node>& resNodes = resource->GetNodes();
@@ -34,6 +31,15 @@ Model::Model(const char* filename)
 	// 行列計算
 	const DirectX::XMFLOAT4X4 transform = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 	UpdateTransform(transform);
+}
+
+// コンストラクタ
+Model::Model(const char* filename)
+{
+	ID3D11Device* device = Graphics::Instance().GetDevice();
+	modelResource = std::make_shared<FbxModelResource>();
+	modelResource->Load(device, filename);
+	ModelInitialize(modelResource);
 }
 
 // 変換行列計算

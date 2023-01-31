@@ -19,7 +19,8 @@ Player::Player()
     //インスタンスポインタ設定
     instance = this;
 
-    model = new Model("Data/Model/Jammo/Jammo.mdl");
+    model = new Model("Data/Model/Slime/Slime.fbx");
+    //model = new Model("Data/Model/Jammo/Jammo.fbx");
     //model->PlayAnimation(0,true);
 
     //model = new Model("Data/Model/Mr.Incredible/Mr.Incredible.mdl");

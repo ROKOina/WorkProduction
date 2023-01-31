@@ -4,6 +4,7 @@
 #include <vector>
 #include <DirectXMath.h>
 #include "Graphics/ModelResource.h"
+#include "Graphics/FbxModelResource.h"
 
 // モデル
 class Model
@@ -11,6 +12,7 @@ class Model
 public:
 	Model(const char* filename);
 	~Model() {}
+	void ModelInitialize(std::shared_ptr<ModelResource> resource);
 
 	struct Node
 	{
@@ -51,6 +53,7 @@ public:
 	float GetCurrentAnimationSecoonds()const { return currentAnimationSeconds; }
 private:
 	std::shared_ptr<ModelResource>	resource;
+	std::shared_ptr<FbxModelResource>	modelResource;	//fbx用
 	std::vector<Node>				nodes;
 
 	//アニメーション

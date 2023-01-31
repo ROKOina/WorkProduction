@@ -160,6 +160,12 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Source\ResourceManager.h" />
+    <ClInclude Include="Source\Graphics\FbxModelResource.h">
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Encoding.h">
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\imgui\imgui.cpp">
@@ -275,6 +281,12 @@
     </ClCompile>
     <ClCompile Include="Source\ResourceManager.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\FbxModelResource.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Encoding.cpp">
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1349,7 +1349,7 @@ public:
 		{
 			bs[j] = mControllPoint[j].W * CalcBSplineBasisFunc(knot, j, p, t * (t_rate));
 
-			if (!std::isnan(bs[j]))
+			if (!isnan(bs[j]))
 			{
 				wSum += bs[j];
 			}
@@ -1362,7 +1362,7 @@ public:
 			d.X = (float)mControllPoint[j].X * magnification * (float)bs[j] / (float)wSum;
 			d.Y = (float)mControllPoint[j].Y * magnification * (float)bs[j] / (float)wSum;
 			d.Z = (float)mControllPoint[j].Z * magnification * (float)bs[j] / (float)wSum;
-			if (!std::isnan(d.X) && !std::isnan(d.Y) && !std::isnan(d.Z))
+			if (!isnan(d.X) && !isnan(d.Y) && !isnan(d.Z))
 			{
 				ans += d;
 			}
