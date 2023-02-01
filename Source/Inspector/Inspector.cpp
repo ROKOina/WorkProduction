@@ -4,13 +4,11 @@
 #include "Inspector\Inspector.h"
 
 // コンストラクタ
-Inspector::Inspector(HWND hWnd,int ID)
-	: hWnd(hWnd),
-	windowID(ID)
+Inspector::Inspector(HWND hWnd, int ID)
+	:SubWindow(hWnd, ID)
 {
-	Graphics::Instance().CreateSubWindowSwapChain(hWnd);
-	p = new Model("Data/Model/Jammo/Jammo.fbx");
-	cameraController = new CameraController();
+	p = std::make_unique<Model>("Data/Model/Jammo/Jammo.fbx");
+	cameraController = std::make_unique<CameraController>();
 
 	Graphics& graphics = Graphics::Instance();
 	Camera& camera = Camera::Instance();
@@ -29,14 +27,6 @@ Inspector::Inspector(HWND hWnd,int ID)
 // デストラクタ
 Inspector::~Inspector()
 {
-	delete p;
-	//カメラコントローラー終了化
-	if (cameraController != nullptr)
-	{
-		delete cameraController;
-		cameraController = nullptr;
-	}
-
 }
 
 // 更新処理
@@ -80,21 +70,12 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 		Shader* shader = graphics.GetShader();
 		shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
 
-		shader->Draw(dc, p);
+		shader->Draw(dc, p.get());
 
 		shader->End(dc);
 	}
 
 
-	// バックバッファに描画した画を画面に表示する。
-	Graphics::Instance().GetSubWindowSwapChain(windowID)->Present(syncInterval, 0);
-}
 
-// アプリケーションループ
-int Inspector::Run(float elapsedTime)
-{
-			Update(elapsedTime);
-			Render(elapsedTime);
-	return 0;
+	SubWindow::Render(elapsedTime);
 }
-

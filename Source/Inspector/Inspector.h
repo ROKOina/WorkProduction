@@ -1,37 +1,23 @@
 #pragma once
 
-#include <windows.h>
-#include "HighResolutionTimer.h"
+#include "Inspector\SubWindowManager.h"
 
-#include "Graphics/Graphics.h"
 #include "Camera.h"
 #include "CameraController.h"
 
-//サブウィンドウの数
-#define WINDOW_NUM 2
-
-class Inspector
+class Inspector : public SubWindow
 {
 public:
 	Inspector(HWND hWnd, int ID);
-	~Inspector();
+	~Inspector()override;
 
 private:
-	void Update(float elapsedTime/*Elapsed seconds from last frame*/);
-	void Render(float elapsedTime/*Elapsed seconds from last frame*/);
+	void Update(float elapsedTime/*Elapsed seconds from last frame*/)override;
+	void Render(float elapsedTime/*Elapsed seconds from last frame*/)override;
 
-public:
-	int Run(float elapsedTime);
-
-	void SetSyncInterval(int syncInterval) { this->syncInterval = syncInterval; }
 private:
-	const HWND				hWnd;
-	HighResolutionTimer		timer;
-	int syncInterval;
 
-	int windowID;	//ウィンドウ識別番号
-
-	Model* p = nullptr;
-	CameraController* cameraController = nullptr;
+	std::unique_ptr<Model> p;
+	std::unique_ptr<CameraController> cameraController;
 };
 

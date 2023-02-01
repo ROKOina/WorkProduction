@@ -6,6 +6,9 @@
 #include "Graphics/Graphics.h"
 #include "Input/input.h"
 
+//サブウィンドウ
+#include "Inspector\Inspector.h"
+#include "Inspector\SubWindowManager.h"
 
 class Framework
 {
@@ -29,5 +32,9 @@ private:
 	Audio					audio;
 	Graphics				graphics;
 	Input					input;
+
+private:	//サブウィンドウ
+	void AddSubWindow(int width = 100, int height = 100);
+	int countSubWindow;
 };
 

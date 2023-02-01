@@ -10,8 +10,6 @@
 #include "SceneTitle.h"
 #include "SceneManager.h"
 
-//サブウィンドウ
-#include "Inspector\Inspector.h"
 
 // 垂直同期間隔設定
 static const int syncInterval = 1;
@@ -109,15 +107,9 @@ int Framework::Run()
 {
 	MSG msg = {};
 
-	std::unique_ptr<Inspector> i[WINDOW_NUM];
-	for (int id = 0; id < WINDOW_NUM; ++id) {
-		RECT rc = { 0, 0, 500, 600 };
-		HWND hWnd2 = CreateWindow(_T("Game"), _T(""), WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, ::GetModuleHandle(NULL), NULL);
-		ShowWindow(hWnd2, __argc);
-
-		i[id] = std::make_unique<Inspector>(hWnd2, id);
-		SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i[id]));
-	}
+	AddSubWindow();
+	AddSubWindow(500,100);
+	
 
 	while (WM_QUIT != msg.message)
 	{
@@ -138,13 +130,12 @@ int Framework::Run()
 			Update(elapsedTime);
 			Render(elapsedTime);
 
-			//サブウィンドウ更新
-			for (int id = 0; id < WINDOW_NUM; ++id) {
-				i[id]->SetSyncInterval(syncInterval);
-				i[id]->Run(elapsedTime);
-			}
+			SubWindowManager::Instance().SetSyncInterval(syncInterval);
+			SubWindowManager::Instance().Run(elapsedTime);
 		}
 	}
+
+	SubWindowManager::Instance().Clear();	//ウィンドウクリア
 
 	return static_cast<int>(msg.wParam);
 }
@@ -186,4 +177,18 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 	return 0;
+}
+
+//サブウィンドウ
+void Framework::AddSubWindow(int width, int height)
+{
+	RECT rc = { 0, 0, width, height };
+	HWND hWnd2 = CreateWindow(_T("Game"), _T(""), WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, ::GetModuleHandle(NULL), NULL);
+	ShowWindow(hWnd2, __argc);
+
+	Inspector* i = new Inspector(hWnd2, countSubWindow);
+	SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i));
+
+	SubWindowManager::Instance().AddSubWindow(i);
+	countSubWindow++;
 }
