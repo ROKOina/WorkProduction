@@ -28,6 +28,9 @@
     <Filter Include="Source\Audio">
       <UniqueIdentifier>{dfdec87c-66e2-424a-8126-477d89e5eb73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Inspector">
+      <UniqueIdentifier>{50a4712f-dc32-4547-b7d7-90bcd724d2a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External\imgui\imconfig.h">
@@ -166,6 +169,12 @@
     <ClInclude Include="Source\Graphics\Encoding.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Inspector\Inspector.h">
+      <Filter>Source\Inspector</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Inspector\SubWindowManager.h">
+      <Filter>Source\Inspector</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\imgui\imgui.cpp">
@@ -287,6 +296,12 @@
     </ClCompile>
     <ClCompile Include="Source\Graphics\Encoding.cpp">
       <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Inspector\Inspector.cpp">
+      <Filter>Source\Inspector</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Inspector\SubWindowManager.cpp">
+      <Filter>Source\Inspector</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

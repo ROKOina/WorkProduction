@@ -56,6 +56,19 @@ public:
 	//ミューテックス取得
 	std::mutex& GetMutex() { return mutex; }
 
+public:	//サブウィンドウ
+	// サブウィンドウスワップチェイン作成
+	void CreateSubWindowSwapChain(HWND hWnd);
+
+	// サブウィンドウスワップチェーン取得
+	IDXGISwapChain* GetSubWindowSwapChain(int index) const { return subWswapchain[index].Get(); }
+
+	// レンダーターゲットビュー取得
+	ID3D11RenderTargetView* GetSubWindowRenderTargetView(int index) const { return subWrenderTargetView[index].Get(); }
+private:
+	std::vector<Microsoft::WRL::ComPtr<ID3D11RenderTargetView>>	subWrenderTargetView;
+	std::vector<Microsoft::WRL::ComPtr<IDXGISwapChain>>			subWswapchain;
+
 private:
 	static Graphics*								instance;
 

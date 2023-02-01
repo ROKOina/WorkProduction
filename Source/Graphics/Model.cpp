@@ -136,39 +136,6 @@ void Model::UpdateAnimetion(float elapsedTime)
 				
 				Node& node = nodes[nodeIndex];
 
-				////補完したい値の差を出す
-				//DirectX::XMFLOAT4 rotateSub = { 
-				//	key1.rotate.x - key0.rotate.x,
-				//	key1.rotate.y - key0.rotate.y,
-				//	key1.rotate.z - key0.rotate.z,
-				//	key1.rotate.w - key0.rotate.w };
-				//DirectX::XMFLOAT3 translateSub = { 
-				//	key1.translate.x - key0.translate.x,
-				//	key1.translate.y - key0.translate.y,
-				//	key1.translate.z - key0.translate.z};
-
-				////補完した値を出す
-				//DirectX::XMFLOAT4 rotateComplement = {
-				//	rotateSub.x * rate,
-				//	rotateSub.y * rate,
-				//	rotateSub.z * rate,
-				//	rotateSub.w * rate};
-				//DirectX::XMFLOAT3 translateComplement = {
-				//	translateSub.x * rate,
-				//	translateSub.y * rate,
-				//	translateSub.z * rate};
-
-				////補間値をノードに反映
-				//node.rotate = {
-				//	key0.rotate.x + rotateComplement.x,
-				//	key0.rotate.y + rotateComplement.y,
-				//	key0.rotate.z + rotateComplement.z,
-				//	key0.rotate.w + rotateComplement.w };
-				//node.translate = {
-				//	key0.translate.x + translateComplement.x,
-				//	key0.translate.y + translateComplement.y,
-				//	key0.translate.z + translateComplement.z };
-
 				//ブレンド補間処理
 				if (blendRate < 1.0f)
 				{

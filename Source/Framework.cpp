@@ -1,15 +1,17 @@
 #include <memory>
 #include <sstream>
+#include <tchar.h>
 
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include "Framework.h"
 #include "EffectManager.h"
-//#include "SceneGame.h"
+#include "SceneGame.h"
 #include "SceneTitle.h"
 #include "SceneManager.h"
 
-//static SceneGame sceneGame;
+//サブウィンドウ
+#include "Inspector\Inspector.h"
 
 // 垂直同期間隔設定
 static const int syncInterval = 1;
@@ -25,6 +27,7 @@ Framework::Framework(HWND hWnd)
 
 	//sceneGame.Initialize();
 	SceneManager::Instance().ChangeScene(new ScneTitle);
+
 }
 
 // デストラクタ
@@ -106,6 +109,16 @@ int Framework::Run()
 {
 	MSG msg = {};
 
+	std::unique_ptr<Inspector> i[WINDOW_NUM];
+	for (int id = 0; id < WINDOW_NUM; ++id) {
+		RECT rc = { 0, 0, 500, 600 };
+		HWND hWnd2 = CreateWindow(_T("Game"), _T(""), WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, ::GetModuleHandle(NULL), NULL);
+		ShowWindow(hWnd2, __argc);
+
+		i[id] = std::make_unique<Inspector>(hWnd2, id);
+		SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i[id]));
+	}
+
 	while (WM_QUIT != msg.message)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -124,8 +137,15 @@ int Framework::Run()
 				;
 			Update(elapsedTime);
 			Render(elapsedTime);
+
+			//サブウィンドウ更新
+			for (int id = 0; id < WINDOW_NUM; ++id) {
+				i[id]->SetSyncInterval(syncInterval);
+				i[id]->Run(elapsedTime);
+			}
 		}
 	}
+
 	return static_cast<int>(msg.wParam);
 }
 
