@@ -61,10 +61,6 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
-	//// IMGUIフレーム開始処理
-	//graphics.GetImGuiRenderer()->NewFrame();
-
-
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
@@ -76,11 +72,6 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	// IMGUIデモウインドウ描画（IMGUI機能テスト用）
 	//ImGui::ShowDemoWindow();
-
-	//// IMGUI描画
-	//graphics.GetImGuiRenderer()->Render(dc);
-
-	ImGui::Text("Hello, world");
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -139,7 +130,7 @@ int Framework::Run()
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hWnd);
-	ImGui_ImplDX11_Init(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
+	ImGui_ImplDX11_Init(graphics.GetDevice(), graphics.GetDeviceContext());
 
 
 	//終了コードならwhileぬける　
