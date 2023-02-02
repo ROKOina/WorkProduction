@@ -30,6 +30,8 @@ public:
 
     void Clear();
 
+    std::vector<SubWindow*> GetSubWindow() { return subWindows; }
+
 private:
     int syncInterval;
 
@@ -40,7 +42,7 @@ private:
 class SubWindow
 {
 public:
-    SubWindow(HWND hWnd, int ID);
+    SubWindow(HWND hWnd, int ID, int width, int height);
     virtual ~SubWindow();
 
 public: //純粋仮想関数で実体化しないように
@@ -49,9 +51,11 @@ public: //純粋仮想関数で実体化しないように
 
     int Run(float elapsedTime);
 
+    const HWND& GetHWND() { return hWnd; }
+
 protected:
     const HWND				hWnd;
     HighResolutionTimer		timer;
-
     int windowID;	//ウィンドウ識別番号
+
 };

@@ -4,8 +4,8 @@
 #include "Inspector\Inspector.h"
 
 // コンストラクタ
-Inspector::Inspector(HWND hWnd, int ID)
-	:SubWindow(hWnd, ID)
+Inspector::Inspector(HWND hWnd, int ID, int width, int height)
+	:SubWindow(hWnd, ID, width, height)
 {
 	p = std::make_unique<Model>("Data/Model/Jammo/Jammo.fbx");
 	cameraController = std::make_unique<CameraController>();
@@ -44,8 +44,11 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 {
 	std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
 
-
 	Graphics& graphics = Graphics::Instance();
+
+	//// IMGUIフレーム開始処理
+	//graphics.GetSubWindowImGuiRenderer(windowID)->NewFrame();
+
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 	ID3D11RenderTargetView* rtv = graphics.GetSubWindowRenderTargetView(windowID);
 	ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
@@ -75,7 +78,23 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 		shader->End(dc);
 	}
 
+	//// 2DデバッグGUI描画
+	//{
+	//	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+	//	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
+	//	if (ImGui::Begin("DebugMenu2", nullptr, ImGuiWindowFlags_None))
+	//	{
+	//		static float a;
+	//		ImGui::DragFloat("a", &a);
+	//	}
+	//	ImGui::End();
+
+	//}
+
+
+	//// IMGUI描画
+	//graphics.GetSubWindowImGuiRenderer(windowID)->Render(dc);
 
 	SubWindow::Render(elapsedTime);
 }

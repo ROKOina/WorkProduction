@@ -25,14 +25,15 @@ void SubWindowManager::Clear()
     subWindows.clear();
 }
 
+
 // SubWindowクラス //
 
-SubWindow::SubWindow(HWND hWnd, int ID) 
+SubWindow::SubWindow(HWND hWnd, int ID, int width, int height)
     : hWnd(hWnd),
     windowID(ID)
 {
     //スワップチェイン生成
-    Graphics::Instance().CreateSubWindowSwapChain(hWnd);
+    Graphics::Instance().CreateSubWindowSwapChain(hWnd, width, height);
 }
 
 SubWindow::~SubWindow() 

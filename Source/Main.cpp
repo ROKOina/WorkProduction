@@ -23,13 +23,13 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = fnWndProc;
+	wcex.lpfnWndProc = fnWndProc;		//ウィンドウのメッセージを処理するためのコールバック関数
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = instance;
 	wcex.hIcon = 0;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);	//ウィンドウ背景色
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = _T("Game");
 	wcex.hIconSm = 0;

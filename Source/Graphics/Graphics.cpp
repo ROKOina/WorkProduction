@@ -146,7 +146,7 @@ Graphics::~Graphics()
 {
 }
 
-void Graphics::CreateSubWindowSwapChain(HWND hWnd)
+void Graphics::CreateSubWindowSwapChain(HWND hWnd,int width, int height)
 {
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> r;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> s;
@@ -154,8 +154,8 @@ void Graphics::CreateSubWindowSwapChain(HWND hWnd)
 		// スワップチェーンを作成するための設定オプション
 		DXGI_SWAP_CHAIN_DESC swapchainDesc;
 		{
-			swapchainDesc.BufferDesc.Width = screenWidth;
-			swapchainDesc.BufferDesc.Height = screenHeight;
+			swapchainDesc.BufferDesc.Width = 0;
+			swapchainDesc.BufferDesc.Height = 0;
 			swapchainDesc.BufferDesc.RefreshRate.Numerator = 60;
 			swapchainDesc.BufferDesc.RefreshRate.Denominator = 1;
 			swapchainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;	// 1ピクセルあたりの各色(RGBA)を8bit(0～255)のテクスチャ(バックバッファ)を作成する。
@@ -197,5 +197,11 @@ void Graphics::CreateSubWindowSwapChain(HWND hWnd)
 
 		subWswapchain.emplace_back(s);
 		subWrenderTargetView.emplace_back(r);
+
+		//// レンダラ
+		//{
+		//	std::unique_ptr<ImGuiRenderer> imGuiR = std::make_unique<ImGuiRenderer>(hWnd, device.Get());
+		//	subWImguiRenderer.emplace_back(std::move(imGuiR));
+		//}
 
 }

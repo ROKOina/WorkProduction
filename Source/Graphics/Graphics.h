@@ -57,17 +57,22 @@ public:
 	std::mutex& GetMutex() { return mutex; }
 
 public:	//サブウィンドウ
-	// サブウィンドウスワップチェイン作成
-	void CreateSubWindowSwapChain(HWND hWnd);
+	// スワップチェイン作成
+	void CreateSubWindowSwapChain(HWND hWnd, int width, int height);
 
-	// サブウィンドウスワップチェーン取得
+	// スワップチェーン取得
 	IDXGISwapChain* GetSubWindowSwapChain(int index) const { return subWswapchain[index].Get(); }
 
 	// レンダーターゲットビュー取得
 	ID3D11RenderTargetView* GetSubWindowRenderTargetView(int index) const { return subWrenderTargetView[index].Get(); }
+
+	// ImGuiレンダラ取得
+	ImGuiRenderer* GetSubWindowImGuiRenderer(int index) const { return subWImguiRenderer[index].get(); }
+
 private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D11RenderTargetView>>	subWrenderTargetView;
 	std::vector<Microsoft::WRL::ComPtr<IDXGISwapChain>>			subWswapchain;
+	std::vector<std::unique_ptr<ImGuiRenderer>>					subWImguiRenderer;
 
 private:
 	static Graphics*								instance;

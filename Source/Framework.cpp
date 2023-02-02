@@ -107,16 +107,20 @@ int Framework::Run()
 {
 	MSG msg = {};
 
-	AddSubWindow();
-	AddSubWindow(500,100);
+	////サブウィンドウ追加
+	//AddSubWindow();
+	//AddSubWindow(1080,720);
 	
-
+	//終了コードならwhileぬける　
 	while (WM_QUIT != msg.message)
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		//PeekMessage = メッセージ受信
+		//メッセージを取得しなかった場合、0 が返る
+		//第3,4引数、両方0の場合すべてのメッセージを返す
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))	//PM_REMOVE = PeekMessage 関数がメッセージを処理した後、そのメッセージをキューから削除
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			TranslateMessage(&msg);	//メッセージ変換
+			DispatchMessage(&msg);	//プロシージャへコールバック
 		}
 		else
 		{
@@ -130,12 +134,13 @@ int Framework::Run()
 			Update(elapsedTime);
 			Render(elapsedTime);
 
+			//サブウィンドウ更新
 			SubWindowManager::Instance().SetSyncInterval(syncInterval);
 			SubWindowManager::Instance().Run(elapsedTime);
 		}
 	}
 
-	SubWindowManager::Instance().Clear();	//ウィンドウクリア
+	SubWindowManager::Instance().Clear();	//サブウィンドウクリア
 
 	return static_cast<int>(msg.wParam);
 }
@@ -143,6 +148,13 @@ int Framework::Run()
 // メッセージハンドラ
 LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	//for (int i = 0; i < countSubWindow; ++i) {
+	//	if (SubWindowManager::Instance().GetSubWindow()[i]) {
+	//		HWND h = SubWindowManager::Instance().GetSubWindow()[i]->GetHWND();
+	//		Graphics::Instance().GetSubWindowImGuiRenderer(i)->HandleMessage(h, msg, wParam, lParam);
+	//	}
+	//}
+
 	if (Graphics::Instance().GetImGuiRenderer()->HandleMessage(hWnd, msg, wParam, lParam))
 		return true;
 
@@ -183,10 +195,13 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 void Framework::AddSubWindow(int width, int height)
 {
 	RECT rc = { 0, 0, width, height };
-	HWND hWnd2 = CreateWindow(_T("Game"), _T(""), WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, ::GetModuleHandle(NULL), NULL);
+	HWND hWnd2 = CreateWindow(_T("Game"), _T(""), 
+		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE | BS_PUSHBUTTON,
+		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
+		NULL, NULL, ::GetModuleHandle(NULL), NULL);
 	ShowWindow(hWnd2, __argc);
 
-	Inspector* i = new Inspector(hWnd2, countSubWindow);
+	Inspector* i = new Inspector(hWnd2, countSubWindow, width, height);
 	SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i));
 
 	SubWindowManager::Instance().AddSubWindow(i);

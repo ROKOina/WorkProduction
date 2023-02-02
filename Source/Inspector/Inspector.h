@@ -8,7 +8,7 @@
 class Inspector : public SubWindow
 {
 public:
-	Inspector(HWND hWnd, int ID);
+	Inspector(HWND hWnd, int ID, int width, int height);
 	~Inspector()override;
 
 private:
