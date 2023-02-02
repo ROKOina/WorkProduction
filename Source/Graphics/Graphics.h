@@ -6,7 +6,7 @@
 #include "Graphics/Shader.h"
 #include "Graphics/DebugRenderer.h"
 #include "Graphics/LineRenderer.h"
-#include "Graphics/ImGuiRenderer.h"
+//#include "Graphics/ImGuiRenderer.h"
 
 #include <mutex>
 
@@ -50,8 +50,8 @@ public:
 	// ラインレンダラ取得
 	LineRenderer* GetLineRenderer() const { return lineRenderer.get(); }
 
-	// ImGuiレンダラ取得
-	ImGuiRenderer* GetImGuiRenderer() const { return imguiRenderer.get(); }
+	//// ImGuiレンダラ取得
+	//ImGuiRenderer* GetImGuiRenderer() const { return imguiRenderer.get(); }
 
 	//ミューテックス取得
 	std::mutex& GetMutex() { return mutex; }
@@ -66,13 +66,13 @@ public:	//サブウィンドウ
 	// レンダーターゲットビュー取得
 	ID3D11RenderTargetView* GetSubWindowRenderTargetView(int index) const { return subWrenderTargetView[index].Get(); }
 
-	// ImGuiレンダラ取得
-	ImGuiRenderer* GetSubWindowImGuiRenderer(int index) const { return subWImguiRenderer[index].get(); }
+	//// ImGuiレンダラ取得
+	//ImGuiRenderer* GetSubWindowImGuiRenderer(int index) const { return subWImguiRenderer[index].get(); }
 
 private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D11RenderTargetView>>	subWrenderTargetView;
 	std::vector<Microsoft::WRL::ComPtr<IDXGISwapChain>>			subWswapchain;
-	std::vector<std::unique_ptr<ImGuiRenderer>>					subWImguiRenderer;
+	//std::vector<std::unique_ptr<ImGuiRenderer>>					subWImguiRenderer;
 
 private:
 	static Graphics*								instance;
@@ -87,7 +87,7 @@ private:
 	std::unique_ptr<Shader>							shader;
 	std::unique_ptr<DebugRenderer>					debugRenderer;
 	std::unique_ptr<LineRenderer>					lineRenderer;
-	std::unique_ptr<ImGuiRenderer>					imguiRenderer;
+	//std::unique_ptr<ImGuiRenderer>					imguiRenderer;
 
 	float	screenWidth;
 	float	screenHeight;

@@ -10,6 +10,9 @@
 #include "SceneTitle.h"
 #include "SceneManager.h"
 
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
 
 // 垂直同期間隔設定
 static const int syncInterval = 1;
@@ -58,8 +61,14 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
-	// IMGUIフレーム開始処理
-	graphics.GetImGuiRenderer()->NewFrame();
+	//// IMGUIフレーム開始処理
+	//graphics.GetImGuiRenderer()->NewFrame();
+
+
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
 
 	// シーン描画処理
 	//sceneGame.Render();
@@ -68,8 +77,13 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 	// IMGUIデモウインドウ描画（IMGUI機能テスト用）
 	//ImGui::ShowDemoWindow();
 
-	// IMGUI描画
-	graphics.GetImGuiRenderer()->Render(dc);
+	//// IMGUI描画
+	//graphics.GetImGuiRenderer()->Render(dc);
+
+	ImGui::Text("Hello, world");
+
+	ImGui::Render();
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	// バックバッファに描画した画を画面に表示する。
 	graphics.GetSwapChain()->Present(syncInterval, 0);
@@ -111,6 +125,23 @@ int Framework::Run()
 	//AddSubWindow();
 	//AddSubWindow(1080,720);
 	
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	//ImGui::StyleColorsDark();
+	//ImGui::StyleColorsLight();
+	ImGui::StyleColorsClassic();
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(hWnd);
+	ImGui_ImplDX11_Init(Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
+
+
 	//終了コードならwhileぬける　
 	while (WM_QUIT != msg.message)
 	{
@@ -140,10 +171,18 @@ int Framework::Run()
 		}
 	}
 
+	// Cleanup
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
 	SubWindowManager::Instance().Clear();	//サブウィンドウクリア
 
 	return static_cast<int>(msg.wParam);
 }
+
+// Forward declare message handler from imgui_impl_win32.cpp
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // メッセージハンドラ
 LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -155,7 +194,9 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 	//	}
 	//}
 
-	if (Graphics::Instance().GetImGuiRenderer()->HandleMessage(hWnd, msg, wParam, lParam))
+	//if (Graphics::Instance().GetImGuiRenderer()->HandleMessage(hWnd, msg, wParam, lParam))
+	//	return true;
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 		return true;
 
 	switch (msg)
