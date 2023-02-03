@@ -5,6 +5,7 @@
 #include "SceneManager.h"
 #include "Input/Input.h"
 #include "SceneLoading.h"
+#include "imgui.h"
 
 //‰Šú‰»
 void ScneTitle::Initialize()
@@ -82,4 +83,10 @@ void ScneTitle::Render()
             1, 1, 1, 1);
     }
 
+    if(ImGui::TreeNode("A"))
+    {
+        static float a;
+        ImGui::DragFloat("a",&a );
+        ImGui::TreePop();
+    }
 }

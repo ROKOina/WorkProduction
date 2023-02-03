@@ -350,6 +350,13 @@ void Sprite::Render(ID3D11DeviceContext *immediate_context,
 		immediate_context->PSSetShaderResources(0, 1, shaderResourceView.GetAddressOf());
 		immediate_context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 
+		const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		immediate_context->OMSetBlendState(blendState.Get(), blend_factor, 0xFFFFFFFF);
+		immediate_context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+		immediate_context->RSSetState(rasterizerState.Get());
+		immediate_context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
+
+
 		// •`‰æ
 		immediate_context->Draw(4, 0);
 	}

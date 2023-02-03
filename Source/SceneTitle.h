@@ -24,4 +24,5 @@ public:
 
 private:
     Sprite* sprite = nullptr;
+    std::unique_ptr<Sprite> alphaS = std::make_unique<Sprite>("Data/Sprite/LoadingIcon.png");
 };
