@@ -32,56 +32,6 @@ LineRenderer::LineRenderer(ID3D11Device* device, UINT vertexCount)
 		dx11State->createConstantBuffer(device, sizeof(ConstantBuffer), constantBuffer.GetAddressOf());
 	}
 
-	// ブレンドステート
-	{
-		D3D11_BLEND_DESC desc;
-		::memset(&desc, 0, sizeof(desc));
-		desc.AlphaToCoverageEnable = false;
-		desc.IndependentBlendEnable = false;
-		desc.RenderTarget[0].BlendEnable = false;
-		desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-		desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-		desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-		desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-		desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-		HRESULT hr = device->CreateBlendState(&desc, blendState.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-	}
-
-	// 深度ステンシルステート
-	{
-		D3D11_DEPTH_STENCIL_DESC desc;
-		::memset(&desc, 0, sizeof(desc));
-		desc.DepthEnable = true;
-		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-		desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-		HRESULT hr = device->CreateDepthStencilState(&desc, depthStencilState.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-	}
-
-	// ラスタライザーステート
-	{
-		D3D11_RASTERIZER_DESC desc;
-		::memset(&desc, 0, sizeof(desc));
-		desc.FrontCounterClockwise = true;
-		desc.DepthBias = 0;
-		desc.DepthBiasClamp = 0;
-		desc.SlopeScaledDepthBias = 0;
-		desc.DepthClipEnable = true;
-		desc.ScissorEnable = false;
-		desc.MultisampleEnable = true;
-		desc.FillMode = D3D11_FILL_SOLID;
-		desc.CullMode = D3D11_CULL_NONE;
-		desc.AntialiasedLineEnable = false;
-
-		HRESULT hr = device->CreateRasterizerState(&desc, rasterizerState.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-	}
-
 	// 頂点バッファ
 	{
 		D3D11_BUFFER_DESC desc;

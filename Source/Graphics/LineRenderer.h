@@ -38,10 +38,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>		pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		inputLayout;
 
-	Microsoft::WRL::ComPtr<ID3D11BlendState>		blendState;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	rasterizerState;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState>	depthStencilState;
-
 	std::vector<Vertex>			vertices;
 	UINT						capacity = 0;
 };
