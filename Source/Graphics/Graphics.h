@@ -6,6 +6,7 @@
 #include "Graphics/Shader.h"
 #include "Graphics/DebugRenderer.h"
 #include "Graphics/LineRenderer.h"
+#include "Graphics\Dx11StateLib.h"
 //#include "Graphics/ImGuiRenderer.h"
 
 #include <mutex>
@@ -53,6 +54,9 @@ public:
 	//// ImGuiレンダラ取得
 	//ImGuiRenderer* GetImGuiRenderer() const { return imguiRenderer.get(); }
 
+	//描画周り設定呼び出し
+	const std::unique_ptr<Dx11StateLib>& GetDx11State() { return dx11State; }
+
 	//ミューテックス取得
 	std::mutex& GetMutex() { return mutex; }
 
@@ -88,6 +92,9 @@ private:
 	std::unique_ptr<DebugRenderer>					debugRenderer;
 	std::unique_ptr<LineRenderer>					lineRenderer;
 	//std::unique_ptr<ImGuiRenderer>					imguiRenderer;
+
+	//描画周り一括初期化
+	std::unique_ptr<Dx11StateLib> dx11State;
 
 	float	screenWidth;
 	float	screenHeight;

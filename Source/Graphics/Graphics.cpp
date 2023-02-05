@@ -139,6 +139,12 @@ Graphics::Graphics(HWND hWnd)
 		lineRenderer = std::make_unique<LineRenderer>(device.Get(), 1024);
 		//imguiRenderer = std::make_unique<ImGuiRenderer>(hWnd, device.Get());
 	}
+
+	//描画周り一括初期化
+	{
+		dx11State = std::make_unique<Dx11StateLib>();
+		dx11State->Dx11StateInit(device.Get());
+	}
 }
 
 // デストラクタ

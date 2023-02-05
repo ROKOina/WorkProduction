@@ -204,6 +204,9 @@
     <ClInclude Include="Source\Misc.h">
       <Filter>Source\Sorce</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Graphics\Dx11StateLib.h">
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -337,6 +340,9 @@
     </ClCompile>
     <ClCompile Include="Source\Main.cpp">
       <Filter>Source\Sorce</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Dx11StateLib.cpp">
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
