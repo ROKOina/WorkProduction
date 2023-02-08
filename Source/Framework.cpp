@@ -14,6 +14,9 @@
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 
+#include "ModelAnimation\ModelWatch.h"
+ModelWatch mw;
+
 // 垂直同期間隔設定
 static const int syncInterval = 1;
 
@@ -72,6 +75,8 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	// IMGUIデモウインドウ描画（IMGUI機能テスト用）
 	//ImGui::ShowDemoWindow();
+
+	mw.Render(elapsedTime);
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -178,15 +183,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 // メッセージハンドラ
 LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	//for (int i = 0; i < countSubWindow; ++i) {
-	//	if (SubWindowManager::Instance().GetSubWindow()[i]) {
-	//		HWND h = SubWindowManager::Instance().GetSubWindow()[i]->GetHWND();
-	//		Graphics::Instance().GetSubWindowImGuiRenderer(i)->HandleMessage(h, msg, wParam, lParam);
-	//	}
-	//}
-
-	//if (Graphics::Instance().GetImGuiRenderer()->HandleMessage(hWnd, msg, wParam, lParam))
-	//	return true;
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 		return true;
 

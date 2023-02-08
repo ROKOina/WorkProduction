@@ -41,11 +41,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>				vertexBuffer;
 
-	Microsoft::WRL::ComPtr<ID3D11BlendState>			blendState;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState>		rasterizerState;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilState>		depthStencilState;
-
-	Microsoft::WRL::ComPtr<ID3D11SamplerState>			samplerState;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	shaderResourceView;
 
 	int textureWidth = 0;

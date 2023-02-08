@@ -28,32 +28,38 @@
     <Filter Include="Source\Audio">
       <UniqueIdentifier>{dfdec87c-66e2-424a-8126-477d89e5eb73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Sorce">
-      <UniqueIdentifier>{6bb43bfe-b5c3-4142-9359-7f09694348c6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Sorce\Stage">
-      <UniqueIdentifier>{96c3a4fc-1af8-481f-939a-c8b9d4eb41fc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Sorce\Render">
-      <UniqueIdentifier>{249be597-005d-4f1f-806b-9e5868c62071}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Sorce\Scene">
-      <UniqueIdentifier>{67db99e1-480b-4686-9d76-ae9159b1f8d3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Sorce\Camera">
-      <UniqueIdentifier>{5695e997-1ab3-469c-b966-d9d28882c270}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Sorce\Effect">
-      <UniqueIdentifier>{4eb406ab-5637-49e6-9f17-c44c0b3bab16}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Sorce\Math">
-      <UniqueIdentifier>{edc6e4d3-4207-471f-bd35-12f1e1f8b1fd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Sorce\Character">
-      <UniqueIdentifier>{b16e195f-91a8-4955-a626-a080f3766678}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Inspector">
       <UniqueIdentifier>{50a4712f-dc32-4547-b7d7-90bcd724d2a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\imgui\ImGuizmo">
+      <UniqueIdentifier>{04e005ee-761f-4d9b-92ae-2128cfa8fcd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource">
+      <UniqueIdentifier>{6bb43bfe-b5c3-4142-9359-7f09694348c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Stage">
+      <UniqueIdentifier>{96c3a4fc-1af8-481f-939a-c8b9d4eb41fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Render">
+      <UniqueIdentifier>{249be597-005d-4f1f-806b-9e5868c62071}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Scene">
+      <UniqueIdentifier>{67db99e1-480b-4686-9d76-ae9159b1f8d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Camera">
+      <UniqueIdentifier>{5695e997-1ab3-469c-b966-d9d28882c270}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Effect">
+      <UniqueIdentifier>{4eb406ab-5637-49e6-9f17-c44c0b3bab16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Math">
+      <UniqueIdentifier>{edc6e4d3-4207-471f-bd35-12f1e1f8b1fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Character">
+      <UniqueIdentifier>{b16e195f-91a8-4955-a626-a080f3766678}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ModelAnimation">
+      <UniqueIdentifier>{0c3652d0-01f2-45be-9ad7-9ad9a23a5a62}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -142,70 +148,91 @@
       <Filter>External\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Source\Collision.h">
-      <Filter>Source\Sorce\Math</Filter>
+      <Filter>Source\GameSource\Math</Filter>
     </ClInclude>
     <ClInclude Include="Source\Mathf.h">
-      <Filter>Source\Sorce\Math</Filter>
+      <Filter>Source\GameSource\Math</Filter>
     </ClInclude>
     <ClInclude Include="Source\SceneGame.h">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Source\SceneLoading.h">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Source\SceneManager.h">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Source\SceneTitle.h">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Source\Character.h">
-      <Filter>Source\Sorce\Character</Filter>
+      <Filter>Source\GameSource\Character</Filter>
     </ClInclude>
     <ClInclude Include="Source\Player.h">
-      <Filter>Source\Sorce\Character</Filter>
+      <Filter>Source\GameSource\Character</Filter>
     </ClInclude>
     <ClInclude Include="Source\ResourceManager.h">
-      <Filter>Source\Sorce\Render</Filter>
+      <Filter>Source\GameSource\Render</Filter>
     </ClInclude>
     <ClInclude Include="Source\Stage.h">
-      <Filter>Source\Sorce\Stage</Filter>
+      <Filter>Source\GameSource\Stage</Filter>
     </ClInclude>
     <ClInclude Include="Source\StageMain.h">
-      <Filter>Source\Sorce\Stage</Filter>
+      <Filter>Source\GameSource\Stage</Filter>
     </ClInclude>
     <ClInclude Include="Source\StageManager.h">
-      <Filter>Source\Sorce\Stage</Filter>
+      <Filter>Source\GameSource\Stage</Filter>
     </ClInclude>
     <ClInclude Include="Source\Camera.h">
-      <Filter>Source\Sorce\Camera</Filter>
+      <Filter>Source\GameSource\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Source\CameraController.h">
-      <Filter>Source\Sorce\Camera</Filter>
+      <Filter>Source\GameSource\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Source\Scene.h">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Source\Effect.h">
-      <Filter>Source\Sorce\Effect</Filter>
+      <Filter>Source\GameSource\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Source\EffectManager.h">
-      <Filter>Source\Sorce\Effect</Filter>
+      <Filter>Source\GameSource\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Source\Framework.h">
-      <Filter>Source\Sorce</Filter>
+      <Filter>Source\GameSource</Filter>
     </ClInclude>
     <ClInclude Include="Source\HighResolutionTimer.h">
-      <Filter>Source\Sorce</Filter>
+      <Filter>Source\GameSource</Filter>
     </ClInclude>
     <ClInclude Include="Source\Logger.h">
-      <Filter>Source\Sorce</Filter>
+      <Filter>Source\GameSource</Filter>
     </ClInclude>
     <ClInclude Include="Source\Misc.h">
-      <Filter>Source\Sorce</Filter>
+      <Filter>Source\GameSource</Filter>
     </ClInclude>
     <ClInclude Include="Source\Graphics\Dx11StateLib.h">
       <Filter>Source\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui\ImGuizmo\GraphEditor.h">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui\ImGuizmo\ImCurveEdit.h">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui\ImGuizmo\ImGradient.h">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui\ImGuizmo\ImGuizmo.h">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui\ImGuizmo\ImSequencer.h">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui\ImGuizmo\ImZoomSlider.h">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\ModelAnimation\ModelWatch.h">
+      <Filter>Source\ModelAnimation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -285,64 +312,82 @@
       <Filter>External\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Source\Collision.cpp">
-      <Filter>Source\Sorce\Math</Filter>
+      <Filter>Source\GameSource\Math</Filter>
     </ClCompile>
     <ClCompile Include="Source\Mathf.cpp">
-      <Filter>Source\Sorce\Math</Filter>
+      <Filter>Source\GameSource\Math</Filter>
     </ClCompile>
     <ClCompile Include="Source\SceneGame.cpp">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Source\SceneLoading.cpp">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Source\SceneManager.cpp">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Source\SceneTitle.cpp">
-      <Filter>Source\Sorce\Scene</Filter>
+      <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Source\Character.cpp">
-      <Filter>Source\Sorce\Character</Filter>
+      <Filter>Source\GameSource\Character</Filter>
     </ClCompile>
     <ClCompile Include="Source\Player.cpp">
-      <Filter>Source\Sorce\Character</Filter>
+      <Filter>Source\GameSource\Character</Filter>
     </ClCompile>
     <ClCompile Include="Source\ResourceManager.cpp">
-      <Filter>Source\Sorce\Render</Filter>
+      <Filter>Source\GameSource\Render</Filter>
     </ClCompile>
     <ClCompile Include="Source\Stage.cpp">
-      <Filter>Source\Sorce\Stage</Filter>
+      <Filter>Source\GameSource\Stage</Filter>
     </ClCompile>
     <ClCompile Include="Source\StageMain.cpp">
-      <Filter>Source\Sorce\Stage</Filter>
+      <Filter>Source\GameSource\Stage</Filter>
     </ClCompile>
     <ClCompile Include="Source\StageManager.cpp">
-      <Filter>Source\Sorce\Stage</Filter>
+      <Filter>Source\GameSource\Stage</Filter>
     </ClCompile>
     <ClCompile Include="Source\Camera.cpp">
-      <Filter>Source\Sorce\Camera</Filter>
+      <Filter>Source\GameSource\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Source\CameraController.cpp">
-      <Filter>Source\Sorce\Camera</Filter>
+      <Filter>Source\GameSource\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Source\Effect.cpp">
-      <Filter>Source\Sorce\Effect</Filter>
+      <Filter>Source\GameSource\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Source\EffectManager.cpp">
-      <Filter>Source\Sorce\Effect</Filter>
+      <Filter>Source\GameSource\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Source\Framework.cpp">
-      <Filter>Source\Sorce</Filter>
+      <Filter>Source\GameSource</Filter>
     </ClCompile>
     <ClCompile Include="Source\Logger.cpp">
-      <Filter>Source\Sorce</Filter>
+      <Filter>Source\GameSource</Filter>
     </ClCompile>
     <ClCompile Include="Source\Main.cpp">
-      <Filter>Source\Sorce</Filter>
+      <Filter>Source\GameSource</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Dx11StateLib.cpp">
       <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui\ImGuizmo\GraphEditor.cpp">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui\ImGuizmo\ImCurveEdit.cpp">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui\ImGuizmo\ImGradient.cpp">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui\ImGuizmo\ImGuizmo.cpp">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui\ImGuizmo\ImSequencer.cpp">
+      <Filter>External\imgui\ImGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ModelAnimation\ModelWatch.cpp">
+      <Filter>Source\ModelAnimation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

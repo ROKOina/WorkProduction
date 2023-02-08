@@ -6,11 +6,11 @@
 #include "StageManager.h"
 #include "StageMain.h"
 #include "SceneGame.h"
+#include "imgui.h"
 
 // 初期化
 void SceneGame::Initialize()
 {
-
 	//ステージ初期化
 	StageManager& stageManager = StageManager::Instance();
 	StageMain* stageMain = new StageMain();	//メイン（マップ）
@@ -128,32 +128,32 @@ void SceneGame::Render()
 	{
 	}
 
-	//// 2DデバッグGUI描画
-	//{
-	//	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-	//	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
+	// 2DデバッグGUI描画
+	{
+		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
-	//	if (ImGui::Begin("DebugMenu", nullptr, ImGuiWindowFlags_None))
-	//	{
+		if (ImGui::Begin("DebugMenu", nullptr, ImGuiWindowFlags_None))
+		{
 
-	//		//プレイヤーデバッグ描画
-	//		player->DrawDebugGUI();
+			//プレイヤーデバッグ描画
+			player->DrawDebugGUI();
 
-	//		//カメラ　
-	//		if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
-	//		{
-	//			DirectX::XMFLOAT3 eye = camera.Instance().GetEye();
-	//			DirectX::XMFLOAT3 focus = camera.Instance().GetFocus();
-	//			ImGui::InputFloat3("Eye", &eye.x);
-	//			ImGui::InputFloat3("Focus", &focus.x);
-	//		}
+			//カメラ　
+			if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				DirectX::XMFLOAT3 eye = camera.Instance().GetEye();
+				DirectX::XMFLOAT3 focus = camera.Instance().GetFocus();
+				ImGui::InputFloat3("Eye", &eye.x);
+				ImGui::InputFloat3("Focus", &focus.x);
+			}
 
-	//		//カメラコントローラー
-	//		cameraController->DrawDebugGUI();
-	//	}
-	//	ImGui::End();
+			//カメラコントローラー
+			cameraController->DrawDebugGUI();
+		}
+		ImGui::End();
 
-	//}
+	}
 
 }
 
