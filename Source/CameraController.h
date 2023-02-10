@@ -2,6 +2,8 @@
 
 #include <DirectXMath.h>
 
+#include "Camera.h"
+
 //カメラコントローラー
 class CameraController
 {
@@ -15,6 +17,10 @@ public:
     //ターゲット位置設定
     void SetTarget(const DirectX::XMFLOAT3& target) { this->target = target; }
 
+    ////カメラ
+    //Camera& GetCamera() { return camera; }
+
+
     //ImGui
     void DrawDebugGUI();
 
@@ -25,4 +31,6 @@ private:
     float               range = 10.0f;
     float               maxAngleX = DirectX::XMConvertToRadians(45);
     float               minAngleX = DirectX::XMConvertToRadians(-45);
+
+    //Camera camera;
 };

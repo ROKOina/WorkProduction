@@ -61,6 +61,9 @@
     <Filter Include="Source\ModelAnimation">
       <UniqueIdentifier>{0c3652d0-01f2-45be-9ad7-9ad9a23a5a62}</UniqueIdentifier>
     </Filter>
+    <Filter Include="External\imguiDocking">
+      <UniqueIdentifier>{5ed599fa-0a44-4e55-af4b-b67cc9fa0da4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External\DirectXTex\WICTextureLoader.h">
@@ -122,30 +125,6 @@
     </ClInclude>
     <ClInclude Include="Source\Inspector\SubWindowManager.h">
       <Filter>Source\Inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imconfig.h">
-      <Filter>External\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imgui.h">
-      <Filter>External\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imgui_impl_dx11.h">
-      <Filter>External\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imgui_impl_win32.h">
-      <Filter>External\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imgui_internal.h">
-      <Filter>External\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imstb_rectpack.h">
-      <Filter>External\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imstb_textedit.h">
-      <Filter>External\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="External\imgui\imstb_truetype.h">
-      <Filter>External\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Source\Collision.h">
       <Filter>Source\GameSource\Math</Filter>
@@ -234,6 +213,30 @@
     <ClInclude Include="Source\ModelAnimation\ModelWatch.h">
       <Filter>Source\ModelAnimation</Filter>
     </ClInclude>
+    <ClInclude Include="External\imgui-docking\imconfig.h">
+      <Filter>External\imguiDocking</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui-docking\imgui.h">
+      <Filter>External\imguiDocking</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui-docking\imgui_internal.h">
+      <Filter>External\imguiDocking</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui-docking\imstb_rectpack.h">
+      <Filter>External\imguiDocking</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui-docking\imstb_textedit.h">
+      <Filter>External\imguiDocking</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui-docking\imstb_truetype.h">
+      <Filter>External\imguiDocking</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui-docking\backends\imgui_impl_dx11.h">
+      <Filter>External\imguiDocking</Filter>
+    </ClInclude>
+    <ClInclude Include="External\imgui-docking\backends\imgui_impl_win32.h">
+      <Filter>External\imguiDocking</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -289,27 +292,6 @@
     </ClCompile>
     <ClCompile Include="Source\Inspector\SubWindowManager.cpp">
       <Filter>Source\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui.cpp">
-      <Filter>External\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_demo.cpp">
-      <Filter>External\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_draw.cpp">
-      <Filter>External\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_impl_dx11.cpp">
-      <Filter>External\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_impl_win32.cpp">
-      <Filter>External\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_tables.cpp">
-      <Filter>External\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="External\imgui\imgui_widgets.cpp">
-      <Filter>External\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Source\Collision.cpp">
       <Filter>Source\GameSource\Math</Filter>
@@ -388,6 +370,27 @@
     </ClCompile>
     <ClCompile Include="Source\ModelAnimation\ModelWatch.cpp">
       <Filter>Source\ModelAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\imgui.cpp">
+      <Filter>External\imguiDocking</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\imgui_demo.cpp">
+      <Filter>External\imguiDocking</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\imgui_draw.cpp">
+      <Filter>External\imguiDocking</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\imgui_tables.cpp">
+      <Filter>External\imguiDocking</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\imgui_widgets.cpp">
+      <Filter>External\imguiDocking</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\backends\imgui_impl_dx11.cpp">
+      <Filter>External\imguiDocking</Filter>
+    </ClCompile>
+    <ClCompile Include="External\imgui-docking\backends\imgui_impl_win32.cpp">
+      <Filter>External\imguiDocking</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
