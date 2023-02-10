@@ -5,17 +5,17 @@
 //カメラ
 class Camera
 {
-private:    //シングルトン化するため、private
+public:   
     Camera(){}
     ~Camera(){}
 
 public:
-    //唯一のインスタンス取得
-    static Camera& Instance()   //カメラは様々な所で取り出したいので、static
-    {
-        static Camera camera;
-        return camera;
-    }
+    ////唯一のインスタンス取得
+    //static Camera& Instance()   //カメラは様々な所で取り出したいので、static
+    //{
+    //    static Camera camera;
+    //    return camera;
+    //}
 
     //指定方向を向く
     void SetLookAt(const DirectX::XMFLOAT3& eye, const DirectX::XMFLOAT3& focus,

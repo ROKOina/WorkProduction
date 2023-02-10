@@ -1,6 +1,5 @@
 #include <imgui.h>
 #include "CameraController.h"
-#include "Camera.h"
 #include "Input/Input.h"
 
 //更新処理
@@ -65,7 +64,8 @@ void CameraController::Update(float elapsedTime)
     eye.z = target.z - front.z * range;
 
     //カメラの視点と注視点を設定
-    Camera::Instance().SetLookAt(eye, target, DirectX::XMFLOAT3(0, 1, 0));
+    //Camera::Instance().SetLookAt(eye, target, DirectX::XMFLOAT3(0, 1, 0));
+    camera.SetLookAt(eye, target, DirectX::XMFLOAT3(0, 1, 0));
 }
 
 void CameraController::DrawDebugGUI()

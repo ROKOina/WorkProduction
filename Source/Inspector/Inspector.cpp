@@ -7,21 +7,21 @@
 Inspector::Inspector(HWND hWnd, int ID, int width, int height)
 	:SubWindow(hWnd, ID, width, height)
 {
-	p = std::make_unique<Model>("Data/Model/Jammo/Jammo.fbx");
-	cameraController = std::make_unique<CameraController>();
+	//p = std::make_unique<Model>("Data/Model/Jammo/Jammo.fbx");
+	//cameraController = std::make_unique<CameraController>();
 
-	Graphics& graphics = Graphics::Instance();
-	Camera& camera = Camera::Instance();
-	camera.SetLookAt(
-		DirectX::XMFLOAT3(0, 10, -10),
-		DirectX::XMFLOAT3(0, 0, 0),
-		DirectX::XMFLOAT3(0, 1, 0)
-	);
-	camera.SetPerspectiveFov(
-		DirectX::XMConvertToRadians(45),
-		graphics.GetScreenWidth() / graphics.GetScreenHeight(),
-		0.1f, 1000.0f
-	);
+	//Graphics& graphics = Graphics::Instance();
+	//Camera& camera = Camera::Instance();
+	//camera.SetLookAt(
+	//	DirectX::XMFLOAT3(0, 10, -10),
+	//	DirectX::XMFLOAT3(0, 0, 0),
+	//	DirectX::XMFLOAT3(0, 1, 0)
+	//);
+	//camera.SetPerspectiveFov(
+	//	DirectX::XMConvertToRadians(45),
+	//	graphics.GetScreenWidth() / graphics.GetScreenHeight(),
+	//	0.1f, 1000.0f
+	//);
 }
 
 // デストラクタ
@@ -63,10 +63,10 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 	RenderContext rc;	//描画するために必要な構造体
 	rc.lightDirection = { 0.0f, -1.0f, 0.0f, 0.0f };	// ライト方向（下方向）
 
-	//カメラパラメーター設定
-	Camera& camera = Camera::Instance();
-	rc.view = camera.GetView();
-	rc.projection = camera.GetProjection();
+	////カメラパラメーター設定
+	//Camera& camera = Camera::Instance();
+	//rc.view = camera.GetView();
+	//rc.projection = camera.GetProjection();
 
 	// 3Dモデル描画
 	{

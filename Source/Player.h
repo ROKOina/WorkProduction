@@ -5,11 +5,13 @@
 #include "Character.h"
 #include "Effect.h"
 
+#include "CameraController.h"
+
 //プレイヤー
 class Player : public Character
 {
 public: //関数
-    Player();
+    Player(CameraController* camera);
     ~Player() override;
 
     //インスタンス取得
@@ -79,6 +81,8 @@ private:    //変数
 
     //エフェクト
     Effect* hitEffect = nullptr;
+
+    CameraController* cameraController;
 
 private:   //アニメーション 
     //遷移

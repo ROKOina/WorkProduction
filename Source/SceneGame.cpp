@@ -1,5 +1,4 @@
 #include "Graphics/Graphics.h"
-#include "Camera.h"
 #include "EffectManager.h"
 #include "Input\Input.h"
 
@@ -16,14 +15,14 @@ void SceneGame::Initialize()
 	StageMain* stageMain = new StageMain();	//メイン（マップ）
 	stageManager.Register(stageMain);
 
-	//プレイヤー初期化
-	player = new Player();
 	//カメラコントローラー初期化
 	cameraController = new CameraController();
+	//プレイヤー初期化
+	player = new Player(cameraController);
 
 	//カメラ初期設定
 	Graphics& graphics = Graphics::Instance();
-	Camera& camera = Camera::Instance();
+	Camera& camera = cameraController->GetCamera();
 	camera.SetLookAt(
 		DirectX::XMFLOAT3(0, 10, -10),
 		DirectX::XMFLOAT3(0, 0, 0),
@@ -89,7 +88,7 @@ void SceneGame::Render()
 	rc.lightDirection = { 0.0f, -1.0f, 0.0f, 0.0f };	// ライト方向（下方向）
 
 	//カメラパラメーター設定
-	Camera& camera = Camera::Instance();
+	Camera& camera = cameraController->GetCamera();
 	rc.view = camera.GetView();
 	rc.projection = camera.GetProjection();
 
@@ -142,8 +141,8 @@ void SceneGame::Render()
 			//カメラ　
 			if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				DirectX::XMFLOAT3 eye = camera.Instance().GetEye();
-				DirectX::XMFLOAT3 focus = camera.Instance().GetFocus();
+				DirectX::XMFLOAT3 eye = camera.GetEye();
+				DirectX::XMFLOAT3 focus = camera.GetFocus();
 				ImGui::InputFloat3("Eye", &eye.x);
 				ImGui::InputFloat3("Focus", &focus.x);
 			}

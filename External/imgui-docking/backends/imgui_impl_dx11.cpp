@@ -123,14 +123,14 @@ static void ImGui_ImplDX11_SetupRenderState(ImDrawData* draw_data, ID3D11DeviceC
 // Render function
 void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
 {
-    // Avoid rendering when minimized
+// 最小化時のレンダリングを避ける
     if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
         return;
 
     ImGui_ImplDX11_Data* bd = ImGui_ImplDX11_GetBackendData();
     ID3D11DeviceContext* ctx = bd->pd3dDeviceContext;
 
-    // Create and grow vertex/index buffers if needed
+    // 必要に応じて頂点/インデックス バッファーを作成して拡張
     if (!bd->pVB || bd->VertexBufferSize < draw_data->TotalVtxCount)
     {
         if (bd->pVB) { bd->pVB->Release(); bd->pVB = nullptr; }
@@ -159,7 +159,7 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
             return;
     }
 
-    // Upload vertex/index data into a single contiguous GPU buffer
+    // 頂点/インデックス データを単一の連続した GPU バッファにアップロード
     D3D11_MAPPED_SUBRESOURCE vtx_resource, idx_resource;
     if (ctx->Map(bd->pVB, 0, D3D11_MAP_WRITE_DISCARD, 0, &vtx_resource) != S_OK)
         return;
@@ -178,8 +178,8 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
     ctx->Unmap(bd->pVB, 0);
     ctx->Unmap(bd->pIB, 0);
 
-    // Setup orthographic projection matrix into our constant buffer
-    // Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
+    // 正投影行列を定数バッファーに設定します
+    // 目に見える imgui スペースは、描画データ -> 表示位置 (左上) から描画データ -> 表示位置 + データ データ -> 表示サイズ (右下) までです。単一ビューポート アプリの場合、表示位置は (0,0) です。
     {
         D3D11_MAPPED_SUBRESOURCE mapped_resource;
         if (ctx->Map(bd->pVertexConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource) != S_OK)
@@ -200,7 +200,7 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
         ctx->Unmap(bd->pVertexConstantBuffer, 0);
     }
 
-    // Backup DX state that will be modified to restore it afterwards (unfortunately this is very ugly looking and verbose. Close your eyes!)
+    // DX の状態をバックアップします。これは後で復元するために変更されます (残念ながら、これは見栄えが悪く、冗長です。目を閉じてください!)
     struct BACKUP_DX11_STATE
     {
         UINT                        ScissorRectsCount, ViewportsCount;
@@ -245,11 +245,11 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
     ctx->IAGetVertexBuffers(0, 1, &old.VertexBuffer, &old.VertexBufferStride, &old.VertexBufferOffset);
     ctx->IAGetInputLayout(&old.InputLayout);
 
-    // Setup desired DX state
+    // 希望する DX 状態を設定します
     ImGui_ImplDX11_SetupRenderState(draw_data, ctx);
 
-    // Render command lists
-    // (Because we merged all buffers into a single one, we maintain our own offset into them)
+    // コマンド リストをレンダリングする
+    // (すべてのバッファを 1 つのバッファにマージしたため、それらへの独自のオフセットを維持します)
     int global_idx_offset = 0;
     int global_vtx_offset = 0;
     ImVec2 clip_off = draw_data->DisplayPos;
@@ -261,8 +261,8 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
             if (pcmd->UserCallback != nullptr)
             {
-                // User callback, registered via ImDrawList::AddCallback()
-                // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
+                // Im Draw List::Add Callback() で登録されたユーザー コールバック
+                // (Im Draw Callback Reset Render State は、レンダラーにレンダリング状態のリセットを要求するためにユーザーが使用する特別なコールバック値です。)
                 if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
                     ImGui_ImplDX11_SetupRenderState(draw_data, ctx);
                 else
@@ -270,17 +270,17 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
             }
             else
             {
-                // Project scissor/clipping rectangles into framebuffer space
+                // シザー/クリッピング長方形をフレームバッファ空間に投影します
                 ImVec2 clip_min(pcmd->ClipRect.x - clip_off.x, pcmd->ClipRect.y - clip_off.y);
                 ImVec2 clip_max(pcmd->ClipRect.z - clip_off.x, pcmd->ClipRect.w - clip_off.y);
                 if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
                     continue;
 
-                // Apply scissor/clipping rectangle
+                // シザー/クリッピング長方形を適用
                 const D3D11_RECT r = { (LONG)clip_min.x, (LONG)clip_min.y, (LONG)clip_max.x, (LONG)clip_max.y };
                 ctx->RSSetScissorRects(1, &r);
 
-                // Bind texture, Draw
+                // テクスチャをバインド、描画
                 ID3D11ShaderResourceView* texture_srv = (ID3D11ShaderResourceView*)pcmd->GetTexID();
                 ctx->PSSetShaderResources(0, 1, &texture_srv);
                 ctx->DrawIndexed(pcmd->ElemCount, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset);
@@ -290,7 +290,7 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
         global_vtx_offset += cmd_list->VtxBuffer.Size;
     }
 
-    // Restore modified DX state
+    // 変更された DX の状態を復元します
     ctx->RSSetScissorRects(old.ScissorRectsCount, old.ScissorRects);
     ctx->RSSetViewports(old.ViewportsCount, old.Viewports);
     ctx->RSSetState(old.RS); if (old.RS) old.RS->Release();

@@ -1,7 +1,6 @@
 #include <imgui.h>
 #include "Player.h"
 #include "Input/Input.h"
-#include "Camera.h"
 #include "Graphics/Graphics.h"
 #include "Collision.h"
 
@@ -14,7 +13,8 @@ Player& Player::Instance()
 }
 
 //コンストラクタ
-Player::Player()
+Player::Player(CameraController* camera)
+    :cameraController(camera)
 {
     //インスタンスポインタ設定
     instance = this;
@@ -53,7 +53,7 @@ DirectX::XMFLOAT3 Player::GetMoveVec() const
     float ay = gamePad.GetAxisLY();
 
     //カメラ方向とスティックの入力値によって進行方向を計算する
-    Camera& camera = Camera::Instance();
+    Camera& camera = cameraController->GetCamera();
     const DirectX::XMFLOAT3& cameraRight = camera.GetRight();
     const DirectX::XMFLOAT3& cameraFront = camera.GetFront();
 

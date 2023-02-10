@@ -17,8 +17,8 @@ public:
     //ターゲット位置設定
     void SetTarget(const DirectX::XMFLOAT3& target) { this->target = target; }
 
-    ////カメラ
-    //Camera& GetCamera() { return camera; }
+    //カメラ
+    Camera& GetCamera() { return camera; }
 
 
     //ImGui
@@ -32,5 +32,5 @@ private:
     float               maxAngleX = DirectX::XMConvertToRadians(45);
     float               minAngleX = DirectX::XMConvertToRadians(-45);
 
-    //Camera camera;
+    Camera camera;
 };

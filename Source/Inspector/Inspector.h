@@ -2,7 +2,6 @@
 
 #include "Inspector\SubWindowManager.h"
 
-#include "Camera.h"
 #include "CameraController.h"
 
 class Inspector : public SubWindow

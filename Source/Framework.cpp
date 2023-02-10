@@ -53,6 +53,8 @@ void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 	// シーン更新処理
 	//sceneGame.Update(elapsedTime);
 	SceneManager::Instance().Update(elapsedTime);
+
+	mw.Update(elapsedTime);
 }
 
 // 描画処理
