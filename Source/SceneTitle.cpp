@@ -83,10 +83,12 @@ void ScneTitle::Render()
             1, 1, 1, 1);
     }
 
+    if (ImGui::Begin("A", nullptr, ImGuiWindowFlags_None))
     if(ImGui::TreeNode("A"))
     {
         static float a;
         ImGui::DragFloat("a",&a );
         ImGui::TreePop();
     }
+    ImGui::End();
 }
