@@ -41,6 +41,7 @@ public:
         ADDITION_ALPHA, //加算（透過）
         SUBTRACTION,    //減算
         SCREEN,         //スクリーン
+        PARTICLE,       //パーティクル
         DEFALT,           //何もなし（保険）
     };
     Microsoft::WRL::ComPtr<ID3D11BlendState> GetBlendState(BLEND_STATE_TYPE blendType) { return blendState[static_cast<int>(blendType)].Get(); }
@@ -52,6 +53,7 @@ public:
     enum class DEPTHSTENCIL_STATE_TYPE {
         DEPTH_ON_3D,   //深度テストON 3Dに設定されていた
         DEPTH_ON_2D,   //深度テストON 2Dに設定されていた
+        DEPTH_ON_PARTICLE,  //パーティクル
         DEPTH_OFF,   //深度テストOFF
         DEFALT,           //何もなし（保険）
     };
@@ -64,7 +66,8 @@ public:
     enum class RASTERIZER_TYPE {
         FRONTCOUNTER_FALSE_CULLBACK,  //FrontCounterClockwiseとカルモード設定
         FRONTCOUNTER_FALSE_CULLNONE,  
-        FRONTCOUNTER_TRUE_CULLNONE,  
+        FRONTCOUNTER_TRUE_CULLNONE,
+        PARTICLE,   //PARTICLE
         DEFALT,           //何もなし（保険）
     };
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> GetRasterizerState(RASTERIZER_TYPE rasterizerType) { return rasterizerState[static_cast<int>(rasterizerType)].Get(); }

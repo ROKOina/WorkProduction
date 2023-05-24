@@ -14,8 +14,8 @@
 #include "backends\imgui_impl_dx11.h"
 #include "backends\imgui_impl_win32.h"
 
-#include "ModelAnimation\ModelWatch.h"
-ModelWatch mw;
+//#include "ModelAnimation\ModelWatch.h"
+//ModelWatch mw;
 
 // 垂直同期間隔設定
 static const int syncInterval = 1;
@@ -54,7 +54,7 @@ void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 	//sceneGame.Update(elapsedTime);
 	SceneManager::Instance().Update(elapsedTime);
 
-	mw.Update(elapsedTime);
+	//mw.Update(elapsedTime);
 }
 
 // 描画処理
@@ -78,7 +78,7 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 	// IMGUIデモウインドウ描画（IMGUI機能テスト用）
 	//ImGui::ShowDemoWindow();
 
-	mw.Render(elapsedTime);
+	//mw.Render(elapsedTime);
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -150,7 +150,6 @@ int Framework::Run()
 	ImGui_ImplWin32_Init(hWnd);
 	ImGui_ImplDX11_Init(graphics.GetDevice(), graphics.GetDeviceContext());
 
-
 	//終了コードならwhileぬける　
 	while (WM_QUIT != msg.message)
 	{
@@ -174,9 +173,9 @@ int Framework::Run()
 			Update(elapsedTime);
 			Render(elapsedTime);
 
-			//サブウィンドウ更新
-			SubWindowManager::Instance().SetSyncInterval(syncInterval);
-			SubWindowManager::Instance().Run(elapsedTime);
+			////サブウィンドウ更新
+			//SubWindowManager::Instance().SetSyncInterval(syncInterval);
+			//SubWindowManager::Instance().Run(elapsedTime);
 		}
 	}
 
@@ -185,7 +184,20 @@ int Framework::Run()
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	SubWindowManager::Instance().Clear();	//サブウィンドウクリア
+	//SubWindowManager::Instance().Clear();	//サブウィンドウクリア
+
+	// 作成
+	typedef HRESULT(__stdcall* fPtr)(const IID&, void**);
+	HMODULE hDll = GetModuleHandleW(L"dxgidebug.dll");
+	fPtr DXGIGetDebugInterface = (fPtr)GetProcAddress(hDll, "DXGIGetDebugInterface");
+
+	DXGIGetDebugInterface(__uuidof(IDXGIDebug), (void**)&debugGI);
+
+	debugGI->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_DETAIL);
+
+	Graphics::Instance().GetDevice()->QueryInterface(__uuidof(ID3D11Debug), (void**)&debugID);
+	debugID->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY);
+	debugID->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 
 	return static_cast<int>(msg.wParam);
 }
@@ -232,19 +244,19 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 	return 0;
 }
 
-//サブウィンドウ
-void Framework::AddSubWindow(int width, int height)
-{
-	RECT rc = { 0, 0, width, height };
-	HWND hWnd2 = CreateWindow(_T("Game"), _T(""), 
-		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE | BS_PUSHBUTTON,
-		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
-		NULL, NULL, ::GetModuleHandle(NULL), NULL);
-	ShowWindow(hWnd2, __argc);
-
-	Inspector* i = new Inspector(hWnd2, countSubWindow, width, height);
-	SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i));
-
-	SubWindowManager::Instance().AddSubWindow(i);
-	countSubWindow++;
-}
+////サブウィンドウ
+//void Framework::AddSubWindow(int width, int height)
+//{
+//	RECT rc = { 0, 0, width, height };
+//	HWND hWnd2 = CreateWindow(_T("Game"), _T(""), 
+//		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE | BS_PUSHBUTTON,
+//		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
+//		NULL, NULL, ::GetModuleHandle(NULL), NULL);
+//	ShowWindow(hWnd2, __argc);
+//
+//	Inspector* i = new Inspector(hWnd2, countSubWindow, width, height);
+//	SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i));
+//
+//	SubWindowManager::Instance().AddSubWindow(i);
+//	countSubWindow++;
+//}

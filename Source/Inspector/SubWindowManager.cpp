@@ -33,7 +33,7 @@ SubWindow::SubWindow(HWND hWnd, int ID, int width, int height)
     windowID(ID)
 {
     //スワップチェイン生成
-    Graphics::Instance().CreateSubWindowSwapChain(hWnd, width, height);
+    //Graphics::Instance().CreateSubWindowSwapChain(hWnd, width, height);
 }
 
 SubWindow::~SubWindow() 
@@ -46,7 +46,7 @@ void SubWindow::Render(float elapsedTime)
     int syncInterval = SubWindowManager::Instance().GetSyncInterval();
 
     // バックバッファに描画した画を画面に表示する。
-    Graphics::Instance().GetSubWindowSwapChain(windowID)->Present(syncInterval, 0);
+    //Graphics::Instance().GetSubWindowSwapChain(windowID)->Present(syncInterval, 0);
 }
 
 int SubWindow::Run(float elapsedTime)

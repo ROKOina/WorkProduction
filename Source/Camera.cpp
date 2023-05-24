@@ -40,3 +40,4 @@ void Camera::SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ
     DirectX::XMMATRIX Projection = DirectX::XMMatrixPerspectiveFovLH(fovY, aspect, nearZ, farZ);	//プロジェクション行列作成
     DirectX::XMStoreFloat4x4(&projection, Projection);	//rcに渡す
 }
+

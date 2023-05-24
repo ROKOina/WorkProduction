@@ -49,15 +49,15 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 	//// IMGUIフレーム開始処理
 	//graphics.GetSubWindowImGuiRenderer(windowID)->NewFrame();
 
-	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
-	ID3D11RenderTargetView* rtv = graphics.GetSubWindowRenderTargetView(windowID);
-	ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
+	//ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+	//ID3D11RenderTargetView* rtv = graphics.GetSubWindowRenderTargetView(windowID);
+	//ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
 
-	// 画面クリア＆レンダーターゲット設定
-	FLOAT color[] = { 0.0f, 0.0f, 0.5f, 1.0f };	// RGBA(0.0～1.0)
-	dc->ClearRenderTargetView(rtv, color);
-	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	dc->OMSetRenderTargets(1, &rtv, dsv);
+	//// 画面クリア＆レンダーターゲット設定
+	//FLOAT color[] = { 0.0f, 0.0f, 0.5f, 1.0f };	// RGBA(0.0～1.0)
+	//dc->ClearRenderTargetView(rtv, color);
+	//dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	//dc->OMSetRenderTargets(1, &rtv, dsv);
 
 	// 描画処理
 	RenderContext rc;	//描画するために必要な構造体
@@ -70,12 +70,12 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	// 3Dモデル描画
 	{
-		Shader* shader = graphics.GetShader();
-		shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
+		//Shader* shader = graphics.GetShader();
+		//shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
 
-		shader->Draw(dc, p.get());
+		//shader->Draw(dc, p.get());
 
-		shader->End(dc);
+		//shader->End(dc);
 	}
 
 	//// 2DデバッグGUI描画

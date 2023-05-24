@@ -37,6 +37,7 @@ LambertShader::LambertShader(ID3D11Device* device)
 	}
 }
 
+
 // 描画開始
 void LambertShader::Begin(ID3D11DeviceContext* dc, const RenderContext& rc)
 {
@@ -52,6 +53,8 @@ void LambertShader::Begin(ID3D11DeviceContext* dc, const RenderContext& rc)
 	};
 	dc->VSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
 	dc->PSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
+	dc->CSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
+	dc->GSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
 
 	
 	Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
@@ -71,7 +74,6 @@ void LambertShader::Begin(ID3D11DeviceContext* dc, const RenderContext& rc)
 		);
 
 	// シーン用定数バッファ更新
-	CbScene cbScene;
 
 	DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&rc.view);
 	DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&rc.projection);

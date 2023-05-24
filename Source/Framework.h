@@ -10,6 +10,8 @@
 #include "Inspector\Inspector.h"
 #include "Inspector\SubWindowManager.h"
 
+#include "dxgidebug.h"
+
 class Framework
 {
 public:
@@ -33,8 +35,12 @@ private:
 	Graphics				graphics;
 	Input					input;
 
-private:	//サブウィンドウ
-	void AddSubWindow(int width = 100, int height = 100);
-	int countSubWindow;
+
+	Microsoft::WRL::ComPtr<IDXGIDebug>				debugGI;
+	Microsoft::WRL::ComPtr<ID3D11Debug>				debugID;
+
+//private:	//サブウィンドウ
+//	void AddSubWindow(int width = 100, int height = 100);
+//	int countSubWindow;
 };
 

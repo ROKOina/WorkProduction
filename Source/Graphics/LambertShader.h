@@ -22,6 +22,7 @@ private:
 		DirectX::XMFLOAT4X4	viewProjection;
 		DirectX::XMFLOAT4	lightDirection;
 	};
+	CbScene cbScene;
 
 	struct CbMesh
 	{

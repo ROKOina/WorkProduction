@@ -60,22 +60,19 @@ public:
 	//ミューテックス取得
 	std::mutex& GetMutex() { return mutex; }
 
-public:	//サブウィンドウ
-	// スワップチェイン作成
-	void CreateSubWindowSwapChain(HWND hWnd, int width, int height);
-
-	// スワップチェーン取得
-	IDXGISwapChain* GetSubWindowSwapChain(int index) const { return subWswapchain[index].Get(); }
-
-	// レンダーターゲットビュー取得
-	ID3D11RenderTargetView* GetSubWindowRenderTargetView(int index) const { return subWrenderTargetView[index].Get(); }
-
-	//// ImGuiレンダラ取得
-	//ImGuiRenderer* GetSubWindowImGuiRenderer(int index) const { return subWImguiRenderer[index].get(); }
-
+//public:	//サブウィンドウ
+//	// スワップチェイン作成
+//	void CreateSubWindowSwapChain(HWND hWnd, int width, int height);
+//
+//	// スワップチェーン取得
+//	IDXGISwapChain* GetSubWindowSwapChain(int index) const { return subWswapchain[index].Get(); }
+//
+//	// レンダーターゲットビュー取得
+//	ID3D11RenderTargetView* GetSubWindowRenderTargetView(int index) const { return subWrenderTargetView[index].Get(); }
+//
 private:
-	std::vector<Microsoft::WRL::ComPtr<ID3D11RenderTargetView>>	subWrenderTargetView;
-	std::vector<Microsoft::WRL::ComPtr<IDXGISwapChain>>			subWswapchain;
+	//std::vector<Microsoft::WRL::ComPtr<ID3D11RenderTargetView>>	subWrenderTargetView;
+	//std::vector<Microsoft::WRL::ComPtr<IDXGISwapChain>>			subWswapchain;
 	//std::vector<std::unique_ptr<ImGuiRenderer>>					subWImguiRenderer;
 
 private:
@@ -91,7 +88,6 @@ private:
 	std::unique_ptr<Shader>							shader;
 	std::unique_ptr<DebugRenderer>					debugRenderer;
 	std::unique_ptr<LineRenderer>					lineRenderer;
-	//std::unique_ptr<ImGuiRenderer>					imguiRenderer;
 
 	//描画周り一括初期化
 	std::unique_ptr<Dx11StateLib> dx11State;

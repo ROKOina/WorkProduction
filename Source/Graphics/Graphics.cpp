@@ -152,62 +152,62 @@ Graphics::~Graphics()
 {
 }
 
-void Graphics::CreateSubWindowSwapChain(HWND hWnd,int width, int height)
-{
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> r;
-	Microsoft::WRL::ComPtr<IDXGISwapChain> s;
-
-		// スワップチェーンを作成するための設定オプション
-		DXGI_SWAP_CHAIN_DESC swapchainDesc;
-		{
-			swapchainDesc.BufferDesc.Width = 0;
-			swapchainDesc.BufferDesc.Height = 0;
-			swapchainDesc.BufferDesc.RefreshRate.Numerator = 60;
-			swapchainDesc.BufferDesc.RefreshRate.Denominator = 1;
-			swapchainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;	// 1ピクセルあたりの各色(RGBA)を8bit(0～255)のテクスチャ(バックバッファ)を作成する。
-			swapchainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-			swapchainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-
-			swapchainDesc.SampleDesc.Count = 1;
-			swapchainDesc.SampleDesc.Quality = 0;
-			swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			swapchainDesc.BufferCount = 1;		// バックバッファの数
-			swapchainDesc.OutputWindow = hWnd;	// DirectXで描いた画を表示するウインドウ
-			swapchainDesc.Windowed = TRUE;		// ウインドウモードか、フルスクリーンにするか。
-			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-			swapchainDesc.Flags = 0; // DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH
-		}
-		
-		Microsoft::WRL::ComPtr<IDXGIDevice1> pDXGI = NULL;
-		Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter = NULL;
-		Microsoft::WRL::ComPtr<IDXGIFactory> pFactory = NULL;
-
-		device->QueryInterface(__uuidof(IDXGIDevice1), (void**)&pDXGI);
-		pDXGI->GetAdapter(&pAdapter);
-		pAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&pFactory);
-
-		pFactory->CreateSwapChain(device.Get(), &swapchainDesc, s.GetAddressOf());
-
-		// レンダーターゲットビューの生成
-		{
-			// スワップチェーンからバックバッファテクスチャを取得する。
-			// ※スワップチェーンに内包されているバックバッファテクスチャは'色'を書き込むテクスチャ。
-			Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
-			HRESULT hr = s->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-			// バックバッファテクスチャへの書き込みの窓口となるレンダーターゲットビューを生成する。
-			hr = device->CreateRenderTargetView(backBuffer.Get(), nullptr, r.GetAddressOf());
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-		}
-
-		subWswapchain.emplace_back(s);
-		subWrenderTargetView.emplace_back(r);
-
-		//// レンダラ
-		//{
-		//	std::unique_ptr<ImGuiRenderer> imGuiR = std::make_unique<ImGuiRenderer>(hWnd, device.Get());
-		//	subWImguiRenderer.emplace_back(std::move(imGuiR));
-		//}
-
-}
+//void Graphics::CreateSubWindowSwapChain(HWND hWnd,int width, int height)
+//{
+//	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> r;
+//	Microsoft::WRL::ComPtr<IDXGISwapChain> s;
+//
+//		// スワップチェーンを作成するための設定オプション
+//		DXGI_SWAP_CHAIN_DESC swapchainDesc;
+//		{
+//			swapchainDesc.BufferDesc.Width = 0;
+//			swapchainDesc.BufferDesc.Height = 0;
+//			swapchainDesc.BufferDesc.RefreshRate.Numerator = 60;
+//			swapchainDesc.BufferDesc.RefreshRate.Denominator = 1;
+//			swapchainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;	// 1ピクセルあたりの各色(RGBA)を8bit(0～255)のテクスチャ(バックバッファ)を作成する。
+//			swapchainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+//			swapchainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+//
+//			swapchainDesc.SampleDesc.Count = 1;
+//			swapchainDesc.SampleDesc.Quality = 0;
+//			swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+//			swapchainDesc.BufferCount = 1;		// バックバッファの数
+//			swapchainDesc.OutputWindow = hWnd;	// DirectXで描いた画を表示するウインドウ
+//			swapchainDesc.Windowed = TRUE;		// ウインドウモードか、フルスクリーンにするか。
+//			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+//			swapchainDesc.Flags = 0; // DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH
+//		}
+//		
+//		Microsoft::WRL::ComPtr<IDXGIDevice1> pDXGI = NULL;
+//		Microsoft::WRL::ComPtr<IDXGIAdapter> pAdapter = NULL;
+//		Microsoft::WRL::ComPtr<IDXGIFactory> pFactory = NULL;
+//
+//		device->QueryInterface(__uuidof(IDXGIDevice1), (void**)&pDXGI);
+//		pDXGI->GetAdapter(&pAdapter);
+//		pAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&pFactory);
+//
+//		pFactory->CreateSwapChain(device.Get(), &swapchainDesc, s.GetAddressOf());
+//
+//		// レンダーターゲットビューの生成
+//		{
+//			// スワップチェーンからバックバッファテクスチャを取得する。
+//			// ※スワップチェーンに内包されているバックバッファテクスチャは'色'を書き込むテクスチャ。
+//			Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
+//			HRESULT hr = s->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
+//			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+//
+//			// バックバッファテクスチャへの書き込みの窓口となるレンダーターゲットビューを生成する。
+//			hr = device->CreateRenderTargetView(backBuffer.Get(), nullptr, r.GetAddressOf());
+//			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+//		}
+//
+//		subWswapchain.emplace_back(s);
+//		subWrenderTargetView.emplace_back(r);
+//
+//		//// レンダラ
+//		//{
+//		//	std::unique_ptr<ImGuiRenderer> imGuiR = std::make_unique<ImGuiRenderer>(hWnd, device.Get());
+//		//	subWImguiRenderer.emplace_back(std::move(imGuiR));
+//		//}
+//
+//}

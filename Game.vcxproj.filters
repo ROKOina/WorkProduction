@@ -64,6 +64,12 @@
     <Filter Include="External\imguiDocking">
       <UniqueIdentifier>{5ed599fa-0a44-4e55-af4b-b67cc9fa0da4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HLSL\compute">
+      <UniqueIdentifier>{8b13efcb-f8ac-45de-b14c-88b027c5ac26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics\compute">
+      <UniqueIdentifier>{2eb9c992-bbe5-48b3-a084-0c801d354071}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External\DirectXTex\WICTextureLoader.h">
@@ -237,6 +243,9 @@
     <ClInclude Include="External\imgui-docking\backends\imgui_impl_win32.h">
       <Filter>External\imguiDocking</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Graphics\compute\particle.h">
+      <Filter>Source\Graphics\compute</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -392,6 +401,9 @@
     <ClCompile Include="External\imgui-docking\backends\imgui_impl_win32.cpp">
       <Filter>External\imguiDocking</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Graphics\compute\particle.cpp">
+      <Filter>Source\Graphics\compute</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Debug.hlsli">
@@ -408,6 +420,9 @@
     </None>
     <None Include="HLSL\Sprite.hlsli">
       <Filter>HLSL</Filter>
+    </None>
+    <None Include="HLSL\compute\Particle.hlsli">
+      <Filter>HLSL\compute</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -440,6 +455,18 @@
     </FxCompile>
     <FxCompile Include="HLSL\SpritePS.hlsl">
       <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\compute\ParticleCS.hlsl">
+      <Filter>HLSL\compute</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\compute\ParticleVS.hlsl">
+      <Filter>HLSL\compute</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\compute\ParticlePS.hlsl">
+      <Filter>HLSL\compute</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\compute\ParticleGS.hlsl">
+      <Filter>HLSL\compute</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

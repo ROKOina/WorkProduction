@@ -7,6 +7,8 @@
 #include "SceneGame.h"
 #include "imgui.h"
 
+#include "Graphics\compute\particle.h"
+
 // 初期化
 void SceneGame::Initialize()
 {
@@ -31,8 +33,10 @@ void SceneGame::Initialize()
 	camera.SetPerspectiveFov(
 		DirectX::XMConvertToRadians(45),
 		graphics.GetScreenWidth() / graphics.GetScreenHeight(),
-		0.1f, 1000.0f
+		1.0f, 1000.0f
 	);
+
+	//particle = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
 }
 
 // 終了化
@@ -67,6 +71,12 @@ void SceneGame::Update(float elapsedTime)
 	player->Update(elapsedTime);
 	//エフェクト更新処理
 	EffectManager::Instance().Update(elapsedTime);
+
+	Graphics& graphics = Graphics::Instance();
+
+	Camera& camera = cameraController->GetCamera();
+
+	//particle->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera.GetView(), camera.GetProjection());
 }
 
 // 描画処理
@@ -92,6 +102,7 @@ void SceneGame::Render()
 	rc.view = camera.GetView();
 	rc.projection = camera.GetProjection();
 
+
 	// 3Dモデル描画
 	{
 		Shader* shader = graphics.GetShader();
@@ -104,6 +115,32 @@ void SceneGame::Render()
 
 		shader->End(dc);
 	}
+
+
+	Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
+	const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	dc->OMSetBlendState(
+		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::PARTICLE).Get(),
+		blend_factor, 0xFFFFFFFF);
+	dc->OMSetDepthStencilState(
+		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_PARTICLE).Get(),
+		0);	
+	dc->RSSetState(
+			dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
+		);
+
+	//particle->Render(rc);
+
+	dc->OMSetBlendState(
+		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
+		blend_factor, 0xFFFFFFFF);
+	dc->OMSetDepthStencilState(
+		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),
+		0);
+	dc->RSSetState(
+		dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
+	);
+
 
 	//3Dエフェクト描画
 	{

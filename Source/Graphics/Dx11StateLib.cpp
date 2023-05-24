@@ -123,6 +123,21 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			HRESULT hr = device->CreateBlendState(&blendDesc, blendState[static_cast<int>(BLEND_STATE_TYPE::SCREEN)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
+		{	//パーティクル
+			blendDesc.AlphaToCoverageEnable = FALSE;
+			blendDesc.IndependentBlendEnable = FALSE;
+			blendDesc.RenderTarget[0].BlendEnable = TRUE;
+			blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+			blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+			blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+			blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+			blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+			blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+			HRESULT hr = device->CreateBlendState(&blendDesc, blendState[static_cast<int>(BLEND_STATE_TYPE::PARTICLE)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
 		{	//無し
 			blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
 			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
@@ -150,6 +165,12 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 		{ //ON_2D
 			depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
 			HRESULT hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilState[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_2D)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
+		{ //ON_PARTICLE
+			depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+			depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+			HRESULT hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilState[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_PARTICLE)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 		{ //OFF
@@ -189,6 +210,21 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			rasterizerDesc.CullMode = D3D11_CULL_NONE;
 			rasterizerDesc.MultisampleEnable = TRUE;
 			HRESULT hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerState[static_cast<int>(RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLNONE)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
+		{ //PARTICLE
+			rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+			rasterizerDesc.CullMode = D3D11_CULL_BACK;
+			rasterizerDesc.FrontCounterClockwise = TRUE;
+			rasterizerDesc.DepthBias = 0;
+			rasterizerDesc.DepthBiasClamp = 0;
+			rasterizerDesc.SlopeScaledDepthBias = 0;
+			rasterizerDesc.DepthClipEnable = TRUE;
+			rasterizerDesc.ScissorEnable = FALSE;
+			rasterizerDesc.MultisampleEnable = TRUE;
+			rasterizerDesc.AntialiasedLineEnable = FALSE;
+
+			HRESULT hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerState[static_cast<int>(RASTERIZER_TYPE::PARTICLE)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 	}

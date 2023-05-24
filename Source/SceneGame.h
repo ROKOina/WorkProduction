@@ -7,6 +7,8 @@
 #include "Audio\AudioSource.h"
 #include "Audio\Audio.h"
 
+#include "Graphics\compute\particle.h"
+
 // ÉQÅ[ÉÄÉVÅ[Éì
 class SceneGame :public Scene
 {
@@ -32,4 +34,6 @@ private:
 	CameraController* cameraController = nullptr;
 	std::unique_ptr<AudioSource> BGM=Audio::Instance().LoadAudioSource("Data/Audio/BGM.wav");;
 
+
+	//std::unique_ptr<Particle> particle;
 };
