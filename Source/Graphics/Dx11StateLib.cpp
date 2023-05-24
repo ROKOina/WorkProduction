@@ -209,7 +209,7 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			rasterizerDesc.FrontCounterClockwise = TRUE;
 			rasterizerDesc.CullMode = D3D11_CULL_NONE;
 			rasterizerDesc.MultisampleEnable = TRUE;
-			HRESULT hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerState[static_cast<int>(RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLNONE)].GetAddressOf());
+			HRESULT hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerState[static_cast<int>(RASTERIZER_TYPE::FRONTCOUNTER_TRUE_CULLNONE)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 		{ //PARTICLE

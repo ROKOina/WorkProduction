@@ -39,8 +39,8 @@ private:
 	Microsoft::WRL::ComPtr<IDXGIDebug>				debugGI;
 	Microsoft::WRL::ComPtr<ID3D11Debug>				debugID;
 
-//private:	//サブウィンドウ
-//	void AddSubWindow(int width = 100, int height = 100);
-//	int countSubWindow;
+private:	//サブウィンドウ
+	void AddSubWindow(int width = 100, int height = 100);
+	int countSubWindow;
 };
 

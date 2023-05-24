@@ -32,11 +32,11 @@ Inspector::~Inspector()
 // XVˆ—
 void Inspector::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 {
-	DirectX::XMFLOAT4X4 a{ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
-	p->UpdateTransform(a);
+	//DirectX::XMFLOAT4X4 a{ 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
+	//p->UpdateTransform(a);
 
-	cameraController->SetTarget({0,0,-500});
-	cameraController->Update(elapsedTime);
+	//cameraController->SetTarget({0,0,-500});
+	//cameraController->Update(elapsedTime);
 }
 
 // •`‰æˆ—

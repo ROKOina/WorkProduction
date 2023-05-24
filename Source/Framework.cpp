@@ -186,18 +186,18 @@ int Framework::Run()
 
 	//SubWindowManager::Instance().Clear();	//サブウィンドウクリア
 
-	// 作成
-	typedef HRESULT(__stdcall* fPtr)(const IID&, void**);
-	HMODULE hDll = GetModuleHandleW(L"dxgidebug.dll");
-	fPtr DXGIGetDebugInterface = (fPtr)GetProcAddress(hDll, "DXGIGetDebugInterface");
+	//// ComPtr用リーク型名表示　作成
+	//typedef HRESULT(__stdcall* fPtr)(const IID&, void**);
+	//HMODULE hDll = GetModuleHandleW(L"dxgidebug.dll");
+	//fPtr DXGIGetDebugInterface = (fPtr)GetProcAddress(hDll, "DXGIGetDebugInterface");
 
-	DXGIGetDebugInterface(__uuidof(IDXGIDebug), (void**)&debugGI);
+	//DXGIGetDebugInterface(__uuidof(IDXGIDebug), (void**)&debugGI);
 
-	debugGI->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_DETAIL);
+	//debugGI->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_DETAIL);
 
-	Graphics::Instance().GetDevice()->QueryInterface(__uuidof(ID3D11Debug), (void**)&debugID);
-	debugID->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY);
-	debugID->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	//Graphics::Instance().GetDevice()->QueryInterface(__uuidof(ID3D11Debug), (void**)&debugID);
+	//debugID->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY);
+	//debugID->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 
 	return static_cast<int>(msg.wParam);
 }
@@ -244,19 +244,19 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 	return 0;
 }
 
-////サブウィンドウ
-//void Framework::AddSubWindow(int width, int height)
-//{
-//	RECT rc = { 0, 0, width, height };
-//	HWND hWnd2 = CreateWindow(_T("Game"), _T(""), 
-//		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE | BS_PUSHBUTTON,
-//		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
-//		NULL, NULL, ::GetModuleHandle(NULL), NULL);
-//	ShowWindow(hWnd2, __argc);
-//
-//	Inspector* i = new Inspector(hWnd2, countSubWindow, width, height);
-//	SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i));
-//
-//	SubWindowManager::Instance().AddSubWindow(i);
-//	countSubWindow++;
-//}
+//サブウィンドウ
+void Framework::AddSubWindow(int width, int height)
+{
+	RECT rc = { 0, 0, width, height };
+	HWND hWnd2 = CreateWindow(_T("Game"), _T(""), 
+		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE | BS_PUSHBUTTON,
+		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
+		NULL, NULL, ::GetModuleHandle(NULL), NULL);
+	ShowWindow(hWnd2, __argc);
+
+	Inspector* i = new Inspector(hWnd2, countSubWindow, width, height);
+	SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i));
+
+	SubWindowManager::Instance().AddSubWindow(i);
+	countSubWindow++;
+}

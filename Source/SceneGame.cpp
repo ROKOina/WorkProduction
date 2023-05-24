@@ -7,8 +7,6 @@
 #include "SceneGame.h"
 #include "imgui.h"
 
-#include "Graphics\compute\particle.h"
-
 // èâä˙âª
 void SceneGame::Initialize()
 {
@@ -36,7 +34,7 @@ void SceneGame::Initialize()
 		1.0f, 1000.0f
 	);
 
-	//particle = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
+	particle = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
 }
 
 // èIóπâª
@@ -76,7 +74,7 @@ void SceneGame::Update(float elapsedTime)
 
 	Camera& camera = cameraController->GetCamera();
 
-	//particle->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera.GetView(), camera.GetProjection());
+	particle->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera.GetView(), camera.GetProjection());
 }
 
 // ï`âÊèàóù
@@ -129,7 +127,7 @@ void SceneGame::Render()
 			dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
 		);
 
-	//particle->Render(rc);
+	particle->Render(rc);
 
 	dc->OMSetBlendState(
 		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
