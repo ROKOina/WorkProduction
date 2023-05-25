@@ -64,7 +64,6 @@ void CameraController::Update(float elapsedTime)
     eye.z = target.z - front.z * range;
 
     //ƒJƒƒ‰‚Ì‹“_‚Æ’‹“_‚ğİ’è
-    //Camera::Instance().SetLookAt(eye, target, DirectX::XMFLOAT3(0, 1, 0));
     camera.SetLookAt(eye, target, DirectX::XMFLOAT3(0, 1, 0));
 }
 

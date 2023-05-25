@@ -20,7 +20,8 @@ Player::Player(CameraController* camera)
     instance = this;
 
     //model = new Model("Data/Model/Slime/Slime.fbx");
-    model = new Model("Data/Model/Jammo/Jammo.fbx");
+    //model = new Model("Data/Model/Jammo/Jammo.fbx");
+    model = new Model("Data/Model/pico/pico.mdl");
     model->ImportFbxAnimation("Data/Model/Jammo/Animations/Attack.fbx");
     //model->PlayAnimation(0,true);
 

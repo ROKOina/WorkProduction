@@ -5,7 +5,7 @@
 Particle::Particle(DirectX::XMFLOAT4 initial_position)
 {
     //半径の外周半径
-    float outermost_radius{ 30 };
+    float outermost_radius{ 10 };
     //パーティクル間隔
     float interval{ 0.5f };
     //パーティクル発生高さ

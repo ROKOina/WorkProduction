@@ -107,8 +107,8 @@ void main(uint3 dtid:SV_DispatchThreadID)
     }
 
     const float amplitude = 0.3;
-    p.velocity.x = snoise(p.position.xyz * frac(sceneTimer) * 10.0) * amplitude;
-    p.velocity.z = snoise(p.position.zyx * frac(sceneTimer) * 10.0) * amplitude;
+    //p.velocity.x = snoise(p.position.xyz * frac(sceneTimer) * 10.0) * amplitude;
+    //p.velocity.z = snoise(p.position.zyx * frac(sceneTimer) * 10.0) * amplitude;
     p.position += p.velocity * deltaTime;
 
     if (p.position.y < current_eye_position.y - snowfall_area_height * 0.5f)

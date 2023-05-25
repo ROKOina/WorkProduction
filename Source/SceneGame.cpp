@@ -114,31 +114,32 @@ void SceneGame::Render()
 		shader->End(dc);
 	}
 
-
-	Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
-	const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	dc->OMSetBlendState(
-		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::PARTICLE).Get(),
-		blend_factor, 0xFFFFFFFF);
-	dc->OMSetDepthStencilState(
-		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_PARTICLE).Get(),
-		0);	
-	dc->RSSetState(
+	//パーティクル
+	{
+		Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
+		const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		dc->OMSetBlendState(
+			dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::PARTICLE).Get(),
+			blend_factor, 0xFFFFFFFF);
+		dc->OMSetDepthStencilState(
+			dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::PARTICLE).Get(),
+			0);
+		dc->RSSetState(
 			dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
 		);
 
-	particle->Render(rc);
+		particle->Render(rc);
 
-	dc->OMSetBlendState(
-		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
-		blend_factor, 0xFFFFFFFF);
-	dc->OMSetDepthStencilState(
-		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),
-		0);
-	dc->RSSetState(
-		dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
-	);
-
+		dc->OMSetBlendState(
+			dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
+			blend_factor, 0xFFFFFFFF);
+		dc->OMSetDepthStencilState(
+			dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),
+			0);
+		dc->RSSetState(
+			dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
+		);
+	}
 
 	//3Dエフェクト描画
 	{

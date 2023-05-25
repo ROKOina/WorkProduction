@@ -170,7 +170,7 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 		{ //ON_PARTICLE
 			depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 			depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-			HRESULT hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilState[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_PARTICLE)].GetAddressOf());
+			HRESULT hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilState[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::PARTICLE)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 		{ //OFF
