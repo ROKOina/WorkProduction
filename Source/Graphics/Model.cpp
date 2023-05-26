@@ -187,7 +187,6 @@ void Model::UpdateAnimetion(float elapsedTime)
 		{
 			//Ä¶ŠÔ‚ğŠª‚«–ß‚·
 			currentAnimationSeconds = 0;
-			//currentAnimationSeconds -= animation.secondsLength;
 		}
 		else
 		{

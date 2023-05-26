@@ -9,11 +9,11 @@
 class Particle
 {
 public:
-    Particle(DirectX::XMFLOAT4 initial_position);
+    Particle(DirectX::XMFLOAT4 initialPosition);
     ~Particle() {
     }
 
-    void integrate(float delta_time, DirectX::XMFLOAT4 eye_position,
+    void integrate(float deltaTime, DirectX::XMFLOAT4 eyePosition,
         DirectX::XMFLOAT4X4	view, DirectX::XMFLOAT4X4	projection);
     void Render(const RenderContext& rc);
 
@@ -27,16 +27,16 @@ public:
 
     struct particle_constants
     {
-        DirectX::XMFLOAT4 current_eye_position;
-        DirectX::XMFLOAT4 previous_eye_position;
+        DirectX::XMFLOAT4 currentEyePosition;
+        DirectX::XMFLOAT4 previousEyePosition;
 
         // Radius of outermost orbit 
-        float outermost_radius;
+        float outermostRadius;
         // Height of area
-        float area_height;
+        float areaHeight;
 
-        float particle_size;
-        uint32_t particle_count;
+        float particleSize;
+        uint32_t particleCount;
 
         DirectX::XMFLOAT4X4	view;
         DirectX::XMFLOAT4X4	projection;
@@ -46,19 +46,19 @@ public:
         DirectX::XMFLOAT2	dummy;
 
     };
-    particle_constants particle_data;
+    particle_constants particleData;
 
 private:
-    size_t particle_count{ 0 };
-    Microsoft::WRL::ComPtr<ID3D11Buffer> particle_buffer;
-    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> particle_buffer_uav;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particle_buffer_srv;
+    size_t particleCount{ 0 };
+    Microsoft::WRL::ComPtr<ID3D11Buffer> particleBuffer;
+    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> particleBufferUav;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleBufferSrv;
 
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertex_shader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixel_shader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometry_shader;
-    Microsoft::WRL::ComPtr<ID3D11ComputeShader> compute_shader;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> constant_buffer;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
+    Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
+    Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
 
 //private:
 //    //パーティクル用頂点レイアウト

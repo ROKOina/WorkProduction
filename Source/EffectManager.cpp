@@ -33,8 +33,6 @@ void EffectManager::Initialize()
 //終了化
 void EffectManager::Finalize()
 {
-    //EffekseerManagerなどは
-    //スマートポインタによって破棄されるので何もしない
 }
 
 //更新処理
@@ -57,8 +55,6 @@ void EffectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLO
     effekseerRenderer->BeginRendering();
 
     //Effekseer描画実行
-    //マネージャー単位で描画するので描画順を制御する場合は
-    //マネージャーを複数個作成し、Draw()関数を実行する順序で制御できそう
     effekseerManager->Draw();
 
     //Effekseer描画終了

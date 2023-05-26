@@ -21,8 +21,6 @@ public:
     //レイキャスト
     bool RayCast(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, HitResult& hit)override;
 
-    ////インスタンス取得
-    //static Stage& Instance();
 
 private:
     Model* model = nullptr;

@@ -1,6 +1,6 @@
 struct VS_OUT_PARTICLE
 {
-    uint vertex_id : VERTEXID;
+    uint vertexId : VERTEXID;
 };
 
 struct GS_OUT
@@ -18,16 +18,16 @@ struct particle
 
 cbuffer PARTICLE_CONSTANTS : register(b9)
 {
-    float4 current_eye_position;
-    float4 previous_eye_position;
+    float4 currentEyePosition;
+    float4 previousEyePosition;
     
 	// Radius of outermost orbit 
-    float outermost_radius;
+    float outermostRadius;
 	// Height of snowfall area
-    float snowfall_area_height;
+    float snowfallAreaHeight;
 
-    float particle_size;
-    uint particle_count;
+    float particleSize;
+    uint particleCount;
     
     float4x4 view;
     float4x4 projection;

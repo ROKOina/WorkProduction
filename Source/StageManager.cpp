@@ -39,22 +39,18 @@ bool StageManager::RayCast(const DirectX::XMFLOAT3& start, const DirectX::XMFLOA
 {
     bool result = false;
 
-    HitResult hitR=hit; //Å‹ß‹——£‚Ìhit‚ğ•Û‘¶
-    
+    HitResult hitR = hit; //Å‹ß‹——£‚Ìhit‚ğ•Û‘¶
+
     for (Stage* stage : stages)
     {
         if (stage->RayCast(start, end, hitR))
         {
             result = true;
-            //if (hit.distance < hitR.distance)   //Å‹ß‹——£‚Ìê‡hitR‚É‘ã“ü
-            //{
-            //    hitR = hit;
-            //}
             if (hit.distance == 0) //ˆê”ÔÅ‰‚Í‘ã“ü‚·‚é
             {
                 hit = hitR;
             }
-            if(hitR.distance<hit.distance)
+            if (hitR.distance < hit.distance)
                 hit = hitR;
         }
     }

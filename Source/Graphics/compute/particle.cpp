@@ -2,103 +2,103 @@
 
 #include <random>
 
-Particle::Particle(DirectX::XMFLOAT4 initial_position)
+Particle::Particle(DirectX::XMFLOAT4 initialPosition)
 {
     //半径の外周半径
-    float outermost_radius{ 10 };
+    float outermostRadius{ 10 };
     //パーティクル間隔
     float interval{ 0.5f };
     //パーティクル発生高さ
-    float area_height{ 20 };
+    float areaHeight{ 20 };
     //速度
-    float fall_speed{ -0.5f };
+    float fallSpeed{ -0.5f };
 
-    int orbit_count = static_cast<int>(outermost_radius / interval);
+    int orbitCount = static_cast<int>(outermostRadius / interval);
 
-    for (int orbit_index = 1; orbit_index <= orbit_count; ++orbit_index)
+    for (int orbitIndex = 1; orbitIndex <= orbitCount; ++orbitIndex)
     {
-        float radius = orbit_index * interval;
+        float radius = orbitIndex * interval;
 
         for (float theta = 0; theta < DirectX::XM_2PI; theta += interval / radius)
         {
-            for (float height = 0; height < area_height; height += interval)
+            for (float height = 0; height < areaHeight; height += interval)
             {
-                particle_count++;
+                particleCount++;
             }
         }
     }
-    particles.resize(particle_count);
+    particles.resize(particleCount);
 
     std::mt19937 mt{ std::random_device{}() };
     std::uniform_real_distribution<float> rand(-interval * 0.5f, +interval * 0.5f);
 
     size_t index{ 0 };
-    for (int orbit_index = 1; orbit_index <= orbit_count; ++orbit_index)
+    for (int orbitIndex = 1; orbitIndex <= orbitCount; ++orbitIndex)
     {
-        float radius = orbit_index * interval;
+        float radius = orbitIndex * interval;
 
         for (float theta = 0; theta < DirectX::XM_2PI; theta += interval / radius)
         {
             const float x{ radius * cosf(theta) };
             const float z{ radius * sinf(theta) };
-            for (float height = -area_height * 0.5f; height < area_height * 0.5f; height += interval)
+            for (float height = -areaHeight * 0.5f; height < areaHeight * 0.5f; height += interval)
             {
-                particles.at(index).position = { x + initial_position.x + rand(mt), height + initial_position.y + rand(mt), z + initial_position.z + rand(mt) };
-                particles.at(index++).velocity = { 0.0f, fall_speed + rand(mt) * (fall_speed * 0.5f), 0.0f };
+                particles.at(index).position = { x + initialPosition.x + rand(mt), height + initialPosition.y + rand(mt), z + initialPosition.z + rand(mt) };
+                particles.at(index++).velocity = { 0.0f, fallSpeed + rand(mt) * (fallSpeed * 0.5f), 0.0f };
             }
         }
     }
 
     HRESULT hr{ S_OK };
 
-    D3D11_BUFFER_DESC buffer_desc = {};
-    buffer_desc.ByteWidth = static_cast<UINT>(sizeof(particle) * particle_count);
-    buffer_desc.StructureByteStride = sizeof(particle);
-    buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-    buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-    buffer_desc.CPUAccessFlags = 0;
-    buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+    D3D11_BUFFER_DESC bufferDesc = {};
+    bufferDesc.ByteWidth = static_cast<UINT>(sizeof(particle) * particleCount);
+    bufferDesc.StructureByteStride = sizeof(particle);
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     D3D11_SUBRESOURCE_DATA subresource_data{};
     subresource_data.pSysMem = particles.data();
     subresource_data.SysMemPitch = 0;
     subresource_data.SysMemSlicePitch = 0;
-    hr = Graphics::Instance().GetDevice()->CreateBuffer(&buffer_desc, &subresource_data, particle_buffer.GetAddressOf());
+    hr = Graphics::Instance().GetDevice()->CreateBuffer(&bufferDesc, &subresource_data, particleBuffer.GetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-    D3D11_UNORDERED_ACCESS_VIEW_DESC unordered_access_view_desc;
-    unordered_access_view_desc.Format = DXGI_FORMAT_UNKNOWN;
-    unordered_access_view_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-    unordered_access_view_desc.Buffer.FirstElement = 0;
-    unordered_access_view_desc.Buffer.NumElements = static_cast<UINT>(particle_count);
-    unordered_access_view_desc.Buffer.Flags = 0;
-    hr = Graphics::Instance().GetDevice()->CreateUnorderedAccessView(particle_buffer.Get(), &unordered_access_view_desc, particle_buffer_uav.GetAddressOf());
+    D3D11_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDesc;
+    unorderedAccessViewDesc.Format = DXGI_FORMAT_UNKNOWN;
+    unorderedAccessViewDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+    unorderedAccessViewDesc.Buffer.FirstElement = 0;
+    unorderedAccessViewDesc.Buffer.NumElements = static_cast<UINT>(particleCount);
+    unorderedAccessViewDesc.Buffer.Flags = 0;
+    hr = Graphics::Instance().GetDevice()->CreateUnorderedAccessView(particleBuffer.Get(), &unorderedAccessViewDesc, particleBufferUav.GetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-    D3D11_SHADER_RESOURCE_VIEW_DESC shader_resource_view_desc;
-    shader_resource_view_desc.Format = DXGI_FORMAT_UNKNOWN;
-    shader_resource_view_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-    shader_resource_view_desc.Buffer.ElementOffset = 0;
-    shader_resource_view_desc.Buffer.NumElements = static_cast<UINT>(particle_count);
-    hr = Graphics::Instance().GetDevice()->CreateShaderResourceView(particle_buffer.Get(), &shader_resource_view_desc, particle_buffer_srv.GetAddressOf());
+    D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+    shaderResourceViewDesc.Format = DXGI_FORMAT_UNKNOWN;
+    shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    shaderResourceViewDesc.Buffer.ElementOffset = 0;
+    shaderResourceViewDesc.Buffer.NumElements = static_cast<UINT>(particleCount);
+    hr = Graphics::Instance().GetDevice()->CreateShaderResourceView(particleBuffer.Get(), &shaderResourceViewDesc, particleBufferSrv.GetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-    ZeroMemory(&buffer_desc, sizeof(buffer_desc));
-    buffer_desc.ByteWidth = sizeof(particle_constants);
-    buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-    buffer_desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    buffer_desc.CPUAccessFlags = 0;
-    buffer_desc.MiscFlags = 0;
-    buffer_desc.StructureByteStride = 0;
-    hr = Graphics::Instance().GetDevice()->CreateBuffer(&buffer_desc, nullptr, constant_buffer.GetAddressOf());
+    ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+    bufferDesc.ByteWidth = sizeof(particle_constants);
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    bufferDesc.CPUAccessFlags = 0;
+    bufferDesc.MiscFlags = 0;
+    bufferDesc.StructureByteStride = 0;
+    hr = Graphics::Instance().GetDevice()->CreateBuffer(&bufferDesc, nullptr, constantBuffer.GetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
     //シェーダー生成
     //頂点シェーダー
-    hr = Graphics::Instance().GetDx11State()->createVsFromCso(Graphics::Instance().GetDevice(), "Shader\\ParticleVS.cso", vertex_shader.GetAddressOf(), nullptr, nullptr, 0);
+    hr = Graphics::Instance().GetDx11State()->createVsFromCso(Graphics::Instance().GetDevice(), "Shader\\ParticleVS.cso", vertexShader.GetAddressOf(), nullptr, nullptr, 0);
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
     //ピクセルシェーダー
-    hr = Graphics::Instance().GetDx11State()->createPsFromCso(Graphics::Instance().GetDevice(), "Shader\\ParticlePS.cso", pixel_shader.GetAddressOf());
+    hr = Graphics::Instance().GetDx11State()->createPsFromCso(Graphics::Instance().GetDevice(), "Shader\\ParticlePS.cso", pixelShader.GetAddressOf());
     _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
     //コンピュートシェーダー
@@ -109,14 +109,14 @@ Particle::Particle(DirectX::XMFLOAT4 initial_position)
         _ASSERT_EXPR_A(fp, "CSO File not found");
 
         fseek(fp, 0, SEEK_END);
-        long cso_sz{ ftell(fp) };
+        long csoSz{ ftell(fp) };
         fseek(fp, 0, SEEK_SET);
 
-        std::unique_ptr<unsigned char[]> cso_data{ std::make_unique<unsigned char[]>(cso_sz) };
-        fread(cso_data.get(), cso_sz, 1, fp);
+        std::unique_ptr<unsigned char[]> csoData{ std::make_unique<unsigned char[]>(csoSz) };
+        fread(csoData.get(), csoSz, 1, fp);
         fclose(fp);
 
-        hr = Graphics::Instance().GetDevice()->CreateComputeShader(cso_data.get(), cso_sz, nullptr, compute_shader.GetAddressOf());
+        hr = Graphics::Instance().GetDevice()->CreateComputeShader(csoData.get(), csoSz, nullptr, computeShader.GetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
     //ジオメトリシェーダー
@@ -127,72 +127,72 @@ Particle::Particle(DirectX::XMFLOAT4 initial_position)
         _ASSERT_EXPR_A(fp, "CSO File not found");
 
         fseek(fp, 0, SEEK_END);
-        long cso_sz{ ftell(fp) };
+        long csoSz{ ftell(fp) };
         fseek(fp, 0, SEEK_SET);
 
-        std::unique_ptr<unsigned char[]> cso_data{ std::make_unique<unsigned char[]>(cso_sz) };
-        fread(cso_data.get(), cso_sz, 1, fp);
+        std::unique_ptr<unsigned char[]> csoData{ std::make_unique<unsigned char[]>(csoSz) };
+        fread(csoData.get(), csoSz, 1, fp);
         fclose(fp);
 
-        hr = Graphics::Instance().GetDevice()->CreateGeometryShader(cso_data.get(), cso_sz, nullptr, geometry_shader.GetAddressOf());
+        hr = Graphics::Instance().GetDevice()->CreateGeometryShader(csoData.get(), csoSz, nullptr, geometryShader.GetAddressOf());
         _ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
     }
 
-    particle_data.current_eye_position = initial_position;
-    particle_data.previous_eye_position = initial_position;
-    particle_data.area_height = area_height;
-    particle_data.outermost_radius = outermost_radius;
-    particle_data.particle_size = 0.005f;
-    particle_data.particle_count = static_cast<uint32_t>(particle_count);
+    particleData.currentEyePosition = initialPosition;
+    particleData.previousEyePosition = initialPosition;
+    particleData.areaHeight = areaHeight;
+    particleData.outermostRadius = outermostRadius;
+    particleData.particleSize = 0.005f;
+    particleData.particleCount = static_cast<uint32_t>(particleCount);
 }
 
 static UINT align(UINT num, UINT alignment)
 {
     return (num + (alignment - 1)) & ~(alignment - 1);
 }
-void Particle::integrate(float delta_time, DirectX::XMFLOAT4 eye_position,
+void Particle::integrate(float deltaTime, DirectX::XMFLOAT4 eyePosition,
     DirectX::XMFLOAT4X4	view, DirectX::XMFLOAT4X4	projection)
 {
     ID3D11DeviceContext* context = Graphics::Instance().GetDeviceContext();
 
-    particle_data.previous_eye_position= particle_data.current_eye_position;
-    particle_data.current_eye_position = eye_position;
-    particle_data.deltaTime = delta_time;
-    particle_data.sceneTimer += delta_time;
-    particle_data.view = view;
-    particle_data.projection = projection;
+    particleData.previousEyePosition= particleData.currentEyePosition;
+    particleData.currentEyePosition = eyePosition;
+    particleData.deltaTime = deltaTime;
+    particleData.sceneTimer += deltaTime;
+    particleData.view = view;
+    particleData.projection = projection;
 
-    context->UpdateSubresource(constant_buffer.Get(), 0, 0, &particle_data, 0, 0);
-    context->CSSetConstantBuffers(9, 1, constant_buffer.GetAddressOf());
+    context->UpdateSubresource(constantBuffer.Get(), 0, 0, &particleData, 0, 0);
+    context->CSSetConstantBuffers(9, 1, constantBuffer.GetAddressOf());
 
-    context->CSSetShader(compute_shader.Get(), NULL, 0);
-    context->CSSetUnorderedAccessViews(0, 1, particle_buffer_uav.GetAddressOf(), nullptr);
+    context->CSSetShader(computeShader.Get(), NULL, 0);
+    context->CSSetUnorderedAccessViews(0, 1, particleBufferUav.GetAddressOf(), nullptr);
 
-    UINT num_threads = align(static_cast<UINT>(particle_count), 256);
-    context->Dispatch(num_threads / 256, 1, 1);
+    UINT numThreads = align(static_cast<UINT>(particleCount), 256);
+    context->Dispatch(numThreads / 256, 1, 1);
 
-    ID3D11UnorderedAccessView* null_unordered_access_view{};
-    context->CSSetUnorderedAccessViews(0, 1, &null_unordered_access_view, nullptr);
+    ID3D11UnorderedAccessView* nullUnorderedAccessView{};
+    context->CSSetUnorderedAccessViews(0, 1, &nullUnorderedAccessView, nullptr);
 }
 
 void Particle::Render(const RenderContext& rc)
 {
     ID3D11DeviceContext* context = Graphics::Instance().GetDeviceContext();
 
-    context->VSSetShader(vertex_shader.Get(), NULL, 0);
-    context->PSSetShader(pixel_shader.Get(), NULL, 0);
-    context->GSSetShader(geometry_shader.Get(), NULL, 0);
-    context->GSSetShaderResources(9, 1, particle_buffer_srv.GetAddressOf());
-    context->GSSetConstantBuffers(9, 1, constant_buffer.GetAddressOf());
+    context->VSSetShader(vertexShader.Get(), NULL, 0);
+    context->PSSetShader(pixelShader.Get(), NULL, 0);
+    context->GSSetShader(geometryShader.Get(), NULL, 0);
+    context->GSSetShaderResources(9, 1, particleBufferSrv.GetAddressOf());
+    context->GSSetConstantBuffers(9, 1, constantBuffer.GetAddressOf());
 
     context->IASetInputLayout(NULL);
     context->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
     context->IASetIndexBuffer(NULL, DXGI_FORMAT_R32_UINT, 0);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-    context->Draw(static_cast<UINT>(particle_count), 0);
+    context->Draw(static_cast<UINT>(particleCount), 0);
 
-    ID3D11ShaderResourceView* null_shaderresource_view{};
-    context->GSSetShaderResources(9, 1, &null_shaderresource_view);
+    ID3D11ShaderResourceView* nullShaderResourceView{};
+    context->GSSetShaderResources(9, 1, &nullShaderResourceView);
     context->VSSetShader(NULL, NULL, 0);
     context->PSSetShader(NULL, NULL, 0);
     context->GSSetShader(NULL, NULL, 0);

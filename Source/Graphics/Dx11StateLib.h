@@ -10,14 +10,6 @@ public:
     Dx11StateLib() {}
     ~Dx11StateLib() {}
 
-
-    ////唯一のインスタンス取得
-    //static Dx11StateLib& Instance()
-    //{
-    //    static Dx11StateLib instance;
-    //    return instance;
-    //}
-
     //Init
     void Dx11StateInit(ID3D11Device* device);
 

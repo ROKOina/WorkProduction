@@ -16,7 +16,6 @@ StageMain::~StageMain()
 //更新処理
 void StageMain::Update(float elapsedTime)
 {
-    //今はやることなし
 }
 
 //レイキャスト

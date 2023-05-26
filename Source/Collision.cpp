@@ -122,7 +122,6 @@ bool Collision::IntersectSphereVsCylider(
     DirectX::XMFLOAT3& outCylinderPosition
 )
 {   
-    /////////////////////////////////////////////////
     //’·•ûŒ`‚Æ‹…‚ğŒ´“_‚É‚Á‚Ä‚¢‚­
     DirectX::XMFLOAT3 spherePos0 = { 
         spherePosition.x - cylinderPosition.x,
@@ -294,16 +293,5 @@ bool Collision::IntersectRayVsModel(
 
     }
 
-    ////ˆÈ‘O‚Ìˆ—‚ª³‚µ‚­“®‚­‚æ‚¤‚É‰¼‚ÌÀ‘•
-    //if (end.y < 0.0f)
-    //{
-    //    result.position.x = end.x;
-    //    result.position.y = 0.0f;
-    //    result.position.z = end.z;
-    //    result.normal.x = 0.0f;
-    //    result.normal.y = 1.0f;
-    //    result.normal.z = 0.0f;
-    //    return true;
-    //}
     return hit;
 }

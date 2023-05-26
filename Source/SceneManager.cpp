@@ -6,7 +6,6 @@ void SceneManager::Update(float elapsedTime)
     if (nextScene != nullptr)
     {
         //古いシーンを終了処理
-        //currentScene = nullptr;
         Clear();
 
         //新しいシーンを設定

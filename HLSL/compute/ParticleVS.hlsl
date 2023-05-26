@@ -1,9 +1,9 @@
 #include "Particle.hlsli"
 
-VS_OUT_PARTICLE main(uint vertex_id : SV_VERTEXID)
+VS_OUT_PARTICLE main(uint vertexId : SV_VERTEXID)
 {
     VS_OUT_PARTICLE vout;
-    vout.vertex_id = vertex_id;
+    vout.vertexId = vertexId;
     return vout;
 }
 

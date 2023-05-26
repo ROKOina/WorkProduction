@@ -1,6 +1,6 @@
 #include "../Lambert.hlsli"
 #include "Particle.hlsli"
-RWStructuredBuffer<particle> particle_buffer : register(u0);
+RWStructuredBuffer<particle> particleBuffer : register(u0);
 
 float3 mod289(float3 x)
 {
@@ -13,7 +13,7 @@ float4 permute(float4 x)
     return fmod(((x * 34.0) + 1.0) * x, 289.0);
 }
 
-float4 taylor_inv_sqrt(float4 r)
+float4 taylorInvSqrt(float4 r)
 {
     return 1.79284291400159 - 0.85373472095314 * r;
 }
@@ -81,7 +81,7 @@ float snoise(float3 v)
     float3 p3 = float3(a1.zw, h.w);
 
     //Normalise gradients
-    float4 norm = taylor_inv_sqrt(float4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+    float4 norm = taylorInvSqrt(float4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
     p0 *= norm.x;
     p1 *= norm.y;
     p2 *= norm.z;
@@ -98,29 +98,29 @@ float snoise(float3 v)
 void main(uint3 dtid:SV_DispatchThreadID)
 {
     uint id = dtid.x;
-    particle p = particle_buffer[id];
+    particle p = particleBuffer[id];
     
-    if (length(p.position.xz - current_eye_position.xz) > outermost_radius)
+    if (length(p.position.xz - currentEyePosition.xz) > outermostRadius)
     {
-        p.position.xz = current_eye_position.xz 
-        - (p.position.xz - previous_eye_position.xz);
+        p.position.xz = currentEyePosition.xz 
+        - (p.position.xz - previousEyePosition.xz);
     }
 
     const float amplitude = 0.3;
-    //p.velocity.x = snoise(p.position.xyz * frac(sceneTimer) * 10.0) * amplitude;
-    //p.velocity.z = snoise(p.position.zyx * frac(sceneTimer) * 10.0) * amplitude;
+    p.velocity.x = snoise(p.position.xyz * frac(sceneTimer) * 10.0) * amplitude;
+    p.velocity.z = snoise(p.position.zyx * frac(sceneTimer) * 10.0) * amplitude;
     p.position += p.velocity * deltaTime;
 
-    if (p.position.y < current_eye_position.y - snowfall_area_height * 0.5f)
+    if (p.position.y < currentEyePosition.y - snowfallAreaHeight * 0.5f)
     {
-        p.position.y += snowfall_area_height;
+        p.position.y += snowfallAreaHeight;
     }
-    else if (p.position.y > current_eye_position.y + snowfall_area_height * 0.5)
+    else if (p.position.y > currentEyePosition.y + snowfallAreaHeight * 0.5)
     {
-        p.position.y -= snowfall_area_height;
+        p.position.y -= snowfallAreaHeight;
     }
 
-    particle_buffer[id] = p;
+    particleBuffer[id] = p;
 }
 
 ////パーティクル構造体

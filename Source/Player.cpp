@@ -19,16 +19,11 @@ Player::Player(CameraController* camera)
     //インスタンスポインタ設定
     instance = this;
 
-    //model = new Model("Data/Model/Slime/Slime.fbx");
-    //model = new Model("Data/Model/Jammo/Jammo.fbx");
-    model = new Model("Data/Model/pico/pico.mdl");
-    model->ImportFbxAnimation("Data/Model/Jammo/Animations/Attack.fbx");
-    //model->PlayAnimation(0,true);
-
-    //model = new Model("Data/Model/Mr.Incredible/Mr.Incredible.mdl");
+    model = new Model("Data/Model/pico/picoAnim.mdl");
+    model->PlayAnimation(0,true);
 
     //モデルが大きいのでスケーリング
-    scale.x = scale.y = scale.z = 0.01f;
+    scale.x = scale.y = scale.z = 0.02f;
 
     //ヒットエフェクト読み込み
     hitEffect = new Effect("Data/Effect/Hit.efk");
@@ -97,15 +92,6 @@ DirectX::XMFLOAT3 Player::GetMoveVec() const
 //更新処理
 void Player::Update(float elapsedTime)
 {
-    ////移動入力処理
-    //InputMove(elapsedTime);
-
-    ////ジャンプ入力処理
-    //InputJump();
-    
-    ////弾丸入力処理
-    //InputProjectile();
-
     //ステート毎の処理
     switch (state)
     {
@@ -244,8 +230,6 @@ void Player::DrawDebugPrimitive()
     if (!VisibleDebugPrimitive)return;
     DebugRenderer* debugRenderer = Graphics::Instance().GetDebugRenderer();
 
-    //衝突判定用のデバッグ球を描画
-    //debugRenderer->DrawSphere(position, radius, DirectX::XMFLOAT4(0, 0, 0, 1));  
     //衝突判定用のデバッグ円柱を描画
     debugRenderer->DrawCylinder(position, radius, height, DirectX::XMFLOAT4(0, 0, 0, 1));  
 
@@ -265,10 +249,6 @@ void Player::DrawDebugPrimitive()
 //デバッグ用GUI描画
 void Player::DrawDebugGUI()
 {
-    //ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-    //ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
-
-    //if (ImGui::Begin("Player", nullptr, ImGuiWindowFlags_None))
     if (ImGui::CollapsingHeader("Player", ImGuiTreeNodeFlags_DefaultOpen))
     {
         ImGui::Checkbox("VisibleDebugPrimitive", &VisibleDebugPrimitive);
@@ -295,7 +275,6 @@ void Player::DrawDebugGUI()
             ImGui::InputFloat("Acceleration", &acceleration);
             ImGui::InputFloat("AirControl", &airControl);
     }
-    //ImGui::End();
 }
 
 //アニメーション
@@ -305,7 +284,7 @@ void Player::TransitionIdleState()
     state = State::Idle;
     
     //待機アニメーション再生
-    model->PlayAnimation(Anim_Idle, true);
+    model->PlayAnimation(Anim_spin, true);
 }
 
 //待機ステート更新処理
@@ -327,7 +306,7 @@ void Player::TransitionMoveState()
     state = State::Move;
 
     //走りアニメーション再生
-    model->PlayAnimation(Anim_Running, true);
+    model->PlayAnimation(Anim_happyWalk, true);
 }
 
 //移動ステート更新処理
@@ -349,7 +328,7 @@ void Player::TransitionJumpState()
     state = State::Jump;
 
     //ジャンプアニメーション再生
-    model->PlayAnimation(Anim_Jump, false);
+    model->PlayAnimation(Anim_ninjaWalk, false);
 }
 
 //ジャンプステート更新処理
@@ -362,7 +341,7 @@ void Player::UpdateJumpState(float elapsedTime)
     InputJump();
 
     //アニメーション再生終了したらFallingにする
-    if (!model->IsPlayAnimation())model->PlayAnimation(Anim_Falling, true);
+    if (!model->IsPlayAnimation())model->PlayAnimation(Anim_happyWalk, true);
 }
 
 //着地ステートへ遷移
@@ -371,7 +350,7 @@ void Player::TransitionLandState()
     state = State::Land;
 
     //ジャンプアニメーション再生
-    model->PlayAnimation(Anim_Landing, false);
+    model->PlayAnimation(Anim_happyWalk, false);
 }
 
 //着地ステート更新処理
@@ -390,7 +369,7 @@ void Player::TransitionAttackState()
     state = State::Attack;
 
     //ジャンプアニメーション再生
-    model->PlayAnimation(Anim_Attack, false);
+    model->PlayAnimation(Anim_happyWalk, false);
 }
 
 //攻撃ステート更新処理
@@ -414,7 +393,7 @@ void Player::TransitionDamageState()
     state = State::Damage;
 
     //ダメージアニメーション再生
-    model->PlayAnimation(Anim_GetHit1, false);
+    model->PlayAnimation(Anim_happyWalk, false);
 }
 
 //ダメージステート更新処理
@@ -433,7 +412,7 @@ void Player::TransitionDeathState()
     state = State::Death;
 
     //死亡アニメーション再生
-    model->PlayAnimation(Anim_Death, false);
+    model->PlayAnimation(Anim_happyWalk, false);
 }
 
 //死亡ステート更新処理
@@ -459,7 +438,7 @@ void Player::TransitionReviveState()
     health = maxHealth;
 
     //復活アニメーション再生
-    model->PlayAnimation(Anim_Revive, false);
+    model->PlayAnimation(Anim_happyWalk, false);
 }
 
 //復活ステート更新処理

@@ -7,7 +7,6 @@
 #include "Graphics/DebugRenderer.h"
 #include "Graphics/LineRenderer.h"
 #include "Graphics\Dx11StateLib.h"
-//#include "Graphics/ImGuiRenderer.h"
 
 #include <mutex>
 
@@ -50,9 +49,6 @@ public:
 
 	// ラインレンダラ取得
 	LineRenderer* GetLineRenderer() const { return lineRenderer.get(); }
-
-	//// ImGuiレンダラ取得
-	//ImGuiRenderer* GetImGuiRenderer() const { return imguiRenderer.get(); }
 
 	//描画周り設定呼び出し
 	const std::unique_ptr<Dx11StateLib>& GetDx11State() { return dx11State; }

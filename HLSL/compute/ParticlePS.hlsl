@@ -3,7 +3,7 @@
 [earlydepthstencil]
 float4 main(GS_OUT pin) : SV_TARGET
 {
-    return float4(pin.color.rgb/* * directional_light_color[0].rgb */ * lightDirection.w, pin.color.a);
+    return float4(pin.color.rgb * lightDirection.w, pin.color.a);
 }
 
 

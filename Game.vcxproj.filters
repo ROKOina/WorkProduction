@@ -49,9 +49,6 @@
     <Filter Include="Source\GameSource\Camera">
       <UniqueIdentifier>{5695e997-1ab3-469c-b966-d9d28882c270}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\GameSource\Effect">
-      <UniqueIdentifier>{4eb406ab-5637-49e6-9f17-c44c0b3bab16}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\GameSource\Math">
       <UniqueIdentifier>{edc6e4d3-4207-471f-bd35-12f1e1f8b1fd}</UniqueIdentifier>
     </Filter>
@@ -69,6 +66,12 @@
     </Filter>
     <Filter Include="Source\Graphics\compute">
       <UniqueIdentifier>{2eb9c992-bbe5-48b3-a084-0c801d354071}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Render\Effect">
+      <UniqueIdentifier>{4eb406ab-5637-49e6-9f17-c44c0b3bab16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\GameSource\Character\Weapon">
+      <UniqueIdentifier>{870dc27d-9a0a-4362-9b5c-291146b538d2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -178,10 +181,10 @@
       <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Source\Effect.h">
-      <Filter>Source\GameSource\Effect</Filter>
+      <Filter>Source\GameSource\Render\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Source\EffectManager.h">
-      <Filter>Source\GameSource\Effect</Filter>
+      <Filter>Source\GameSource\Render\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Source\Framework.h">
       <Filter>Source\GameSource</Filter>
@@ -345,10 +348,10 @@
       <Filter>Source\GameSource\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Source\Effect.cpp">
-      <Filter>Source\GameSource\Effect</Filter>
+      <Filter>Source\GameSource\Render\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Source\EffectManager.cpp">
-      <Filter>Source\GameSource\Effect</Filter>
+      <Filter>Source\GameSource\Render\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Source\Framework.cpp">
       <Filter>Source\GameSource</Filter>

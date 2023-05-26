@@ -29,12 +29,6 @@ public: //関数
     //デバッグプリミティブ描画
     void DrawDebugPrimitive();
 
-    ////ジャンプ処理
-    //void Jump(float speed);
-
-    ////速力処理更新
-    //void UpdateVelocity(float elapsedTime);
-
     //ジャンプ入力処理
     bool InputJump();
 
@@ -47,9 +41,6 @@ private:    //関数
 
     //攻撃入力処理
     bool InputAttack();
-
-    ////旋回処理
-    //void Turn(float elapsedTime, float vx, float vz, float speed);
 
 protected:
     //着地した時に呼ばれる
@@ -84,7 +75,7 @@ private:    //変数
 
     CameraController* cameraController;
 
-private:   //アニメーション 
+private:   //アニメーション
     //遷移
     //待機ステートへ遷移
     void TransitionIdleState();
@@ -140,17 +131,8 @@ private:   //アニメーション
     //アニメーション
     enum Animation
     {
-        Anim_Attack,
-        Anim_Death,
-        Anim_Falling,
-        Anim_GetHit1,
-        Anim_GetHit2,
-        Anim_Idle,
-        Anim_Jump,
-        Anim_Jump_Flip,
-        Anim_Landing,
-        Anim_Revive,
-        Anim_Running,
-        Anim_Walking 
+        Anim_spin,
+        Anim_happyWalk,
+        Anim_ninjaWalk,
     };
 };
