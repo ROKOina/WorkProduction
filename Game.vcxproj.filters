@@ -135,55 +135,49 @@
     <ClInclude Include="Source\Inspector\SubWindowManager.h">
       <Filter>Source\Inspector</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Collision.h">
+    <ClInclude Include="Source\GameSource\Math\Collision.h">
       <Filter>Source\GameSource\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Mathf.h">
+    <ClInclude Include="Source\GameSource\Math\Mathf.h">
       <Filter>Source\GameSource\Math</Filter>
     </ClInclude>
-    <ClInclude Include="Source\SceneGame.h">
+    <ClInclude Include="Source\GameSource\Scene\SceneGame.h">
       <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Source\SceneLoading.h">
+    <ClInclude Include="Source\GameSource\Scene\SceneLoading.h">
       <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Source\SceneManager.h">
+    <ClInclude Include="Source\GameSource\Scene\SceneManager.h">
       <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Source\SceneTitle.h">
+    <ClInclude Include="Source\GameSource\Scene\SceneTitle.h">
       <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Character.h">
+    <ClInclude Include="Source\GameSource\Character\Character.h">
       <Filter>Source\GameSource\Character</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Player.h">
+    <ClInclude Include="Source\GameSource\Character\Player.h">
       <Filter>Source\GameSource\Character</Filter>
     </ClInclude>
-    <ClInclude Include="Source\ResourceManager.h">
+    <ClInclude Include="Source\GameSource\Render\ResourceManager.h">
       <Filter>Source\GameSource\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Stage.h">
+    <ClInclude Include="Source\GameSource\Stage\Stage.h">
       <Filter>Source\GameSource\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="Source\StageMain.h">
+    <ClInclude Include="Source\GameSource\Stage\StageMain.h">
       <Filter>Source\GameSource\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="Source\StageManager.h">
+    <ClInclude Include="Source\GameSource\Stage\StageManager.h">
       <Filter>Source\GameSource\Stage</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Camera.h">
-      <Filter>Source\GameSource\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\CameraController.h">
-      <Filter>Source\GameSource\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Scene.h">
+    <ClInclude Include="Source\GameSource\Scene\Scene.h">
       <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Effect.h">
+    <ClInclude Include="Source\GameSource\Render\Effect\Effect.h">
       <Filter>Source\GameSource\Render\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="Source\EffectManager.h">
+    <ClInclude Include="Source\GameSource\Render\Effect\EffectManager.h">
       <Filter>Source\GameSource\Render\Effect</Filter>
     </ClInclude>
     <ClInclude Include="Source\Framework.h">
@@ -249,6 +243,13 @@
     <ClInclude Include="Source\Graphics\compute\particle.h">
       <Filter>Source\Graphics\compute</Filter>
     </ClInclude>
+    <ClInclude Include="Source\GameSource\Camera\Camera.h">
+      <Filter>Source\GameSource\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GameSource\Camera\CameraController.h">
+      <Filter>Source\GameSource\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GameSource\Weapon\Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -305,52 +306,46 @@
     <ClCompile Include="Source\Inspector\SubWindowManager.cpp">
       <Filter>Source\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Collision.cpp">
+    <ClCompile Include="Source\GameSource\Math\Collision.cpp">
       <Filter>Source\GameSource\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mathf.cpp">
+    <ClCompile Include="Source\GameSource\Math\Mathf.cpp">
       <Filter>Source\GameSource\Math</Filter>
     </ClCompile>
-    <ClCompile Include="Source\SceneGame.cpp">
+    <ClCompile Include="Source\GameSource\Scene\SceneGame.cpp">
       <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Source\SceneLoading.cpp">
+    <ClCompile Include="Source\GameSource\Scene\SceneLoading.cpp">
       <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Source\SceneManager.cpp">
+    <ClCompile Include="Source\GameSource\Scene\SceneManager.cpp">
       <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Source\SceneTitle.cpp">
+    <ClCompile Include="Source\GameSource\Scene\SceneTitle.cpp">
       <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Character.cpp">
+    <ClCompile Include="Source\GameSource\Character\Character.cpp">
       <Filter>Source\GameSource\Character</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Player.cpp">
+    <ClCompile Include="Source\GameSource\Character\Player.cpp">
       <Filter>Source\GameSource\Character</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ResourceManager.cpp">
+    <ClCompile Include="Source\GameSource\Render\ResourceManager.cpp">
       <Filter>Source\GameSource\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Stage.cpp">
+    <ClCompile Include="Source\GameSource\Stage\Stage.cpp">
       <Filter>Source\GameSource\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="Source\StageMain.cpp">
+    <ClCompile Include="Source\GameSource\Stage\StageMain.cpp">
       <Filter>Source\GameSource\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="Source\StageManager.cpp">
+    <ClCompile Include="Source\GameSource\Stage\StageManager.cpp">
       <Filter>Source\GameSource\Stage</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Camera.cpp">
-      <Filter>Source\GameSource\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\CameraController.cpp">
-      <Filter>Source\GameSource\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Effect.cpp">
+    <ClCompile Include="Source\GameSource\Render\Effect\Effect.cpp">
       <Filter>Source\GameSource\Render\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="Source\EffectManager.cpp">
+    <ClCompile Include="Source\GameSource\Render\Effect\EffectManager.cpp">
       <Filter>Source\GameSource\Render\Effect</Filter>
     </ClCompile>
     <ClCompile Include="Source\Framework.cpp">
@@ -406,6 +401,15 @@
     </ClCompile>
     <ClCompile Include="Source\Graphics\compute\particle.cpp">
       <Filter>Source\Graphics\compute</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\Camera\Camera.cpp">
+      <Filter>Source\GameSource\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\Camera\CameraController.cpp">
+      <Filter>Source\GameSource\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\Weapon\Weapon.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

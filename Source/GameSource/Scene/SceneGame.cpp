@@ -1,9 +1,9 @@
 #include "Graphics/Graphics.h"
-#include "EffectManager.h"
+#include "GameSource\Render\Effect\EffectManager.h"
 #include "Input\Input.h"
 
-#include "StageManager.h"
-#include "StageMain.h"
+#include "GameSource\Stage\StageManager.h"
+#include "GameSource\Stage\StageMain.h"
 #include "SceneGame.h"
 #include "imgui.h"
 

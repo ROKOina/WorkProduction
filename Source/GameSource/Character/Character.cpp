@@ -1,9 +1,9 @@
 #include "Character.h"
-#include "Stage.h"
+#include "GameSource\Stage\Stage.h"
 #include <imgui.h>
 #include "Logger.h"
-#include "Mathf.h"
-#include "StageManager.h"
+#include "GameSource\Math\Mathf.h"
+#include "GameSource\Stage\StageManager.h"
 
 //s—ñXVˆ—
 void Character::UpdateTransform()

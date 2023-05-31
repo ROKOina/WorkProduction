@@ -2,7 +2,7 @@
 #include "Player.h"
 #include "Input/Input.h"
 #include "Graphics/Graphics.h"
-#include "Collision.h"
+#include "GameSource\Math\Collision.h"
 
 static Player* instance = nullptr;
 
@@ -27,6 +27,9 @@ Player::Player(CameraController* camera)
 
     //ヒットエフェクト読み込み
     hitEffect = new Effect("Data/Effect/Hit.efk");
+
+    w = std::make_unique<Weapon>("Data/Model/Swords/BigSword.mdl", DirectX::XMFLOAT3{ 0.01f,0.01f,0.01f });
+    w->SetAngle({ -90,0,0 });
 
     //待機ステートへ遷移
     TransitionIdleState();
@@ -143,6 +146,11 @@ void Player::Update(float elapsedTime)
 
     //モデル行列更新
     model->UpdateTransform(transform);  //位置行列を渡す
+
+
+    Model::Node* rightHandBone = model->FindNode("RightHand");
+    w->ParentTransform(rightHandBone->worldTransform);
+    w->Update(elapsedTime);
 }
 
 
@@ -222,6 +230,7 @@ void Player::OnDead()
 void Player::Render(ID3D11DeviceContext* dc, Shader* shader)
 {
     shader->Draw(dc, model);
+    w->Render(dc, shader);
 }
 
 //デバッグプリミティブ描画

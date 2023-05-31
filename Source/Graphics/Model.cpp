@@ -1,6 +1,6 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/Model.h"
-#include "ResourceManager.h"
+#include "GameSource\Render\ResourceManager.h"
 
 //コンストラクタで呼ぶイニシャライザ
 void Model::ModelInitialize(std::shared_ptr<ModelResource> resource)

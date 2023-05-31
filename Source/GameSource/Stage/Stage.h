@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Graphics\Shader.h"
-#include "Collision.h"
+#include "GameSource\Math\Collision.h"
 
 //ステージ
 class Stage

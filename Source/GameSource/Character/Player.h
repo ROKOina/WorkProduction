@@ -2,10 +2,10 @@
 
 #include "Graphics/Shader.h"
 #include "Graphics/Model.h"
-#include "Character.h"
-#include "Effect.h"
-
-#include "CameraController.h"
+#include "GameSource\Character\Character.h"
+#include "GameSource\Render\Effect\Effect.h"
+#include "GameSource\Camera\CameraController.h"
+#include "GameSource\Weapon\Weapon.h"
 
 //プレイヤー
 class Player : public Character
@@ -74,6 +74,8 @@ private:    //変数
     Effect* hitEffect = nullptr;
 
     CameraController* cameraController;
+
+    std::unique_ptr<Weapon> w;
 
 private:   //アニメーション
     //遷移

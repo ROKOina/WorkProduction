@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Player.h"
-#include "CameraController.h"
+#include "GameSource\Character\Player.h"
+#include "GameSource\Camera\CameraController.h"
 #include "Scene.h"
 #include "Graphics\Sprite.h"
 #include "Audio\AudioSource.h"

@@ -4,7 +4,7 @@
 // モデルのアニメーションを見れるクラス
 //
 
-#include "CameraController.h"
+#include "GameSource\Camera\CameraController.h"
 #include <memory>
 class ModelWatch
 {
