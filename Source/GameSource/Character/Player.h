@@ -73,7 +73,7 @@ private:    //変数
     //エフェクト
     Effect* hitEffect = nullptr;
 
-    CameraController* cameraController;
+    std::unique_ptr<CameraController> cameraController;
 
     std::unique_ptr<Weapon> w;
 

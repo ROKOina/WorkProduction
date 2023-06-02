@@ -243,13 +243,18 @@
     <ClInclude Include="Source\Graphics\compute\particle.h">
       <Filter>Source\Graphics\compute</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GameSource\Camera\Camera.h">
+    <ClInclude Include="Source\Components\CameraCom.h">
       <Filter>Source\GameSource\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Source\GameSource\Camera\CameraController.h">
       <Filter>Source\GameSource\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Source\GameSource\Weapon\Weapon.h" />
+    <ClInclude Include="Source\Components\System\Component.h" />
+    <ClInclude Include="Source\Components\System\GameObject.h" />
+    <ClInclude Include="Source\Components\RendererCom.h" />
+    <ClInclude Include="Source\Components\TransformCom.h" />
+    <ClInclude Include="Source\Components\Script\PlayerCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -402,13 +407,25 @@
     <ClCompile Include="Source\Graphics\compute\particle.cpp">
       <Filter>Source\Graphics\compute</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameSource\Camera\Camera.cpp">
+    <ClCompile Include="Source\Components\CameraCom.cpp">
       <Filter>Source\GameSource\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\Camera\CameraController.cpp">
       <Filter>Source\GameSource\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\Weapon\Weapon.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\System\GameObject.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\RendererCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\TransformCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\Script\PlayerCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 
-#include "Camera.h"
+#include "../Source/Components/CameraCom.h"
 
 //カメラコントローラー
 class CameraController
@@ -18,7 +18,8 @@ public:
     void SetTarget(const DirectX::XMFLOAT3& target) { this->target = target; }
 
     //カメラ
-    Camera& GetCamera() { return camera; }
+    std::shared_ptr<CameraCom> GetCamera() { return camera; }
+    void SetCamera(std::shared_ptr<CameraCom> c) { camera = c; }
 
 
     //ImGui
@@ -32,5 +33,5 @@ private:
     float               maxAngleX = DirectX::XMConvertToRadians(45);
     float               minAngleX = DirectX::XMConvertToRadians(-45);
 
-    Camera camera;
+    std::shared_ptr<CameraCom> camera;
 };

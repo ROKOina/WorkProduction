@@ -5843,6 +5843,14 @@ bool ImGui::TreeNode(const char* label)
     return TreeNodeBehavior(window->GetID(label), 0, label, NULL);
 }
 
+bool ImGui::TreeNode(const char* label, ImGuiTreeNodeFlags flags)
+{
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+    return TreeNodeBehavior(window->GetID(label), flags, label, NULL);
+}
+
 bool ImGui::TreeNodeV(const char* str_id, const char* fmt, va_list args)
 {
     return TreeNodeExV(str_id, 0, fmt, args);

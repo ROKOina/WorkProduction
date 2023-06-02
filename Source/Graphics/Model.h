@@ -38,7 +38,7 @@ public:
 	const ModelResource* GetResource() const { return resource.get(); }
 
 	//アニメーション更新処理
-	void UpdateAnimetion(float elapsedTime);
+	void UpdateAnimation(float elapsedTime);
 
 	//アニメーション再生
 	void PlayAnimation(int index, bool loop, float blendSeconds = 0.2f);

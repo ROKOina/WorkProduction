@@ -52,9 +52,9 @@ DirectX::XMFLOAT3 Player::GetMoveVec() const
     float ay = gamePad.GetAxisLY();
 
     //カメラ方向とスティックの入力値によって進行方向を計算する
-    Camera& camera = cameraController->GetCamera();
-    const DirectX::XMFLOAT3& cameraRight = camera.GetRight();
-    const DirectX::XMFLOAT3& cameraFront = camera.GetFront();
+    std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
+    const DirectX::XMFLOAT3& cameraRight = camera->GetRight();
+    const DirectX::XMFLOAT3& cameraFront = camera->GetFront();
 
     //移動ベクトルはXZ平面に水平なベクトルになるようにする
 
@@ -142,7 +142,7 @@ void Player::Update(float elapsedTime)
     UpdateTransform();
 
     //モデルアニメーション更新処理
-    model->UpdateAnimetion(elapsedTime);
+    model->UpdateAnimation(elapsedTime);
 
     //モデル行列更新
     model->UpdateTransform(transform);  //位置行列を渡す

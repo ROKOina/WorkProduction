@@ -90,7 +90,7 @@ Model::Node* Model::FindNode(const char* name)
 }
 
 //アニメーション更新処理
-void Model::UpdateAnimetion(float elapsedTime)
+void Model::UpdateAnimation(float elapsedTime)
 {
 	//再生中でないなら処理しない
 	if (!IsPlayAnimation())return;

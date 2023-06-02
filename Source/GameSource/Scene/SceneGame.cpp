@@ -7,34 +7,73 @@
 #include "SceneGame.h"
 #include "imgui.h"
 
+#include "Components\System\GameObject.h"
+#include "Components\RendererCom.h"
+#include "Components\TransformCom.h"
+#include "Components\CameraCom.h"
+
 // 初期化
 void SceneGame::Initialize()
 {
+	//仮オブジェクト
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("pico");
+		obj->SetScale({ 0.01f, 0.01f, 0.01f });
+
+		const char* filename = "Data/Model/pico/picoAnim.mdl";
+		std::shared_ptr<RenderderCom> r = obj->AddComponent<RenderderCom>();
+		r->LoadModel(filename);
+
+		//でばふ
+		std::shared_ptr<GameObject> o[9];
+		for (int i = 0; i < 9; ++i)
+		{
+			std::shared_ptr<GameObject> obj2;
+			if (i == 0)
+				obj2 = obj->AddChildObject();
+			else
+				obj2 = o[i - 1]->AddChildObject();
+
+
+			obj2->SetPosition({ 10, 0, 0 });
+
+			const char* filename = "Data/Model/pico/picoAnim.mdl";
+			std::shared_ptr<RenderderCom> r = obj2->AddComponent<RenderderCom>();
+			r->LoadModel(filename);
+			o[i] = obj2;
+		}
+
+		//カメラを子オブジェクトに
+		{
+			////カメラコントローラー初期化
+			//cameraController = std::make_unique<CameraController>();
+
+			std::shared_ptr<GameObject> cameraObj = obj->AddChildObject();
+			cameraObj->SetName("Camera");
+
+			Graphics& graphics = Graphics::Instance();
+			std::shared_ptr<CameraCom> c = cameraObj->AddComponent<CameraCom>();
+			c->SetPerspectiveFov(
+				DirectX::XMConvertToRadians(45),
+				graphics.GetScreenWidth() / graphics.GetScreenHeight(),
+				1.0f, 1000.0f
+			);
+
+			//cameraController->SetCamera(c);
+		}
+
+	}
+
 	//ステージ初期化
 	StageManager& stageManager = StageManager::Instance();
 	StageMain* stageMain = new StageMain();	//メイン（マップ）
 	stageManager.Register(stageMain);
 
-	//カメラコントローラー初期化
-	cameraController = new CameraController();
 	//プレイヤー初期化
-	player = new Player(cameraController);
+	//player = new Player(cameraController.get());
 
-	//カメラ初期設定
-	Graphics& graphics = Graphics::Instance();
-	Camera& camera = cameraController->GetCamera();
-	camera.SetLookAt(
-		DirectX::XMFLOAT3(0, 10, -10),
-		DirectX::XMFLOAT3(0, 0, 0),
-		DirectX::XMFLOAT3(0, 1, 0)
-	);
-	camera.SetPerspectiveFov(
-		DirectX::XMConvertToRadians(45),
-		graphics.GetScreenWidth() / graphics.GetScreenHeight(),
-		1.0f, 1000.0f
-	);
-
-	particle = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
+	//particle = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
 }
 
 // 終了化
@@ -47,34 +86,31 @@ void SceneGame::Finalize()
 		delete player;
 		player = nullptr;
 	}
-	//カメラコントローラー終了化
-	if (cameraController != nullptr)
-	{
-		delete cameraController;
-		cameraController = nullptr;
-	}
 }
 
 // 更新処理
 void SceneGame::Update(float elapsedTime)
 {
-	//カメラコントローラー更新処理
-	DirectX::XMFLOAT3 target = player->GetPosition();
-	target.y += 0.5f;
-	cameraController->SetTarget(target);
-	cameraController->Update(elapsedTime);
+	GameObjectManager::Instance().Update(elapsedTime);
+
+	////カメラコントローラー更新処理
+	////DirectX::XMFLOAT3 target = player->GetPosition();
+	//DirectX::XMFLOAT3 target = GameObjectManager::Instance().Find("pico")->GetComponent<TransformCom>()->GetPosition();
+	//target.y += 0.5f;
+	//cameraController->SetTarget(target);
+	//cameraController->Update(elapsedTime);
 	//ステージ更新処理
 	StageManager::Instance().Update(elapsedTime);
 	//プレイヤー更新処理
-	player->Update(elapsedTime);
+	//player->Update(elapsedTime);
 	//エフェクト更新処理
 	EffectManager::Instance().Update(elapsedTime);
 
 	Graphics& graphics = Graphics::Instance();
 
-	Camera& camera = cameraController->GetCamera();
+	//std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
 
-	particle->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera.GetView(), camera.GetProjection());
+	//particle->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera->GetView(), camera->GetProjection());
 }
 
 // 描画処理
@@ -95,11 +131,14 @@ void SceneGame::Render()
 	RenderContext rc;	//描画するために必要な構造体
 	rc.lightDirection = { 0.0f, -1.0f, 0.0f, 0.0f };	// ライト方向（下方向）
 
-	//カメラパラメーター設定
-	Camera& camera = cameraController->GetCamera();
-	rc.view = camera.GetView();
-	rc.projection = camera.GetProjection();
+	////カメラパラメーター設定
+	//std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
+	std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+	rc.view = camera->GetView();
+	rc.projection = camera->GetProjection();
 
+	GameObjectManager::Instance().UpdateTransform();
+	GameObjectManager::Instance().Render(camera->GetView(), camera->GetProjection());
 
 	// 3Dモデル描画
 	{
@@ -108,38 +147,38 @@ void SceneGame::Render()
 
 		//ステージ描画
 		StageManager::Instance().Render(dc, shader);
-		//プレイヤー描画
-		player->Render(dc, shader);
+		////プレイヤー描画
+		//player->Render(dc, shader);
 
 		shader->End(dc);
 	}
 
-	//パーティクル
-	{
-		Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
-		const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		dc->OMSetBlendState(
-			dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::PARTICLE).Get(),
-			blend_factor, 0xFFFFFFFF);
-		dc->OMSetDepthStencilState(
-			dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::PARTICLE).Get(),
-			0);
-		dc->RSSetState(
-			dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
-		);
+	////パーティクル
+	//{
+	//	Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
+	//	const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	//	dc->OMSetBlendState(
+	//		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::PARTICLE).Get(),
+	//		blend_factor, 0xFFFFFFFF);
+	//	dc->OMSetDepthStencilState(
+	//		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::PARTICLE).Get(),
+	//		0);
+	//	dc->RSSetState(
+	//		dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
+	//	);
 
-		particle->Render(rc);
+	//	particle->Render(rc);
 
-		dc->OMSetBlendState(
-			dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
-			blend_factor, 0xFFFFFFFF);
-		dc->OMSetDepthStencilState(
-			dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),
-			0);
-		dc->RSSetState(
-			dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
-		);
-	}
+	//	dc->OMSetBlendState(
+	//		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
+	//		blend_factor, 0xFFFFFFFF);
+	//	dc->OMSetDepthStencilState(
+	//		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),
+	//		0);
+	//	dc->RSSetState(
+	//		dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
+	//	);
+	//}
 
 	//3Dエフェクト描画
 	{
@@ -148,8 +187,8 @@ void SceneGame::Render()
 
 	// 3Dデバッグ描画
 	{
-		//プレイヤーデバッグプリミティブ描画
-		player->DrawDebugPrimitive();
+		////プレイヤーデバッグプリミティブ描画
+		//player->DrawDebugPrimitive();
 
 		// ラインレンダラ描画実行
 		graphics.GetLineRenderer()->Render(dc, rc.view, rc.projection);
@@ -171,20 +210,11 @@ void SceneGame::Render()
 		if (ImGui::Begin("DebugMenu", nullptr, ImGuiWindowFlags_None))
 		{
 
-			//プレイヤーデバッグ描画
-			player->DrawDebugGUI();
-
-			//カメラ　
-			if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				DirectX::XMFLOAT3 eye = camera.GetEye();
-				DirectX::XMFLOAT3 focus = camera.GetFocus();
-				ImGui::InputFloat3("Eye", &eye.x);
-				ImGui::InputFloat3("Focus", &focus.x);
-			}
+			////プレイヤーデバッグ描画
+			//player->DrawDebugGUI();
 
 			//カメラコントローラー
-			cameraController->DrawDebugGUI();
+			//cameraController->DrawDebugGUI();
 		}
 		ImGui::End();
 
