@@ -5,26 +5,7 @@
 #include "GameSource\Math\Mathf.h"
 #include "GameSource\Stage\StageManager.h"
 
-//行列更新処理
-void Character::UpdateTransform()
-{
-    //スケール行列を作成
-    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
-
-    //回転行列を作成
-    DirectX::XMMATRIX X = DirectX::XMMatrixRotationX(angle.x);
-    DirectX::XMMATRIX Y = DirectX::XMMatrixRotationY(angle.y);
-    DirectX::XMMATRIX Z = DirectX::XMMatrixRotationZ(angle.z);
-    DirectX::XMMATRIX R = X * Y * Z;
-    
-    //位置行列を作成
-    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
-
-    //3つの行列を組み合わせて、ワールド行列を作成
-    DirectX::XMMATRIX W = S * R * T;
-    //計算したワールド行列を取り出す
-    DirectX::XMStoreFloat4x4(&transform, W);
-}
+#include <cmath>
 
 //移動処理
 void Character::Move(float vx, float vz, float speed)
@@ -44,20 +25,11 @@ void Character::Jump(float speed)
     velocity.y = speed;
 }
 
-//衝撃を与える
-void Character::AddImpulse(const DirectX::XMFLOAT3& impulse)
-{
-    //速力に力を加える
-    velocity.x += impulse.x;
-    velocity.y += impulse.y;
-    velocity.z += impulse.z;
-}
-
 //速力処理更新
-void Character::UpdateVelocity(float elapsedTime)
+void Character::UpdateVelocity(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle)
 {
     //経過フレーム
-    float elapsedFrame = 60.0f * elapsedTime;
+    float elapsedFrame = 120.0f * elapsedTime;
 
     //垂直速力更新処理
     UpdateVertialVelocity(elapsedFrame);
@@ -66,10 +38,10 @@ void Character::UpdateVelocity(float elapsedTime)
     UpdateHorizontalVelocity(elapsedFrame);
 
     //垂直移動更新処理
-    UpdateVertialMove(elapsedTime);
+    UpdateVertialMove(elapsedTime,position,angle);
 
     //水平移動更新処理
-    UpdateHorizontalMove(elapsedTime);
+    UpdateHorizontalMove(elapsedTime, position, angle);
 }
 
 //垂直速力更新処理
@@ -89,8 +61,8 @@ void Character::UpdateHorizontalVelocity(float elapsedFrame)
         //摩擦力
         float Friction = this->friction * elapsedFrame;
 
-       //空中にいるときは摩擦力を減らす
-        if (!isGround)Friction -= airControl;
+       ////空中にいるときは摩擦力を減らす
+       // if (!isGround)Friction -= airControl;
 
         //摩擦による横方向の減速処理
         if (length > friction)
@@ -121,8 +93,8 @@ void Character::UpdateHorizontalVelocity(float elapsedFrame)
             //加速力
             float acceleration = this->acceleration * elapsedFrame;
            
-            //空中にいるときは加速力を減らす
-            if (!isGround)acceleration -= airControl;
+            ////空中にいるときは加速力を減らす
+            //if (!isGround)acceleration -= airControl;
             
             //移動ベクトルによる加速処理
             velocity.x += moveVecX*acceleration;
@@ -144,11 +116,11 @@ void Character::UpdateHorizontalVelocity(float elapsedFrame)
                velocity.z = DirectX::XMVectorGetZ(Velocity);
             }
 
-            //下り坂でガタガタしないようにする
-            if (isGround && slopeRate > 0.0f)
-            {
-                velocity.y -= length * slopeRate * elapsedFrame;
-            }
+            ////下り坂でガタガタしないようにする
+            //if (isGround && slopeRate > 0.0f)
+            //{
+            //    velocity.y -= length * slopeRate * elapsedFrame;
+            //}
         }
     }
 
@@ -158,7 +130,7 @@ void Character::UpdateHorizontalVelocity(float elapsedFrame)
 }
 
 //垂直移動更新処理
-void Character::UpdateVertialMove(float elapsedTime)
+void Character::UpdateVertialMove(float elapsedTime,DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle)
 {
     //垂直方向の移動量
     float my = velocity.y * elapsedTime;
@@ -186,30 +158,25 @@ void Character::UpdateVertialMove(float elapsedTime)
             //地面に接地している
             position = hit.position;
 
-            //回転
-            angle.x += hit.rotation.x;
-            angle.y += hit.rotation.y;
-            angle.z += hit.rotation.z;
-
             //傾斜率の計算
             float normalLenghtXZ = sqrtf(
                 hit.normal.x * hit.normal.x + hit.normal.z * hit.normal.z);
             slopeRate = 1.0f - 
                 (hit.normal.y / (normalLenghtXZ + hit.normal.y));
 
-            //着地した
-            if (!isGround)
-            {
-                OnLanding();
-            }
-            isGround = true;
+            ////着地した
+            //if (!isGround)
+            //{
+            //    OnLanding();
+            //}
+            //isGround = true;
             velocity.y = 0.0f;
         }
         else
         {
             //空中に浮いている
             position.y += my;
-            isGround = false;
+            //isGround = false;
         }
     }
 
@@ -217,7 +184,7 @@ void Character::UpdateVertialMove(float elapsedTime)
     else if (my > 0.0f)
     {
         position.y += my;
-        isGround = false;
+        //isGround = false;
     }
     //地面の向きに沿うようにXZ軸回転
     {
@@ -233,7 +200,7 @@ void Character::UpdateVertialMove(float elapsedTime)
 }
 
 //水平移動更新処理
-void Character::UpdateHorizontalMove(float elapsedTime)
+void Character::UpdateHorizontalMove(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle)
 {
     //水平速力量計算
     float velocityLengthXZ = fabsf(velocity.x) + fabsf(velocity.z);
@@ -306,8 +273,10 @@ void Character::UpdateHorizontalMove(float elapsedTime)
 }
 
 //旋回処理
-void Character::Turn(float elapsedTime, float vx, float vz, float speed)
+void Character::Turn(float elapsedTime, float vx, float vz, float speed, DirectX::XMFLOAT4& angle, DirectX::XMFLOAT3 up)
 {
+    if (!std::isfinite(vx))return;
+
     speed *= elapsedTime;
 
 
@@ -340,53 +309,20 @@ void Character::Turn(float elapsedTime, float vx, float vz, float speed)
     //左右判定を行うことによって左右回転を選択する
     if (cross < 0.0f)   //右
     {
-        angle.y -= rot;
+        DirectX::XMVECTOR Angle = DirectX::XMLoadFloat4(&angle);
+        DirectX::XMVECTOR AngleAdd = DirectX::XMQuaternionMultiply(DirectX::XMQuaternionRotationAxis({ up.x,up.y,up.z }, DirectX::XMConvertToRadians(-rot)), Angle);
+        DirectX::XMStoreFloat4(&angle, AngleAdd);
     }
     else
     {
-        angle.y += rot;
+        DirectX::XMVECTOR Angle = DirectX::XMLoadFloat4(&angle);
+        DirectX::XMVECTOR AngleAdd = DirectX::XMQuaternionMultiply(DirectX::XMQuaternionRotationAxis({ up.x,up.y,up.z }, DirectX::XMConvertToRadians(rot)), Angle);
+        DirectX::XMStoreFloat4(&angle, AngleAdd);
     }
+
+    //DirectX::XMVECTOR Angle = DirectX::XMLoadFloat4(&angle);
+    //DirectX::XMVECTOR AngleAdd = DirectX::XMQuaternionMultiply(DirectX::XMQuaternionRotationAxis({ up.x,up.y,up.z }, 0.1f), Angle);
+    //DirectX::XMStoreFloat4(&angle, AngleAdd);
 
 }
 
-//ダメージを与える
-bool Character::ApplyDamage(int damage, float invincibleTime)
-{
-    //ダメージが0の場合は健康状態を変更する必要がない
-    if (damage <= 0)return false;
-
-    //死亡している場合は健康状態を変更しない
-    if (health <= 0)return false;
-
-    //無敵時間
-    if (invincibleTimer > 0)return false;
-
-    //ダメージ処理
-    health -= damage;
-
-    //無敵時間処理
-    invincibleTimer = invincibleTime;
-
-    //死亡通知
-    if (health <= 0)
-    {
-        OnDead();
-    }
-    //ダメージ通知
-    else
-    {
-        OnDamage();
-    }
-
-    //健康状態が変更した場合はtrueを返す
-    return true;
-}
-
-//無敵時間更新
-void Character::UpdateInvincibleTimer(float elapsedTime)
-{
-    if (invincibleTimer > 0.0f)
-    {
-        invincibleTimer -= elapsedTime;
-    }
-}

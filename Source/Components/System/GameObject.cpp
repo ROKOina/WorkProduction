@@ -35,11 +35,11 @@ void GameObject::UpdateTransform()
 	//親子の行列更新
 	if (parentObject.lock())
 	{
-		DirectX::XMFLOAT4X4 parentTransform = parentObject.lock()->GetTransform();
-		transformCopy->SetParentTransform(parentTransform);
+		DirectX::XMFLOAT4X4 parentTransform = parentObject.lock()->transform->GetTransform();
+		transform->SetParentTransform(parentTransform);
 	}
 
-	transformCopy->UpdateTransform();
+	transform->UpdateTransform();
 }
 
 // GUI表示
@@ -61,7 +61,8 @@ void GameObject::OnGUI()
 		ImGui::Spacing();
 		ImGui::Separator();
 
-		if(ImGui::TreeNode(component->GetName()))
+		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		if(ImGui::TreeNode(component->GetName(), nodeFlags))
 		{
 			component->OnGUI();
 			ImGui::TreePop();
@@ -81,63 +82,6 @@ std::shared_ptr<GameObject> GameObject::AddChildObject()
 	return obj;
 }
 
-//ローカルポジション
-const DirectX::XMFLOAT3 GameObject::GetPosition() const 
-{ 
-	return transformCopy->GetPosition();
-
-}
-void GameObject::SetPosition(const DirectX::XMFLOAT3& position) 
-{
-	transformCopy->SetPosition(position);
-}
-
-//ワールドポジション
-const DirectX::XMFLOAT3 GameObject::GetWorldPosition() const
-{
-	return transformCopy->GetWorldPosition();
-}
-
-
-//スケール
-const DirectX::XMFLOAT3 GameObject::GetScale() const
-{
-	return transformCopy->GetScale();
-}
-void GameObject::SetScale(const DirectX::XMFLOAT3& scale)
-{
-	transformCopy->SetScale(scale);
-}
-
-// 回転
-const DirectX::XMFLOAT4& GameObject::GetRotation() const
-{
-	return transformCopy->GetRotation();
-}
-void GameObject::SetRotation(const DirectX::XMFLOAT4& rotation)
-{
-	transformCopy->SetRotation(rotation);
-}
-
-//ワールドトランスフォーム
-const DirectX::XMFLOAT4X4& GameObject::GetTransform() const
-{
-	return transformCopy->GetTransform();
-}
-void GameObject::SetTransform(const DirectX::XMFLOAT4X4& transform)
-{
-	transformCopy->SetTransform(transform);
-}
-
-//ローカルトランスフォーム(今はローカルではない)
-const DirectX::XMFLOAT4X4& GameObject::GetParentTransform() const
-{
-	return transformCopy->GetParentTransform();
-}
-void GameObject::SetParentTransform(const DirectX::XMFLOAT4X4& parentTransform)
-{
-	transformCopy->SetParentTransform(parentTransform);
-}
 
 
 ///----- マネージャー関数 -----///
@@ -262,41 +206,43 @@ std::shared_ptr<GameObject> GameObjectManager::Find(const char* name)
 	return nullptr;
 }
 
-//子がいるオブジェクト用、再起関数
-void ChildCycleDrawLister(std::vector<std::weak_ptr<GameObject>> children, std::set<std::shared_ptr<GameObject>>& selectObject)
+//デバッグGUI、再起関数
+void CycleDrawLister(std::shared_ptr<GameObject> obj, std::set<std::shared_ptr<GameObject>>& selectObject)
 {
-	for (std::weak_ptr<GameObject>& childWeak : children)
+	ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+
+	//選んでいるなら、フラグを選択モードに
+	if (selectObject.find(obj) != selectObject.end())
 	{
-		std::shared_ptr<GameObject> child = childWeak.lock();
-		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
-		//選んでいるなら、フラグを選択モードに
-		if (selectObject.find(child) != selectObject.end())
-		{
-			nodeFlags |= ImGuiTreeNodeFlags_Selected;
-		}
-
-		//子がいないなら、▼付けない
-		if (child->GetChildren().size() == 0)
-		{
-			nodeFlags |= ImGuiTreeNodeFlags_Leaf;
-		}
-
-		//デバック描画内容
-		if (ImGui::TreeNode(child->GetName(), nodeFlags))
-		{
-
-			if (ImGui::IsItemClicked())
-			{
-				// 単一選択だけ対応しておく
-				selectObject.clear();
-				selectObject.insert(child);
-			}
-
-			ChildCycleDrawLister(child->GetChildren(), selectObject);
-
-			ImGui::TreePop();
-		}
+		nodeFlags |= ImGuiTreeNodeFlags_Selected;
 	}
+
+	//子がいないなら、▼付けない
+	if (obj->GetChildren().size() == 0)
+	{
+		nodeFlags |= ImGuiTreeNodeFlags_Leaf;
+	}
+
+	//デバック描画内容
+	bool openNode = ImGui::TreeNode(obj->GetName(), nodeFlags);
+
+
+	if (ImGui::IsItemClicked())
+	{
+		// 単一選択だけ対応しておく
+		selectObject.clear();
+		selectObject.insert(obj);
+	}
+
+	if (!openNode)return;
+
+	for (std::weak_ptr<GameObject>& child : obj->GetChildren())
+	{
+		CycleDrawLister(child.lock(), selectObject);
+	}
+
+	ImGui::TreePop();
+
 }
 
 // リスター描画
@@ -305,7 +251,7 @@ void GameObjectManager::DrawLister()
 	ImGui::SetNextWindowPos(ImVec2(30, 50), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
-	hiddenLister = !ImGui::Begin("Actor Lister", nullptr, ImGuiWindowFlags_None);
+	hiddenLister = !ImGui::Begin("GameObject Lister", nullptr, ImGuiWindowFlags_None);
 	if (!hiddenLister)
 	{
 		for (std::shared_ptr<GameObject>& obj : updateGameObject)
@@ -313,37 +259,8 @@ void GameObjectManager::DrawLister()
 			//parentがあればcontinue
 			if (obj->GetParent())continue;
 
-			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
-
-			//選んでいるなら、フラグを選択モードに
-			if (selectionGameObject.find(obj) != selectionGameObject.end())
-			{
-				nodeFlags |= ImGuiTreeNodeFlags_Selected;
-			}
-
-			//子がいないなら、▼付けない
-			if (obj->GetChildren().size() == 0)
-			{
-				nodeFlags |= ImGuiTreeNodeFlags_Leaf;
-			}
-
-			//デバック描画内容
-			//ImGui::TreeNodeEx(obj.get(), nodeFlags, obj->GetName());
-			if(ImGui::TreeNode(obj->GetName(), nodeFlags))
-			{
-
-				if (ImGui::IsItemClicked())
-				{
-					// 単一選択だけ対応しておく
-					selectionGameObject.clear();
-					selectionGameObject.insert(obj);
-				}
-
-				ChildCycleDrawLister(obj->GetChildren(), selectionGameObject);
-
-
-				ImGui::TreePop();
-			}
+			//再起関数
+			CycleDrawLister(obj, selectionGameObject);
 		}
 	}
 	ImGui::End();
@@ -355,7 +272,7 @@ void GameObjectManager::DrawDetail()
 	ImGui::SetNextWindowPos(ImVec2(950, 50), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
-	hiddenDetail = !ImGui::Begin("Actor Detail", nullptr, ImGuiWindowFlags_None);
+	hiddenDetail = !ImGui::Begin("GameObject Detail", nullptr, ImGuiWindowFlags_None);
 	if (!hiddenDetail)
 	{
 		std::shared_ptr<GameObject> lastSelected = selectionGameObject.empty() ? nullptr : *selectionGameObject.rbegin();

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../System\Component.h"
+#include "GameSource\Character\Character.h"
 
-class PlayerCom : public Component
+class PlayerCom : public Component,public Character
 {
     //コンポーネントオーバーライド
 public:
@@ -39,7 +40,7 @@ private:
 
     //移動
     //スティック入力値から移動ベクトルを取得
-    DirectX::XMFLOAT3 GetMoveVec() const;
+    DirectX::XMFLOAT3 GetMoveVec();
 
     //移動入力処理
     bool InputMove(float elapsedTime);

@@ -1,12 +1,13 @@
 #include "CameraCom.h"
 
+#include "TransformCom.h"
 #include <imgui.h>
 
 // 更新処理
 void CameraCom::Update(float elapsedTime)
 {
-    DirectX::XMFLOAT3 p= GameObjectManager::Instance().Find("pico")->GetPosition();
-    SetLookAt(p, {0,1,0});
+    //DirectX::XMFLOAT3 p= GameObjectManager::Instance().Find("pico")->GetPosition();
+    //SetLookAt(p, {0,1,0});
 }
 
 // GUI描画
@@ -19,15 +20,18 @@ void CameraCom::OnGUI()
 void CameraCom::SetLookAt(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT3& up)
 {
     //視点、注視点、上方向からビュー行列を作成
-    DirectX::XMFLOAT3 cameraPos = GetGameObject()->GetWorldPosition();
+    DirectX::XMFLOAT3 cameraPos = GetGameObject()->transform->GetWorldPosition();
     DirectX::XMVECTOR Eye = DirectX::XMLoadFloat3(&cameraPos);
     DirectX::XMVECTOR Focus = DirectX::XMLoadFloat3(&focus);
     DirectX::XMVECTOR Up = DirectX::XMLoadFloat3(&up);
+
+    //同じ座標の場合、少しずらす
     if (focus.x == cameraPos.x && focus.y == cameraPos.y && focus.z == cameraPos.z)
     {
         cameraPos.y += 0.0001f;
         Eye = DirectX::XMLoadFloat3(&cameraPos);
     }
+
     DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(Eye, Focus, Up);
     DirectX::XMStoreFloat4x4(&view, View);
 

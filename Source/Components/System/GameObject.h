@@ -36,29 +36,6 @@ public:
 	// 名前の取得
 	const char* GetName() const { return name.c_str(); }
 
-	//ローカルポジション
-	const DirectX::XMFLOAT3 GetPosition() const;
-	void SetPosition(const DirectX::XMFLOAT3& position);
-
-	//ワールドポジション	
-	const DirectX::XMFLOAT3 GetWorldPosition() const;
-
-	//スケール
-	const DirectX::XMFLOAT3 GetScale() const;
-	void SetScale(const DirectX::XMFLOAT3& scale);
-
-	// 回転
-	const DirectX::XMFLOAT4& GetRotation() const;
-	void SetRotation(const DirectX::XMFLOAT4& rotation);
-
-	//ワールドトランスフォーム
-	const DirectX::XMFLOAT4X4& GetTransform() const;
-	void SetTransform(const DirectX::XMFLOAT4X4& transform);
-
-	//ローカルトランスフォーム
-	const DirectX::XMFLOAT4X4& GetParentTransform() const;
-	void SetParentTransform(const DirectX::XMFLOAT4X4& parentTransform);
-
 	// コンポーネント追加
 	template<class T, class... Args>
 	std::shared_ptr<T> AddComponent(Args... args)
@@ -68,7 +45,7 @@ public:
 
 		//transformの場合は保持する
 		if (std::strcmp(component->GetName(), "Transform") == 0)
-			transformCopy = std::dynamic_pointer_cast<TransformCom>(component);
+			transform = std::dynamic_pointer_cast<TransformCom>(component);
 
 		components.emplace_back(component);
 		return component;
@@ -98,9 +75,11 @@ public:
 	//子供達取得 (weak_ptrなので注意)
 	std::vector<std::weak_ptr<GameObject>> GetChildren() { return childrenObject; }
 
+public:
+	std::shared_ptr<TransformCom> transform;
+
 private:
-	std::string			name;
-	std::shared_ptr<TransformCom> transformCopy;
+	std::string	name;
 
 	std::vector<std::shared_ptr<Component>>	components;
 

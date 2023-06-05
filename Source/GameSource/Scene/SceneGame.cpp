@@ -11,6 +11,7 @@
 #include "Components\RendererCom.h"
 #include "Components\TransformCom.h"
 #include "Components\CameraCom.h"
+#include "Components\Script\PlayerCom.h"
 
 // 初期化
 void SceneGame::Initialize()
@@ -19,50 +20,52 @@ void SceneGame::Initialize()
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("pico");
-		obj->SetScale({ 0.01f, 0.01f, 0.01f });
+		obj->transform->SetScale({ 0.01f, 0.01f, 0.01f });
 
 		const char* filename = "Data/Model/pico/picoAnim.mdl";
 		std::shared_ptr<RenderderCom> r = obj->AddComponent<RenderderCom>();
 		r->LoadModel(filename);
 
-		//でばふ
-		std::shared_ptr<GameObject> o[9];
-		for (int i = 0; i < 9; ++i)
-		{
-			std::shared_ptr<GameObject> obj2;
-			if (i == 0)
-				obj2 = obj->AddChildObject();
-			else
-				obj2 = o[i - 1]->AddChildObject();
+		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
 
 
-			obj2->SetPosition({ 10, 0, 0 });
+		////でばふ
+		//std::shared_ptr<GameObject> o[5];
+		//for (int i = 0; i < 3; ++i)
+		//{
+		//	std::shared_ptr<GameObject> obj2;
+		//	if (i == 0)
+		//		obj2 = obj->AddChildObject();
+		//	else
+		//		obj2 = o[i - 1]->AddChildObject();
 
-			const char* filename = "Data/Model/pico/picoAnim.mdl";
-			std::shared_ptr<RenderderCom> r = obj2->AddComponent<RenderderCom>();
-			r->LoadModel(filename);
-			o[i] = obj2;
-		}
 
-		//カメラを子オブジェクトに
-		{
-			////カメラコントローラー初期化
-			//cameraController = std::make_unique<CameraController>();
+		//	obj2->SetPosition({ 10, 0, 0 });
 
-			std::shared_ptr<GameObject> cameraObj = obj->AddChildObject();
-			cameraObj->SetName("Camera");
+		//	const char* filename = "Data/Model/pico/picoAnim.mdl";
+		//	std::shared_ptr<RenderderCom> r = obj2->AddComponent<RenderderCom>();
+		//	r->LoadModel(filename);
+		//	o[i] = obj2;
+		//}
+	}
 
-			Graphics& graphics = Graphics::Instance();
-			std::shared_ptr<CameraCom> c = cameraObj->AddComponent<CameraCom>();
-			c->SetPerspectiveFov(
-				DirectX::XMConvertToRadians(45),
-				graphics.GetScreenWidth() / graphics.GetScreenHeight(),
-				1.0f, 1000.0f
-			);
+	//カメラを生成
+	{
+		////カメラコントローラー初期化
+		//cameraController = std::make_unique<CameraController>();
 
-			//cameraController->SetCamera(c);
-		}
+		std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Create();
+		cameraObj->SetName("Camera");
 
+		Graphics& graphics = Graphics::Instance();
+		std::shared_ptr<CameraCom> c = cameraObj->AddComponent<CameraCom>();
+		c->SetPerspectiveFov(
+			DirectX::XMConvertToRadians(45),
+			graphics.GetScreenWidth() / graphics.GetScreenHeight(),
+			1.0f, 1000.0f
+		);
+
+		//cameraController->SetCamera(c);
 	}
 
 	//ステージ初期化
@@ -80,12 +83,6 @@ void SceneGame::Initialize()
 void SceneGame::Finalize()
 {
 	StageManager::Instance().Clear();
-	//プレイヤー終了化
-	if (player != nullptr)
-	{
-		delete player;
-		player = nullptr;
-	}
 }
 
 // 更新処理

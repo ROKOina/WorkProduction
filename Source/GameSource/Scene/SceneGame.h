@@ -30,7 +30,6 @@ public:
 
 
 private:
-	Player* player = nullptr;
 	std::unique_ptr<CameraController> cameraController;
 	std::unique_ptr<AudioSource> BGM=Audio::Instance().LoadAudioSource("Data/Audio/BGM.wav");
 
