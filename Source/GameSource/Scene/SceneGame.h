@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Scene.h"
-#include "Graphics\Sprite.h"
+#include "Graphics\Sprite\Sprite.h"
 #include "Audio\AudioSource.h"
 #include "Audio\Audio.h"
 
-#include "Graphics\compute\particle.h"
+#include "Graphics\Shader\compute\particle.h"
 
 // ÉQÅ[ÉÄÉVÅ[Éì
 class SceneGame :public Scene

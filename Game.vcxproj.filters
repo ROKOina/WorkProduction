@@ -81,22 +81,22 @@
     <ClInclude Include="Source\Input\GamePad.h">
       <Filter>Source\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\DebugRenderer.h">
+    <ClInclude Include="Source\Graphics\Debug\DebugRenderer.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Source\Graphics\Graphics.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\LambertShader.h">
+    <ClInclude Include="Source\Graphics\Shader\LambertShader.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Model.h">
+    <ClInclude Include="Source\Graphics\Model\Model.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\ModelResource.h">
+    <ClInclude Include="Source\Graphics\Model\ModelResource.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Shader.h">
+    <ClInclude Include="Source\Graphics\Shader\Shader.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Source\Input\Input.h">
@@ -105,10 +105,10 @@
     <ClInclude Include="Source\Graphics\RenderContext.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\LineRenderer.h">
+    <ClInclude Include="Source\Graphics\Debug\LineRenderer.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Sprite.h">
+    <ClInclude Include="Source\Graphics\Sprite\Sprite.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Source\Audio\Audio.h">
@@ -123,7 +123,7 @@
     <ClInclude Include="Source\Input\Mouse.h">
       <Filter>Source\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\FbxModelResource.h">
+    <ClInclude Include="Source\Graphics\Model\FbxModelResource.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Source\Graphics\Encoding.h">
@@ -237,7 +237,7 @@
     <ClInclude Include="External\imgui-docking\backends\imgui_impl_win32.h">
       <Filter>External\imguiDocking</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\compute\particle.h">
+    <ClInclude Include="Source\Graphics\Shader\compute\particle.h">
       <Filter>Source\Graphics\compute</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\CameraCom.h">
@@ -249,6 +249,7 @@
     <ClInclude Include="Source\Components\RendererCom.h" />
     <ClInclude Include="Source\Components\TransformCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCom.h" />
+    <ClInclude Include="Source\Components\AnimationCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -257,28 +258,28 @@
     <ClCompile Include="Source\Input\GamePad.cpp">
       <Filter>Source\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\DebugRenderer.cpp">
+    <ClCompile Include="Source\Graphics\Debug\DebugRenderer.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Graphics.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\LambertShader.cpp">
+    <ClCompile Include="Source\Graphics\Shader\LambertShader.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Model.cpp">
+    <ClCompile Include="Source\Graphics\Model\Model.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\ModelResource.cpp">
+    <ClCompile Include="Source\Graphics\Model\ModelResource.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Source\Input\Input.cpp">
       <Filter>Source\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\LineRenderer.cpp">
+    <ClCompile Include="Source\Graphics\Debug\LineRenderer.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Sprite.cpp">
+    <ClCompile Include="Source\Graphics\Sprite\Sprite.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Source\Audio\Audio.cpp">
@@ -293,7 +294,7 @@
     <ClCompile Include="Source\Input\Mouse.cpp">
       <Filter>Source\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\FbxModelResource.cpp">
+    <ClCompile Include="Source\Graphics\Model\FbxModelResource.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Encoding.cpp">
@@ -395,7 +396,7 @@
     <ClCompile Include="External\imgui-docking\backends\imgui_impl_win32.cpp">
       <Filter>External\imguiDocking</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\compute\particle.cpp">
+    <ClCompile Include="Source\Graphics\Shader\compute\particle.cpp">
       <Filter>Source\Graphics\compute</Filter>
     </ClCompile>
     <ClCompile Include="Source\Components\CameraCom.cpp">
@@ -414,6 +415,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\AnimationCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

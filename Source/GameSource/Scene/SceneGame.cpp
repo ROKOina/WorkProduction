@@ -11,6 +11,7 @@
 #include "Components\RendererCom.h"
 #include "Components\TransformCom.h"
 #include "Components\CameraCom.h"
+#include "Components\AnimationCom.h"
 
 #include "GameSource\ScriptComponents\Player\PlayerCom.h"
 
@@ -29,8 +30,10 @@ void SceneGame::Initialize()
 		obj->transform->SetScale({ 0.01f, 0.01f, 0.01f });
 
 		const char* filename = "Data/Model/pico/picoAnim.mdl";
-		std::shared_ptr<RenderderCom> r = obj->AddComponent<RenderderCom>();
+		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
+
+		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
 
@@ -69,6 +72,8 @@ void SceneGame::Initialize()
 			1.0f, 1000.0f
 		);
 		cameraObj->transform->SetWorldPosition({ 0, 5, -10 });
+
+		cameraObj->AddComponent<AnimationCom>();
 	}
 
 	//ステージ初期化

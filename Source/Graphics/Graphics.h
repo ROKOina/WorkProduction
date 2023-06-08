@@ -3,9 +3,9 @@
 #include <memory>
 #include <d3d11.h>
 #include <wrl.h>
-#include "Graphics/Shader.h"
-#include "Graphics/DebugRenderer.h"
-#include "Graphics/LineRenderer.h"
+#include "Graphics/Shader/Shader.h"
+#include "Graphics/Debug/DebugRenderer.h"
+#include "Graphics/Debug/LineRenderer.h"
 #include "Graphics\Dx11StateLib.h"
 
 #include <mutex>

@@ -2,7 +2,6 @@
 
 #include "Inspector\SubWindowManager.h"
 
-#include "GameSource\Camera\CameraController.h"
 
 class Inspector : public SubWindow
 {
@@ -17,6 +16,5 @@ private:
 private:
 
 	std::unique_ptr<Model> p;
-	std::unique_ptr<CameraController> cameraController;
 };
 

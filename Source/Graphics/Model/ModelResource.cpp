@@ -12,7 +12,7 @@
 
 #include "Misc.h"
 #include "Logger.h"
-#include "Graphics/ModelResource.h"
+#include "ModelResource.h"
 
 // CEREALバージョン定義
 CEREAL_CLASS_VERSION(ModelResource::Node, 1)

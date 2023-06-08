@@ -2,6 +2,7 @@
 #include "Input/Input.h"
 #include "Components\CameraCom.h"
 #include "Components\TransformCom.h"
+#include "Components\AnimationCom.h"
 #include <imgui.h>
 
 // 開始処理
@@ -16,6 +17,11 @@ void PlayerCom::Start()
     wp.y += 6;
     cameraObj->transform->SetPosition(wp);
 
+    {   //仮アニメーション
+        std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
+        anim->ImportFbxAnimation("Data/Model/pico/attack3Combo.fbx");
+        anim->PlayAnimation(3, true);
+    }
 }
 static bool aaa = true;
 // 更新処理

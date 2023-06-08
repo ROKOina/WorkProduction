@@ -1,14 +1,14 @@
 #pragma once
 
 #include "System\Component.h"
-#include "Graphics\Model.h"
+#include "Graphics\Model\Model.h"
 
-class RenderderCom : public Component
+class RendererCom : public Component
 {
     //コンポーネントオーバーライド
 public: 
-    RenderderCom() {}
-    ~RenderderCom() {}
+    RendererCom() {}
+    ~RendererCom() {}
 
     // 名前取得
     const char* GetName() const override { return "Renderer"; }

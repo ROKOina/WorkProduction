@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include <map>
-#include "Graphics\ModelResource.h"
+#include "Graphics\Model\ModelResource.h"
 
 //リソースマネジャー
 class ResourceManager

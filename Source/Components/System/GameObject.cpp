@@ -177,8 +177,8 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 	for (std::shared_ptr<GameObject>& obj : updateGameObject)
 	{
 		// Rendererコンポーネントがあれば描画
-		if (!obj->GetComponent<RenderderCom>())continue;
-		Model* model = obj->GetComponent<RenderderCom>()->GetModel();
+		if (!obj->GetComponent<RendererCom>())continue;
+		Model* model = obj->GetComponent<RendererCom>()->GetModel();
 		if (model != nullptr)
 		{
 			shader->Draw(dc, model);

@@ -1,6 +1,6 @@
 #include <fstream>
 #include <algorithm>
-#include "Encoding.h"
+#include "Graphics\Encoding.h"
 #include "Misc.h"
 #include "Logger.h"
 #include "FbxModelResource.h"

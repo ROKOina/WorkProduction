@@ -3,8 +3,7 @@
 #include <memory>
 #include <vector>
 #include <DirectXMath.h>
-#include "Graphics/ModelResource.h"
-#include "Graphics/FbxModelResource.h"
+#include "Graphics/Model/FbxModelResource.h"
 
 // モデル
 class Model
@@ -35,35 +34,16 @@ public:
 	std::vector<Node>& GetNodes() { return nodes; }
 
 	// リソース取得
-	const ModelResource* GetResource() const { return resource.get(); }
-
-	//アニメーション更新処理
-	void UpdateAnimation(float elapsedTime);
-
-	//アニメーション再生
-	void PlayAnimation(int index, bool loop, float blendSeconds = 0.2f);
-
-	//アニメーション再生中か
-	bool IsPlayAnimation()const;
+	const FbxModelResource* GetResource() const { return modelResource.get(); }
+	std::shared_ptr<FbxModelResource> GetResourceShared() const { return modelResource; }
 
 	//ノード検索
 	Node* FindNode(const char* name);
 
-	//現在のアニメーション再生時間取得
-	float GetCurrentAnimationSecoonds()const { return currentAnimationSeconds; }
-
 	//アニメーション追加
 	void ImportFbxAnimation(const char* filename);
 private:
-	std::shared_ptr<ModelResource>	resource;
+	//std::shared_ptr<ModelResource>	resource;
 	std::shared_ptr<FbxModelResource>	modelResource;	//fbx用
 	std::vector<Node>				nodes;
-
-	//アニメーション
-	int currentAnimationIndex = -1;
-	float currentAnimationSeconds = 0.0f;
-	bool animationLoopFlag = false;
-	bool animationEndFlag = false;
-	float animationBlendTime = 0.0f;
-	float animationBlendSeconds = 0.0f;
 };
