@@ -5,7 +5,6 @@
 #include <set>
 #include <string>
 #include <DirectXMath.h>
-#include "../../Graphics/Model.h"
 
 // ‘O•ûéŒ¾
 class Component;

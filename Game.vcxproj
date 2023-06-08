@@ -128,7 +128,7 @@
     <ClInclude Include="Source\Audio\AudioResource.h" />
     <ClInclude Include="Source\Audio\AudioSource.h" />
     <ClInclude Include="Source\Components\RendererCom.h" />
-    <ClInclude Include="Source\Components\Script\PlayerCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCom.h" />
     <ClInclude Include="Source\Components\System\Component.h" />
     <ClInclude Include="Source\Components\System\GameObject.h" />
     <ClInclude Include="Source\Components\TransformCom.h" />
@@ -138,7 +138,6 @@
     <ClInclude Include="Source\GameSource\Render\Effect\EffectManager.h" />
     <ClInclude Include="Source\Framework.h" />
     <ClInclude Include="Source\Components\CameraCom.h" />
-    <ClInclude Include="Source\GameSource\Camera\CameraController.h" />
     <ClInclude Include="Source\GameSource\Weapon\Weapon.h" />
     <ClInclude Include="Source\Graphics\compute\particle.h" />
     <ClInclude Include="Source\Graphics\DebugRenderer.h" />
@@ -163,7 +162,6 @@
     <ClInclude Include="Source\GameSource\Math\Mathf.h" />
     <ClInclude Include="Source\Misc.h" />
     <ClInclude Include="Source\ModelAnimation\ModelWatch.h" />
-    <ClInclude Include="Source\GameSource\Character\Player.h" />
     <ClInclude Include="Source\GameSource\Render\ResourceManager.h" />
     <ClInclude Include="Source\GameSource\Scene\Scene.h" />
     <ClInclude Include="Source\GameSource\Scene\SceneGame.h" />
@@ -192,7 +190,7 @@
     <ClCompile Include="Source\Audio\AudioResource.cpp" />
     <ClCompile Include="Source\Audio\AudioSource.cpp" />
     <ClCompile Include="Source\Components\RendererCom.cpp" />
-    <ClCompile Include="Source\Components\Script\PlayerCom.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCom.cpp" />
     <ClCompile Include="Source\Components\System\GameObject.cpp" />
     <ClCompile Include="Source\Components\TransformCom.cpp" />
     <ClCompile Include="Source\GameSource\Character\Character.cpp" />
@@ -201,7 +199,6 @@
     <ClCompile Include="Source\GameSource\Render\Effect\EffectManager.cpp" />
     <ClCompile Include="Source\Framework.cpp" />
     <ClCompile Include="Source\Components\CameraCom.cpp" />
-    <ClCompile Include="Source\GameSource\Camera\CameraController.cpp" />
     <ClCompile Include="Source\GameSource\Weapon\Weapon.cpp" />
     <ClCompile Include="Source\Graphics\compute\particle.cpp" />
     <ClCompile Include="Source\Graphics\DebugRenderer.cpp" />
@@ -223,7 +220,6 @@
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\GameSource\Math\Mathf.cpp" />
     <ClCompile Include="Source\ModelAnimation\ModelWatch.cpp" />
-    <ClCompile Include="Source\GameSource\Character\Player.cpp" />
     <ClCompile Include="Source\GameSource\Render\ResourceManager.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneGame.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneLoading.cpp" />

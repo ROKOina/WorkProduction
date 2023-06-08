@@ -29,5 +29,4 @@ public:
 
 private:
 	std::weak_ptr<GameObject>	gameObject;
-
 };

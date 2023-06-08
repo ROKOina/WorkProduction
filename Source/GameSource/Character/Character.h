@@ -13,13 +13,13 @@ private:
     void UpdateVertialVelocity(float elapsedFrame);
 
     //垂直移動更新処理
-    void UpdateVertialMove(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle);
+    void UpdateVertialMove(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle, DirectX::XMFLOAT3& up);
 
     //水平速力更新処理
     void UpdateHorizontalVelocity(float elapsedFrame);
 
     //水平移動更新処理
-    void UpdateHorizontalMove(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle);
+    void UpdateHorizontalMove(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle, DirectX::XMFLOAT3& up);
 
 protected:
     //移動処理
@@ -32,7 +32,7 @@ protected:
     void Jump(float speed);
 
     //速力処理更新
-    void UpdateVelocity(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle);
+    void UpdateVelocity(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle, DirectX::XMFLOAT3& up);
 
 
 protected:  //継承先にアクセス可能にする

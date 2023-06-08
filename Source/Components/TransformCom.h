@@ -32,11 +32,27 @@ public:
     const DirectX::XMFLOAT3& GetPosition() const { return position; }
 
     // ワールドポジション
+    void SetWorldPosition(const DirectX::XMFLOAT3& worldPosition) { this->worldPosition = worldPosition; }
     const DirectX::XMFLOAT3& GetWorldPosition() const { return worldPosition; }
 
-    // 回転
+    // クォータニオン回転
     void SetRotation(const DirectX::XMFLOAT4& rotation) { this->rotation = rotation; }
     const DirectX::XMFLOAT4& GetRotation() const { return rotation; }
+
+    // オイラー回転(クォータニオン->オイラーはきついのでセットだけ)
+    void SetEulerRotation(const DirectX::XMFLOAT3& setEuler) { 
+        DirectX::XMFLOAT3 euler;
+        euler.x = DirectX::XMConvertToRadians(setEuler.x);
+        euler.y = DirectX::XMConvertToRadians(setEuler.y);
+        euler.z = DirectX::XMConvertToRadians(setEuler.z);
+        DirectX::XMVECTOR ROT = DirectX::XMQuaternionRotationRollPitchYaw(euler.x, euler.y, euler.z);
+        DirectX::XMStoreFloat4(&rotation, ROT);
+        euler.y = DirectX::XMConvertToDegrees(euler.y);
+        euler.x = DirectX::XMConvertToDegrees(euler.x);
+        euler.z = DirectX::XMConvertToDegrees(euler.z);
+        eulerRotation = euler;
+    }
+
 
     // スケール
     void SetScale(const DirectX::XMFLOAT3& scale) { this->scale = scale; }
@@ -65,14 +81,20 @@ public:
         return right;
     }
 
+    //指定方向を向く
+    void LookAtTransform(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT3& up = { 0,1,0 });
+
+    //指定のUpに合わせる
+    void SetUpTransform(const DirectX::XMFLOAT3& up);
 
 private:
     DirectX::XMFLOAT3	position = DirectX::XMFLOAT3(0, 0, 0);
     DirectX::XMFLOAT3	worldPosition = DirectX::XMFLOAT3(0, 0, 0);
 
-    DirectX::XMFLOAT4	rotation = DirectX::XMFLOAT4(0, 0, 0, 1);
+    DirectX::XMFLOAT4	rotation = DirectX::XMFLOAT4(0, 0, 0, 1);   //基準はクォータニオン
+    DirectX::XMFLOAT3   eulerRotation = DirectX::XMFLOAT3(0, 0, 0);
     DirectX::XMFLOAT3	scale = DirectX::XMFLOAT3(1, 1, 1);
     DirectX::XMFLOAT4X4	transform = DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     DirectX::XMFLOAT4X4	parentTransform = DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-
 };
+

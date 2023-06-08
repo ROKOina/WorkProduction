@@ -203,6 +203,11 @@ std::shared_ptr<GameObject> GameObjectManager::Find(const char* name)
 		if (std::strcmp(obj->GetName(), name) == 0)return obj;
 	}
 
+	for (std::shared_ptr<GameObject>& obj : startGameObject)
+	{
+		if (std::strcmp(obj->GetName(), name) == 0)return obj;
+	}
+
 	return nullptr;
 }
 

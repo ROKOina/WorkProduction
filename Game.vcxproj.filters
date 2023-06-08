@@ -156,9 +156,6 @@
     <ClInclude Include="Source\GameSource\Character\Character.h">
       <Filter>Source\GameSource\Character</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GameSource\Character\Player.h">
-      <Filter>Source\GameSource\Character</Filter>
-    </ClInclude>
     <ClInclude Include="Source\GameSource\Render\ResourceManager.h">
       <Filter>Source\GameSource\Render</Filter>
     </ClInclude>
@@ -246,15 +243,12 @@
     <ClInclude Include="Source\Components\CameraCom.h">
       <Filter>Source\GameSource\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GameSource\Camera\CameraController.h">
-      <Filter>Source\GameSource\Camera</Filter>
-    </ClInclude>
     <ClInclude Include="Source\GameSource\Weapon\Weapon.h" />
     <ClInclude Include="Source\Components\System\Component.h" />
     <ClInclude Include="Source\Components\System\GameObject.h" />
     <ClInclude Include="Source\Components\RendererCom.h" />
     <ClInclude Include="Source\Components\TransformCom.h" />
-    <ClInclude Include="Source\Components\Script\PlayerCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -332,9 +326,6 @@
     <ClCompile Include="Source\GameSource\Character\Character.cpp">
       <Filter>Source\GameSource\Character</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameSource\Character\Player.cpp">
-      <Filter>Source\GameSource\Character</Filter>
-    </ClCompile>
     <ClCompile Include="Source\GameSource\Render\ResourceManager.cpp">
       <Filter>Source\GameSource\Render</Filter>
     </ClCompile>
@@ -410,9 +401,6 @@
     <ClCompile Include="Source\Components\CameraCom.cpp">
       <Filter>Source\GameSource\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameSource\Camera\CameraController.cpp">
-      <Filter>Source\GameSource\Camera</Filter>
-    </ClCompile>
     <ClCompile Include="Source\GameSource\Weapon\Weapon.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -425,7 +413,7 @@
     <ClCompile Include="Source\Components\TransformCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Components\Script\PlayerCom.cpp">
+    <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

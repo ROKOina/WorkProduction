@@ -11,11 +11,17 @@
 #include "Components\RendererCom.h"
 #include "Components\TransformCom.h"
 #include "Components\CameraCom.h"
-#include "Components\Script\PlayerCom.h"
+
+#include "GameSource\ScriptComponents\Player\PlayerCom.h"
 
 // 初期化
 void SceneGame::Initialize()
 {
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("miru");
+	}
+
 	//仮オブジェクト
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
@@ -27,6 +33,7 @@ void SceneGame::Initialize()
 		r->LoadModel(filename);
 
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
+
 
 
 		////でばふ
@@ -51,9 +58,6 @@ void SceneGame::Initialize()
 
 	//カメラを生成
 	{
-		////カメラコントローラー初期化
-		//cameraController = std::make_unique<CameraController>();
-
 		std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Create();
 		cameraObj->SetName("Camera");
 
@@ -64,17 +68,13 @@ void SceneGame::Initialize()
 			graphics.GetScreenWidth() / graphics.GetScreenHeight(),
 			1.0f, 1000.0f
 		);
-
-		//cameraController->SetCamera(c);
+		cameraObj->transform->SetWorldPosition({ 0, 5, -10 });
 	}
 
 	//ステージ初期化
 	StageManager& stageManager = StageManager::Instance();
 	StageMain* stageMain = new StageMain();	//メイン（マップ）
 	stageManager.Register(stageMain);
-
-	//プレイヤー初期化
-	//player = new Player(cameraController.get());
 
 	//particle = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
 }
@@ -90,22 +90,13 @@ void SceneGame::Update(float elapsedTime)
 {
 	GameObjectManager::Instance().Update(elapsedTime);
 
-	////カメラコントローラー更新処理
-	////DirectX::XMFLOAT3 target = player->GetPosition();
-	//DirectX::XMFLOAT3 target = GameObjectManager::Instance().Find("pico")->GetComponent<TransformCom>()->GetPosition();
-	//target.y += 0.5f;
-	//cameraController->SetTarget(target);
-	//cameraController->Update(elapsedTime);
 	//ステージ更新処理
 	StageManager::Instance().Update(elapsedTime);
-	//プレイヤー更新処理
-	//player->Update(elapsedTime);
 	//エフェクト更新処理
 	EffectManager::Instance().Update(elapsedTime);
 
 	Graphics& graphics = Graphics::Instance();
 
-	//std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
 
 	//particle->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera->GetView(), camera->GetProjection());
 }
@@ -128,8 +119,7 @@ void SceneGame::Render()
 	RenderContext rc;	//描画するために必要な構造体
 	rc.lightDirection = { 0.0f, -1.0f, 0.0f, 0.0f };	// ライト方向（下方向）
 
-	////カメラパラメーター設定
-	//std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
+	//カメラパラメーター設定
 	std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
 	rc.view = camera->GetView();
 	rc.projection = camera->GetProjection();
@@ -184,9 +174,6 @@ void SceneGame::Render()
 
 	// 3Dデバッグ描画
 	{
-		////プレイヤーデバッグプリミティブ描画
-		//player->DrawDebugPrimitive();
-
 		// ラインレンダラ描画実行
 		graphics.GetLineRenderer()->Render(dc, rc.view, rc.projection);
 
@@ -199,23 +186,6 @@ void SceneGame::Render()
 	{
 	}
 
-	// 2DデバッグGUI描画
-	{
-		ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
-
-		if (ImGui::Begin("DebugMenu", nullptr, ImGuiWindowFlags_None))
-		{
-
-			////プレイヤーデバッグ描画
-			//player->DrawDebugGUI();
-
-			//カメラコントローラー
-			//cameraController->DrawDebugGUI();
-		}
-		ImGui::End();
-
-	}
 
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "System\Component.h"
+#include "Graphics\Model.h"
 
 class RenderderCom : public Component
 {

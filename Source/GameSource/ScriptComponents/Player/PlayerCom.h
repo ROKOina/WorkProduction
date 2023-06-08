@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../System\Component.h"
+#include "Components\System\Component.h"
 #include "GameSource\Character\Character.h"
 
 class PlayerCom : public Component,public Character
@@ -25,19 +25,6 @@ public:
 
     //PlayerComクラス
 private:
-    //カメラ
-    void CameraControll(float elapsedTime);
-
-    //カメラパラメーター
-    DirectX::XMFLOAT3   target = { 0,0,0 };
-    DirectX::XMFLOAT3   angle = { 0,0,0 };
-    float               rollSpeed = DirectX::XMConvertToRadians(90);
-    float               range = 10.0f;
-    float               maxAngleX = DirectX::XMConvertToRadians(45);
-    float               minAngleX = DirectX::XMConvertToRadians(-45);
-
-
-
     //移動
     //スティック入力値から移動ベクトルを取得
     DirectX::XMFLOAT3 GetMoveVec();
@@ -49,5 +36,8 @@ private:
     float moveSpeed = 5.0f;
     float turnSpeed = DirectX::XMConvertToRadians(720);
     float jumpSpeed = 20.0f;
+
+    DirectX::XMFLOAT3 up;
+    DirectX::XMFLOAT3 look;
 
 };

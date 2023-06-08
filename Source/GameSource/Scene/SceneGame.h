@@ -1,7 +1,5 @@
 #pragma once
 
-#include "GameSource\Character\Player.h"
-#include "GameSource\Camera\CameraController.h"
 #include "Scene.h"
 #include "Graphics\Sprite.h"
 #include "Audio\AudioSource.h"
@@ -30,7 +28,6 @@ public:
 
 
 private:
-	std::unique_ptr<CameraController> cameraController;
 	std::unique_ptr<AudioSource> BGM=Audio::Instance().LoadAudioSource("Data/Audio/BGM.wav");
 
 

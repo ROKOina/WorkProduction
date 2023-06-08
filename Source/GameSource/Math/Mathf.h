@@ -9,7 +9,4 @@ public:
 
     //指定範囲のランダム値を計算する
     static float RandomRange(float min, float max);
-
-    //クォータニオン回転
-    //static 
 };

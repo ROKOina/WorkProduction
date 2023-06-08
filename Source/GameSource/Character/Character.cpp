@@ -26,7 +26,7 @@ void Character::Jump(float speed)
 }
 
 //速力処理更新
-void Character::UpdateVelocity(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle)
+void Character::UpdateVelocity(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle, DirectX::XMFLOAT3& up)
 {
     //経過フレーム
     float elapsedFrame = 120.0f * elapsedTime;
@@ -38,10 +38,10 @@ void Character::UpdateVelocity(float elapsedTime, DirectX::XMFLOAT3& position, D
     UpdateHorizontalVelocity(elapsedFrame);
 
     //垂直移動更新処理
-    UpdateVertialMove(elapsedTime,position,angle);
+    UpdateVertialMove(elapsedTime,position,angle,up);
 
     //水平移動更新処理
-    UpdateHorizontalMove(elapsedTime, position, angle);
+    UpdateHorizontalMove(elapsedTime, position, angle,up);
 }
 
 //垂直速力更新処理
@@ -106,7 +106,6 @@ void Character::UpdateHorizontalVelocity(float elapsedFrame)
             DirectX::XMVECTOR Length = DirectX::XMVector3Length(Velocity);
 
             float length = DirectX::XMVectorGetX(Length);
-            //float length = fabsf(velocity.x) + fabsf(velocity.z);
             if (length > maxMoveSpeed)
             {
                Velocity = DirectX::XMVector3Normalize(Velocity);    //正規化して
@@ -130,7 +129,7 @@ void Character::UpdateHorizontalVelocity(float elapsedFrame)
 }
 
 //垂直移動更新処理
-void Character::UpdateVertialMove(float elapsedTime,DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle)
+void Character::UpdateVertialMove(float elapsedTime,DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle, DirectX::XMFLOAT3& up)
 {
     //垂直方向の移動量
     float my = velocity.y * elapsedTime;
@@ -196,11 +195,13 @@ void Character::UpdateVertialMove(float elapsedTime,DirectX::XMFLOAT3& position,
         //線形補完で滑らかに回転する
         angle.x = Mathf::Lerp(angle.x, angleX, 0.1f);
         angle.z = Mathf::Lerp(angle.z, angleZ, 0.1f);
+
+        up = normal;
     }
 }
 
 //水平移動更新処理
-void Character::UpdateHorizontalMove(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle)
+void Character::UpdateHorizontalMove(float elapsedTime, DirectX::XMFLOAT3& position, DirectX::XMFLOAT4& angle, DirectX::XMFLOAT3& up)
 {
     //水平速力量計算
     float velocityLengthXZ = fabsf(velocity.x) + fabsf(velocity.z);
@@ -278,6 +279,8 @@ void Character::Turn(float elapsedTime, float vx, float vz, float speed, DirectX
     if (!std::isfinite(vx))return;
 
     speed *= elapsedTime;
+
+
 
 
     //進行ベクトルを単位ベクトル化

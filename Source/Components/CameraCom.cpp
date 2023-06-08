@@ -2,12 +2,34 @@
 
 #include "TransformCom.h"
 #include <imgui.h>
+#include <cmath>
+
+static bool isLookAt = false;
+
+// 開始処理
+void CameraCom::Start()
+{
+
+}
+
 
 // 更新処理
 void CameraCom::Update(float elapsedTime)
 {
-    //DirectX::XMFLOAT3 p= GameObjectManager::Instance().Find("pico")->GetPosition();
-    //SetLookAt(p, {0,1,0});
+    //LookAt関数使っていないなら更新する
+    if (!isLookAt) {
+        //カメラのフォワードをフォーカスする
+        DirectX::XMFLOAT3 forwardPoint;
+        DirectX::XMFLOAT3 wPos = GetGameObject()->transform->GetWorldPosition();
+        DirectX::XMFLOAT3 forwardNormalVec = GetGameObject()->transform->GetFront();
+        forwardPoint = { forwardNormalVec.x * 2 + wPos.x,
+            forwardNormalVec.y * 2 + wPos.y,
+            forwardNormalVec.z * 2 + wPos.z };
+
+        SetLookAt(forwardPoint, GetGameObject()->transform->GetUp());
+    }
+
+    isLookAt = false;
 }
 
 // GUI描画
@@ -40,6 +62,8 @@ void CameraCom::SetLookAt(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT
     DirectX::XMFLOAT4X4 world;
     DirectX::XMStoreFloat4x4(&world, World);
 
+    if (!std::isfinite(world._11))return;
+
     //カメラの方向を取り出す
     this->right.x   = world._11;
     this->right.y   = world._12;
@@ -53,8 +77,13 @@ void CameraCom::SetLookAt(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT
     this->front.y   = world._32;
     this->front.z   = world._33;
 
+    GetGameObject()->transform->SetTransform(world);
+
+
     //視点、注視点を保存
     this->focus = focus;
+
+    isLookAt = true;
 }
 
 //パースペクティブ設定

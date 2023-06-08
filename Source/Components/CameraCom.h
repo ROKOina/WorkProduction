@@ -15,6 +15,9 @@ public:
     // 名前取得
     const char* GetName() const override { return "Camera"; }
 
+    // 開始処理
+    void Start() override;
+
     // 更新処理
     void Update(float elapsedTime) override;
 
@@ -51,9 +54,9 @@ private:
     DirectX::XMFLOAT4X4 view;
     DirectX::XMFLOAT4X4 projection;
 
-    DirectX::XMFLOAT3 focus;
+    DirectX::XMFLOAT3 focus = {0,0,0};
 
-    DirectX::XMFLOAT3 up;
-    DirectX::XMFLOAT3 front;
-    DirectX::XMFLOAT3 right;
+    DirectX::XMFLOAT3 up = { 0,1,0 };
+    DirectX::XMFLOAT3 front = { 0,0,1 };
+    DirectX::XMFLOAT3 right = { 1,0,0 };
 };
