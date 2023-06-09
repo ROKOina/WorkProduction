@@ -40,8 +40,6 @@ public:
 	//ノード検索
 	Node* FindNode(const char* name);
 
-	//アニメーション追加
-	void ImportFbxAnimation(const char* filename);
 private:
 	//std::shared_ptr<ModelResource>	resource;
 	std::shared_ptr<FbxModelResource>	modelResource;	//fbx用

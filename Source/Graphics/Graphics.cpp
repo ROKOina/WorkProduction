@@ -1,5 +1,5 @@
 #include "Misc.h"
-#include "Graphics/LambertShader.h"
+#include "Graphics/Shader/LambertShader.h"
 #include "Graphics/Graphics.h"
 
 Graphics* Graphics::instance = nullptr;

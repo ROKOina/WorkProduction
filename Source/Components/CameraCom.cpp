@@ -4,8 +4,6 @@
 #include <imgui.h>
 #include <cmath>
 
-static bool isLookAt = false;
-
 // ŠJnˆ—
 void CameraCom::Start()
 {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <DirectXMath.h>
-#include "Graphics\Model.h"
-#include "Graphics/Shader.h"
+#include "Graphics/Model/Model.h"
+#include "Graphics/Shader/Shader.h"
 
 class Weapon
 {

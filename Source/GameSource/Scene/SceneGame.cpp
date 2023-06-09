@@ -72,8 +72,6 @@ void SceneGame::Initialize()
 			1.0f, 1000.0f
 		);
 		cameraObj->transform->SetWorldPosition({ 0, 5, -10 });
-
-		cameraObj->AddComponent<AnimationCom>();
 	}
 
 	//ステージ初期化

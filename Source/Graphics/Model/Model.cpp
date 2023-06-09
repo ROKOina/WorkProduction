@@ -88,18 +88,3 @@ Model::Node* Model::FindNode(const char* name)
 	//見つからなかった
 	return nullptr;
 }
-
-
-// アニメーション入力
-void Model::ImportFbxAnimation(const char* filename)
-{
-	if (modelResource != nullptr)
-	{
-		//fbx以外は弾く
-		const char* ext = strrchr(filename, '.');
-		if (::_stricmp(ext, ".fbx") == 0)
-		{
-			modelResource->AddAnimation(filename);
-		}
-	}
-}

@@ -21,24 +21,24 @@ float screenHeight = 400;
 
 ModelWatch::ModelWatch()
 {
-    cameraController = std::make_unique<CameraController>();
+    //cameraController = std::make_unique<CameraController>();
 
-    std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
-    camera->SetLookAt(
-        DirectX::XMFLOAT3(0, 0, 0),
-        DirectX::XMFLOAT3(0, 1, 0)
-    );
-    camera->SetPerspectiveFov(
-        DirectX::XMConvertToRadians(45),
-        screenWidth / screenHeight,
-        0.1f, 1000.0f
-    );
+    //std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
+    //camera->SetLookAt(
+    //    DirectX::XMFLOAT3(0, 0, 0),
+    //    DirectX::XMFLOAT3(0, 1, 0)
+    //);
+    //camera->SetPerspectiveFov(
+    //    DirectX::XMConvertToRadians(45),
+    //    screenWidth / screenHeight,
+    //    0.1f, 1000.0f
+    //);
 }
 
 
 void ModelWatch::Update(float elapsedTime)
 {
-    std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
+    //std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
 
     //âÒì]çsóÒÇçÏê¨
     DirectX::XMMATRIX Transform = DirectX::XMMatrixRotationRollPitchYaw(
@@ -74,7 +74,7 @@ void ModelWatch::Update(float elapsedTime)
 
 void ModelWatch::Render(float elapsedTime)
 {
-    std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
+    //std::shared_ptr<CameraCom> camera = cameraController->GetCamera();
 
     ImGuiIO& io = ImGui::GetIO();
     float viewManipulateRight = io.DisplaySize.x;
@@ -127,8 +127,8 @@ void ModelWatch::Render(float elapsedTime)
         0.f, 0.f, 1.f, 0.f,
         0.f, 0.f, 0.f, 1.f };
 
-    ImGuizmo::DrawGrid(&camera->GetView()._11, &camera->GetProjection()._11, identityMatrix, 100.0f);
-    ImGuizmo::DrawCubes(&camera->GetView()._11, &camera->GetProjection()._11, identityMatrix, 1);
+    //ImGuizmo::DrawGrid(&camera->GetView()._11, &camera->GetProjection()._11, identityMatrix, 100.0f);
+    //ImGuizmo::DrawCubes(&camera->GetView()._11, &camera->GetProjection()._11, identityMatrix, 1);
 
     //ÉJÉÅÉâ
     if (ImGui::TreeNode("Camera")) {

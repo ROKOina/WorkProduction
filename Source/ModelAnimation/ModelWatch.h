@@ -3,8 +3,7 @@
 //
 // モデルのアニメーションを見れるクラス
 //
-
-#include "GameSource\Camera\CameraController.h"
+#include <DirectXMath.h>
 #include <memory>
 class ModelWatch
 {
@@ -17,7 +16,6 @@ public:
     void Render(float elapsedTime);
 
 private:
-    std::unique_ptr<CameraController> cameraController;
     DirectX::XMFLOAT2 cameraAngle;
     DirectX::XMFLOAT3 cameraEye;
 };

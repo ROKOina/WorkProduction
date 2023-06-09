@@ -59,4 +59,7 @@ private:
     DirectX::XMFLOAT3 up = { 0,1,0 };
     DirectX::XMFLOAT3 front = { 0,0,1 };
     DirectX::XMFLOAT3 right = { 1,0,0 };
+
+    bool isLookAt = false;
+
 };

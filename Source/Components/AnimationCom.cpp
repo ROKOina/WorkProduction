@@ -2,6 +2,7 @@
 
 #include "RendererCom.h"
 #include <imgui.h>
+
 // 開始処理
 void AnimationCom::Start()
 {
@@ -20,7 +21,6 @@ void AnimationCom::Update(float elapsedTime)
 
 	//ブレンド率の計算
 	float blendRate = 1.0f;
-	//blendRate = animationBlendTime / animationBlendSeconds;
 	if (animationBlendTime < animationBlendSeconds)
 	{
 		animationBlendTime += elapsedTime;
