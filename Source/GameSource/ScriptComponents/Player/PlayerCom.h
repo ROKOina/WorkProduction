@@ -33,11 +33,11 @@ private:
     bool InputMove(float elapsedTime);
 
     //移動パラメーター
-    float moveSpeed = 5.0f;
-    float turnSpeed = DirectX::XMConvertToRadians(720);
-    float jumpSpeed = 20.0f;
+    float moveSpeed_ = 5.0f;
+    float turnSpeed_ = DirectX::XMConvertToRadians(720);
+    float jumpSpeed_ = 20.0f;
 
-    DirectX::XMFLOAT3 up;
-    DirectX::XMFLOAT3 look;
+    DirectX::XMFLOAT3 up_;
+    DirectX::XMFLOAT3 look_;
 
 };

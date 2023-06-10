@@ -30,7 +30,7 @@ ModelWatch::ModelWatch()
     //);
     //camera->SetPerspectiveFov(
     //    DirectX::XMConvertToRadians(45),
-    //    screenWidth / screenHeight,
+    //    screenWidth_ / screenHeight_,
     //    0.1f, 1000.0f
     //);
 }

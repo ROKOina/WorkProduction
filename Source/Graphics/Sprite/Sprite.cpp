@@ -50,7 +50,7 @@ Sprite::Sprite(const char* filename)
 		subresource_data.SysMemPitch = 0; //Not use for vertex buffers.
 		subresource_data.SysMemSlicePitch = 0; //Not use for vertex buffers.
 		// 頂点バッファオブジェクトの生成
-		hr = device->CreateBuffer(&buffer_desc, &subresource_data, &vertexBuffer);
+		hr = device->CreateBuffer(&buffer_desc, &subresource_data, &vertexBuffer_);
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
@@ -66,13 +66,13 @@ Sprite::Sprite(const char* filename)
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 		
-		dx11State->createVsFromCso(device, "Shader\\SpriteVS.cso", vertexShader.GetAddressOf(),
-			inputLayout.GetAddressOf(), inputElementDesc, ARRAYSIZE(inputElementDesc));
+		dx11State->createVsFromCso(device, "Shader\\SpriteVS.cso", vertexShader_.GetAddressOf(),
+			inputLayout_.GetAddressOf(), inputElementDesc, ARRAYSIZE(inputElementDesc));
 	}
 
 	// ピクセルシェーダー
 	{
-		dx11State->createPsFromCso(device, "Shader\\SpritePS.cso", pixelShader.GetAddressOf());
+		dx11State->createPsFromCso(device, "Shader\\SpritePS.cso", pixelShader_.GetAddressOf());
 	}
 
 	// テクスチャの生成
@@ -85,7 +85,7 @@ Sprite::Sprite(const char* filename)
 		// テクスチャファイル読み込み
 		// テクスチャ読み込み
 		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
-		HRESULT hr = DirectX::CreateWICTextureFromFile(device, wfilename, resource.GetAddressOf(), shaderResourceView.GetAddressOf());
+		HRESULT hr = DirectX::CreateWICTextureFromFile(device, wfilename, resource.GetAddressOf(), shaderResourceView_.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		// テクスチャ情報の取得
@@ -95,8 +95,8 @@ Sprite::Sprite(const char* filename)
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		texture2d->GetDesc(&desc);
 
-		textureWidth = desc.Width;
-		textureHeight = desc.Height;
+		textureWidth_ = desc.Width;
+		textureHeight_ = desc.Height;
 	}
 	else
 	{
@@ -126,11 +126,11 @@ Sprite::Sprite(const char* filename)
 		HRESULT hr = device->CreateTexture2D(&desc, &data, texture.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-		hr = device->CreateShaderResourceView(texture.Get(), nullptr, shaderResourceView.GetAddressOf());
+		hr = device->CreateShaderResourceView(texture.Get(), nullptr, shaderResourceView_.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-		textureWidth = desc.Width;
-		textureHeight = desc.Height;
+		textureWidth_ = desc.Width;
+		textureHeight_ = desc.Height;
 	}
 }
 
@@ -205,7 +205,7 @@ void Sprite::Render(ID3D11DeviceContext *immediate_context,
 
 		// 頂点バッファの内容の編集を開始する。
 		D3D11_MAPPED_SUBRESOURCE mappedBuffer;
-		HRESULT hr = immediate_context->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
+		HRESULT hr = immediate_context->Map(vertexBuffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		// pDataを編集することで頂点データの内容を書き換えることができる。
@@ -221,12 +221,12 @@ void Sprite::Render(ID3D11DeviceContext *immediate_context,
 			v[i].color.z = b;
 			v[i].color.w = a;
 
-			v[i].texcoord.x = texcoords[i].x / textureWidth;
-			v[i].texcoord.y = texcoords[i].y / textureHeight;
+			v[i].texcoord.x = texcoords[i].x / textureWidth_;
+			v[i].texcoord.y = texcoords[i].y / textureHeight_;
 		}
 
 		// 頂点バッファの内容の編集を終了する。
-		immediate_context->Unmap(vertexBuffer.Get(), 0);
+		immediate_context->Unmap(vertexBuffer_.Get(), 0);
 	}
 
 	{
@@ -235,14 +235,14 @@ void Sprite::Render(ID3D11DeviceContext *immediate_context,
 
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
-		immediate_context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+		immediate_context->IASetVertexBuffers(0, 1, vertexBuffer_.GetAddressOf(), &stride, &offset);
 		immediate_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-		immediate_context->IASetInputLayout(inputLayout.Get());
+		immediate_context->IASetInputLayout(inputLayout_.Get());
 
-		immediate_context->VSSetShader(vertexShader.Get(), nullptr, 0);
-		immediate_context->PSSetShader(pixelShader.Get(), nullptr, 0);
+		immediate_context->VSSetShader(vertexShader_.Get(), nullptr, 0);
+		immediate_context->PSSetShader(pixelShader_.Get(), nullptr, 0);
 
-		immediate_context->PSSetShaderResources(0, 1, shaderResourceView.GetAddressOf());
+		immediate_context->PSSetShaderResources(0, 1, shaderResourceView_.GetAddressOf());
 
 		const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		

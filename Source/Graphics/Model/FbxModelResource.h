@@ -62,5 +62,5 @@ private:
 	void ConvertIndexBufferFromRHtoLH(std::vector<UINT>& indices);
 
 private:
-	int						rootMotionNodeIndex = -1;
+	int						rootMotionNodeIndex_ = -1;
 };

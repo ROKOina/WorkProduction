@@ -3,43 +3,43 @@
 //更新処理
 void SceneManager::Update(float elapsedTime)
 {
-    if (nextScene != nullptr)
+    if (nextScene_ != nullptr)
     {
         //古いシーンを終了処理
         Clear();
 
         //新しいシーンを設定
-        currentScene = nextScene;
-        nextScene = nullptr;
+        currentScene_ = nextScene_;
+        nextScene_ = nullptr;
 
         //シーン初期化処理
-        if (!currentScene->IsReady())currentScene->Initialize();
+        if (!currentScene_->IsReady())currentScene_->Initialize();
 
     }
 
-    if (currentScene != nullptr)
+    if (currentScene_ != nullptr)
     {
-        currentScene->Update(elapsedTime);
+        currentScene_->Update(elapsedTime);
     }
 }
 
 //描画処理
 void SceneManager::Render()
 {
-    if (currentScene != nullptr)
+    if (currentScene_ != nullptr)
     {
-        currentScene->Render();
+        currentScene_->Render();
     }
 }
 
 //シーンクリア
 void SceneManager::Clear()
 {
-    if (currentScene != nullptr)
+    if (currentScene_ != nullptr)
     {
-        currentScene->Finalize();
-        delete currentScene;
-        currentScene = nullptr;
+        currentScene_->Finalize();
+        delete currentScene_;
+        currentScene_ = nullptr;
     }
 }
 
@@ -47,5 +47,5 @@ void SceneManager::Clear()
 void SceneManager::ChangeScene(Scene* scene)
 {
     //新しいシーンを設定
-    nextScene = scene;
+    nextScene_ = scene;
 }

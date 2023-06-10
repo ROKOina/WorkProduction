@@ -33,7 +33,7 @@ SubWindow::SubWindow(HWND hWnd, int ID, int width, int height)
     windowID(ID)
 {
     //スワップチェイン生成
-    //Graphics::Instance().CreateSubWindowSwapChain(hWnd, width, height);
+    //Graphics::Instance().CreateSubWindowSwapChain(hWnd_, width, height);
 }
 
 SubWindow::~SubWindow() 

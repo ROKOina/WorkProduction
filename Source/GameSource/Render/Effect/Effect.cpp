@@ -21,7 +21,7 @@ Effect::Effect(const char* filename)
         EffectManager::Instance().GetEffekseerManager();
 
     //Effekseerエフェクトを読み込む
-    effekseerEffect = Effekseer::Effect::
+    effekseerEffect_ = Effekseer::Effect::
         Create(effekseerManager, (EFK_CHAR*)utf16Filename);
 
 }
@@ -34,7 +34,7 @@ Effekseer::Handle Effect::Play
         EffectManager::Instance().GetEffekseerManager();
 
     Effekseer::Handle handle = effekseerManager->Play
-    (effekseerEffect, position.x, position.y, position.z);
+    (effekseerEffect_, position.x, position.y, position.z);
 
     effekseerManager->SetScale(handle, scale, scale, scale);
     return handle;

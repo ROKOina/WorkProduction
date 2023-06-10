@@ -5,63 +5,63 @@
 class HighResolutionTimer
 {
 public:
-	HighResolutionTimer() : delta_time(-1.0), paused_time(0), stopped(false)
+	HighResolutionTimer() : deltaTime_(-1.0), pausedTime_(0), isStopped_(false)
 	{
 		LONGLONG counts_per_sec;
 		QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&counts_per_sec));
-		seconds_per_count = 1.0 / static_cast<double>(counts_per_sec);
+		secondsPerCount_ = 1.0 / static_cast<double>(counts_per_sec);
 
-		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&this_time));
-		base_time = this_time;
-		last_time = this_time;
+		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&thisTime_));
+		baseTime_ = thisTime_;
+		lastTime_ = thisTime_;
 	}
 
 	// Returns the total time elapsed since Reset() was called, NOT counting any
-	// time when the clock is stopped.
+	// time when the clock is isStopped_.
 	float TimeStamp() const  // in seconds
 	{
-		// If we are stopped, do not count the time that has passed since we stopped.
+		// If we are isStopped_, do not count the time that has passed since we isStopped_.
 		// Moreover, if we previously already had a pause, the distance 
-		// stop_time - base_time includes paused time, which we do not want to count.
+		// stopTime_ - baseTime_ includes paused time, which we do not want to count.
 		// To correct this, we can subtract the paused time from mStopTime:  
 		//
-		//                     |<--paused_time-->|
+		//                     |<--pausedTime_-->|
 		// ----*---------------*-----------------*------------*------------*------> time
-		//  base_time       stop_time        start_time     stop_time    this_time
+		//  baseTime_       stopTime_        start_time     stopTime_    thisTime_
 
-		if (stopped)
+		if (isStopped_)
 		{
-			return static_cast<float>(((stop_time - paused_time) - base_time)*seconds_per_count);
+			return static_cast<float>(((stopTime_ - pausedTime_) - baseTime_)*secondsPerCount_);
 		}
 
-		// The distance this_time - mBaseTime includes paused time,
+		// The distance thisTime_ - mBaseTime includes paused time,
 		// which we do not want to count.  To correct this, we can subtract 
-		// the paused time from this_time:  
+		// the paused time from thisTime_:  
 		//
-		//  (this_time - paused_time) - base_time 
+		//  (thisTime_ - pausedTime_) - baseTime_ 
 		//
-		//                     |<--paused_time-->|
+		//                     |<--pausedTime_-->|
 		// ----*---------------*-----------------*------------*------> time
-		//  base_time       stop_time        start_time     this_time
+		//  baseTime_       stopTime_        start_time     thisTime_
 		else
 		{
-			return static_cast<float>(((this_time - paused_time) - base_time)*seconds_per_count);
+			return static_cast<float>(((thisTime_ - pausedTime_) - baseTime_)*secondsPerCount_);
 		}
 	}
 
 	float TimeInterval() const  // in seconds
 	{
-		return static_cast<float>(delta_time);
+		return static_cast<float>(deltaTime_);
 	}
 
 	void Reset() // Call before message loop.
 	{
-		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&this_time));
-		base_time = this_time;
-		last_time = this_time;
+		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&thisTime_));
+		baseTime_ = thisTime_;
+		lastTime_ = thisTime_;
 
-		stop_time = 0;
-		stopped = false;
+		stopTime_ = 0;
+		isStopped_ = false;
 	}
 
 	void Start() // Call when unpaused.
@@ -73,58 +73,58 @@ public:
 		//
 		//                     |<-------d------->|
 		// ----*---------------*-----------------*------------> time
-		//  base_time       stop_time        start_time     
-		if (stopped)
+		//  baseTime_       stopTime_        start_time     
+		if (isStopped_)
 		{
-			paused_time += (start_time - stop_time);
-			last_time = start_time;
-			stop_time = 0;
-			stopped = false;
+			pausedTime_ += (start_time - stopTime_);
+			lastTime_ = start_time;
+			stopTime_ = 0;
+			isStopped_ = false;
 		}
 	}
 
 	void Stop() // Call when paused.
 	{
-		if (!stopped)
+		if (!isStopped_)
 		{
-			QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&stop_time));
-			stopped = true;
+			QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&stopTime_));
+			isStopped_ = true;
 		}
 	}
 
 	void Tick() // Call every frame.
 	{
-		if (stopped)
+		if (isStopped_)
 		{
-			delta_time = 0.0;
+			deltaTime_ = 0.0;
 			return;
 		}
 
-		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&this_time));
+		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&thisTime_));
 		// Time difference between this frame and the previous.
-		delta_time = (this_time - last_time)*seconds_per_count;
+		deltaTime_ = (thisTime_ - lastTime_)*secondsPerCount_;
 
 		// Prepare for next frame.
-		last_time = this_time;
+		lastTime_ = thisTime_;
 
 		// Force nonnegative.  The DXSDK's CDXUTTimer mentions that if the 
 		// processor goes into a power save mode or we get shuffled to another
 		// processor, then mDeltaTime can be negative.
-		if (delta_time < 0.0)
+		if (deltaTime_ < 0.0)
 		{
-			delta_time = 0.0;
+			deltaTime_ = 0.0;
 		}
 	}
 
 private:
-	double seconds_per_count;
-	double delta_time;
+	double secondsPerCount_;
+	double deltaTime_;
 
-	LONGLONG base_time;
-	LONGLONG paused_time;
-	LONGLONG stop_time;
-	LONGLONG last_time;
-	LONGLONG this_time;
+	LONGLONG baseTime_;
+	LONGLONG pausedTime_;
+	LONGLONG stopTime_;
+	LONGLONG lastTime_;
+	LONGLONG thisTime_;
 
-	bool stopped;
+	bool isStopped_;
 };

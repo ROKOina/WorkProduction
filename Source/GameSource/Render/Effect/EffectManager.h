@@ -32,9 +32,9 @@ public:
     void Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection);
 
     //Effekseerマネージャーの取得
-    Effekseer::ManagerRef GetEffekseerManager() { return effekseerManager; }
+    Effekseer::ManagerRef GetEffekseerManager() { return effekseerManager_; }
 
 private:
-    Effekseer::ManagerRef effekseerManager;
-    EffekseerRenderer::RendererRef effekseerRenderer;
+    Effekseer::ManagerRef effekseerManager_;
+    EffekseerRenderer::RendererRef effekseerRenderer_;
 };

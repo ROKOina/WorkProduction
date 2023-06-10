@@ -15,32 +15,32 @@ void CameraCom::Start()
 void CameraCom::Update(float elapsedTime)
 {
     //LookAt関数使っていないなら更新する
-    if (!isLookAt) {
+    if (!isLookAt_) {
         //カメラのフォワードをフォーカスする
         DirectX::XMFLOAT3 forwardPoint;
-        DirectX::XMFLOAT3 wPos = GetGameObject()->transform->GetWorldPosition();
-        DirectX::XMFLOAT3 forwardNormalVec = GetGameObject()->transform->GetFront();
+        DirectX::XMFLOAT3 wPos = GetGameObject()->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 forwardNormalVec = GetGameObject()->transform_->GetFront();
         forwardPoint = { forwardNormalVec.x * 2 + wPos.x,
             forwardNormalVec.y * 2 + wPos.y,
             forwardNormalVec.z * 2 + wPos.z };
 
-        SetLookAt(forwardPoint, GetGameObject()->transform->GetUp());
+        SetLookAt(forwardPoint, GetGameObject()->transform_->GetUp());
     }
 
-    isLookAt = false;
+    isLookAt_ = false;
 }
 
 // GUI描画
 void CameraCom::OnGUI()
 {
-    ImGui::DragFloat3("Focus", &focus.x);
+    ImGui::DragFloat3("Focus", &focus_.x);
 }
 
 //指定方向を向く
 void CameraCom::SetLookAt(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT3& up)
 {
     //視点、注視点、上方向からビュー行列を作成
-    DirectX::XMFLOAT3 cameraPos = GetGameObject()->transform->GetWorldPosition();
+    DirectX::XMFLOAT3 cameraPos = GetGameObject()->transform_->GetWorldPosition();
     DirectX::XMVECTOR Eye = DirectX::XMLoadFloat3(&cameraPos);
     DirectX::XMVECTOR Focus = DirectX::XMLoadFloat3(&focus);
     DirectX::XMVECTOR Up = DirectX::XMLoadFloat3(&up);
@@ -53,7 +53,7 @@ void CameraCom::SetLookAt(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT
     }
 
     DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(Eye, Focus, Up);
-    DirectX::XMStoreFloat4x4(&view, View);
+    DirectX::XMStoreFloat4x4(&view_, View);
 
     //ビューを逆行列化し、ワールド座標に戻す
     DirectX::XMMATRIX World = DirectX::XMMatrixInverse(nullptr, View);
@@ -63,25 +63,25 @@ void CameraCom::SetLookAt(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT
     if (!std::isfinite(world._11))return;
 
     //カメラの方向を取り出す
-    this->right.x   = world._11;
-    this->right.y   = world._12;
-    this->right.z   = world._13;
+    this->right_.x   = world._11;
+    this->right_.y   = world._12;
+    this->right_.z   = world._13;
 
-    this->up.x      = world._21;
-    this->up.y      = world._22;
-    this->up.z      = world._23;
+    this->up_.x      = world._21;
+    this->up_.y      = world._22;
+    this->up_.z      = world._23;
 
-    this->front.x   = world._31;
-    this->front.y   = world._32;
-    this->front.z   = world._33;
+    this->front_.x   = world._31;
+    this->front_.y   = world._32;
+    this->front_.z   = world._33;
 
-    GetGameObject()->transform->SetTransform(world);
+    GetGameObject()->transform_->SetTransform(world);
 
 
     //視点、注視点を保存
-    this->focus = focus;
+    this->focus_ = focus;
 
-    isLookAt = true;
+    isLookAt_ = true;
 }
 
 //パースペクティブ設定
@@ -89,5 +89,5 @@ void CameraCom::SetPerspectiveFov(float fovY, float aspect, float nearZ, float f
 {
     //画角、画面比率、クリップ距離からプロジェクション行列を作成
     DirectX::XMMATRIX Projection = DirectX::XMMatrixPerspectiveFovLH(fovY, aspect, nearZ, farZ);	//プロジェクション行列作成
-    DirectX::XMStoreFloat4x4(&projection, Projection);	//rcに渡す
+    DirectX::XMStoreFloat4x4(&projection_, Projection);	//rcに渡す
 }

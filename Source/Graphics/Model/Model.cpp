@@ -10,14 +10,14 @@ void Model::ModelInitialize(std::shared_ptr<ModelResource> resource)
 	// ノード
 	const std::vector<ModelResource::Node>& resNodes = resource->GetNodes();
 
-	nodes.resize(resNodes.size());
-	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
+	nodes_.resize(resNodes.size());
+	for (size_t nodeIndex = 0; nodeIndex < nodes_.size(); ++nodeIndex)
 	{
 		auto&& src = resNodes.at(nodeIndex);
-		auto&& dst = nodes.at(nodeIndex);
+		auto&& dst = nodes_.at(nodeIndex);
 
 		dst.name = src.name.c_str();
-		dst.parent = src.parentIndex >= 0 ? &nodes.at(src.parentIndex) : nullptr;
+		dst.parent = src.parentIndex >= 0 ? &nodes_.at(src.parentIndex) : nullptr;
 		dst.scale = src.scale;
 		dst.rotate = src.rotate;
 		dst.translate = src.translate;
@@ -37,9 +37,9 @@ void Model::ModelInitialize(std::shared_ptr<ModelResource> resource)
 Model::Model(const char* filename)
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
-	modelResource = std::make_shared<FbxModelResource>();
-	modelResource->Load(device, filename);
-	ModelInitialize(modelResource);
+	modelResource_ = std::make_shared<FbxModelResource>();
+	modelResource_->Load(device, filename);
+	ModelInitialize(modelResource_);
 }
 
 // 変換行列計算
@@ -47,7 +47,7 @@ void Model::UpdateTransform(const DirectX::XMFLOAT4X4& transform)
 {
 	DirectX::XMMATRIX Transform = DirectX::XMLoadFloat4x4(&transform);
 
-	for (Node& node : nodes)
+	for (Node& node : nodes_)
 	{
 		// ローカル行列算出
 		DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);
@@ -77,7 +77,7 @@ void Model::UpdateTransform(const DirectX::XMFLOAT4X4& transform)
 Model::Node* Model::FindNode(const char* name)
 {
 	//全てのノードを総当たりで名前比較する
-	for (auto& node : nodes)
+	for (auto& node : nodes_)
 	{
 		if (strcmp(node.name, name) == 0)
 		{

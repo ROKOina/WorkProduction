@@ -38,19 +38,19 @@ protected:
 protected:  //継承先にアクセス可能にする
 
     //ジャンプ
-    float gravity = -1.0f;
-    DirectX::XMFLOAT3 velocity = { 0,0,0 }; //速力
+    float gravity_ = -1.0f;
+    DirectX::XMFLOAT3 velocity_ = { 0,0,0 }; //速力
 
-    float friction = 0.5f;  //摩擦
+    float friction_ = 0.5f;  //摩擦
 
     //慣性
-    float acceleration = 1.0f;
-    float maxMoveSpeed = 5.0f;
-    float moveVecX = 0.0f;
-    float moveVecZ = 0.0f;
-    float airControl = 0.3f;
+    float acceleration_ = 1.0f;
+    float maxMoveSpeed_ = 5.0f;
+    float moveVecX_ = 0.0f;
+    float moveVecZ_ = 0.0f;
+    float airControl_ = 0.3f;
 
-    float stepOffset = 1.0f;
-    float slopeRate = 1.0f;
+    float stepOffset_ = 1.0f;
+    float slopeRate_ = 1.0f;
 
 };

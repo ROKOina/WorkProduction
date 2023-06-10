@@ -18,6 +18,6 @@ public:
 	void Stop();
 
 private:
-	IXAudio2SourceVoice*			sourceVoice = nullptr;
-	std::shared_ptr<AudioResource>	resource;
+	IXAudio2SourceVoice*			sourceVoice_ = nullptr;
+	std::shared_ptr<AudioResource>	resource_;
 };

@@ -7,28 +7,28 @@
 void SceneLoading::Initialize()
 {
     //スプライト初期化
-    sprite = new Sprite("Data/Sprite/LoadingIcon.png");
+    sprite_ = new Sprite("Data/Sprite/LoadingIcon.png");
     
     //スレッド開始
-    thread = new std::thread(LoadingThread,this);
+    thread_ = new std::thread(LoadingThread,this);
 }
 
 //終了化
 void SceneLoading::Finalize()
 {
     //スレッド終了化
-    if (thread != nullptr)
+    if (thread_ != nullptr)
     {
-        thread->detach();
-        delete thread;
-        thread = nullptr;
+        thread_->detach();
+        delete thread_;
+        thread_ = nullptr;
     }
 
     //スプライト終了化
-    if (sprite != nullptr)
+    if (sprite_ != nullptr)
     {
-        delete sprite;
-        sprite = nullptr;
+        delete sprite_;
+        sprite_ = nullptr;
     }
 }
 
@@ -36,12 +36,12 @@ void SceneLoading::Finalize()
 void SceneLoading::Update(float elapsedTime)
 {
     constexpr float speed = 180;
-    angle += speed * elapsedTime;
+    angle_ += speed * elapsedTime;
 
     //次のシーンの準備が完了したらシーンを切り替える
-    if (nextScene->IsReady())
+    if (nextScene_->IsReady())
     {
-        SceneManager::Instance().ChangeScene(nextScene);
+        SceneManager::Instance().ChangeScene(nextScene_);
     }
 }
 
@@ -65,15 +65,15 @@ void SceneLoading::Render()
         //画面下にローでイングアイコンを描画
         float screenWidth = static_cast<float>(graphics.GetScreenWidth());
         float screenHeight = static_cast<float>(graphics.GetScreenHeight());
-        float textureWidth = static_cast<float>(sprite->GetTextureWidth());
-        float textureHeight = static_cast<float>(sprite->GetTextureHeight());
+        float textureWidth = static_cast<float>(sprite_->GetTextureWidth());
+        float textureHeight = static_cast<float>(sprite_->GetTextureHeight());
         float positionX = screenWidth - textureWidth;
         float positionY = screenHeight - textureHeight;
 
-        sprite->Render(dc,
+        sprite_->Render(dc,
             positionX, positionY, textureWidth, textureHeight,
             0, 0, textureWidth, textureHeight,
-            angle,
+            angle_,
             1, 1, 1, 1);
     }
 }
@@ -86,11 +86,11 @@ void SceneLoading::LoadingThread(SceneLoading* scene)
     CoInitialize(nullptr);
 
     //次のシーンの初期化を行う
-    scene->nextScene->Initialize();
+    scene->nextScene_->Initialize();
 
     //スレッドが終わる前にCOM関連の終了化
     CoUninitialize();
 
     //次のシーンの準備完了設定
-    scene->nextScene->SetReady();
+    scene->nextScene_->SetReady();
 }

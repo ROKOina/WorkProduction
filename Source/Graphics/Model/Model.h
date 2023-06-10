@@ -30,18 +30,18 @@ public:
 	void UpdateTransform(const DirectX::XMFLOAT4X4& transform);
 
 	// ノードリスト取得
-	const std::vector<Node>& GetNodes() const { return nodes; }
-	std::vector<Node>& GetNodes() { return nodes; }
+	const std::vector<Node>& GetNodes() const { return nodes_; }
+	std::vector<Node>& GetNodes() { return nodes_; }
 
 	// リソース取得
-	const FbxModelResource* GetResource() const { return modelResource.get(); }
-	std::shared_ptr<FbxModelResource> GetResourceShared() const { return modelResource; }
+	const FbxModelResource* GetResource() const { return modelResource_.get(); }
+	std::shared_ptr<FbxModelResource> GetResourceShared() const { return modelResource_; }
 
 	//ノード検索
 	Node* FindNode(const char* name);
 
 private:
 	//std::shared_ptr<ModelResource>	resource;
-	std::shared_ptr<FbxModelResource>	modelResource;	//fbx用
-	std::vector<Node>				nodes;
+	std::shared_ptr<FbxModelResource>	modelResource_;	//fbx用
+	std::vector<Node>				nodes_;
 };

@@ -10,7 +10,7 @@ Inspector::Inspector(HWND hWnd, int ID, int width, int height)
 	//p = std::make_unique<Model>("Data/Model/Jammo/Jammo.fbx");
 	//cameraController = std::make_unique<CameraController>();
 
-	//Graphics& graphics = Graphics::Instance();
+	//Graphics& graphics_ = Graphics::Instance();
 	//Camera& camera = Camera::Instance();
 	//camera.SetLookAt(
 	//	DirectX::XMFLOAT3(0, 10, -10),
@@ -19,7 +19,7 @@ Inspector::Inspector(HWND hWnd, int ID, int width, int height)
 	//);
 	//camera.SetPerspectiveFov(
 	//	DirectX::XMConvertToRadians(45),
-	//	graphics.GetScreenWidth() / graphics.GetScreenHeight(),
+	//	graphics_.GetScreenWidth() / graphics_.GetScreenHeight(),
 	//	0.1f, 1000.0f
 	//);
 }
@@ -47,11 +47,11 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 	Graphics& graphics = Graphics::Instance();
 
 	//// IMGUIフレーム開始処理
-	//graphics.GetSubWindowImGuiRenderer(windowID)->NewFrame();
+	//graphics_.GetSubWindowImGuiRenderer(windowID)->NewFrame();
 
-	//ID3D11DeviceContext* dc = graphics.GetDeviceContext();
-	//ID3D11RenderTargetView* rtv = graphics.GetSubWindowRenderTargetView(windowID);
-	//ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
+	//ID3D11DeviceContext* dc = graphics_.GetDeviceContext();
+	//ID3D11RenderTargetView* rtv = graphics_.GetSubWindowRenderTargetView(windowID);
+	//ID3D11DepthStencilView* dsv = graphics_.GetDepthStencilView();
 
 	//// 画面クリア＆レンダーターゲット設定
 	//FLOAT color[] = { 0.0f, 0.0f, 0.5f, 1.0f };	// RGBA(0.0～1.0)
@@ -70,12 +70,12 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	// 3Dモデル描画
 	{
-		//Shader* shader = graphics.GetShader();
-		//shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
+		//Shader* shader_ = graphics_.GetShader();
+		//shader_->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
 
-		//shader->Draw(dc, p.get());
+		//shader_->Draw(dc, p.get());
 
-		//shader->End(dc);
+		//shader_->End(dc);
 	}
 
 	//// 2DデバッグGUI描画
@@ -94,7 +94,7 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 
 	//// IMGUI描画
-	//graphics.GetSubWindowImGuiRenderer(windowID)->Render(dc);
+	//graphics_.GetSubWindowImGuiRenderer(windowID)->Render(dc);
 
 	SubWindow::Render(elapsedTime);
 }

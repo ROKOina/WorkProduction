@@ -27,7 +27,7 @@ void SceneGame::Initialize()
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("pico");
-		obj->transform->SetScale({ 0.01f, 0.01f, 0.01f });
+		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
 
 		const char* filename = "Data/Model/pico/picoAnim.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
@@ -71,7 +71,7 @@ void SceneGame::Initialize()
 			graphics.GetScreenWidth() / graphics.GetScreenHeight(),
 			1.0f, 1000.0f
 		);
-		cameraObj->transform->SetWorldPosition({ 0, 5, -10 });
+		cameraObj->transform_->SetWorldPosition({ 0, 5, -10 });
 	}
 
 	//ステージ初期化
@@ -79,7 +79,7 @@ void SceneGame::Initialize()
 	StageMain* stageMain = new StageMain();	//メイン（マップ）
 	stageManager.Register(stageMain);
 
-	//particle = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
+	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
 }
 
 // 終了化
@@ -101,7 +101,7 @@ void SceneGame::Update(float elapsedTime)
 	Graphics& graphics = Graphics::Instance();
 
 
-	//particle->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera->GetView(), camera->GetProjection());
+	//particle_->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera->GetView(), camera->GetProjection());
 }
 
 // 描画処理
@@ -138,35 +138,35 @@ void SceneGame::Render()
 		//ステージ描画
 		StageManager::Instance().Render(dc, shader);
 		////プレイヤー描画
-		//player->Render(dc, shader);
+		//player->Render(dc, shader_);
 
 		shader->End(dc);
 	}
 
 	////パーティクル
 	//{
-	//	Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
+	//	Dx11StateLib* dx11State_ = Graphics::Instance().GetDx11State().get();
 	//	const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	//	dc->OMSetBlendState(
-	//		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::PARTICLE).Get(),
+	//		dx11State_->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::PARTICLE).Get(),
 	//		blend_factor, 0xFFFFFFFF);
 	//	dc->OMSetDepthStencilState(
-	//		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::PARTICLE).Get(),
+	//		dx11State_->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::PARTICLE).Get(),
 	//		0);
 	//	dc->RSSetState(
-	//		dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
+	//		dx11State_->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
 	//	);
 
-	//	particle->Render(rc);
+	//	particle_->Render(rc);
 
 	//	dc->OMSetBlendState(
-	//		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
+	//		dx11State_->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
 	//		blend_factor, 0xFFFFFFFF);
 	//	dc->OMSetDepthStencilState(
-	//		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),
+	//		dx11State_->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),
 	//		0);
 	//	dc->RSSetState(
-	//		dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
+	//		dx11State_->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
 	//	);
 	//}
 

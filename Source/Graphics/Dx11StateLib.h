@@ -36,9 +36,9 @@ public:
         PARTICLE,       //パーティクル
         DEFALT,           //何もなし（保険）
     };
-    Microsoft::WRL::ComPtr<ID3D11BlendState> GetBlendState(BLEND_STATE_TYPE blendType) { return blendState[static_cast<int>(blendType)].Get(); }
+    Microsoft::WRL::ComPtr<ID3D11BlendState> GetBlendState(BLEND_STATE_TYPE blendType) { return blendState_[static_cast<int>(blendType)].Get(); }
 private:
-    Microsoft::WRL::ComPtr<ID3D11BlendState> blendState[static_cast<int>(BLEND_STATE_TYPE::DEFALT) + 1];
+    Microsoft::WRL::ComPtr<ID3D11BlendState> blendState_[static_cast<int>(BLEND_STATE_TYPE::DEFALT) + 1];
 
     //深度ステンシルステート
 public:
@@ -49,9 +49,9 @@ public:
         PARTICLE,  //パーティクル
         DEFALT,           //何もなし（保険）
     };
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> GetDepthStencilState(DEPTHSTENCIL_STATE_TYPE depthStencilType) { return depthStencilState[static_cast<int>(depthStencilType)].Get(); }
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> GetDepthStencilState(DEPTHSTENCIL_STATE_TYPE depthStencilType) { return depthStencilState_[static_cast<int>(depthStencilType)].Get(); }
 private:
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::DEFALT) + 1];
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState_[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::DEFALT) + 1];
 
     //ラスタライザーステート
 public:
@@ -62,9 +62,9 @@ public:
         PARTICLE,   //パーティクル
         DEFALT,           //何もなし（保険）
     };
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> GetRasterizerState(RASTERIZER_TYPE rasterizerType) { return rasterizerState[static_cast<int>(rasterizerType)].Get(); }
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> GetRasterizerState(RASTERIZER_TYPE rasterizerType) { return rasterizerState_[static_cast<int>(rasterizerType)].Get(); }
 private:
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState[static_cast<int>(RASTERIZER_TYPE::DEFALT) + 1];
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState_[static_cast<int>(RASTERIZER_TYPE::DEFALT) + 1];
 
     //サンプラーステート
 public:
@@ -72,9 +72,9 @@ public:
         TEXTURE_ADDRESS_WRAP,
         DEFALT,           //何もなし（保険）
     };
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState(SAMPLER_TYPE samplerType) { return samplerState[static_cast<int>(samplerType)].Get(); }
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState(SAMPLER_TYPE samplerType) { return samplerState_[static_cast<int>(samplerType)].Get(); }
 private:
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState[static_cast<int>(SAMPLER_TYPE::DEFALT) + 1];
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState_[static_cast<int>(SAMPLER_TYPE::DEFALT) + 1];
 
 
 };

@@ -12,29 +12,35 @@ void AnimationCom::Start()
 // 更新処理
 void AnimationCom::Update(float elapsedTime)
 {
+	AnimationUpdata(elapsedTime);
+}
+
+//アニメーション更新
+void AnimationCom::AnimationUpdata(float elapsedTime)
+{	
 	//再生中でないなら処理しない
 	if (!IsPlayAnimation())return;
 
 	//モデルからリソースを取得
 	Model* model = GetGameObject()->GetComponent<RendererCom>()->GetModel();
 	const FbxModelResource* resource = model->GetResource();
-
+	
 	//ブレンド率の計算
 	float blendRate = 1.0f;
-	if (animationBlendTime < animationBlendSeconds)
+	if (animationBlendTime_ < animationBlendSeconds_)
 	{
-		animationBlendTime += elapsedTime;
-		if (animationBlendTime >= animationBlendSeconds)
+		animationBlendTime_ += elapsedTime;
+		if (animationBlendTime_ >= animationBlendSeconds_)
 		{
-			animationBlendTime = animationBlendSeconds;
+			animationBlendTime_ = animationBlendSeconds_;
 		}
-		blendRate = animationBlendTime / animationBlendSeconds;
+		blendRate = animationBlendTime_ / animationBlendSeconds_;
 		blendRate *= blendRate;
 	}
 
 	//指定のアニメーションデータを取得
 	const std::vector<ModelResource::Animation>& animations = resource->GetAnimations();
-	const ModelResource::Animation& animation = animations.at(currentAnimationIndex);
+	const ModelResource::Animation& animation = animations.at(currentAnimationIndex_);
 
 	//アニメーションデータからキーフレームデータリストを取得
 	const std::vector<ModelResource::Keyframe>& keyframes = animation.keyframes;
@@ -44,13 +50,13 @@ void AnimationCom::Update(float elapsedTime)
 		//現在の時間がどのキーフレームの間にいるか判定する
 		const ModelResource::Keyframe& keyframe0 = keyframes.at(keyIndex);
 		const ModelResource::Keyframe& keyframe1 = keyframes.at(keyIndex + 1);
-		if (currentAnimationSeconds >= keyframe0.seconds &&
-			currentAnimationSeconds < keyframe1.seconds)
+		if (currentAnimationSeconds_ >= keyframe0.seconds &&
+			currentAnimationSeconds_ < keyframe1.seconds)
 		{
 			//再生時間とキーフレームの時間から補完率を算出する
-			float rate = (currentAnimationSeconds - keyframe0.seconds) /
+			float rate = (currentAnimationSeconds_ - keyframe0.seconds) /
 				(keyframe1.seconds - keyframe0.seconds);
-			
+
 			int nodeCount = static_cast<int>(model->GetNodes().size());
 			for (int nodeIndex = 0; nodeIndex < nodeCount; ++nodeIndex)
 			{
@@ -93,28 +99,28 @@ void AnimationCom::Update(float elapsedTime)
 	}
 
 	//最終フレーム処理
-	if (animationEndFlag)
+	if (animationEndFlag_)
 	{
-		animationEndFlag = false;
-		currentAnimationIndex = -1;
+		animationEndFlag_ = false;
+		currentAnimationIndex_ = -1;
 		return;
 	}
 
 	//時間経過
-	currentAnimationSeconds += elapsedTime;
-	animationBlendTime += elapsedTime;
+	currentAnimationSeconds_ += elapsedTime;
+	animationBlendTime_ += elapsedTime;
 
 	//再生時間が終端時間を超えたら
-	if (currentAnimationSeconds >= animation.secondsLength)
+	if (currentAnimationSeconds_ >= animation.secondsLength)
 	{
-		if (animationLoopFlag)
+		if (animationLoopFlag_)
 		{
 			//再生時間を巻き戻す
-			currentAnimationSeconds = 0;
+			currentAnimationSeconds_ = 0;
 		}
 		else
 		{
-			animationEndFlag = true;
+			animationEndFlag_ = true;
 		}
 	}
 }
@@ -143,20 +149,20 @@ void AnimationCom::OnGUI()
 //アニメーション再生
 void AnimationCom::PlayAnimation(int index, bool loop, float blendSeconds)
 {
-	currentAnimationIndex = index;
-	currentAnimationSeconds = 0.0f;
-	animationLoopFlag = loop;
-	animationEndFlag = false;
-	animationBlendTime = 0.0f;
-	animationBlendSeconds = blendSeconds;
+	currentAnimationIndex_ = index;
+	currentAnimationSeconds_ = 0.0f;
+	animationLoopFlag_ = loop;
+	animationEndFlag_ = false;
+	animationBlendTime_ = 0.0f;
+	animationBlendSeconds_ = blendSeconds;
 }
 
 //アニメーション再生中か
 bool AnimationCom::IsPlayAnimation()
 {
-	if (currentAnimationIndex < 0)return false;
+	if (currentAnimationIndex_ < 0)return false;
 	const ModelResource* resource = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResource();
-	if (currentAnimationIndex >= resource->GetAnimations().size())return false;
+	if (currentAnimationIndex_ >= resource->GetAnimations().size())return false;
 
 	return true;
 }

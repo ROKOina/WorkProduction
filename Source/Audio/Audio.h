@@ -20,6 +20,6 @@ public:
 private:
 	static Audio*			instance;
 
-	IXAudio2*				xaudio = nullptr;
-	IXAudio2MasteringVoice* masteringVoice = nullptr;
+	IXAudio2*				xaudio_ = nullptr;
+	IXAudio2MasteringVoice* masteringVoice_ = nullptr;
 };

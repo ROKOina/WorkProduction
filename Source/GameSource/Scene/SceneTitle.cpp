@@ -11,17 +11,17 @@
 void ScneTitle::Initialize()
 {
     //スプライト初期化
-    sprite = new Sprite("Data/Sprite/Title.png");
+    sprite_ = new Sprite("Data/Sprite/Title.png");
 }
 
 //終了化
 void ScneTitle::Finalize()
 {
     //スプライト終了化
-    if (sprite != nullptr)
+    if (sprite_ != nullptr)
     {
-        delete sprite;
-        sprite = nullptr;
+        delete sprite_;
+        sprite_ = nullptr;
     }
 }
 
@@ -73,10 +73,10 @@ void ScneTitle::Render()
     {
         float screenWidth = static_cast<float>(graphics.GetScreenWidth());
         float screenHeight = static_cast<float>(graphics.GetScreenHeight());
-        float textureWidth = static_cast<float>(sprite->GetTextureWidth());
-        float textureHeight = static_cast<float>(sprite->GetTextureHeight());
+        float textureWidth = static_cast<float>(sprite_->GetTextureWidth());
+        float textureHeight = static_cast<float>(sprite_->GetTextureHeight());
         //タイトルスプライト描画
-        sprite->Render(dc,
+        sprite_->Render(dc,
             0, 0, screenWidth, screenHeight,
             0, 0, textureWidth, textureHeight,
             0,

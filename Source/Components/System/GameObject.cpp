@@ -9,7 +9,7 @@
 // 開始処理
 void GameObject::Start()
 {
-	for (std::shared_ptr<Component>& component : components)
+	for (std::shared_ptr<Component>& component : components_)
 	{
 		component->Start();
 	}
@@ -18,11 +18,11 @@ void GameObject::Start()
 // 更新
 void GameObject::Update(float elapsedTime)
 {
-	for (std::shared_ptr<Component>& component : components)
+	for (std::shared_ptr<Component>& component : components_)
 	{
 		component->Update(elapsedTime);
 	}
-	for (std::weak_ptr<GameObject>& child : childrenObject)
+	for (std::weak_ptr<GameObject>& child : childrenObject_)
 	{
 		child.lock()->Update(elapsedTime);
 	}
@@ -33,13 +33,13 @@ void GameObject::Update(float elapsedTime)
 void GameObject::UpdateTransform()
 {
 	//親子の行列更新
-	if (parentObject.lock())
+	if (parentObject_.lock())
 	{
-		DirectX::XMFLOAT4X4 parentTransform = parentObject.lock()->transform->GetTransform();
-		transform->SetParentTransform(parentTransform);
+		DirectX::XMFLOAT4X4 parentTransform = parentObject_.lock()->transform_->GetTransform();
+		transform_->SetParentTransform(parentTransform);
 	}
 
-	transform->UpdateTransform();
+	transform_->UpdateTransform();
 }
 
 // GUI表示
@@ -56,7 +56,7 @@ void GameObject::OnGUI()
 	}
 
 	// コンポーネント
-	for (std::shared_ptr<Component>& component : components)
+	for (std::shared_ptr<Component>& component : components_)
 	{
 		ImGui::Spacing();
 		ImGui::Separator();
@@ -75,9 +75,9 @@ std::shared_ptr<GameObject> GameObject::AddChildObject()
 {
 	std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 	//親登録
-	obj->parentObject = shared_from_this();
+	obj->parentObject_ = shared_from_this();
 	//子供追加
-	childrenObject.emplace_back(obj->shared_from_this());
+	childrenObject_.emplace_back(obj->shared_from_this());
 
 	return obj;
 }
@@ -97,58 +97,58 @@ std::shared_ptr<GameObject> GameObjectManager::Create()
 		::sprintf_s(name, sizeof(name), "Actor%d", id++);
 		obj->SetName(name);
 	}
-	startGameObject.emplace_back(obj);
+	startGameObject_.emplace_back(obj);
 	return obj;
 }
 
 // 削除
 void GameObjectManager::Remove(std::shared_ptr<GameObject> obj)
 {
-	removeGameObject.insert(obj);
+	removeGameObject_.insert(obj);
 }
 
 // 更新
 void GameObjectManager::Update(float elapsedTime)
 {
-	for (std::shared_ptr<GameObject>& obj : startGameObject)
+	for (std::shared_ptr<GameObject>& obj : startGameObject_)
 	{
 		obj->Start();
-		updateGameObject.emplace_back(obj);
+		updateGameObject_.emplace_back(obj);
 	}
-	startGameObject.clear();
+	startGameObject_.clear();
 
-	for (std::shared_ptr<GameObject>& obj : updateGameObject)
+	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 	{
 		obj->Update(elapsedTime);
 	}
 
-	for (const std::shared_ptr<GameObject>& obj : removeGameObject)
+	for (const std::shared_ptr<GameObject>& obj : removeGameObject_)
 	{
-		std::vector<std::shared_ptr<GameObject>>::iterator itStart = std::find(startGameObject.begin(), startGameObject.end(), obj);
-		if (itStart != startGameObject.end())
+		std::vector<std::shared_ptr<GameObject>>::iterator itStart = std::find(startGameObject_.begin(), startGameObject_.end(), obj);
+		if (itStart != startGameObject_.end())
 		{
-			startGameObject.erase(itStart);
+			startGameObject_.erase(itStart);
 		}
 
-		std::vector<std::shared_ptr<GameObject>>::iterator itUpdate = std::find(updateGameObject.begin(), updateGameObject.end(), obj);
-		if (itUpdate != updateGameObject.end())
+		std::vector<std::shared_ptr<GameObject>>::iterator itUpdate = std::find(updateGameObject_.begin(), updateGameObject_.end(), obj);
+		if (itUpdate != updateGameObject_.end())
 		{
-			updateGameObject.erase(itUpdate);
+			updateGameObject_.erase(itUpdate);
 		}
 
-		std::set<std::shared_ptr<GameObject>>::iterator itSelection = selectionGameObject.find(obj);
-		if (itSelection != selectionGameObject.end())
+		std::set<std::shared_ptr<GameObject>>::iterator itSelection = selectionGameObject_.find(obj);
+		if (itSelection != selectionGameObject_.end())
 		{
-			selectionGameObject.erase(itSelection);
+			selectionGameObject_.erase(itSelection);
 		}
 	}
-	removeGameObject.clear();
+	removeGameObject_.clear();
 }
 
 // 行列更新
 void GameObjectManager::UpdateTransform()
 {
-	for (std::shared_ptr<GameObject>& obj : updateGameObject)
+	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 	{
 		obj->UpdateTransform();
 	}
@@ -174,7 +174,7 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 	// 描画
 	shader->Begin(dc, rc);
 
-	for (std::shared_ptr<GameObject>& obj : updateGameObject)
+	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 	{
 		// Rendererコンポーネントがあれば描画
 		if (!obj->GetComponent<RendererCom>())continue;
@@ -198,12 +198,12 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 //ゲームオブジェクトを探す
 std::shared_ptr<GameObject> GameObjectManager::Find(const char* name)
 {
-	for (std::shared_ptr<GameObject>& obj : updateGameObject)
+	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 	{
 		if (std::strcmp(obj->GetName(), name) == 0)return obj;
 	}
 
-	for (std::shared_ptr<GameObject>& obj : startGameObject)
+	for (std::shared_ptr<GameObject>& obj : startGameObject_)
 	{
 		if (std::strcmp(obj->GetName(), name) == 0)return obj;
 	}
@@ -256,16 +256,16 @@ void GameObjectManager::DrawLister()
 	ImGui::SetNextWindowPos(ImVec2(30, 50), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
-	hiddenLister = !ImGui::Begin("GameObject Lister", nullptr, ImGuiWindowFlags_None);
-	if (!hiddenLister)
+	isHiddenLister_ = !ImGui::Begin("GameObject Lister", nullptr, ImGuiWindowFlags_None);
+	if (!isHiddenLister_)
 	{
-		for (std::shared_ptr<GameObject>& obj : updateGameObject)
+		for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 		{
 			//parentがあればcontinue
 			if (obj->GetParent())continue;
 
 			//再起関数
-			CycleDrawLister(obj, selectionGameObject);
+			CycleDrawLister(obj, selectionGameObject_);
 		}
 	}
 	ImGui::End();
@@ -277,10 +277,10 @@ void GameObjectManager::DrawDetail()
 	ImGui::SetNextWindowPos(ImVec2(950, 50), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
-	hiddenDetail = !ImGui::Begin("GameObject Detail", nullptr, ImGuiWindowFlags_None);
-	if (!hiddenDetail)
+	isHiddenDetail_ = !ImGui::Begin("GameObject Detail", nullptr, ImGuiWindowFlags_None);
+	if (!isHiddenDetail_)
 	{
-		std::shared_ptr<GameObject> lastSelected = selectionGameObject.empty() ? nullptr : *selectionGameObject.rbegin();
+		std::shared_ptr<GameObject> lastSelected = selectionGameObject_.empty() ? nullptr : *selectionGameObject_.rbegin();
 		if (lastSelected != nullptr)
 		{
 			lastSelected->OnGUI();

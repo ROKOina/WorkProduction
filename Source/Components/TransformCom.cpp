@@ -18,36 +18,36 @@ void TransformCom::Update(float elapsedTime)
 void TransformCom::OnGUI()
 {
 	// トランスフォーム
-	ImGui::DragFloat3("Position", &position.x, 0.1f);
-	ImGui::DragFloat3("WorldPosition", &worldPosition.x, 0.1f);
+	ImGui::DragFloat3("Position", &position_.x, 0.1f);
+	ImGui::DragFloat3("WorldPosition", &worldPosition_.x, 0.1f);
 
-	ImGui::DragFloat4("Rotation", &rotation.x, 0.1f);
+	ImGui::DragFloat4("Rotation", &rotation_.x, 0.1f);
 
 	{	//オイラー角
-		DirectX::XMFLOAT3 euler = eulerRotation;
+		DirectX::XMFLOAT3 euler = eulerRotation_;
 		if (ImGui::DragFloat3("EulerRotato", &euler.x)) {
 			SetEulerRotation(euler);
 		}
 	}
 
-	ImGui::DragFloat3("Scale", &scale.x, 0.1f);
+	ImGui::DragFloat3("Scale", &scale_.x, 0.1f);
 }
 
 //行列更新
 void TransformCom::UpdateTransform()
 {
 	// ワールド行列の更新
-	DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&rotation);
-	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+	DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&rotation_);
+	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale_.x, scale_.y, scale_.z);
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMQuaternionNormalize(Q));
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position_.x, position_.y, position_.z);
 
-	DirectX::XMMATRIX L = DirectX::XMLoadFloat4x4(&parentTransform);
+	DirectX::XMMATRIX L = DirectX::XMLoadFloat4x4(&parentTransform_);
 	DirectX::XMMATRIX W = S * R * T * L;
 
-	DirectX::XMStoreFloat4x4(&transform, W);
+	DirectX::XMStoreFloat4x4(&transform_, W);
 
-	worldPosition = { transform._41,transform._42,transform._43 };
+	worldPosition_ = { transform_._41,transform_._42,transform_._43 };
 
 
 }
@@ -58,12 +58,12 @@ void TransformCom::LookAtTransform(const DirectX::XMFLOAT3& focus, const DirectX
 	UpdateTransform();
 
 	//位置、注視点、上方向からビュー行列を作成
-	DirectX::XMVECTOR Eye = DirectX::XMLoadFloat3(&worldPosition);
+	DirectX::XMVECTOR Eye = DirectX::XMLoadFloat3(&worldPosition_);
 	DirectX::XMVECTOR Focus = DirectX::XMLoadFloat3(&focus);
 	DirectX::XMVECTOR Up = DirectX::XMLoadFloat3(&up);
 
 	//同じ座標の場合、少しずらす
-	DirectX::XMFLOAT3 wp = worldPosition;
+	DirectX::XMFLOAT3 wp = worldPosition_;
 	if (focus.x == wp.x && focus.y == wp.y && focus.z == wp.z)
 	{
 		wp.y += 0.0001f;
@@ -76,11 +76,11 @@ void TransformCom::LookAtTransform(const DirectX::XMFLOAT3& focus, const DirectX
 	DirectX::XMMATRIX World = DirectX::XMMatrixInverse(nullptr, View);
 	if (!std::isfinite(World.r->m128_f32[0]))return;
 
-	DirectX::XMStoreFloat4x4(&transform, World);
+	DirectX::XMStoreFloat4x4(&transform_, World);
 
 	//クォータニオンに適用
-	DirectX::XMStoreFloat4(&rotation,
-		DirectX::XMQuaternionRotationMatrix(DirectX::XMLoadFloat4x4(&transform)));
+	DirectX::XMStoreFloat4(&rotation_,
+		DirectX::XMQuaternionRotationMatrix(DirectX::XMLoadFloat4x4(&transform_)));
 }
 
 //指定のUpに合わせる
@@ -108,5 +108,5 @@ void TransformCom::SetUpTransform(const DirectX::XMFLOAT3& up)
 		0, 0, 0, 1 };
 	DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&rt);
 
-	DirectX::XMStoreFloat4(&rotation, DirectX::XMQuaternionRotationMatrix(M));
+	DirectX::XMStoreFloat4(&rotation_, DirectX::XMQuaternionRotationMatrix(M));
 }

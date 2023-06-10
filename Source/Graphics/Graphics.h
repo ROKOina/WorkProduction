@@ -18,47 +18,47 @@ public:
 	~Graphics();
 
 	// インスタンス取得
-	static Graphics& Instance() { return *instance; }
+	static Graphics& Instance() { return *instance_; }
 
 	// デバイス取得
-	ID3D11Device* GetDevice() const { return device.Get(); }
+	ID3D11Device* GetDevice() const { return device_.Get(); }
 
 	// デバイスコンテキスト取得
-	ID3D11DeviceContext* GetDeviceContext() const { return immediateContext.Get(); }
+	ID3D11DeviceContext* GetDeviceContext() const { return immediateContext_.Get(); }
 
 	// スワップチェーン取得
-	IDXGISwapChain* GetSwapChain() const { return swapchain.Get(); }
+	IDXGISwapChain* GetSwapChain() const { return swapchain_.Get(); }
 
 	// レンダーターゲットビュー取得
-	ID3D11RenderTargetView* GetRenderTargetView() const { return renderTargetView.Get(); }
+	ID3D11RenderTargetView* GetRenderTargetView() const { return renderTargetView_.Get(); }
 
 	// デプスステンシルビュー取得
-	ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView.Get(); }
+	ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView_.Get(); }
 
 	// シェーダー取得
-	Shader* GetShader() const { return shader.get(); }
+	Shader* GetShader() const { return shader_.get(); }
 
 	// スクリーン幅取得
-	float GetScreenWidth() const { return screenWidth; }
+	float GetScreenWidth() const { return screenWidth_; }
 
 	// スクリーン高さ取得
-	float GetScreenHeight() const { return screenHeight; }
+	float GetScreenHeight() const { return screenHeight_; }
 
 	// デバッグレンダラ取得
-	DebugRenderer* GetDebugRenderer() const { return debugRenderer.get(); }
+	DebugRenderer* GetDebugRenderer() const { return debugRenderer_.get(); }
 
 	// ラインレンダラ取得
-	LineRenderer* GetLineRenderer() const { return lineRenderer.get(); }
+	LineRenderer* GetLineRenderer() const { return lineRenderer_.get(); }
 
 	//描画周り設定呼び出し
-	const std::unique_ptr<Dx11StateLib>& GetDx11State() { return dx11State; }
+	const std::unique_ptr<Dx11StateLib>& GetDx11State() { return dx11State_; }
 
 	//ミューテックス取得
-	std::mutex& GetMutex() { return mutex; }
+	std::mutex& GetMutex() { return mutex_; }
 
 //public:	//サブウィンドウ
 //	// スワップチェイン作成
-//	void CreateSubWindowSwapChain(HWND hWnd, int width, int height);
+//	void CreateSubWindowSwapChain(HWND hWnd_, int width, int height);
 //
 //	// スワップチェーン取得
 //	IDXGISwapChain* GetSubWindowSwapChain(int index) const { return subWswapchain[index].Get(); }
@@ -72,25 +72,25 @@ private:
 	//std::vector<std::unique_ptr<ImGuiRenderer>>					subWImguiRenderer;
 
 private:
-	static Graphics*								instance;
+	static Graphics*								instance_;
 
-	Microsoft::WRL::ComPtr<ID3D11Device>			device;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext>		immediateContext;
-	Microsoft::WRL::ComPtr<IDXGISwapChain>			swapchain;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	renderTargetView;
-	Microsoft::WRL::ComPtr<ID3D11Texture2D>			depthStencilBuffer;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView;
+	Microsoft::WRL::ComPtr<ID3D11Device>			device_;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext>		immediateContext_;
+	Microsoft::WRL::ComPtr<IDXGISwapChain>			swapchain_;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	renderTargetView_;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D>			depthStencilBuffer_;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView_;
 
-	std::unique_ptr<Shader>							shader;
-	std::unique_ptr<DebugRenderer>					debugRenderer;
-	std::unique_ptr<LineRenderer>					lineRenderer;
+	std::unique_ptr<Shader>							shader_;
+	std::unique_ptr<DebugRenderer>					debugRenderer_;
+	std::unique_ptr<LineRenderer>					lineRenderer_;
 
 	//描画周り一括初期化
-	std::unique_ptr<Dx11StateLib> dx11State;
+	std::unique_ptr<Dx11StateLib> dx11State_;
 
-	float	screenWidth;
-	float	screenHeight;
+	float	screenWidth_;
+	float	screenHeight_;
 
-	std::mutex	mutex;
+	std::mutex	mutex_;
 };
 

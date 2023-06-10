@@ -22,9 +22,9 @@ static const int syncInterval = 0;
 
 // コンストラクタ
 Framework::Framework(HWND hWnd)
-	: hWnd(hWnd)
-	, input(hWnd)
-	, graphics(hWnd)
+	: hWnd_(hWnd)
+	, input_(hWnd)
+	, graphics_(hWnd)
 {
 	//エフェクトマネージャー初期化
 	EffectManager::Instance().Initialize();
@@ -48,7 +48,7 @@ Framework::~Framework()
 void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
 {
 	// 入力更新処理
-	input.Update();
+	input_.Update();
 
 	// シーン更新処理
 	//sceneGame.Update(elapsedTime);
@@ -62,9 +62,9 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 {
 	//別スレッド中にデバイスコンテキストが使われていた場合に
 	//同時アクセスしないように排他制御する
-	std::lock_guard<std::mutex> lock(graphics.GetMutex());
+	std::lock_guard<std::mutex> lock(graphics_.GetMutex());
 
-	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+	ID3D11DeviceContext* dc = graphics_.GetDeviceContext();
 
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -84,7 +84,7 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	// バックバッファに描画した画を画面に表示する。
-	graphics.GetSwapChain()->Present(syncInterval, 0);
+	graphics_.GetSwapChain()->Present(syncInterval, 0);
 
 	// Update and Render additional Platform Windows
 	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -106,14 +106,14 @@ void Framework::CalculateFrameStats()
 	frames++;
 
 	// Compute averages over one second period.
-	if ((timer.TimeStamp() - time_tlapsed) >= 1.0f)
+	if ((timer_.TimeStamp() - time_tlapsed) >= 1.0f)
 	{
 		float fps = static_cast<float>(frames); // fps = frameCnt / 1
 		float mspf = 1000.0f / fps;
 		std::ostringstream outs;
 		outs.precision(6);
 		outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
-		SetWindowTextA(hWnd, outs.str().c_str());
+		SetWindowTextA(hWnd_, outs.str().c_str());
 
 		// Reset for next average.
 		frames = 0;
@@ -147,8 +147,8 @@ int Framework::Run()
 	ImGui::StyleColorsClassic();
 
 	// Setup Platform/Renderer backends
-	ImGui_ImplWin32_Init(hWnd);
-	ImGui_ImplDX11_Init(graphics.GetDevice(), graphics.GetDeviceContext());
+	ImGui_ImplWin32_Init(hWnd_);
+	ImGui_ImplDX11_Init(graphics_.GetDevice(), graphics_.GetDeviceContext());
 
 	//終了コードならwhileぬける　
 	while (WM_QUIT != msg.message)
@@ -163,11 +163,11 @@ int Framework::Run()
 		}
 		else
 		{
-			timer.Tick();
+			timer_.Tick();
 			CalculateFrameStats();
 
 			float elapsedTime = syncInterval == 0
-				? timer.TimeInterval()
+				? timer_.TimeInterval()
 				: syncInterval / 60.0f
 				;
 			Update(elapsedTime);
@@ -191,13 +191,13 @@ int Framework::Run()
 	//HMODULE hDll = GetModuleHandleW(L"dxgidebug.dll");
 	//fPtr DXGIGetDebugInterface = (fPtr)GetProcAddress(hDll, "DXGIGetDebugInterface");
 
-	//DXGIGetDebugInterface(__uuidof(IDXGIDebug), (void**)&debugGI);
+	//DXGIGetDebugInterface(__uuidof(IDXGIDebug), (void**)&debugGI_);
 
-	//debugGI->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_DETAIL);
+	//debugGI_->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_DETAIL);
 
-	//Graphics::Instance().GetDevice()->QueryInterface(__uuidof(ID3D11Debug), (void**)&debugID);
-	//debugID->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY);
-	//debugID->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	//Graphics::Instance().GetDevice()->QueryInterface(__uuidof(ID3D11Debug), (void**)&debugID_);
+	//debugID_->ReportLiveDeviceObjects(D3D11_RLDO_SUMMARY);
+	//debugID_->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 
 	return static_cast<int>(msg.wParam);
 }
@@ -231,12 +231,12 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 		break;
 	case WM_ENTERSIZEMOVE:
 		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
-		timer.Stop();
+		timer_.Stop();
 		break;
 	case WM_EXITSIZEMOVE:
 		// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
 		// Here we reset everything based on the new window dimensions.
-		timer.Start();
+		timer_.Start();
 		break;
 	default:
 		return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -254,9 +254,9 @@ void Framework::AddSubWindow(int width, int height)
 		NULL, NULL, ::GetModuleHandle(NULL), NULL);
 	ShowWindow(hWnd2, __argc);
 
-	Inspector* i = new Inspector(hWnd2, countSubWindow, width, height);
+	Inspector* i = new Inspector(hWnd2, countSubWindow_, width, height);
 	SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i));
 
 	SubWindowManager::Instance().AddSubWindow(i);
-	countSubWindow++;
+	countSubWindow_++;
 }

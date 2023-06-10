@@ -12,10 +12,10 @@ void RendererCom::Start()
 void RendererCom::Update(float elapsedTime)
 {
 	// モデルの更新
-	if (model != nullptr)
+	if (model_ != nullptr)
 	{
 		DirectX::XMFLOAT4X4 transform = GetGameObject()->GetComponent<TransformCom>()->GetTransform();
-		model->UpdateTransform(transform);
+		model_->UpdateTransform(transform);
 	}
 }
 
@@ -28,5 +28,5 @@ void RendererCom::OnGUI()
 // モデルの読み込み
 void RendererCom::LoadModel(const char* filename)
 {
-	model = std::make_unique<Model>(filename);
+	model_ = std::make_unique<Model>(filename);
 }

@@ -230,7 +230,7 @@ void FbxModelResource::LoadNodes(FbxNode* fbxNode, int parentNodeIndex)
 	}
 
 	// 再帰的に子ノードを処理する
-	parentNodeIndex = static_cast<int>(nodes.size() - 1);
+	parentNodeIndex = static_cast<int>(nodes_.size() - 1);
 	for (int i = 0; i < fbxNode->GetChildCount(); ++i)
 	{
 		LoadNodes(fbxNode->GetChild(i), parentNodeIndex);
@@ -255,7 +255,7 @@ void FbxModelResource::LoadNode(FbxNode* fbxNode, int parentNodeIndex)
 	ConvertTranslationFromRHtoLH(node.translate);
 	ConvertRotationFromRHtoLH(node.rotate);
 
-	nodes.emplace_back(node);
+	nodes_.emplace_back(node);
 }
 
 // FBXノードを再帰的に辿ってメッシュデータを読み込み
@@ -294,8 +294,8 @@ void FbxModelResource::LoadMesh(ID3D11Device* device, FbxNode* fbxNode, FbxMesh*
 	int fbxPolygonCount = fbxMesh->GetPolygonCount();
 	std::string& fbxNodePath = GetNodePath(fbxNode);
 
-	meshes.emplace_back(Mesh());
-	Mesh& mesh = meshes.back();
+	meshes_.emplace_back(Mesh());
+	Mesh& mesh = meshes_.back();
 	NodeId nodeId = GetNodeId(fbxNode);
 	mesh.nodeIndex = FindNodeIndex(nodeId);
 	mesh.subsets.resize(fbxMaterialCount > 0 ? fbxMaterialCount : 1);
@@ -652,7 +652,7 @@ void FbxModelResource::LoadMaterials(ID3D11Device* device, const char* dirname, 
 		Material material;
 		material.name = "Dummy";
 		material.color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-		materials.emplace_back(material);
+		materials_.emplace_back(material);
 	}
 }
 
@@ -717,7 +717,7 @@ void FbxModelResource::LoadMaterial(ID3D11Device* device, const char* dirname, F
 		}
 	}
 
-	materials.emplace_back(material);
+	materials_.emplace_back(material);
 }
 
 // アニメーションデータを読み込み
@@ -732,8 +732,8 @@ void FbxModelResource::LoadAnimations(FbxScene* fbxScene, const char* name, bool
 	{
 		//if (0 != ::strncmp(fbxAnimStackNames.GetAt(fbxAnimationIndex)->Buffer(), u8"基本", strlen(u8"基本"))) continue;
 		
-		animations.emplace_back(Animation());
-		Animation& animation = animations.back();
+		animations_.emplace_back(Animation());
+		Animation& animation = animations_.back();
 
 		// アニメーションデータのサンプリング設定
 		FbxTime::EMode fbxTimeMode = fbxScene->GetGlobalSettings().GetTimeMode();
@@ -770,7 +770,7 @@ void FbxModelResource::LoadAnimations(FbxScene* fbxScene, const char* name, bool
 			// ノード名を比較して対象ノードを列挙する
 			// ※名前が重複していると失敗する場合がある
 			FbxNode* fbxRootNode = fbxScene->GetRootNode();
-			for (Node& node : nodes)
+			for (Node& node : nodes_)
 			{
 				FbxNode* fbxNode = fbxRootNode->FindChild(node.name.c_str(), true, true);
 				fbxNodes.emplace_back(fbxNode);
@@ -780,7 +780,7 @@ void FbxModelResource::LoadAnimations(FbxScene* fbxScene, const char* name, bool
 		{
 			// ノードの完全パスを比較して対象ノードを列挙する（重い）
 			// ※必ずモデルとアニメーションのFBXのノードツリー構成が一致している必要がある
-			for (Node& node : nodes)
+			for (Node& node : nodes_)
 			{
 				FbxNode* fbxAnimationNode = nullptr;
 				for (int fbxNodeIndex = 0; fbxNodeIndex < fbxScene->GetNodeCount(); ++fbxNodeIndex)
@@ -830,15 +830,15 @@ void FbxModelResource::LoadAnimations(FbxScene* fbxScene, const char* name, bool
 				if (fbxNode == nullptr)
 				{
 					// アニメーション対象のノードがなかったのでダミーデータを設定
-					Node& node = nodes.at(fbxNodeIndex);
+					Node& node = nodes_.at(fbxNodeIndex);
 					keyData.scale = node.scale;
 					keyData.rotate = node.rotate;
 					keyData.translate = node.translate;
 				}
-				else if (fbxNodeIndex == rootMotionNodeIndex)
+				else if (fbxNodeIndex == rootMotionNodeIndex_)
 				{
 					// ルートモーションは無視する
-					Node& node = nodes.at(fbxNodeIndex);
+					Node& node = nodes_.at(fbxNodeIndex);
 					keyData.scale = DirectX::XMFLOAT3(1, 1, 1);
 					keyData.rotate = DirectX::XMFLOAT4(0, 0, 0, 1);
 					keyData.translate = DirectX::XMFLOAT3(0, 0, 0);
@@ -866,7 +866,7 @@ void FbxModelResource::LoadAnimations(FbxScene* fbxScene, const char* name, bool
 		delete fbxAnimStackNames[i];
 	}
 
-	//std::sort(animations.begin(), animations.end(), [](auto& a, auto& b) { return strcmp(a.name.c_str(), b.name.c_str()); });
+	//std::sort(animations_.begin(), animations_.end(), [](auto& a, auto& b) { return strcmp(a.name.c_str(), b.name.c_str()); });
 }
 
 // 右手座標系から左手座標系へ変換
@@ -965,12 +965,12 @@ void FbxModelResource::SetupIgnoreMotionNode(const char* ignoreRootMotionNodeNam
 	// 無視するルートモーションを検索
 	if (ignoreRootMotionNodeName != nullptr)
 	{
-		rootMotionNodeIndex = -1;
-		for (size_t i = 0; i < nodes.size(); ++i)
+		rootMotionNodeIndex_ = -1;
+		for (size_t i = 0; i < nodes_.size(); ++i)
 		{
-			if (nodes.at(i).name == ignoreRootMotionNodeName)
+			if (nodes_.at(i).name == ignoreRootMotionNodeName)
 			{
-				rootMotionNodeIndex = static_cast<int>(i);
+				rootMotionNodeIndex_ = static_cast<int>(i);
 				break;
 			}
 		}

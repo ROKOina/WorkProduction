@@ -22,11 +22,11 @@ public:
 	virtual void OnGUI() {}
 
 	// ゲームオブジェクト設定
-	void SetGameObject(std::shared_ptr<GameObject> obj) { this->gameObject = obj; }
+	void SetGameObject(std::shared_ptr<GameObject> obj) { this->gameObject_ = obj; }
 
 	// ゲームオブジェクト取得
-	std::shared_ptr<GameObject> GetGameObject() { return gameObject.lock(); }
+	std::shared_ptr<GameObject> GetGameObject() { return gameObject_.lock(); }
 
 private:
-	std::weak_ptr<GameObject>	gameObject;
+	std::weak_ptr<GameObject>	gameObject_;
 };

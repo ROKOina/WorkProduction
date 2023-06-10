@@ -28,8 +28,8 @@ public:
 
 
 private:
-	std::unique_ptr<AudioSource> BGM=Audio::Instance().LoadAudioSource("Data/Audio/BGM.wav");
+	std::unique_ptr<AudioSource> bgm_=Audio::Instance().LoadAudioSource("Data/Audio/BGM.wav");
 
 
-	std::unique_ptr<Particle> particle;
+	std::unique_ptr<Particle> particle_;
 };

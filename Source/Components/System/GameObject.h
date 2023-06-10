@@ -44,9 +44,9 @@ public:
 
 		//transformの場合は保持する
 		if (std::strcmp(component->GetName(), "Transform") == 0)
-			transform = std::dynamic_pointer_cast<TransformCom>(component);
+			transform_ = std::dynamic_pointer_cast<TransformCom>(component);
 
-		components.emplace_back(component);
+		components_.emplace_back(component);
 		return component;
 	}
 
@@ -54,7 +54,7 @@ public:
 	template<class T>
 	std::shared_ptr<T> GetComponent()
 	{
-		for (std::shared_ptr<Component>& component : components)
+		for (std::shared_ptr<Component>& component : components_)
 		{
 			std::shared_ptr<T> p = std::dynamic_pointer_cast<T>(component);
 			if (p == nullptr) continue;
@@ -69,22 +69,22 @@ public:
 	std::shared_ptr<GameObject> AddChildObject();
 
 	//親取得
-	std::shared_ptr<GameObject> GetParent() { return parentObject.lock(); }
+	std::shared_ptr<GameObject> GetParent() { return parentObject_.lock(); }
 
 	//子供達取得 (weak_ptrなので注意)
-	std::vector<std::weak_ptr<GameObject>> GetChildren() { return childrenObject; }
+	std::vector<std::weak_ptr<GameObject>> GetChildren() { return childrenObject_; }
 
 public:
-	std::shared_ptr<TransformCom> transform;
+	std::shared_ptr<TransformCom> transform_;
 
 private:
 	std::string	name;
 
-	std::vector<std::shared_ptr<Component>>	components;
+	std::vector<std::shared_ptr<Component>>	components_;
 
 	//親子
-	std::weak_ptr<GameObject> parentObject;
-	std::vector<std::weak_ptr<GameObject>> childrenObject;
+	std::weak_ptr<GameObject> parentObject_;
+	std::vector<std::weak_ptr<GameObject>> childrenObject_;
 };
 
 // ゲームオブジェクトマネージャー
@@ -125,11 +125,11 @@ private:
 	void DrawDetail();
 
 private:
-	std::vector<std::shared_ptr<GameObject>>		startGameObject;
-	std::vector<std::shared_ptr<GameObject>>		updateGameObject;
-	std::set<std::shared_ptr<GameObject>>		selectionGameObject;
-	std::set<std::shared_ptr<GameObject>>		removeGameObject;
+	std::vector<std::shared_ptr<GameObject>>		startGameObject_;
+	std::vector<std::shared_ptr<GameObject>>		updateGameObject_;
+	std::set<std::shared_ptr<GameObject>>		selectionGameObject_;
+	std::set<std::shared_ptr<GameObject>>		removeGameObject_;
 
-	bool					hiddenLister = false;
-	bool					hiddenDetail = false;
+	bool					isHiddenLister_ = false;
+	bool					isHiddenDetail_ = false;
 };

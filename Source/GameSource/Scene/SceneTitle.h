@@ -23,6 +23,5 @@ public:
     void Render()override;
 
 private:
-    Sprite* sprite = nullptr;
-    std::unique_ptr<Sprite> alphaS = std::make_unique<Sprite>("Data/Sprite/LoadingIcon.png");
+    Sprite* sprite_ = nullptr;
 };

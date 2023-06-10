@@ -29,18 +29,18 @@ public:
 	LRESULT CALLBACK HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 private:
-	const HWND				hWnd;
-	HighResolutionTimer		timer;
-	Audio					audio;
-	Graphics				graphics;
-	Input					input;
+	const HWND				hWnd_;
+	HighResolutionTimer		timer_;
+	Audio					audio_;
+	Graphics				graphics_;
+	Input					input_;
 
 
-	Microsoft::WRL::ComPtr<IDXGIDebug>				debugGI;
-	Microsoft::WRL::ComPtr<ID3D11Debug>				debugID;
+	Microsoft::WRL::ComPtr<IDXGIDebug>				debugGI_;
+	Microsoft::WRL::ComPtr<ID3D11Debug>				debugID_;
 
 private:	//サブウィンドウ
 	void AddSubWindow(int width = 100, int height = 100);
-	int countSubWindow;
+	int countSubWindow_;
 };
 

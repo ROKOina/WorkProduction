@@ -20,11 +20,11 @@ public:
     virtual void Render() = 0;
 
     //€”õŠ®—¹‚µ‚Ä‚¢‚é‚©
-    bool IsReady()const { return ready; }
+    bool IsReady()const { return isReady_; }
 
     //€”õŠ®—¹İ’è
-    void SetReady() { ready = true; }
+    void SetReady() { isReady_ = true; }
 
 private:
-    bool ready = false;
+    bool isReady_ = false;
 };

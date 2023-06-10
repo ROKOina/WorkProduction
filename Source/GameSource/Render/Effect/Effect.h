@@ -26,5 +26,5 @@ public:
     (Effekseer::Handle handle, DirectX::XMFLOAT3& scale);
     
 private :
-    Effekseer::EffectRef effekseerEffect;
+    Effekseer::EffectRef effekseerEffect_;
 };

@@ -29,20 +29,20 @@ public:
 		float r, float g, float b, float a) const;
 
 	// テクスチャ幅取得
-	int GetTextureWidth() const { return textureWidth; }
+	int GetTextureWidth() const { return textureWidth_; }
 
 	// テクスチャ高さ取得
-	int GetTextureHeight() const { return textureHeight; }
+	int GetTextureHeight() const { return textureHeight_; }
 
 private:
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>			vertexShader;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>			pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>			inputLayout;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>			vertexShader_;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>			pixelShader_;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>			inputLayout_;
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer>				vertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>				vertexBuffer_;
 
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	shaderResourceView;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	shaderResourceView_;
 
-	int textureWidth = 0;
-	int textureHeight = 0;
+	int textureWidth_ = 0;
+	int textureHeight_ = 0;
 };

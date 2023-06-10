@@ -21,24 +21,24 @@ inline LPWSTR HRTrace(HRESULT hr)
 
 class Benchmark
 {
-	LARGE_INTEGER ticksPerSecond;
-	LARGE_INTEGER startTicks;
-	LARGE_INTEGER currentTicks;
+	LARGE_INTEGER ticksPerSecond_;
+	LARGE_INTEGER startTicks_;
+	LARGE_INTEGER currentTicks_;
 
 public:
 	Benchmark()
 	{
-		QueryPerformanceFrequency(&ticksPerSecond);
-		QueryPerformanceCounter(&startTicks);
-		QueryPerformanceCounter(&currentTicks);
+		QueryPerformanceFrequency(&ticksPerSecond_);
+		QueryPerformanceCounter(&startTicks_);
+		QueryPerformanceCounter(&currentTicks_);
 	}
 	void begin()
 	{
-		QueryPerformanceCounter(&startTicks);
+		QueryPerformanceCounter(&startTicks_);
 	}
 	float end()
 	{
-		QueryPerformanceCounter(&currentTicks);
-		return static_cast<float>(currentTicks.QuadPart - startTicks.QuadPart) / static_cast<float>(ticksPerSecond.QuadPart);
+		QueryPerformanceCounter(&currentTicks_);
+		return static_cast<float>(currentTicks_.QuadPart - startTicks_.QuadPart) / static_cast<float>(ticksPerSecond_.QuadPart);
 	}
 };

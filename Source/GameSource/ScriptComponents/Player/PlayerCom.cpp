@@ -12,10 +12,10 @@ void PlayerCom::Start()
     std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
 
     //プレイヤーのワールドポジションを取得
-    DirectX::XMFLOAT3 wp = GetGameObject()->transform->GetWorldPosition();
+    DirectX::XMFLOAT3 wp = GetGameObject()->transform_->GetWorldPosition();
     wp.z -= 10;
     wp.y += 6;
-    cameraObj->transform->SetPosition(wp);
+    cameraObj->transform_->SetPosition(wp);
 
     {   //仮アニメーション
         std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
@@ -32,13 +32,13 @@ void PlayerCom::Update(float elapsedTime)
     {
         //カメラをプレイヤーにフォーカスする
         std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
-        cameraObj->transform->LookAtTransform(GetGameObject()->transform->GetPosition());
+        cameraObj->transform_->LookAtTransform(GetGameObject()->transform_->GetPosition());
 
         //プレイヤーのワールドポジションを取得
-        DirectX::XMFLOAT3 wp = GetGameObject()->transform->GetWorldPosition();
+        DirectX::XMFLOAT3 wp = GetGameObject()->transform_->GetWorldPosition();
         wp.z -= 10;
         wp.y += 6;
-        cameraObj->transform->SetPosition(wp);
+        cameraObj->transform_->SetPosition(wp);
 
     }
 
@@ -47,12 +47,12 @@ void PlayerCom::Update(float elapsedTime)
         InputMove(elapsedTime);
 
         //速力処理更新
-        DirectX::XMFLOAT3 p = GetGameObject()->transform->GetPosition();
-        DirectX::XMFLOAT4 r = GetGameObject()->transform->GetRotation();
+        DirectX::XMFLOAT3 p = GetGameObject()->transform_->GetPosition();
+        DirectX::XMFLOAT4 r = GetGameObject()->transform_->GetRotation();
         //UpdateVelocity(elapsedTime, p, r);
-        UpdateVelocity(elapsedTime, p, DirectX::XMFLOAT4(0, 0, 0, 0),up);
-        GetGameObject()->transform->SetPosition(p);
-        GetGameObject()->transform->SetRotation(r);
+        UpdateVelocity(elapsedTime, p, DirectX::XMFLOAT4(0, 0, 0, 0),up_);
+        GetGameObject()->transform_->SetPosition(p);
+        GetGameObject()->transform_->SetRotation(r);
     }
 
     //仮回転
@@ -65,14 +65,14 @@ void PlayerCom::Update(float elapsedTime)
 // GUI描画
 void PlayerCom::OnGUI()
 {
-    ImGui::DragFloat("moveSpeed", &moveSpeed);
-    ImGui::DragFloat("turnSpeed", &turnSpeed);
+    ImGui::DragFloat("moveSpeed", &moveSpeed_);
+    ImGui::DragFloat("turnSpeed", &turnSpeed_);
 
-    ImGui::DragFloat3("lookP", &look.x);
-    ImGui::DragFloat3("up", &up.x);
+    ImGui::DragFloat3("lookP", &look_.x);
+    ImGui::DragFloat3("up", &up_.x);
 
     DirectX::XMFLOAT3 p;
-    p = GetGameObject()->transform->GetUp();
+    p = GetGameObject()->transform_->GetUp();
     ImGui::DragFloat3("myUp", &p.x);
     ImGui::Checkbox("aaa", &aaa);
 }
@@ -139,15 +139,15 @@ bool PlayerCom::InputMove(float elapsedTime)
     }
 
     //移動処理
-    Move(moveVec.x, moveVec.z, moveSpeed);
+    Move(moveVec.x, moveVec.z, moveSpeed_);
 
     //旋回処理
-    DirectX::XMFLOAT3 pos = GetGameObject()->transform->GetWorldPosition();
-    look = { moveVec.x * 3 + pos.x 
+    DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
+    look_ = { moveVec.x * 3 + pos.x 
         ,pos.y
         ,moveVec.z * 3 + pos.z };
-    GetGameObject()->transform->LookAtTransform(look, up);
-    GetGameObject()->transform->SetUpTransform(up);
+    GetGameObject()->transform_->LookAtTransform(look_, up_);
+    GetGameObject()->transform_->SetUpTransform(up_);
 
 
 

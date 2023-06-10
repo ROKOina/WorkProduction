@@ -30,7 +30,7 @@ public:
     void ChangeScene(Scene* scene);
 
 private:
-    Scene* currentScene = nullptr;
-    Scene* nextScene = nullptr;
+    Scene* currentScene_ = nullptr;
+    Scene* nextScene_ = nullptr;
 
 };

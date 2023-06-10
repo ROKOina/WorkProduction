@@ -115,10 +115,10 @@ public:
 	};
 
 	// 各種データ取得
-	const std::vector<Mesh>& GetMeshes() const { return meshes; }
-	const std::vector<Node>& GetNodes() const { return nodes; }
-	const std::vector<Animation>& GetAnimations() const { return animations; }
-	const std::vector<Material>& GetMaterials() const { return materials; }
+	const std::vector<Mesh>& GetMeshes() const { return meshes_; }
+	const std::vector<Node>& GetNodes() const { return nodes_; }
+	const std::vector<Animation>& GetAnimations() const { return animations_; }
+	const std::vector<Material>& GetMaterials() const { return materials_; }
 
 	// 読み込み
 	void Load(ID3D11Device* device, const char* filename);
@@ -137,8 +137,8 @@ protected:
 	int FindNodeIndex(NodeId nodeId) const;
 
 protected:
-	std::vector<Node>		nodes;
-	std::vector<Material>	materials;
-	std::vector<Mesh>		meshes;
-	std::vector<Animation>	animations;
+	std::vector<Node>		nodes_;
+	std::vector<Material>	materials_;
+	std::vector<Mesh>		meshes_;
+	std::vector<Animation>	animations_;
 };

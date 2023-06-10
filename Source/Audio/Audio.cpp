@@ -22,11 +22,11 @@ Audio::Audio()
 #endif
 
 	// XAudio初期化
-	hr = XAudio2Create(&xaudio, createFlags);
+	hr = XAudio2Create(&xaudio_, createFlags);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	// マスタリングボイス生成
-	hr = xaudio->CreateMasteringVoice(&masteringVoice);
+	hr = xaudio_->CreateMasteringVoice(&masteringVoice_);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 }
 
@@ -34,17 +34,17 @@ Audio::Audio()
 Audio::~Audio()
 {
 	// マスタリングボイス破棄
-	if (masteringVoice != nullptr)
+	if (masteringVoice_ != nullptr)
 	{
-		masteringVoice->DestroyVoice();
-		masteringVoice = nullptr;
+		masteringVoice_->DestroyVoice();
+		masteringVoice_ = nullptr;
 	}
 
 	// XAudio終了化
-	if (xaudio != nullptr)
+	if (xaudio_ != nullptr)
 	{
-		xaudio->Release();
-		xaudio = nullptr;
+		xaudio_->Release();
+		xaudio_ = nullptr;
 	}
 
 	// COM終了化
@@ -55,5 +55,5 @@ Audio::~Audio()
 std::unique_ptr<AudioSource> Audio::LoadAudioSource(const char* filename)
 {
 	std::shared_ptr<AudioResource> resource = std::make_shared<AudioResource>(filename);
-	return std::make_unique<AudioSource>(xaudio, resource);
+	return std::make_unique<AudioSource>(xaudio_, resource);
 }

@@ -8,7 +8,7 @@
 class SceneLoading :public Scene
 {
 public:
-    SceneLoading(Scene* nextScene):nextScene(nextScene){}
+    SceneLoading(Scene* nextScene):nextScene_(nextScene){}
     ~SceneLoading(){}
 
     //èâä˙âª
@@ -28,8 +28,8 @@ private:
     static void LoadingThread(SceneLoading* scene);
 
 private :
-    Sprite* sprite = nullptr;
-    float angle = 0.0f;
-    Scene* nextScene = nullptr;
-    std::thread* thread = nullptr;
+    Sprite* sprite_ = nullptr;
+    float angle_ = 0.0f;
+    Scene* nextScene_ = nullptr;
+    std::thread* thread_ = nullptr;
 };

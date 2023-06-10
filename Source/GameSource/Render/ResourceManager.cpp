@@ -9,7 +9,7 @@ std::shared_ptr<ModelResource> ResourceManager::LoadModelResource(const char* fi
     std::shared_ptr<ModelResource> model;
 
     //モデル検索
-    for (auto& modelmap : models){
+    for (auto& modelmap : models_){
         if (modelmap.first == filename){
             if (modelmap.second.expired() == false) {
                 model = static_cast<std::shared_ptr<ModelResource>>(modelmap.second);
@@ -24,8 +24,8 @@ std::shared_ptr<ModelResource> ResourceManager::LoadModelResource(const char* fi
         resource->Load(Graphics::Instance().GetDevice(), filename);
 
         //マップに登録
-        models[filename] = resource;
-        model = static_cast<std::shared_ptr<ModelResource>>(models[filename]);
+        models_[filename] = resource;
+        model = static_cast<std::shared_ptr<ModelResource>>(models_[filename]);
     }
 
     return model;

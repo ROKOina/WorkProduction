@@ -29,9 +29,9 @@ public:
     void LoadModel(const char* filename);
 
     // ƒ‚ƒfƒ‹‚ÌŽæ“¾
-    Model* GetModel() const { return model.get(); }
+    Model* GetModel() const { return model_.get(); }
 
 private:
-    std::unique_ptr<Model>	model;
+    std::unique_ptr<Model>	model_;
 
 };
