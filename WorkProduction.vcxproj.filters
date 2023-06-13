@@ -87,7 +87,7 @@
     <ClInclude Include="Source\Graphics\Graphics.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Shader\LambertShader.h">
+    <ClInclude Include="Source\Graphics\Shaders\3D\LambertShader.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Source\Graphics\Model\Model.h">
@@ -96,7 +96,7 @@
     <ClInclude Include="Source\Graphics\Model\ModelResource.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Shader\Shader.h">
+    <ClInclude Include="Source\Graphics\Shaders\Shader.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Source\Input\Input.h">
@@ -237,7 +237,7 @@
     <ClInclude Include="External\imgui-docking\backends\imgui_impl_win32.h">
       <Filter>External\imguiDocking</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Shader\compute\particle.h">
+    <ClInclude Include="Source\Graphics\Shaders\compute\particle.h">
       <Filter>Source\Graphics\compute</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\CameraCom.h">
@@ -250,6 +250,7 @@
     <ClInclude Include="Source\Components\TransformCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCom.h" />
     <ClInclude Include="Source\Components\AnimationCom.h" />
+    <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -264,7 +265,7 @@
     <ClCompile Include="Source\Graphics\Graphics.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Shader\LambertShader.cpp">
+    <ClCompile Include="Source\Graphics\Shaders\3D\LambertShader.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Model\Model.cpp">
@@ -396,7 +397,7 @@
     <ClCompile Include="External\imgui-docking\backends\imgui_impl_win32.cpp">
       <Filter>External\imguiDocking</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Shader\compute\particle.cpp">
+    <ClCompile Include="Source\Graphics\Shaders\compute\particle.cpp">
       <Filter>Source\Graphics\compute</Filter>
     </ClCompile>
     <ClCompile Include="Source\Components\CameraCom.cpp">
@@ -420,56 +421,47 @@
     <ClCompile Include="Source\Components\AnimationCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="HLSL\Debug.hlsli">
+    <None Include="HLSL\Debugs\Debug.hlsli">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="HLSL\ImGui.hlsli">
+    <None Include="HLSL\Debugs\Line.hlsli">
       <Filter>HLSL</Filter>
     </None>
-    <None Include="HLSL\Lambert.hlsli">
-      <Filter>HLSL</Filter>
-    </None>
-    <None Include="HLSL\Line.hlsli">
-      <Filter>HLSL</Filter>
-    </None>
-    <None Include="HLSL\Sprite.hlsli">
+    <None Include="HLSL\2D\Sprite.hlsli">
       <Filter>HLSL</Filter>
     </None>
     <None Include="HLSL\compute\Particle.hlsli">
       <Filter>HLSL\compute</Filter>
     </None>
+    <None Include="HLSL\3D\Phong.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="HLSL\3D\Lambert.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="HLSL\DebugPS.hlsl">
+    <FxCompile Include="HLSL\Debugs\DebugPS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="HLSL\DebugVS.hlsl">
+    <FxCompile Include="HLSL\Debugs\DebugVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="HLSL\ImGuiPS.hlsl">
+    <FxCompile Include="HLSL\Debugs\LineVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="HLSL\ImGuiVS.hlsl">
+    <FxCompile Include="HLSL\Debugs\LinePS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="HLSL\LambertPS.hlsl">
+    <FxCompile Include="HLSL\2D\SpriteVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="HLSL\LambertVS.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="HLSL\LineVS.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="HLSL\LinePS.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="HLSL\SpriteVS.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="HLSL\SpritePS.hlsl">
+    <FxCompile Include="HLSL\2D\SpritePS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\compute\ParticleCS.hlsl">
@@ -483,6 +475,18 @@
     </FxCompile>
     <FxCompile Include="HLSL\compute\ParticleGS.hlsl">
       <Filter>HLSL\compute</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\PhongPS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\PhongVS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\LambertPS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\LambertVS.hlsl">
+      <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

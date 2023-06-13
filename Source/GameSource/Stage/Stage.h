@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Graphics\Shader\Shader.h"
+#include "Graphics\Shaders\Shader.h"
 #include "GameSource\Math\Collision.h"
 
 //ステージ

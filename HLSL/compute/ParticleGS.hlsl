@@ -1,4 +1,4 @@
-#include "../Lambert.hlsli"
+#include "../3D/Lambert.hlsli"
 #include "Particle.hlsli"
 
 StructuredBuffer<particle> particleBuffer : register(t9);

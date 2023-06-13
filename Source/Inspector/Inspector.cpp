@@ -65,13 +65,13 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 	////カメラパラメーター設定
 	//Camera& camera = Camera::Instance();
-	//rc.view = camera.GetView();
-	//rc.projection = camera.GetProjection();
+	//rc_.view = camera.GetView();
+	//rc_.projection = camera.GetProjection();
 
 	// 3Dモデル描画
 	{
 		//Shader* shader_ = graphics_.GetShader();
-		//shader_->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
+		//shader_->Begin(dc, rc_);	//シェーダーにカメラの情報を渡す
 
 		//shader_->Draw(dc, p.get());
 

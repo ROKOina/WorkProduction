@@ -3,7 +3,7 @@
 #include "Components\System\Component.h"
 #include "GameSource\Character\Character.h"
 
-class PlayerCom : public Component,public Character
+class PlayerCom : public Component, public Character
 {
     //コンポーネントオーバーライド
 public:

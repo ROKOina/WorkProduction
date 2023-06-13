@@ -4,6 +4,7 @@
 #include "Components\TransformCom.h"
 #include "Components\AnimationCom.h"
 #include <imgui.h>
+#include "Components\RendererCom.h"
 
 // 開始処理
 void PlayerCom::Start()
@@ -141,7 +142,7 @@ bool PlayerCom::InputMove(float elapsedTime)
     //移動処理
     Move(moveVec.x, moveVec.z, moveSpeed_);
 
-    //旋回処理
+    //旋回処理＆地面の法線で回転
     DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
     look_ = { moveVec.x * 3 + pos.x 
         ,pos.y

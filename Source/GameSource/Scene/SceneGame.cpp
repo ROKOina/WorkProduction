@@ -132,7 +132,7 @@ void SceneGame::Render()
 
 	// 3Dモデル描画
 	{
-		Shader* shader = graphics.GetShader();
+		Shader* shader = graphics.GetShader(0);
 		shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
 
 		//ステージ描画
@@ -157,7 +157,7 @@ void SceneGame::Render()
 	//		dx11State_->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
 	//	);
 
-	//	particle_->Render(rc);
+	//	particle_->Render(rc_);
 
 	//	dc->OMSetBlendState(
 	//		dx11State_->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),

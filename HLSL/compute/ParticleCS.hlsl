@@ -1,4 +1,4 @@
-#include "../Lambert.hlsli"
+#include "../3D/Lambert.hlsli"
 #include "Particle.hlsli"
 RWStructuredBuffer<particle> particleBuffer : register(u0);
 

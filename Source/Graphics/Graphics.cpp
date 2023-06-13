@@ -1,5 +1,6 @@
 #include "Misc.h"
-#include "Graphics/Shader/LambertShader.h"
+#include "Graphics/Shaders/3D/LambertShader.h"
+#include "Graphics/Shaders/3D/PhongShader.h"
 #include "Graphics/Graphics.h"
 
 Graphics* Graphics::instance_ = nullptr;
@@ -130,7 +131,10 @@ Graphics::Graphics(HWND hWnd)
 
 	// シェーダー
 	{
-		shader_ = std::make_unique<LambertShader>(device_.Get());
+		shader_.resize(SHADER_ID::MAX);
+
+		shader_[SHADER_ID::Default] = std::make_unique<LambertShader>(device_.Get());
+		shader_[SHADER_ID::Phong] = std::make_unique<PhongShader>(device_.Get());
 	}
 
 	// レンダラ

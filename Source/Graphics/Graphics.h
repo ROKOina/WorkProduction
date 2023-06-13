@@ -3,12 +3,20 @@
 #include <memory>
 #include <d3d11.h>
 #include <wrl.h>
-#include "Graphics/Shader/Shader.h"
+#include "Graphics/Shaders/Shader.h"
 #include "Graphics/Debug/DebugRenderer.h"
 #include "Graphics/Debug/LineRenderer.h"
 #include "Graphics\Dx11StateLib.h"
 
 #include <mutex>
+
+enum SHADER_ID
+{
+	Default,
+	Phong,
+
+	MAX,	//最大数を保持する
+};
 
 // グラフィックス
 class Graphics
@@ -36,7 +44,7 @@ public:
 	ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView_.Get(); }
 
 	// シェーダー取得
-	Shader* GetShader() const { return shader_.get(); }
+	Shader* GetShader(int shaderID) const { return shader_[shaderID].get(); }
 
 	// スクリーン幅取得
 	float GetScreenWidth() const { return screenWidth_; }
@@ -71,6 +79,10 @@ private:
 	//std::vector<Microsoft::WRL::ComPtr<IDXGISwapChain>>			subWswapchain;
 	//std::vector<std::unique_ptr<ImGuiRenderer>>					subWImguiRenderer;
 
+
+public:
+	RenderContext rc_;
+
 private:
 	static Graphics*								instance_;
 
@@ -81,7 +93,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Texture2D>			depthStencilBuffer_;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView_;
 
-	std::unique_ptr<Shader>							shader_;
+	std::vector<std::unique_ptr<Shader>>			shader_;
 	std::unique_ptr<DebugRenderer>					debugRenderer_;
 	std::unique_ptr<LineRenderer>					lineRenderer_;
 

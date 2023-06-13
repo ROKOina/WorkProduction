@@ -9,6 +9,7 @@
 // 前方宣言
 class Component;
 class TransformCom;
+class RendererCom;
 
 // ゲームオブジェクト
 class GameObject : public std::enable_shared_from_this<GameObject>
@@ -129,6 +130,9 @@ private:
 	std::vector<std::shared_ptr<GameObject>>		updateGameObject_;
 	std::set<std::shared_ptr<GameObject>>		selectionGameObject_;
 	std::set<std::shared_ptr<GameObject>>		removeGameObject_;
+
+	//描画順に格納する
+	std::vector<std::shared_ptr<RendererCom>>   renderSortObject_;
 
 	bool					isHiddenLister_ = false;
 	bool					isHiddenDetail_ = false;

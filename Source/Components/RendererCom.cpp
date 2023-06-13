@@ -1,11 +1,13 @@
 #include "RendererCom.h"
 
 #include "TransformCom.h"
+#include <imgui.h>
+#include <string>
 
 // 開始処理
 void RendererCom::Start()
 {
-
+	
 }
 
 // 更新処理
@@ -19,10 +21,30 @@ void RendererCom::Update(float elapsedTime)
 	}
 }
 
+//GUI用名前
+const char* shaderNames[SHADER_ID::MAX] = { //シェーダーを追加したらこっちでも追加する
+    "Default",
+    "Phong",
+};
 // GUI描画
 void RendererCom::OnGUI()
 {
-
+    //シェーダー変える
+    if (ImGui::Button("ShaderSelect.."))
+        ImGui::OpenPopup("my_select_popup");
+    ImGui::SameLine();
+    ImGui::TextUnformatted(shaderNames[shaderID_]);
+    if (ImGui::BeginPopup("my_select_popup"))
+    {
+        for (int i = 0; i < IM_ARRAYSIZE(shaderNames); i++)
+        {
+            if (ImGui::Selectable(shaderNames[i]))
+            {
+                shaderID_ = i;
+            }
+        }
+        ImGui::EndPopup();
+    }
 }
 
 // モデルの読み込み

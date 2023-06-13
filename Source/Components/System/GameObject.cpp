@@ -114,6 +114,11 @@ void GameObjectManager::Update(float elapsedTime)
 	{
 		obj->Start();
 		updateGameObject_.emplace_back(obj);
+
+		//レンダラーコンポーネントがあればレンダーオブジェに入れる
+		std::shared_ptr<RendererCom> rendererComponent = obj->GetComponent<RendererCom>();
+		if (rendererComponent)
+			renderSortObject_.emplace_back(rendererComponent);
 	}
 	startGameObject_.clear();
 
@@ -158,27 +163,43 @@ void GameObjectManager::UpdateTransform()
 void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
 {
 	Graphics& graphics = Graphics::Instance();
-	Shader* shader = graphics.GetShader();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
 	// 描画処理
-	RenderContext rc;	//描画するために必要な構造体
+	//RenderContext rc_;	//描画するために必要な構造体
 
-	//カメラパラメーター設定
-	rc.view = view;
-	rc.projection = projection;
+	////カメラパラメーター設定
+	//rc_.view = view;
+	//rc_.projection = projection;
 
-	// ライトの方向
-	rc.lightDirection = DirectX::XMFLOAT4(0.2f, -0.8f, 0.0f, 0.0f);
+	//// ライトの方向
+	//rc_.lightDirection = DirectX::XMFLOAT4(0.2f, -0.8f, 0.0f, 0.0f);
+
+	graphics.rc_.view = view;
+	graphics.rc_.projection = projection;
+	DirectX::XMFLOAT3 viewPos = Find("Camera")->transform_->GetPosition();
+	graphics.rc_.viewPosition = DirectX::XMFLOAT4(viewPos.x, viewPos.y, viewPos.z, 1);
 
 	// 描画
-	shader->Begin(dc, rc);
+	int oldShaderID = renderSortObject_[0]->GetShaderID();	//違うシェーダーを使用するため、古いIDを保存
+	Shader* shader = graphics.GetShader(oldShaderID);
+	shader->Begin(dc, graphics.rc_);
 
-	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
+	for (std::shared_ptr<RendererCom>& renderObj : renderSortObject_)
 	{
-		// Rendererコンポーネントがあれば描画
-		if (!obj->GetComponent<RendererCom>())continue;
-		Model* model = obj->GetComponent<RendererCom>()->GetModel();
+		//シェーダーがIDが変化したら、シェーダーを変更
+		int newShaderID = renderObj->GetShaderID();
+		if (oldShaderID != newShaderID)
+		{
+			shader->End(dc);
+
+			shader = graphics.GetShader(newShaderID);
+			oldShaderID = newShaderID;
+
+			shader->Begin(dc, graphics.rc_);
+		}
+
+		Model* model = renderObj->GetModel();
 		if (model != nullptr)
 		{
 			shader->Draw(dc, model);
@@ -256,6 +277,14 @@ void GameObjectManager::DrawLister()
 	ImGui::SetNextWindowPos(ImVec2(30, 50), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
+	//仮太陽方向
+	DirectX::XMFLOAT4 l = Graphics::Instance().rc_.lightDirection;
+	if (ImGui::SliderFloat4("lightVec", &l.x, -1, 1))
+	{
+		l.w = 0;
+		DirectX::XMStoreFloat4(&Graphics::Instance().rc_.lightDirection, DirectX::XMVector4Normalize(DirectX::XMLoadFloat4(&l)));
+	}
+
 	isHiddenLister_ = !ImGui::Begin("GameObject Lister", nullptr, ImGuiWindowFlags_None);
 	if (!isHiddenLister_)
 	{
@@ -264,7 +293,7 @@ void GameObjectManager::DrawLister()
 			//parentがあればcontinue
 			if (obj->GetParent())continue;
 
-			//再起関数
+			//親子GUI用の再起関数
 			CycleDrawLister(obj, selectionGameObject_);
 		}
 	}

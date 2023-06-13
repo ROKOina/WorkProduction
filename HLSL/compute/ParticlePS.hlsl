@@ -1,4 +1,4 @@
-#include "../Lambert.hlsli"
+#include "../3D/Lambert.hlsli"
 #include "Particle.hlsli"
 [earlydepthstencil]
 float4 main(GS_OUT pin) : SV_TARGET

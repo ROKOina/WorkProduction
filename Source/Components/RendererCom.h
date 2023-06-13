@@ -2,6 +2,7 @@
 
 #include "System\Component.h"
 #include "Graphics\Model\Model.h"
+#include "Graphics\Graphics.h"
 
 class RendererCom : public Component
 {
@@ -31,7 +32,12 @@ public:
     // モデルの取得
     Model* GetModel() const { return model_.get(); }
 
+    //シェーダーIDゲット
+    const int GetShaderID() const { return shaderID_; }
+    void SetShaderID(SHADER_ID shaderID) { shaderID_ = shaderID; }
+
 private:
     std::unique_ptr<Model>	model_;
 
+    int shaderID_ = SHADER_ID::Phong;  //シェーダーを決める
 };

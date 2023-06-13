@@ -5,7 +5,7 @@
 #include "Audio\AudioSource.h"
 #include "Audio\Audio.h"
 
-#include "Graphics\Shader\compute\particle.h"
+#include "Graphics\Shaders\compute\particle.h"
 
 // ƒQ[ƒ€ƒV[ƒ“
 class SceneGame :public Scene
