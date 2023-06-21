@@ -39,5 +39,5 @@ public:
 private:
     std::unique_ptr<Model>	model_;
 
-    int shaderID_ = SHADER_ID::Phong;  //シェーダーを決める
+    int shaderID_ = SHADER_ID::Default;  //シェーダーを決める
 };

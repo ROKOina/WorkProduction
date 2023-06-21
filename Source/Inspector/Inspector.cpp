@@ -60,18 +60,18 @@ void Inspector::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 	//dc->OMSetRenderTargets(1, &rtv, dsv);
 
 	// 描画処理
-	RenderContext rc;	//描画するために必要な構造体
+	ShaderParameter3D rc;	//描画するために必要な構造体
 	rc.lightDirection = { 0.0f, -1.0f, 0.0f, 0.0f };	// ライト方向（下方向）
 
 	////カメラパラメーター設定
 	//Camera& camera = Camera::Instance();
-	//rc_.view = camera.GetView();
-	//rc_.projection = camera.GetProjection();
+	//shaderParameter3D_.view = camera.GetView();
+	//shaderParameter3D_.projection = camera.GetProjection();
 
 	// 3Dモデル描画
 	{
 		//Shader* shader_ = graphics_.GetShader();
-		//shader_->Begin(dc, rc_);	//シェーダーにカメラの情報を渡す
+		//shader_->Begin(dc, shaderParameter3D_);	//シェーダーにカメラの情報を渡す
 
 		//shader_->Draw(dc, p.get());
 

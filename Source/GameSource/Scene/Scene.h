@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+
+//前方宣言
+class CameraCom;
+
 //シーン
 class Scene
 {
@@ -24,6 +29,10 @@ public:
 
     //準備完了設定
     void SetReady() { isReady_ = true; }
+
+protected:
+    //メインカメラ
+    std::shared_ptr<CameraCom> mainCamera_;
 
 private:
     bool isReady_ = false;

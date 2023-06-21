@@ -39,7 +39,7 @@ LambertShader::LambertShader(ID3D11Device* device)
 
 
 // •`‰æŠJŽn
-void LambertShader::Begin(ID3D11DeviceContext* dc, const RenderContext& rc)
+void LambertShader::Begin(ID3D11DeviceContext* dc, const ShaderParameter3D& rc)
 {
 	dc->VSSetShader(vertexShader_.Get(), nullptr, 0);
 	dc->PSSetShader(pixelShader_.Get(), nullptr, 0);

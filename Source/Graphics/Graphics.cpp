@@ -135,13 +135,59 @@ Graphics::Graphics(HWND hWnd)
 
 		shader_[SHADER_ID::Default] = std::make_unique<LambertShader>(device_.Get());
 		shader_[SHADER_ID::Phong] = std::make_unique<PhongShader>(device_.Get());
+
+		//パラメーター設定
+		{
+			//影
+			ShadowMapData* sp = &shaderParameter3D_.shadowMapData;
+			//	シャドウマップのサイズ
+			static	const	UINT	SHADOWMAP_SIZE = 2048;
+			sp->height = SHADOWMAP_SIZE;
+			sp->width = SHADOWMAP_SIZE;
+			sp->shadowRect = 500;
+
+			D3D11_TEXTURE2D_DESC texture2dDesc = {};							
+			texture2dDesc.Width = SHADOWMAP_SIZE;
+			texture2dDesc.Height = SHADOWMAP_SIZE;
+			texture2dDesc.MipLevels = 1;
+			texture2dDesc.ArraySize = 1;
+			texture2dDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+			texture2dDesc.SampleDesc.Count = 1;
+			texture2dDesc.SampleDesc.Quality = 0;
+			texture2dDesc.Usage = D3D11_USAGE_DEFAULT;
+			texture2dDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+			texture2dDesc.CPUAccessFlags = 0;
+			texture2dDesc.MiscFlags = 0;
+
+			Microsoft::WRL::ComPtr<ID3D11Texture2D>	texture2d;
+			HRESULT hr = device_->CreateTexture2D(&texture2dDesc, 0, texture2d.ReleaseAndGetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC shader_resource_view_desc = {};
+			ZeroMemory(&shader_resource_view_desc, sizeof(shader_resource_view_desc));
+			shader_resource_view_desc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			shader_resource_view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			shader_resource_view_desc.Texture2D.MostDetailedMip = 0;
+			shader_resource_view_desc.Texture2D.MipLevels = 1;
+			hr = device_->CreateShaderResourceView(texture2d.Get(), &shader_resource_view_desc, sp->shadowSrvMap.ReleaseAndGetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+			D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc{};
+			ZeroMemory(&depth_stencil_view_desc, sizeof(depth_stencil_view_desc));
+			depth_stencil_view_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+			depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+			depth_stencil_view_desc.Flags = 0;
+			depth_stencil_view_desc.Texture2D.MipSlice = 0;
+			hr = device_->CreateDepthStencilView(texture2d.Get(), &depth_stencil_view_desc, sp->shadowDsvMap.ReleaseAndGetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+		}
 	}
 
 	// レンダラ
 	{
 		debugRenderer_ = std::make_unique<DebugRenderer>(device_.Get());
 		lineRenderer_ = std::make_unique<LineRenderer>(device_.Get(), 1024);
-		//imguiRenderer = std::make_unique<ImGuiRenderer>(hWnd_, device_.Get());
 	}
 
 	//描画周り一括初期化

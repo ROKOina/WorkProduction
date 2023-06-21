@@ -10,7 +10,7 @@ public:
     PhongShader(ID3D11Device* device);
     ~PhongShader() override {}
 
-    void Begin(ID3D11DeviceContext* dc, const RenderContext& rc)override;
+    void Begin(ID3D11DeviceContext* dc, const ShaderParameter3D& rc)override;
     void Draw(ID3D11DeviceContext* dc,  const Model* model)override;
     void End(ID3D11DeviceContext* context)override;
 
@@ -23,6 +23,7 @@ private:
         DirectX::XMFLOAT4X4     viewProjection;
         DirectX::XMFLOAT4		ambientLightColor;	
         DirectX::XMFLOAT4		lightDirection;
+        DirectX::XMFLOAT4		lightColor;
     };
 
     struct CbMesh
@@ -42,20 +43,13 @@ private:
         float				shadowBias;				//	深度比較用のオフセット値
     };
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> meshConstantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> subsetConstantBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> shadowMapConstantBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer_;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> meshConstantBuffer_;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> subsetConstantBuffer_;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> shadowMapConstantBuffer_;
 
 
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
-
-    Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState>		shadowMapSamplerState;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader_;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader_;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout_;
 };

@@ -175,7 +175,7 @@ void Particle::integrate(float deltaTime, DirectX::XMFLOAT4 eyePosition,
     context->CSSetUnorderedAccessViews(0, 1, &nullUnorderedAccessView, nullptr);
 }
 
-void Particle::Render(const RenderContext& rc)
+void Particle::Render(const ShaderParameter3D& rc)
 {
     ID3D11DeviceContext* context = Graphics::Instance().GetDeviceContext();
 
@@ -371,7 +371,7 @@ void Particle::Render(const RenderContext& rc)
 //    Graphics::Instance().GetDeviceContext()->Unmap(mpPositionBuffer.Get(), 0);
 //}
 //
-//void Particle::Render(const RenderContext& rc_)
+//void Particle::Render(const ShaderParameter3D& shaderParameter3D_)
 //{
 //    ID3D11Buffer* constantBuffers[] =
 //    {
@@ -381,8 +381,8 @@ void Particle::Render(const RenderContext& rc)
 //
 //    WVP wvp;
 //    DirectX::XMStoreFloat4x4(&wvp.world, DirectX::XMMatrixIdentity());
-//    wvp.view = rc_.view;
-//    wvp.projection = rc_.projection;
+//    wvp.view = shaderParameter3D_.view;
+//    wvp.projection = shaderParameter3D_.projection;
 //    Graphics::Instance().GetDeviceContext()->UpdateSubresource(wvpBuffer.Get(), 0, 0, &wvp, 0, 0);
 //
 //    // •`‰æ

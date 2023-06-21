@@ -121,9 +121,20 @@ public:
 	//ゲームオブジェクトを探す
 	std::shared_ptr<GameObject> Find(const char* name);
 
+	//シェーダーIDを変えたら、ソートするために呼び出す
+	void ChangeShaderID() { isChangeShaderID = true; }
+
 private:
 	void DrawLister();
 	void DrawDetail();
+
+	//レンダーオブジェクトをシェーダーID順にソートする
+	void SortRenderObject();
+
+	//影描画
+	void RenderShadowmap();
+	//3D描画
+	void Render3D();
 
 private:
 	std::vector<std::shared_ptr<GameObject>>		startGameObject_;
@@ -133,6 +144,7 @@ private:
 
 	//描画順に格納する
 	std::vector<std::shared_ptr<RendererCom>>   renderSortObject_;
+	bool isChangeShaderID = false;
 
 	bool					isHiddenLister_ = false;
 	bool					isHiddenDetail_ = false;

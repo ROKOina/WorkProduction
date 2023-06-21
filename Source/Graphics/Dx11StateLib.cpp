@@ -243,7 +243,20 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 			HRESULT hr = device->CreateSamplerState(&samplerDesc, samplerState_[static_cast<int>(SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
+		{ //TEXTURE_ADDRESS_BORDER
+			samplerDesc.BorderColor[0] = FLT_MAX;
+			samplerDesc.BorderColor[1] = FLT_MAX;
+			samplerDesc.BorderColor[2] = FLT_MAX;
+			samplerDesc.BorderColor[3] = FLT_MAX;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+			HRESULT hr = device->CreateSamplerState(&samplerDesc, samplerState_[static_cast<int>(SAMPLER_TYPE::TEXTURE_ADDRESS_BORDER)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 	}

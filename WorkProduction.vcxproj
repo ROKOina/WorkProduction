@@ -152,7 +152,7 @@
     <ClInclude Include="Source\Graphics\Debug\LineRenderer.h" />
     <ClInclude Include="Source\Graphics\Model\Model.h" />
     <ClInclude Include="Source\Graphics\Model\ModelResource.h" />
-    <ClInclude Include="Source\Graphics\RenderContext.h" />
+    <ClInclude Include="Source\Graphics\Shaders\3D\ShaderParameter3D.h" />
     <ClInclude Include="Source\Graphics\Shaders\Shader.h" />
     <ClInclude Include="Source\Graphics\Sprite\Sprite.h" />
     <ClInclude Include="Source\HighResolutionTimer.h" />

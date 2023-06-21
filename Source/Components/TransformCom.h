@@ -95,6 +95,6 @@ private:
     DirectX::XMFLOAT3   eulerRotation_ = DirectX::XMFLOAT3(0, 0, 0);
     DirectX::XMFLOAT3	scale_ = DirectX::XMFLOAT3(1, 1, 1);
     DirectX::XMFLOAT4X4	transform_ = DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    DirectX::XMFLOAT4X4	parentTransform_ = DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    DirectX::XMFLOAT4X4& parentTransform_ = DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 };
 

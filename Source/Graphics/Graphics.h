@@ -7,6 +7,7 @@
 #include "Graphics/Debug/DebugRenderer.h"
 #include "Graphics/Debug/LineRenderer.h"
 #include "Graphics\Dx11StateLib.h"
+#include "Shaders\3D\ShaderParameter3D.h"
 
 #include <mutex>
 
@@ -44,7 +45,7 @@ public:
 	ID3D11DepthStencilView* GetDepthStencilView() const { return depthStencilView_.Get(); }
 
 	// シェーダー取得
-	Shader* GetShader(int shaderID) const { return shader_[shaderID].get(); }
+	Shader* GetShader(SHADER_ID shaderID) const { return shader_[shaderID].get(); }
 
 	// スクリーン幅取得
 	float GetScreenWidth() const { return screenWidth_; }
@@ -81,7 +82,7 @@ private:
 
 
 public:
-	RenderContext rc_;
+	ShaderParameter3D shaderParameter3D_;
 
 private:
 	static Graphics*								instance_;

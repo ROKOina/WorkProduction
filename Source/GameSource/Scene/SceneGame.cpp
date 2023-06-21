@@ -34,9 +34,9 @@ void SceneGame::Initialize()
 		r->LoadModel(filename);
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-
+		
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
-
+	
 
 
 		////でばふ
@@ -59,6 +59,65 @@ void SceneGame::Initialize()
 		//}
 	}
 
+	////仮オブジェクト
+	//{
+	//	std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+	//	obj->SetName("pico");
+	//	obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+	//	obj->transform_->SetPosition({ 1,0,0 });
+
+	//	const char* filename = "Data/Model/pico/picoAnim.mdl";
+	//	std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+	//	r->LoadModel(filename);
+	//	r->SetShaderID(SHADER_ID::Phong);
+
+	//	std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+	//}
+	////仮オブジェクト
+	//{
+	//	std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+	//	obj->SetName("pico");
+	//	obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+	//	obj->transform_->SetPosition({ 2,0,0 });
+
+	//	const char* filename = "Data/Model/pico/picoAnim.mdl";
+	//	std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+	//	r->LoadModel(filename);
+
+	//	std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+	//}
+	////仮オブジェクト
+	//{
+	//	std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+	//	obj->SetName("pico");
+	//	obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+	//	obj->transform_->SetPosition({ 3,0,0 });
+
+	//	const char* filename = "Data/Model/pico/picoAnim.mdl";
+	//	std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+	//	r->LoadModel(filename);
+	//	r->SetShaderID(SHADER_ID::Phong);
+
+	//	std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+
+	//	//こ
+	//	{
+	//		std::shared_ptr<GameObject> child= obj->AddChildObject();
+	//		child->SetName("pico");
+	//		child->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+	//		child->transform_->SetPosition({ 3,0,0 });
+
+	//		const char* filename = "Data/Model/pico/picoAnim.mdl";
+	//		r = child->AddComponent<RendererCom>();
+	//		r->LoadModel(filename);
+	//		r->SetShaderID(SHADER_ID::Phong);
+
+	//		 a = child->AddComponent<AnimationCom>();
+
+
+	//	}
+	//}
+
 	//カメラを生成
 	{
 		std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Create();
@@ -73,6 +132,10 @@ void SceneGame::Initialize()
 		);
 		cameraObj->transform_->SetWorldPosition({ 0, 5, -10 });
 	}
+
+	//メインカメラ設定
+	std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+	mainCamera_ = camera;
 
 	//ステージ初期化
 	StageManager& stageManager = StageManager::Instance();
@@ -119,20 +182,21 @@ void SceneGame::Render()
 	dc->OMSetRenderTargets(1, &rtv, dsv);
 
 	// 描画処理
-	RenderContext rc;	//描画するために必要な構造体
-	rc.lightDirection = { 0.0f, -1.0f, 0.0f, 0.0f };	// ライト方向（下方向）
+	ShaderParameter3D& rc = graphics.shaderParameter3D_;
+	rc.lightDirection = graphics.shaderParameter3D_.lightDirection;	// ライト方向
 
 	//カメラパラメーター設定
-	std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
-	rc.view = camera->GetView();
-	rc.projection = camera->GetProjection();
+	rc.view = mainCamera_->GetView();
+	rc.projection = mainCamera_->GetProjection();
+	DirectX::XMFLOAT3 cameraPos = mainCamera_->GetGameObject()->transform_->GetPosition();
+	rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
 
 	GameObjectManager::Instance().UpdateTransform();
-	GameObjectManager::Instance().Render(camera->GetView(), camera->GetProjection());
+	GameObjectManager::Instance().Render(mainCamera_->GetView(), mainCamera_->GetProjection());
 
 	// 3Dモデル描画
 	{
-		Shader* shader = graphics.GetShader(0);
+		Shader* shader = graphics.GetShader(SHADER_ID::Phong);
 		shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
 
 		//ステージ描画
@@ -157,7 +221,7 @@ void SceneGame::Render()
 	//		dx11State_->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
 	//	);
 
-	//	particle_->Render(rc_);
+	//	particle_->Render(shaderParameter3D_);
 
 	//	dc->OMSetBlendState(
 	//		dx11State_->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),

@@ -41,6 +41,7 @@ void RendererCom::OnGUI()
             if (ImGui::Selectable(shaderNames[i]))
             {
                 shaderID_ = i;
+                GameObjectManager::Instance().ChangeShaderID();
             }
         }
         ImGui::EndPopup();

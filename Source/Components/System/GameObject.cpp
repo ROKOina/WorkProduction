@@ -22,11 +22,6 @@ void GameObject::Update(float elapsedTime)
 	{
 		component->Update(elapsedTime);
 	}
-	for (std::weak_ptr<GameObject>& child : childrenObject_)
-	{
-		child.lock()->Update(elapsedTime);
-	}
-
 }
 
 // 行列の更新
@@ -117,8 +112,22 @@ void GameObjectManager::Update(float elapsedTime)
 
 		//レンダラーコンポーネントがあればレンダーオブジェに入れる
 		std::shared_ptr<RendererCom> rendererComponent = obj->GetComponent<RendererCom>();
-		if (rendererComponent)
-			renderSortObject_.emplace_back(rendererComponent);
+		if (rendererComponent) 
+		{
+			//シェーダーID順にソートして入れる
+			int insertShaderID = rendererComponent->GetShaderID();
+			int indexSize = renderSortObject_.size();	//最初のサイズを取得
+			for (int indexID = 0; indexID < renderSortObject_.size(); ++indexID)
+			{
+				if (renderSortObject_[indexID]->GetShaderID() > insertShaderID)
+				{
+					renderSortObject_.insert(renderSortObject_.begin() + indexID, rendererComponent);
+					break;
+				}
+			}
+			if (indexSize == renderSortObject_.size())
+				renderSortObject_.emplace_back(rendererComponent);
+		}
 	}
 	startGameObject_.clear();
 
@@ -162,58 +171,17 @@ void GameObjectManager::UpdateTransform()
 // 描画
 void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
 {
-	Graphics& graphics = Graphics::Instance();
-	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+	//影描画
 
-	// 描画処理
-	//RenderContext rc_;	//描画するために必要な構造体
 
-	////カメラパラメーター設定
-	//rc_.view = view;
-	//rc_.projection = projection;
-
-	//// ライトの方向
-	//rc_.lightDirection = DirectX::XMFLOAT4(0.2f, -0.8f, 0.0f, 0.0f);
-
-	graphics.rc_.view = view;
-	graphics.rc_.projection = projection;
-	DirectX::XMFLOAT3 viewPos = Find("Camera")->transform_->GetPosition();
-	graphics.rc_.viewPosition = DirectX::XMFLOAT4(viewPos.x, viewPos.y, viewPos.z, 1);
-
-	// 描画
-	int oldShaderID = renderSortObject_[0]->GetShaderID();	//違うシェーダーを使用するため、古いIDを保存
-	Shader* shader = graphics.GetShader(oldShaderID);
-	shader->Begin(dc, graphics.rc_);
-
-	for (std::shared_ptr<RendererCom>& renderObj : renderSortObject_)
-	{
-		//シェーダーがIDが変化したら、シェーダーを変更
-		int newShaderID = renderObj->GetShaderID();
-		if (oldShaderID != newShaderID)
-		{
-			shader->End(dc);
-
-			shader = graphics.GetShader(newShaderID);
-			oldShaderID = newShaderID;
-
-			shader->Begin(dc, graphics.rc_);
-		}
-
-		Model* model = renderObj->GetModel();
-		if (model != nullptr)
-		{
-			shader->Draw(dc, model);
-		}
-	}
-
-	shader->End(dc);
+	//3D描画
+	Render3D();
 
 	// リスター描画
 	DrawLister();
 
 	// 詳細描画
 	DrawDetail();
-
 }
 
 //ゲームオブジェクトを探す
@@ -278,12 +246,26 @@ void GameObjectManager::DrawLister()
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
 	//仮太陽方向
-	DirectX::XMFLOAT4 l = Graphics::Instance().rc_.lightDirection;
-	if (ImGui::SliderFloat4("lightVec", &l.x, -1, 1))
+	if (ImGui::Begin("3DShaderParamerter", nullptr, ImGuiWindowFlags_None))
 	{
-		l.w = 0;
-		DirectX::XMStoreFloat4(&Graphics::Instance().rc_.lightDirection, DirectX::XMVector4Normalize(DirectX::XMLoadFloat4(&l)));
+		if(ImGui::TreeNode("Sun"))
+		{
+			DirectX::XMFLOAT4 lVec = Graphics::Instance().shaderParameter3D_.lightDirection;
+			if (ImGui::SliderFloat4("lightDirection", &lVec.x, -1, 1))
+			{
+				lVec.w = 0;
+				DirectX::XMStoreFloat4(&Graphics::Instance().shaderParameter3D_.lightDirection, DirectX::XMVector4Normalize(DirectX::XMLoadFloat4(&lVec)));
+			}
+			DirectX::XMFLOAT4 lCor = Graphics::Instance().shaderParameter3D_.lightColor;
+			if (ImGui::SliderFloat4("lightColor", &lCor.x, 0, 1))
+			{
+				lCor.w = 0;
+				DirectX::XMStoreFloat4(&Graphics::Instance().shaderParameter3D_.lightColor, DirectX::XMLoadFloat4(&lCor));
+			}
+			ImGui::TreePop();
+		}
 	}
+	ImGui::End();
 
 	isHiddenLister_ = !ImGui::Begin("GameObject Lister", nullptr, ImGuiWindowFlags_None);
 	if (!isHiddenLister_)
@@ -318,3 +300,114 @@ void GameObjectManager::DrawDetail()
 	ImGui::End();
 }
 
+//レンダーオブジェクトをシェーダーID順にソートする
+void GameObjectManager::SortRenderObject()
+{
+	//コムソート
+	size_t indexOffset = (renderSortObject_.size() * 10) / 13;
+	bool is_sorted = false;
+	while (!is_sorted) {
+		if (indexOffset == 1)is_sorted = true;
+		for (size_t index = 0; index < renderSortObject_.size() - indexOffset; ++index) {
+			if (renderSortObject_[index]->GetShaderID() > renderSortObject_[index + indexOffset]->GetShaderID()) {
+				std::iter_swap(renderSortObject_.begin() + index, renderSortObject_.begin() + (index + indexOffset));
+				if (is_sorted)is_sorted = false;
+			}
+		}
+		if (indexOffset > 1) indexOffset = (indexOffset * 10) / 13;
+		if (indexOffset == 0) indexOffset = 1;
+	}
+}
+
+//影描画
+void GameObjectManager::RenderShadowmap()
+{
+	Graphics& graphics = Graphics::Instance();
+	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+	ID3D11RenderTargetView* rtv = nullptr;
+	ShaderParameter3D* sp = &graphics.shaderParameter3D_;
+	ShadowMapData* shadowData = &sp->shadowMapData;
+	ID3D11DepthStencilView* dsv = shadowData->shadowDsvMap.Get();
+
+	// 画面クリア
+	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	// レンダーターゲット設定
+	dc->OMSetRenderTargets(0, &rtv, dsv);
+	// ビューポートの設定
+	D3D11_VIEWPORT	vp = {};
+	vp.Width = static_cast<float>(shadowData->width);
+	vp.Height = static_cast<float>(shadowData->height);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	dc->RSSetViewports(1, &vp);
+
+	//カメラ用に用意
+	ShaderParameter3D spCamera;
+	//カメラ設定
+	{
+		// 平行光源からカメラ位置を作成し、そこから原点の位置を見るように視線行列を生成
+		DirectX::XMVECTOR LightPosition =
+			DirectX::XMLoadFloat3(
+				&DirectX::XMFLOAT3(
+					sp->lightDirection.x,
+					sp->lightDirection.y,
+					sp->lightDirection.z));
+		LightPosition = DirectX::XMVectorScale(LightPosition, -250.0f);
+		DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(LightPosition,
+			DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
+			DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+
+		// シャドウマップに描画したい範囲の射影行列を生成
+		DirectX::XMMATRIX P =
+			DirectX::XMMatrixOrthographicLH(
+				shadowData->shadowRect, shadowData->shadowRect, 0.1f, 1000.0f);
+		DirectX::XMStoreFloat4x4(&spCamera.view, V);
+		DirectX::XMStoreFloat4x4(&spCamera.projection, P);
+		DirectX::XMStoreFloat4x4(&shadowData->lightViewProjection, V * P);
+	}
+
+	//描画
+	{
+
+	}
+}
+
+//3D描画
+void GameObjectManager::Render3D()
+{
+	Graphics& graphics = Graphics::Instance();
+	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+	//シェーダーIDが変更された時に呼ぶ
+	if (isChangeShaderID)
+		SortRenderObject();
+
+	// 描画
+	int oldShaderID = renderSortObject_[0]->GetShaderID();	//違うシェーダーを使用するため、古いIDを保存
+	Shader* shader = graphics.GetShader(static_cast<SHADER_ID>(oldShaderID));
+	shader->Begin(dc, graphics.shaderParameter3D_);
+
+	for (std::shared_ptr<RendererCom>& renderObj : renderSortObject_)
+	{
+		//シェーダーIDが変化したら、シェーダーを変更
+		int newShaderID = renderObj->GetShaderID();
+		if (oldShaderID != newShaderID)
+		{
+			shader->End(dc);
+
+			shader = graphics.GetShader(static_cast<SHADER_ID>(newShaderID));
+			oldShaderID = newShaderID;
+
+			shader->Begin(dc, graphics.shaderParameter3D_);
+		}
+
+		Model* model = renderObj->GetModel();
+		if (model != nullptr)
+		{
+			shader->Draw(dc, model);
+		}
+	}
+
+	shader->End(dc);
+
+}

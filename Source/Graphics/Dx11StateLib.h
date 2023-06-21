@@ -70,6 +70,7 @@ private:
 public:
     enum class SAMPLER_TYPE {
         TEXTURE_ADDRESS_WRAP,
+        TEXTURE_ADDRESS_BORDER, //âeóp
         DEFALT,           //âΩÇ‡Ç»ÇµÅiï€åØÅj
     };
     Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState(SAMPLER_TYPE samplerType) { return samplerState_[static_cast<int>(samplerType)].Get(); }

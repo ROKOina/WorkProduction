@@ -10,7 +10,7 @@ public:
 	LambertShader(ID3D11Device* device);
 	~LambertShader() override {}
 
-	void Begin(ID3D11DeviceContext* dc, const RenderContext& rc) override;
+	void Begin(ID3D11DeviceContext* dc, const ShaderParameter3D& rc) override;
 	void Draw(ID3D11DeviceContext* dc, const Model* model) override;
 	void End(ID3D11DeviceContext* dc) override;
 

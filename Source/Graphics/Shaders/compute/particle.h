@@ -15,7 +15,7 @@ public:
 
     void integrate(float deltaTime, DirectX::XMFLOAT4 eyePosition,
         DirectX::XMFLOAT4X4	view, DirectX::XMFLOAT4X4	projection);
-    void Render(const RenderContext& rc);
+    void Render(const ShaderParameter3D& rc);
 
 public:
     struct particle
