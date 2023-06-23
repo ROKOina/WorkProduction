@@ -32,6 +32,7 @@ void SceneGame::Initialize()
 		const char* filename = "Data/Model/pico/picoAnim.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
+		r->SetShaderID(SHADER_ID::Phong);
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 		
@@ -142,6 +143,13 @@ void SceneGame::Initialize()
 	StageMain* stageMain = new StageMain();	//メイン（マップ）
 	stageManager.Register(stageMain);
 
+	{
+		Graphics& graphics = Graphics::Instance();
+		postEff = std::make_unique<PostEffect>(
+			graphics.GetScreenWidth()/8 ,
+			graphics.GetScreenHeight()/8);
+	}
+
 	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
 }
 
@@ -191,8 +199,37 @@ void SceneGame::Render()
 	DirectX::XMFLOAT3 cameraPos = mainCamera_->GetGameObject()->transform_->GetPosition();
 	rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
 
+
+	//バッファ避難
+	Graphics::Instance().CacheRenderTargets();
+
+	//ポストエフェクト用切り替え
+	PostRenderTarget* ps = Graphics::Instance().GetPostEffectModelRenderTarget().get();
+	PostDepthStencil* ds = Graphics::Instance().GetPostEffectModelDepthStencilView().get();
+
+	// 画面クリア＆レンダーターゲット設定
+	rtv = {};
+	dsv = {};
+	rtv = ps->renderTargetView.Get();
+	dsv = ds->depthStencilView.Get();
+	dc->ClearRenderTargetView(rtv, color);
+	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	dc->OMSetRenderTargets(1, &rtv, dsv);
+
+	// ビューポートの設定
+	D3D11_VIEWPORT	vp = {};
+	vp.Width = static_cast<float>(ps->width);
+	vp.Height = static_cast<float>(ps->height);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	dc->RSSetViewports(1, &vp);
+
+
 	GameObjectManager::Instance().UpdateTransform();
 	GameObjectManager::Instance().Render(mainCamera_->GetView(), mainCamera_->GetProjection());
+
+
+
 
 	// 3Dモデル描画
 	{
@@ -206,6 +243,12 @@ void SceneGame::Render()
 
 		shader->End(dc);
 	}
+
+	//バッファ戻す
+	Graphics::Instance().RestoreRenderTargets();
+
+	postEff->Render();
+	postEff->ImGuiRender();
 
 	////パーティクル
 	//{

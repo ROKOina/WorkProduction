@@ -19,6 +19,7 @@ enum SHADER_ID
 	MAX,	//最大数を保持する
 };
 
+
 // グラフィックス
 class Graphics
 {
@@ -62,19 +63,29 @@ public:
 	//描画周り設定呼び出し
 	const std::unique_ptr<Dx11StateLib>& GetDx11State() { return dx11State_; }
 
+	// 描画ターゲットの退避
+	void CacheRenderTargets();
+
+	// 描画ターゲットを戻す
+	void RestoreRenderTargets();
+
+	//ポストエフェクト
+	std::unique_ptr<PostRenderTarget>& GetPostEffectModelRenderTarget() { return postEffectModelRenderTarget; }
+	std::unique_ptr<PostDepthStencil>& GetPostEffectModelDepthStencilView() { return postEffectModelDepthStencil; }
+
 	//ミューテックス取得
 	std::mutex& GetMutex() { return mutex_; }
 
-//public:	//サブウィンドウ
-//	// スワップチェイン作成
-//	void CreateSubWindowSwapChain(HWND hWnd_, int width, int height);
-//
-//	// スワップチェーン取得
-//	IDXGISwapChain* GetSubWindowSwapChain(int index) const { return subWswapchain[index].Get(); }
-//
-//	// レンダーターゲットビュー取得
-//	ID3D11RenderTargetView* GetSubWindowRenderTargetView(int index) const { return subWrenderTargetView[index].Get(); }
-//
+	//public:	//サブウィンドウ
+	//	// スワップチェイン作成
+	//	void CreateSubWindowSwapChain(HWND hWnd_, int width, int height);
+	//
+	//	// スワップチェーン取得
+	//	IDXGISwapChain* GetSubWindowSwapChain(int index) const { return subWswapchain[index].Get(); }
+	//
+	//	// レンダーターゲットビュー取得
+	//	ID3D11RenderTargetView* GetSubWindowRenderTargetView(int index) const { return subWrenderTargetView[index].Get(); }
+	//
 private:
 	//std::vector<Microsoft::WRL::ComPtr<ID3D11RenderTargetView>>	subWrenderTargetView;
 	//std::vector<Microsoft::WRL::ComPtr<IDXGISwapChain>>			subWswapchain;
@@ -85,7 +96,7 @@ public:
 	ShaderParameter3D shaderParameter3D_;
 
 private:
-	static Graphics*								instance_;
+	static Graphics* instance_;
 
 	Microsoft::WRL::ComPtr<ID3D11Device>			device_;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext>		immediateContext_;
@@ -101,6 +112,17 @@ private:
 	//描画周り一括初期化
 	std::unique_ptr<Dx11StateLib> dx11State_;
 
+	//描画ターゲット避難用
+	UINT			cachedViewportCount_{ D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE };
+	D3D11_VIEWPORT	cachedViewports_[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	cachedRenderTargetView_;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	cachedDepthStencilView_;
+
+	//ポストエフェクト用
+	std::unique_ptr<PostRenderTarget> postEffectModelRenderTarget;
+	std::unique_ptr<PostDepthStencil> postEffectModelDepthStencil;
+
+private:
 	float	screenWidth_;
 	float	screenHeight_;
 

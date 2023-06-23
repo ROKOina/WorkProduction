@@ -5,6 +5,7 @@
 #include "Audio\AudioSource.h"
 #include "Audio\Audio.h"
 
+#include "Graphics\Shaders\PostEffect.h"
 #include "Graphics\Shaders\compute\particle.h"
 
 // ÉQÅ[ÉÄÉVÅ[Éì
@@ -32,4 +33,5 @@ private:
 
 
 	std::unique_ptr<Particle> particle_;
+	std::unique_ptr<PostEffect> postEff;
 };

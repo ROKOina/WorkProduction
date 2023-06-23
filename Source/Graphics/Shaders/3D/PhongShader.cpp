@@ -70,7 +70,7 @@ void PhongShader::Begin(ID3D11DeviceContext* dc, const ShaderParameter3D& rc)
     ID3D11SamplerState* samplerStates[] =
     {
        dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP).Get(),
-       dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_BORDER).Get(),
+       dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_BORDER_POINT).Get(),
     };
     dc->PSSetSamplers(0, ARRAYSIZE(samplerStates), samplerStates);
 

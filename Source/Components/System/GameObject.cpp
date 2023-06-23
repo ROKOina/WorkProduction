@@ -245,28 +245,6 @@ void GameObjectManager::DrawLister()
 	ImGui::SetNextWindowPos(ImVec2(30, 50), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
 
-	//‰¼‘¾—z•ûŒü
-	if (ImGui::Begin("3DShaderParamerter", nullptr, ImGuiWindowFlags_None))
-	{
-		if(ImGui::TreeNode("Sun"))
-		{
-			DirectX::XMFLOAT4 lVec = Graphics::Instance().shaderParameter3D_.lightDirection;
-			if (ImGui::SliderFloat4("lightDirection", &lVec.x, -1, 1))
-			{
-				lVec.w = 0;
-				DirectX::XMStoreFloat4(&Graphics::Instance().shaderParameter3D_.lightDirection, DirectX::XMVector4Normalize(DirectX::XMLoadFloat4(&lVec)));
-			}
-			DirectX::XMFLOAT4 lCor = Graphics::Instance().shaderParameter3D_.lightColor;
-			if (ImGui::SliderFloat4("lightColor", &lCor.x, 0, 1))
-			{
-				lCor.w = 0;
-				DirectX::XMStoreFloat4(&Graphics::Instance().shaderParameter3D_.lightColor, DirectX::XMLoadFloat4(&lCor));
-			}
-			ImGui::TreePop();
-		}
-	}
-	ImGui::End();
-
 	isHiddenLister_ = !ImGui::Begin("GameObject Lister", nullptr, ImGuiWindowFlags_None);
 	if (!isHiddenLister_)
 	{

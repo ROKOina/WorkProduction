@@ -182,6 +182,10 @@ Graphics::Graphics(HWND hWnd)
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		}
+
+		//ポストエフェクト用
+		postEffectModelRenderTarget = std::make_unique<PostRenderTarget>(device_.Get(), screenWidth_, screenHeight_,  DXGI_FORMAT_R8G8B8A8_UNORM);
+		postEffectModelDepthStencil = std::make_unique<PostDepthStencil>(device_.Get(), screenWidth_, screenHeight_);
 	}
 
 	// レンダラ
@@ -201,6 +205,21 @@ Graphics::Graphics(HWND hWnd)
 Graphics::~Graphics()
 {
 }
+
+// 描画ターゲットの退避
+void Graphics::CacheRenderTargets()
+{
+	immediateContext_->RSGetViewports(&cachedViewportCount_, cachedViewports_);
+	immediateContext_->OMGetRenderTargets(1, cachedRenderTargetView_.ReleaseAndGetAddressOf(), cachedDepthStencilView_.ReleaseAndGetAddressOf());
+}
+
+// 描画ターゲットを戻す
+void Graphics::RestoreRenderTargets()
+{
+	immediateContext_->RSSetViewports(cachedViewportCount_, cachedViewports_);
+	immediateContext_->OMSetRenderTargets(1, cachedRenderTargetView_.GetAddressOf(), cachedDepthStencilView_.Get());
+}
+
 
 //void Graphics::CreateSubWindowSwapChain(HWND hWnd_,int width, int height)
 //{

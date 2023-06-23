@@ -70,7 +70,8 @@ private:
 public:
     enum class SAMPLER_TYPE {
         TEXTURE_ADDRESS_WRAP,
-        TEXTURE_ADDRESS_BORDER, //影用
+        TEXTURE_ADDRESS_CLAMP,
+        TEXTURE_ADDRESS_BORDER_POINT, //影用
         DEFALT,           //何もなし（保険）
     };
     Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState(SAMPLER_TYPE samplerType) { return samplerState_[static_cast<int>(samplerType)].Get(); }

@@ -251,6 +251,8 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCom.h" />
     <ClInclude Include="Source\Components\AnimationCom.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
+    <ClInclude Include="Source\Graphics\Shaders\PostEffect.h" />
+    <ClInclude Include="Source\Graphics\Shaders\TextureFormat.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -424,6 +426,12 @@
     <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Graphics\Shaders\PostEffect.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Shaders\TextureFormat.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Debugs\Debug.hlsli">
@@ -486,6 +494,24 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\3D\LambertVS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\ShaderPostVS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\PostEffect.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\colorGrading.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\GaussianBlur.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\BloomExtract.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\RenderPost.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
