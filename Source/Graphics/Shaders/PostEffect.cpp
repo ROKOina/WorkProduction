@@ -35,6 +35,7 @@ PostEffect::PostEffect(UINT width, UINT height)
     //ピクセルシェーダーセット
     colorGrading_ = std::make_unique<ShaderPost>("ColorGrading");
     bloomExtract_ = std::make_unique<ShaderPost>("BloomExtract");
+    bloomKawaseFilter_ = std::make_unique<ShaderPost>("BloomKawase");
     bloomBlur_ = std::make_unique<ShaderPost>("GaussianBlur");
 
     postEffect_ = std::make_unique<ShaderPost>("PostEffect");
@@ -43,9 +44,24 @@ PostEffect::PostEffect(UINT width, UINT height)
     //テクスチャ初期化
     drawTexture_ = std::make_unique<TextureFormat>();
 
-    //レンダーターゲット
+    //レンダーターゲット設定
+    //輝度抽出用
     renderPost_[0] = std::make_unique<PostRenderTarget>(device, width, height);
-    renderPost_[1] = std::make_unique<PostRenderTarget>(device, width, height);
+    //ブラー用
+    UINT wB = width/2;
+    UINT hB = height/2;
+    renderPost_[1] = std::make_unique<PostRenderTarget>(device, wB, hB);
+    wB /= 2;
+    hB /= 2;
+    renderPost_[2] = std::make_unique<PostRenderTarget>(device, wB, hB);
+    wB /= 2;
+    hB /= 2;
+    renderPost_[3] = std::make_unique<PostRenderTarget>(device, wB, hB);
+    wB /= 2;
+    hB /= 2;
+    renderPost_[4] = std::make_unique<PostRenderTarget>(device, wB, hB);
+
+    //フルスクリーン用
     renderPostFull_ = std::make_unique<PostRenderTarget>(device, Graphics::Instance().GetScreenWidth(), Graphics::Instance().GetScreenHeight());
 }
 
@@ -101,8 +117,8 @@ void PostEffect::Render()
             CalcGaussianFilter(bloomData.Weight, KARNEL_SIZE, 50.0f);//ガウスフィルター作成 
             //コンスタントバッファ更新
             bloomData.KarnelSize = KARNEL_SIZE;
-            bloomData.texel.x = 1.0f / renderPost_[1]->width;
-            bloomData.texel.y = 1.0f / renderPost_[1]->height;
+            bloomData.texel.x = 1.0f / renderPost_[3]->width;
+            bloomData.texel.y = 1.0f / renderPost_[3]->height;
             dc->UpdateSubresource(bloomBuffer_.Get(), 0, NULL, &bloomData, 0, 0);
             dc->PSSetConstantBuffers(7, 1, bloomBuffer_.GetAddressOf());        
         }
@@ -110,13 +126,13 @@ void PostEffect::Render()
         //高輝度描画対象を暈す
         {
             //描画先を変更
-            ID3D11RenderTargetView* rtv = renderPost_[1]->renderTargetView.Get();
+            ID3D11RenderTargetView* rtv = renderPost_[3]->renderTargetView.Get();
             FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
             dc->ClearRenderTargetView(rtv, color);
             dc->OMSetRenderTargets(1, &rtv, nullptr);
             D3D11_VIEWPORT	viewport{};
-            viewport.Width = static_cast<float>(renderPost_[1]->width);
-            viewport.Height = static_cast<float>(renderPost_[1]->height);
+            viewport.Width = static_cast<float>(renderPost_[3]->width);
+            viewport.Height = static_cast<float>(renderPost_[3]->height);
             viewport.MinDepth = 0.0f;
             viewport.MaxDepth = 1.0f;
             dc->RSSetViewports(1, &viewport);
@@ -136,6 +152,131 @@ void PostEffect::Render()
         }
     }
 #pragma endregion
+
+#pragma region 川瀬式?ブルーム
+    {
+        if (bloomKawaseFilter_->IsEnabled())
+        {
+            //高輝度抽出用バッファ
+            {
+                //描画先を変更
+                ID3D11RenderTargetView* rtv = renderPost_[0]->renderTargetView.Get();
+                FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+                dc->ClearRenderTargetView(rtv, color);
+                dc->OMSetRenderTargets(1, &rtv, nullptr);
+                D3D11_VIEWPORT	viewport{};
+                viewport.Width = static_cast<float>(renderPost_[0]->width);
+                viewport.Height = static_cast<float>(renderPost_[0]->height);
+                viewport.MinDepth = 0.0f;
+                viewport.MaxDepth = 1.0f;
+                dc->RSSetViewports(1, &viewport);
+
+                //シェーダーリソースビュー設定
+                PostRenderTarget* ps = graphics.GetPostEffectModelRenderTarget().get();
+                drawTexture_->SetShaderResourceView(
+                    ps->shaderResourceView, ps->width, ps->height);
+
+                drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+                    0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
+                    0,
+                    1, 1, 1, 1);
+
+
+                dc->UpdateSubresource(bloomExBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.bloomData2, 0, 0);
+                dc->PSSetConstantBuffers(0, 1, bloomExBuffer_.GetAddressOf());
+
+
+                //高輝度抽出
+                bloomExtract_->Draw(drawTexture_.get());
+            }
+
+            //ダウンサンプリングして、暈しを複数回する
+            for (int i = 0; i < 4; ++i)
+            {
+                int index = i + 1;
+                //暈しバッファ更新
+                {
+                    BloomData bloomData;
+                    CalcGaussianFilter(bloomData.Weight, KARNEL_SIZE, 50.0f);//ガウスフィルター作成 
+                    //コンスタントバッファ更新
+                    bloomData.KarnelSize = KARNEL_SIZE;
+                    bloomData.texel.x = 1.0f / renderPost_[index]->width;
+                    bloomData.texel.y = 1.0f / renderPost_[index]->height;
+                    dc->UpdateSubresource(bloomBuffer_.Get(), 0, NULL, &bloomData, 0, 0);
+                    dc->PSSetConstantBuffers(7, 1, bloomBuffer_.GetAddressOf());
+                }
+
+                //高輝度描画対象を暈す
+                {
+                    //描画先を変更
+                    ID3D11RenderTargetView* rtv = renderPost_[index]->renderTargetView.Get();
+                    FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+                    dc->ClearRenderTargetView(rtv, color);
+                    dc->OMSetRenderTargets(1, &rtv, nullptr);
+                    D3D11_VIEWPORT	viewport{};
+                    viewport.Width = static_cast<float>(renderPost_[index]->width);
+                    viewport.Height = static_cast<float>(renderPost_[index]->height);
+                    viewport.MinDepth = 0.0f;
+                    viewport.MaxDepth = 1.0f;
+                    dc->RSSetViewports(1, &viewport);
+
+                    //シェーダーリソースビュー設定
+                    drawTexture_->SetShaderResourceView(
+                        renderPost_[index - 1]->shaderResourceView,
+                        renderPost_[index - 1]->width, renderPost_[index - 1]->height);
+
+                    drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+                        0, 0, static_cast<float>(renderPost_[index - 1]->width), static_cast<float>(renderPost_[index - 1]->height),
+                        0,
+                        1, 1, 1, 1);
+
+                    //暈す
+                    bloomBlur_->Draw(drawTexture_.get());
+                }
+            }
+
+            //暈しの平均を計算
+            {
+                //描画先を変更
+                ID3D11RenderTargetView* rtv = renderPost_[0]->renderTargetView.Get();
+                FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+                dc->ClearRenderTargetView(rtv, color);
+                dc->OMSetRenderTargets(1, &rtv, nullptr);
+                D3D11_VIEWPORT	viewport{};
+                viewport.Width = static_cast<float>(renderPost_[0]->width);
+                viewport.Height = static_cast<float>(renderPost_[0]->height);
+                viewport.MinDepth = 0.0f;
+                viewport.MaxDepth = 1.0f;
+                dc->RSSetViewports(1, &viewport);
+
+                //シェーダーリソースビュー設定
+                drawTexture_->SetShaderResourceView(
+                    renderPost_[1]->shaderResourceView,
+                    viewport.Width, viewport.Height);
+
+                ID3D11ShaderResourceView* srvs[] =
+                {
+                    renderPost_[2]->shaderResourceView.Get(),
+                    renderPost_[3]->shaderResourceView.Get(),
+                    renderPost_[4]->shaderResourceView.Get(),
+                };
+                dc->PSSetShaderResources(
+                    1, ARRAYSIZE(srvs),
+                    srvs
+                );
+
+                drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+                    0, 0, static_cast<float>(renderPost_[0]->width), static_cast<float>(renderPost_[0]->height),
+                    0,
+                    1, 1, 1, 1);
+
+                //平均化
+                bloomKawaseFilter_->Draw(drawTexture_.get());
+            }
+        }
+    }
+#pragma endregion
+
 
 #pragma region ポストエフェクト適用
     {
@@ -161,10 +302,22 @@ void PostEffect::Render()
             0,
             1, 1, 1, 1);
 
-        dc->PSSetShaderResources(
-            1, 1,
-            renderPost_[1]->shaderResourceView.GetAddressOf()
-        );
+        //川瀬ブルーム
+        if (bloomKawaseFilter_->IsEnabled()) {
+            dc->PSSetShaderResources(
+                1, 1,
+                renderPost_[0]->shaderResourceView.GetAddressOf()
+            );
+        }
+        else
+        {
+            //ブルーム
+            dc->PSSetShaderResources(
+                1, 1,
+                renderPost_[3]->shaderResourceView.GetAddressOf()
+            );
+        }
+
         postEffect_->Draw(drawTexture_.get());
     }
 #pragma endregion
@@ -218,8 +371,8 @@ void PostEffect::Render()
     dc->PSSetShaderResources(1, 1, srvNull);
 
     FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    dc->ClearRenderTargetView(renderPost_[0]->renderTargetView.Get(), color);
     dc->ClearRenderTargetView(renderPost_[1]->renderTargetView.Get(), color);
+    dc->ClearRenderTargetView(renderPost_[3]->renderTargetView.Get(), color);
 }
 
 //ImGui
@@ -274,9 +427,14 @@ void PostEffect::ImGuiRender()
             {
                 bloomExtract_->SetEnabled(enabled);
             }
+            bool enabledKawase = bloomKawaseFilter_->IsEnabled();
+            if(ImGui::Checkbox("enabledKawase", &enabledKawase))
+            {
+                bloomKawaseFilter_->SetEnabled(enabledKawase);
+            }
             ImGui::Separator();
-            ImGui::DragFloat("intensity", &graphics.shaderParameter3D_.bloomData2.intensity, 0.01f);
-            ImGui::DragFloat("threshold", &graphics.shaderParameter3D_.bloomData2.threshold, 0.01f);
+            ImGui::SliderFloat("intensity", &graphics.shaderParameter3D_.bloomData2.intensity, 0, 10);
+            ImGui::SliderFloat("threshold", &graphics.shaderParameter3D_.bloomData2.threshold, 0, 1);
 
            
             ImGui::TreePop();
@@ -290,6 +448,12 @@ void PostEffect::ImGuiRender()
             ImGui::Image(renderPost_[0]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
             ImGui::Text("Post1");
             ImGui::Image(renderPost_[1]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            ImGui::Text("Post2");
+            ImGui::Image(renderPost_[2]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            ImGui::Text("Post3");
+            ImGui::Image(renderPost_[3]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            ImGui::Text("Post4");
+            ImGui::Image(renderPost_[4]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
 
             ImGui::TreePop();
         }

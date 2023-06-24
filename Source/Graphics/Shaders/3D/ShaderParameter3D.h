@@ -28,7 +28,7 @@ struct ColorGradingData
 };
 
 //ÉuÉãÅ[ÉÄ
-static constexpr u_int KARNEL_SIZE = 5;
+static constexpr u_int KARNEL_SIZE = 17;
 static constexpr float PI = 3.141592f;
 static constexpr u_int BUFFER_SIZE = KARNEL_SIZE * KARNEL_SIZE;
 struct BloomData

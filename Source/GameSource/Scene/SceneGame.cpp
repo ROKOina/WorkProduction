@@ -143,11 +143,12 @@ void SceneGame::Initialize()
 	StageMain* stageMain = new StageMain();	//メイン（マップ）
 	stageManager.Register(stageMain);
 
+	//ポストエフェクト
 	{
 		Graphics& graphics = Graphics::Instance();
 		postEff = std::make_unique<PostEffect>(
-			graphics.GetScreenWidth()/8 ,
-			graphics.GetScreenHeight()/8);
+			graphics.GetScreenWidth() ,
+			graphics.GetScreenHeight());
 	}
 
 	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });

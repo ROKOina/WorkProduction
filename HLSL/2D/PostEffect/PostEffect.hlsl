@@ -1,23 +1,23 @@
-
 struct VS_OUT
 {
     float4 position : SV_POSITION;
     float4 color : COLOR;
     float2 texcoord : TEXCOORD;
 };
-Texture2D texture0 : register(t0);
-SamplerState sampler0 : register(s0);
+
+Texture2D mainTexture : register(t0);
+SamplerState samplerLiner : register(s0);
 
 Texture2D bloomTexture : register(t1);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
-    float4 tex = texture0.Sample(sampler0, pin.texcoord) * pin.color;
-    float4 color = tex;
+    float4 tex = mainTexture.Sample(samplerLiner, pin.texcoord) * pin.color;
+    float4 bloomTex = bloomTexture.Sample(samplerLiner, pin.texcoord) * pin.color;
     
-    //ブルームを足す
-    tex = bloomTexture.Sample(sampler0, pin.texcoord) * pin.color;
-    color.rgb += tex.rgb;
+    //ブルームと画面を足す
+    float4 color = float4(0, 0, 0, 1);
+    color.rgb = tex.rgb + bloomTex.rgb;
     
     //格子
     //color.rgb *= step(abs(sin(pin.texcoord.x * 50)), 0.8);

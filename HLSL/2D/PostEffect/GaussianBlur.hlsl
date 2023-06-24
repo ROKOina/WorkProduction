@@ -4,19 +4,19 @@ struct VS_OUT
     float4 color : COLOR;
     float2 texcoord : TEXCOORD;
 };
-Texture2D texture0 : register(t0);
-SamplerState sampler0[3] : register(s0);
 
-
-#define KERNEL_SIZE (5)
+#define KERNEL_SIZE (17)
 #define BUFFER_SIZE (KERNEL_SIZE * KERNEL_SIZE)
 cbuffer BlurData : register(b7)
 {
-    float4 Weight[BUFFER_SIZE];
-    float KarnelSize;
+    float4 Weight[BUFFER_SIZE]; 
+    float KarnelSize;           
     float2 texel;
     float dummy;
 };
+
+Texture2D blurTexture : register(t0);
+SamplerState samplers[3] : register(s0);    //0:WRAP 1:CLAMP 2:BORDER,POINT
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
@@ -24,11 +24,11 @@ float4 main(VS_OUT pin) : SV_TARGET
     for (int i = 0; i < KarnelSize * KarnelSize; i++)
     {
         float2 offset = texel * Weight[i].xy;
-		//offset *= 4.0f; //”ÍˆÍ’²®
+        //offset *= 4.0f; //”ÍˆÍ’²®
         float weight = Weight[i].z;
         color.rgb +=
-			texture0.Sample(
-				sampler0[1], pin.texcoord + offset).rgb * weight;
+			blurTexture.Sample(
+				samplers[1], pin.texcoord + offset).rgb * weight;
     }
     return color;
 }

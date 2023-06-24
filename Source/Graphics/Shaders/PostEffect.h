@@ -43,6 +43,7 @@ private:
 
     //ブルーム
     std::unique_ptr<ShaderPost> bloomExtract_;
+    std::unique_ptr<ShaderPost> bloomKawaseFilter_;  //川瀬式
     std::unique_ptr<ShaderPost> bloomBlur_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> bloomBuffer_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> bloomExBuffer_;
@@ -51,7 +52,7 @@ private:
     std::unique_ptr<ShaderPost> postRender_;
 
     std::unique_ptr<TextureFormat> drawTexture_;
-    std::unique_ptr<PostRenderTarget> renderPost_[2];
+    std::unique_ptr<PostRenderTarget> renderPost_[5];
     std::unique_ptr<PostRenderTarget> renderPostFull_;  //フルスクリーン用のレンダーターゲット
 };
 
