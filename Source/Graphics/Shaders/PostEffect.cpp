@@ -157,6 +157,11 @@ void PostEffect::Render()
     {
         if (bloomKawaseFilter_->IsEnabled())
         {
+
+            //ブルームのバッファと被るため解放
+            ID3D11ShaderResourceView* srvNull[] = { NULL };
+            dc->PSSetShaderResources(0, 1, srvNull);
+
             //高輝度抽出用バッファ
             {
                 //描画先を変更
@@ -366,9 +371,8 @@ void PostEffect::Render()
     }
 
     //解放
-    ID3D11ShaderResourceView* srvNull[] = { NULL };
-    dc->PSSetShaderResources(0, 1, srvNull);
-    dc->PSSetShaderResources(1, 1, srvNull);
+    ID3D11ShaderResourceView* srvNull[4] = { NULL };
+    dc->PSSetShaderResources(0, ARRAYSIZE(srvNull), srvNull);
 
     FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     dc->ClearRenderTargetView(renderPost_[1]->renderTargetView.Get(), color);

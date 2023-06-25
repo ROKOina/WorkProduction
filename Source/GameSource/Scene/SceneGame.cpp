@@ -20,7 +20,13 @@ void SceneGame::Initialize()
 {
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-		obj->SetName("miru");
+		obj->SetName("hanbai");
+		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+
+		const char* filename = "Data/Model/stages/mon.mdl";
+		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+		r->LoadModel(filename);
+		r->SetShaderID(SHADER_ID::Phong);
 	}
 
 	//仮オブジェクト
@@ -40,84 +46,29 @@ void SceneGame::Initialize()
 	
 
 
-		////でばふ
-		//std::shared_ptr<GameObject> o[5];
-		//for (int i = 0; i < 3; ++i)
-		//{
-		//	std::shared_ptr<GameObject> obj2;
-		//	if (i == 0)
-		//		obj2 = obj->AddChildObject();
-		//	else
-		//		obj2 = o[i - 1]->AddChildObject();
+		//でばふ
+		{
+			std::shared_ptr<GameObject> o[5];
+			for (int i = 0; i < 3; ++i)
+			{
+				std::shared_ptr<GameObject> obj2;
+				if (i == 0)
+					obj2 = obj->AddChildObject();
+				else
+					obj2 = o[i - 1]->AddChildObject();
+				obj2->SetName(std::to_string(i).c_str());
 
 
-		//	obj2->SetPosition({ 10, 0, 0 });
+				obj2->transform_->SetPosition({ 10, 0, 0 });
 
-		//	const char* filename = "Data/Model/pico/picoAnim.mdl";
-		//	std::shared_ptr<RenderderCom> r = obj2->AddComponent<RenderderCom>();
-		//	r->LoadModel(filename);
-		//	o[i] = obj2;
-		//}
+				std::shared_ptr<RendererCom> r1 = obj2->AddComponent<RendererCom>();
+				filename = "Data/Model/pico/picoAnim.mdl";
+				r1->LoadModel(filename);
+				o[i] = obj2;
+			}
+		}
 	}
 
-	////仮オブジェクト
-	//{
-	//	std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-	//	obj->SetName("pico");
-	//	obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-	//	obj->transform_->SetPosition({ 1,0,0 });
-
-	//	const char* filename = "Data/Model/pico/picoAnim.mdl";
-	//	std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
-	//	r->LoadModel(filename);
-	//	r->SetShaderID(SHADER_ID::Phong);
-
-	//	std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-	//}
-	////仮オブジェクト
-	//{
-	//	std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-	//	obj->SetName("pico");
-	//	obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-	//	obj->transform_->SetPosition({ 2,0,0 });
-
-	//	const char* filename = "Data/Model/pico/picoAnim.mdl";
-	//	std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
-	//	r->LoadModel(filename);
-
-	//	std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-	//}
-	////仮オブジェクト
-	//{
-	//	std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-	//	obj->SetName("pico");
-	//	obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-	//	obj->transform_->SetPosition({ 3,0,0 });
-
-	//	const char* filename = "Data/Model/pico/picoAnim.mdl";
-	//	std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
-	//	r->LoadModel(filename);
-	//	r->SetShaderID(SHADER_ID::Phong);
-
-	//	std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-
-	//	//こ
-	//	{
-	//		std::shared_ptr<GameObject> child= obj->AddChildObject();
-	//		child->SetName("pico");
-	//		child->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-	//		child->transform_->SetPosition({ 3,0,0 });
-
-	//		const char* filename = "Data/Model/pico/picoAnim.mdl";
-	//		r = child->AddComponent<RendererCom>();
-	//		r->LoadModel(filename);
-	//		r->SetShaderID(SHADER_ID::Phong);
-
-	//		 a = child->AddComponent<AnimationCom>();
-
-
-	//	}
-	//}
 
 	//カメラを生成
 	{
