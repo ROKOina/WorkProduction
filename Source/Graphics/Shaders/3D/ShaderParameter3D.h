@@ -101,7 +101,7 @@ public:
 		shader_resource_view_desc.Format = texture2dDesc.Format;
 		shader_resource_view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		shader_resource_view_desc.Texture2D.MipLevels = 1;
-		hr = device->CreateShaderResourceView(texture2d.Get(), &shader_resource_view_desc, shaderResourceView.ReleaseAndGetAddressOf());
+		hr = device->CreateShaderResourceView(texture2d.Get(), &shader_resource_view_desc, diffuseMap.ReleaseAndGetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		D3D11_RENDER_TARGET_VIEW_DESC render_target_view_desc{};
@@ -111,7 +111,7 @@ public:
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 	
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	shaderResourceView;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	diffuseMap;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>		renderTargetView;
 	UINT width;
 	UINT height;
@@ -149,7 +149,7 @@ public:
 		shader_resource_view_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		shader_resource_view_desc.Texture2D.MostDetailedMip = 0;
 		shader_resource_view_desc.Texture2D.MipLevels = 1;
-		hr = device->CreateShaderResourceView(texture2d.Get(), &shader_resource_view_desc, shaderResourceView.ReleaseAndGetAddressOf());
+		hr = device->CreateShaderResourceView(texture2d.Get(), &shader_resource_view_desc, diffuseMap.ReleaseAndGetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc{};
@@ -162,7 +162,7 @@ public:
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 	
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	shaderResourceView;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	diffuseMap;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>		depthStencilView;
 	UINT width;
 	UINT height;

@@ -11,7 +11,6 @@ void TransformCom::Start()
 // 更新処理
 void TransformCom::Update(float elapsedTime)
 {
-
 }
 
 // GUI描画
@@ -37,7 +36,7 @@ void TransformCom::OnGUI()
 void TransformCom::UpdateTransform()
 {
 	// ワールド行列の更新
-	DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&rotation_);
+	DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&rotation_.dxFloat4);
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale_.x, scale_.y, scale_.z);
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(Q);
 	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position_.x, position_.y, position_.z);
@@ -55,32 +54,17 @@ void TransformCom::UpdateTransform()
 //指定方向を向く
 void TransformCom::LookAtTransform(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT3& up)
 {
-	UpdateTransform();
-
 	//位置、注視点、上方向からビュー行列を作成
 	DirectX::XMVECTOR Eye = DirectX::XMLoadFloat3(&worldPosition_);
 	DirectX::XMVECTOR Focus = DirectX::XMLoadFloat3(&focus);
 	DirectX::XMVECTOR Up = DirectX::XMLoadFloat3(&up);
 
-	//同じ座標の場合、少しずらす
-	DirectX::XMFLOAT3 wp = worldPosition_;
-	if (focus.x == wp.x && focus.y == wp.y && focus.z == wp.z)
-	{
-		wp.y += 0.0001f;
-		Eye = DirectX::XMLoadFloat3(&wp);
-	}
+	DirectX::XMFLOAT3 direction;
+	DirectX::XMStoreFloat3(&direction, DirectX::XMVectorSubtract(Focus, Eye));
+	
+	rotation_ = QuaternionStruct::LookRotation(direction, up);
 
-	DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(Eye, Focus, Up);
-
-	//ビューを逆行列化し、ワールド座標に戻す
-	DirectX::XMMATRIX World = DirectX::XMMatrixInverse(nullptr, View);
-	if (!std::isfinite(World.r->m128_f32[0]))return;
-
-	DirectX::XMStoreFloat4x4(&transform_, World);
-
-	//回転を適用
-	DirectX::XMStoreFloat4(&rotation_,
-		DirectX::XMQuaternionRotationMatrix(DirectX::XMLoadFloat4x4(&transform_)));
+	UpdateTransform();
 }
 
 //指定のUpに合わせる
@@ -109,5 +93,7 @@ void TransformCom::SetUpTransform(const DirectX::XMFLOAT3& up)
 	DirectX::XMMATRIX M = DirectX::XMLoadFloat4x4(&matrixUp);
 
 	//回転を適用
-	DirectX::XMStoreFloat4(&rotation_, DirectX::XMQuaternionRotationMatrix(M));
+	DirectX::XMStoreFloat4(&rotation_.dxFloat4, DirectX::XMQuaternionRotationMatrix(M));
+
+	UpdateTransform();
 }

@@ -135,7 +135,8 @@ void PhongShader::Draw(ID3D11DeviceContext* dc, const Model* model)
             dc->UpdateSubresource(subsetConstantBuffer_.Get(), 0, 0, &cbSubset, 0, 0);
             ID3D11ShaderResourceView* srvs[] =
             {
-                subset.material->shaderResourceView.Get(),
+                subset.material->diffuseMap.Get(),
+                subset.material->normalMap.Get(),
             };
             dc->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
             

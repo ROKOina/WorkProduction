@@ -2,7 +2,7 @@
 
 #include <DirectXMath.h>
 #include "Graphics/Model/Model.h"
-#include "Graphics/Shader/Shader.h"
+#include "Graphics\Shaders\Shader.h"
 
 class Weapon
 {

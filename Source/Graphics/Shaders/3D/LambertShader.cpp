@@ -121,7 +121,7 @@ void LambertShader::Draw(ID3D11DeviceContext* dc, const Model* model)
 			CbSubset cbSubset;
 			cbSubset.materialColor = subset.material->color;
 			dc->UpdateSubresource(subsetConstantBuffer_.Get(), 0, 0, &cbSubset, 0, 0);
-			dc->PSSetShaderResources(0, 1, subset.material->shaderResourceView.GetAddressOf());
+			dc->PSSetShaderResources(0, 1, subset.material->diffuseMap.GetAddressOf());
 			//dc->PSSetSamplers(0, 1, samplerState_.GetAddressOf());
 			dc->DrawIndexed(subset.indexCount, subset.startIndex, 0);
 		}

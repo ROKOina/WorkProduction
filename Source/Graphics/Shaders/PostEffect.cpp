@@ -95,7 +95,7 @@ void PostEffect::Render()
             //シェーダーリソースビュー設定
             PostRenderTarget* ps = graphics.GetPostEffectModelRenderTarget().get();
             drawTexture_->SetShaderResourceView(
-                ps->shaderResourceView, ps->width, ps->height);
+                ps->diffuseMap, ps->width, ps->height);
 
             drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
                 0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
@@ -139,7 +139,7 @@ void PostEffect::Render()
 
             //シェーダーリソースビュー設定
             drawTexture_->SetShaderResourceView(
-                renderPost_[0]->shaderResourceView,
+                renderPost_[0]->diffuseMap,
                 renderPost_[0]->width, renderPost_[0]->height);
 
             drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
@@ -179,7 +179,7 @@ void PostEffect::Render()
                 //シェーダーリソースビュー設定
                 PostRenderTarget* ps = graphics.GetPostEffectModelRenderTarget().get();
                 drawTexture_->SetShaderResourceView(
-                    ps->shaderResourceView, ps->width, ps->height);
+                    ps->diffuseMap, ps->width, ps->height);
 
                 drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
                     0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
@@ -227,7 +227,7 @@ void PostEffect::Render()
 
                     //シェーダーリソースビュー設定
                     drawTexture_->SetShaderResourceView(
-                        renderPost_[index - 1]->shaderResourceView,
+                        renderPost_[index - 1]->diffuseMap,
                         renderPost_[index - 1]->width, renderPost_[index - 1]->height);
 
                     drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
@@ -256,14 +256,14 @@ void PostEffect::Render()
 
                 //シェーダーリソースビュー設定
                 drawTexture_->SetShaderResourceView(
-                    renderPost_[1]->shaderResourceView,
+                    renderPost_[1]->diffuseMap,
                     viewport.Width, viewport.Height);
 
                 ID3D11ShaderResourceView* srvs[] =
                 {
-                    renderPost_[2]->shaderResourceView.Get(),
-                    renderPost_[3]->shaderResourceView.Get(),
-                    renderPost_[4]->shaderResourceView.Get(),
+                    renderPost_[2]->diffuseMap.Get(),
+                    renderPost_[3]->diffuseMap.Get(),
+                    renderPost_[4]->diffuseMap.Get(),
                 };
                 dc->PSSetShaderResources(
                     1, ARRAYSIZE(srvs),
@@ -300,7 +300,7 @@ void PostEffect::Render()
 
         //シェーダーリソースビュー設定
         drawTexture_->SetShaderResourceView(
-            ps->shaderResourceView, ps->width, ps->height);
+            ps->diffuseMap, ps->width, ps->height);
 
         drawTexture_->Update(0, 0, graphics.GetScreenWidth(), graphics.GetScreenHeight(),
             0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
@@ -311,7 +311,7 @@ void PostEffect::Render()
         if (bloomKawaseFilter_->IsEnabled()) {
             dc->PSSetShaderResources(
                 1, 1,
-                renderPost_[0]->shaderResourceView.GetAddressOf()
+                renderPost_[0]->diffuseMap.GetAddressOf()
             );
         }
         else
@@ -319,7 +319,7 @@ void PostEffect::Render()
             //ブルーム
             dc->PSSetShaderResources(
                 1, 1,
-                renderPost_[3]->shaderResourceView.GetAddressOf()
+                renderPost_[3]->diffuseMap.GetAddressOf()
             );
         }
 
@@ -335,7 +335,7 @@ void PostEffect::Render()
         //シェーダーリソースビュー設定
         PostRenderTarget* ps = graphics.GetPostEffectModelRenderTarget().get();
         drawTexture_->SetShaderResourceView(
-            renderPostFull_->shaderResourceView, ps->width, ps->height);
+            renderPostFull_->diffuseMap, ps->width, ps->height);
 
         drawTexture_->Update(0, 0, ps->width, ps->height,
             0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
@@ -349,7 +349,7 @@ void PostEffect::Render()
         {
             //シェーダーリソースビュー設定
             drawTexture_->SetShaderResourceView(
-                renderPostFull_->shaderResourceView, ps->width, ps->height);
+                renderPostFull_->diffuseMap, ps->width, ps->height);
 
             drawTexture_->Update(0, 0, ps->width, ps->height,
                 0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
@@ -449,15 +449,15 @@ void PostEffect::ImGuiRender()
             ImGui::Text("Color");
             ImGui::Image(drawTexture_->GetShaderResourceView().Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
             ImGui::Text("Post0");
-            ImGui::Image(renderPost_[0]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            ImGui::Image(renderPost_[0]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
             ImGui::Text("Post1");
-            ImGui::Image(renderPost_[1]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            ImGui::Image(renderPost_[1]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
             ImGui::Text("Post2");
-            ImGui::Image(renderPost_[2]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            ImGui::Image(renderPost_[2]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
             ImGui::Text("Post3");
-            ImGui::Image(renderPost_[3]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            ImGui::Image(renderPost_[3]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
             ImGui::Text("Post4");
-            ImGui::Image(renderPost_[4]->shaderResourceView.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            ImGui::Image(renderPost_[4]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
 
             ImGui::TreePop();
         }

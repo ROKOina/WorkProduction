@@ -176,6 +176,7 @@
     <ClInclude Include="Source\GameSource\Stage\Stage.h" />
     <ClInclude Include="Source\GameSource\Stage\StageMain.h" />
     <ClInclude Include="Source\GameSource\Stage\StageManager.h" />
+    <ClInclude Include="Source\SystemStruct\QuaternionStruct.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp" />

@@ -23,7 +23,7 @@ void SceneGame::Initialize()
 		obj->SetName("hanbai");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
 
-		const char* filename = "Data/Model/stages/mon.mdl";
+		const char* filename = "Data/Model/stages/FloorSand.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::Phong);
@@ -46,27 +46,27 @@ void SceneGame::Initialize()
 	
 
 
-		//でばふ
-		{
-			std::shared_ptr<GameObject> o[5];
-			for (int i = 0; i < 3; ++i)
-			{
-				std::shared_ptr<GameObject> obj2;
-				if (i == 0)
-					obj2 = obj->AddChildObject();
-				else
-					obj2 = o[i - 1]->AddChildObject();
-				obj2->SetName(std::to_string(i).c_str());
+		////でばふ
+		//{
+		//	std::shared_ptr<GameObject> o[5];
+		//	for (int i = 0; i < 3; ++i)
+		//	{
+		//		std::shared_ptr<GameObject> obj2;
+		//		if (i == 0)
+		//			obj2 = obj->AddChildObject();
+		//		else
+		//			obj2 = o[i - 1]->AddChildObject();
+		//		obj2->SetName(std::to_string(i).c_str());
 
 
-				obj2->transform_->SetPosition({ 10, 0, 0 });
+		//		obj2->transform_->SetPosition({ 10, 0, 0 });
 
-				std::shared_ptr<RendererCom> r1 = obj2->AddComponent<RendererCom>();
-				filename = "Data/Model/pico/picoAnim.mdl";
-				r1->LoadModel(filename);
-				o[i] = obj2;
-			}
-		}
+		//		std::shared_ptr<RendererCom> r1 = obj2->AddComponent<RendererCom>();
+		//		filename = "Data/Model/stages/vendingMachine.mdl";
+		//		r1->LoadModel(filename);
+		//		o[i] = obj2;
+		//	}
+		//}
 	}
 
 
@@ -89,10 +89,10 @@ void SceneGame::Initialize()
 	std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
 	mainCamera_ = camera;
 
-	//ステージ初期化
-	StageManager& stageManager = StageManager::Instance();
-	StageMain* stageMain = new StageMain();	//メイン（マップ）
-	stageManager.Register(stageMain);
+	////ステージ初期化
+	//StageManager& stageManager = StageManager::Instance();
+	//StageMain* stageMain = new StageMain();	//メイン（マップ）
+	//stageManager.Register(stageMain);
 
 	//ポストエフェクト
 	{
@@ -108,7 +108,7 @@ void SceneGame::Initialize()
 // 終了化
 void SceneGame::Finalize()
 {
-	StageManager::Instance().Clear();
+	//StageManager::Instance().Clear();
 }
 
 // 更新処理
@@ -116,8 +116,8 @@ void SceneGame::Update(float elapsedTime)
 {
 	GameObjectManager::Instance().Update(elapsedTime);
 
-	//ステージ更新処理
-	StageManager::Instance().Update(elapsedTime);
+	////ステージ更新処理
+	//StageManager::Instance().Update(elapsedTime);
 	//エフェクト更新処理
 	EffectManager::Instance().Update(elapsedTime);
 
@@ -188,8 +188,8 @@ void SceneGame::Render()
 		Shader* shader = graphics.GetShader(SHADER_ID::Phong);
 		shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
 
-		//ステージ描画
-		StageManager::Instance().Render(dc, shader);
+		////ステージ描画
+		//StageManager::Instance().Render(dc, shader);
 		////プレイヤー描画
 		//player->Render(dc, shader_);
 

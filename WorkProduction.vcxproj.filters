@@ -253,6 +253,7 @@
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\PostEffect.h" />
     <ClInclude Include="Source\Graphics\Shaders\TextureFormat.h" />
+    <ClInclude Include="Source\SystemStruct\QuaternionStruct.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">

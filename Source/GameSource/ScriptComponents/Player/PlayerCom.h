@@ -30,14 +30,18 @@ private:
     DirectX::XMFLOAT3 GetMoveVec();
 
     //移動入力処理
-    bool InputMove(float elapsedTime);
+    bool Move(float elapsedTime);
+
+    //入力値保存
+    DirectX::XMFLOAT3 inputMoveVec_;
 
     //移動パラメーター
     float moveSpeed_ = 5.0f;
     float turnSpeed_ = DirectX::XMConvertToRadians(720);
     float jumpSpeed_ = 20.0f;
 
-    DirectX::XMFLOAT3 up_;
+
+    DirectX::XMFLOAT3 up_ = {0,1,0};
     DirectX::XMFLOAT3 look_;
 
 };

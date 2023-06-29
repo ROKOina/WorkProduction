@@ -45,13 +45,13 @@ void PlayerCom::Update(float elapsedTime)
 
     //移動
     {
-        InputMove(elapsedTime);
+        Move(elapsedTime);
 
         //速力処理更新
         DirectX::XMFLOAT3 p = GetGameObject()->transform_->GetPosition();
         DirectX::XMFLOAT4 r = GetGameObject()->transform_->GetRotation();
         //UpdateVelocity(elapsedTime, p, r);
-        UpdateVelocity(elapsedTime, p, DirectX::XMFLOAT4(0, 0, 0, 0),up_);
+        //UpdateVelocity(elapsedTime, p, DirectX::XMFLOAT4(0, 0, 0, 0),up_);
         GetGameObject()->transform_->SetPosition(p);
         GetGameObject()->transform_->SetRotation(r);
     }
@@ -130,29 +130,34 @@ DirectX::XMFLOAT3 PlayerCom::GetMoveVec()
 }
 
 //移動入力処理
-bool PlayerCom::InputMove(float elapsedTime)
+bool PlayerCom::Move(float elapsedTime)
 {
     //進行ベクトル取得
-    DirectX::XMFLOAT3 moveVec = GetMoveVec();
+    inputMoveVec_ = GetMoveVec();
 
-    if (moveVec.x * moveVec.x + moveVec.y * moveVec.y + moveVec.z * moveVec.z <= 0.1f) {
+    //進行ベクトルがゼロベクトルでない場合は入力された
+    if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.y * inputMoveVec_.y + inputMoveVec_.z * inputMoveVec_.z <= 0.1f) {
         return false;
     }
 
-    //移動処理
-    Move(moveVec.x, moveVec.z, moveSpeed_);
+    ////移動処理
+    //Move(moveVec.x, moveVec.z, moveSpeed_);
+
 
     //旋回処理＆地面の法線で回転
     DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
-    look_ = { moveVec.x * 3 + pos.x 
+    look_ = { inputMoveVec_.x * 3 + pos.x
         ,pos.y
-        ,moveVec.z * 3 + pos.z };
-    GetGameObject()->transform_->LookAtTransform(look_, up_);
-    GetGameObject()->transform_->SetUpTransform(up_);
+        ,inputMoveVec_.z * 3 + pos.z };
 
+    //入力方向のクォータニオン生成
+    QuaternionStruct inputQuaternion = QuaternionStruct::LookRotation(inputMoveVec_, up_);
+    QuaternionStruct playerQuaternion = GetGameObject()->transform_->GetRotation();
 
+    //DirectX::XMQuaternionSlerp()
 
-    //進行ベクトルがゼロベクトルでない場合は入力された
-    return moveVec.x * moveVec.x + moveVec.y * moveVec.y + moveVec.z * moveVec.z;
+    //GetGameObject()->transform_->LookAtTransform(look_, up_);
+    //GetGameObject()->transform_->SetUpTransform(up_);
+
+    return true;
 }
-

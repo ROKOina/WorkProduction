@@ -1,6 +1,7 @@
 #pragma once
 
 #include "System\Component.h"
+#include "SystemStruct\QuaternionStruct.h"
 
 class TransformCom : public Component
 {
@@ -46,7 +47,7 @@ public:
         euler.y = DirectX::XMConvertToRadians(setEuler.y);
         euler.z = DirectX::XMConvertToRadians(setEuler.z);
         DirectX::XMVECTOR ROT = DirectX::XMQuaternionRotationRollPitchYaw(euler.x, euler.y, euler.z);
-        DirectX::XMStoreFloat4(&rotation_, ROT);
+        DirectX::XMStoreFloat4(&rotation_.dxFloat4, ROT);
         euler.y = DirectX::XMConvertToDegrees(euler.y);
         euler.x = DirectX::XMConvertToDegrees(euler.x);
         euler.z = DirectX::XMConvertToDegrees(euler.z);
@@ -91,7 +92,7 @@ private:
     DirectX::XMFLOAT3	position_ = DirectX::XMFLOAT3(0, 0, 0);
     DirectX::XMFLOAT3	worldPosition_ = DirectX::XMFLOAT3(0, 0, 0);
 
-    DirectX::XMFLOAT4	rotation_ = DirectX::XMFLOAT4(0, 0, 0, 1);   //基準はクォータニオン
+    QuaternionStruct	rotation_ = DirectX::XMFLOAT4(0, 0, 0, 1);   //基準はクォータニオン
     DirectX::XMFLOAT3   eulerRotation_ = DirectX::XMFLOAT3(0, 0, 0);
     DirectX::XMFLOAT3	scale_ = DirectX::XMFLOAT3(1, 1, 1);
     DirectX::XMFLOAT4X4	transform_ = DirectX::XMFLOAT4X4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
