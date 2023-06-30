@@ -45,7 +45,7 @@ Framework::~Framework()
 }
 
 // 更新処理
-void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/)
+void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/,float fps_)
 {
 	// 入力更新処理
 	input_.Update();
@@ -118,6 +118,9 @@ void Framework::CalculateFrameStats()
 		// Reset for next average.
 		frames = 0;
 		time_tlapsed += 1.0f;
+
+		//FPSをセット
+		Graphics::Instance().SetFPSFramework(fps);
 	}
 }
 
@@ -170,7 +173,7 @@ int Framework::Run()
 				? timer_.TimeInterval()
 				: syncInterval / 60.0f
 				;
-			Update(elapsedTime);
+			Update(elapsedTime, fps_);
 			Render(elapsedTime);
 
 			////サブウィンドウ更新

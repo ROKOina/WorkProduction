@@ -19,7 +19,7 @@ public:
 	~Framework();
 
 private:
-	void Update(float elapsedTime/*Elapsed seconds from last frame*/);
+	void Update(float elapsedTime/*Elapsed seconds from last frame*/, float fps_);
 	void Render(float elapsedTime/*Elapsed seconds from last frame*/);
 
 	void CalculateFrameStats();
@@ -34,6 +34,8 @@ private:
 	Audio					audio_;
 	Graphics				graphics_;
 	Input					input_;
+
+	float fps_;
 
 
 	Microsoft::WRL::ComPtr<IDXGIDebug>				debugGI_;

@@ -23,7 +23,7 @@ private:
 
 protected:
     //ˆÚ“®ˆ—
-    void Move(float vx, float vz, float speed);
+    void IsMove(float vx, float vz, float speed);
 
     //ù‰ñˆ—
     void Turn(float elapsedTime, float vx, float vz, float speed, DirectX::XMFLOAT4& angle,DirectX::XMFLOAT3 up);

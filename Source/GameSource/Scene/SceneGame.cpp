@@ -21,7 +21,7 @@ void SceneGame::Initialize()
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("hanbai");
-		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+		obj->transform_->SetScale({ 0.1f, 0.1f, 0.1f });
 
 		const char* filename = "Data/Model/stages/FloorSand.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();

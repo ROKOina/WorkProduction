@@ -73,6 +73,10 @@ public:
 	std::unique_ptr<PostRenderTarget>& GetPostEffectModelRenderTarget() { return postEffectModelRenderTarget; }
 	std::unique_ptr<PostDepthStencil>& GetPostEffectModelDepthStencilView() { return postEffectModelDepthStencil; }
 
+	//FPS(セットはフレームワークでしか使わない予定)
+	void SetFPSFramework(float fps) { this->fps_ = fps; }
+	float GetFPS() { return fps_; }
+
 	//ミューテックス取得
 	std::mutex& GetMutex() { return mutex_; }
 
@@ -126,6 +130,7 @@ private:
 	float	screenWidth_;
 	float	screenHeight_;
 
+	float fps_;
 	std::mutex	mutex_;
 };
 
