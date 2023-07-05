@@ -22,6 +22,7 @@ CEREAL_CLASS_VERSION(ModelResource::Vertex, 1)
 CEREAL_CLASS_VERSION(ModelResource::Mesh, 1)
 CEREAL_CLASS_VERSION(ModelResource::NodeKeyData, 1)
 CEREAL_CLASS_VERSION(ModelResource::Keyframe, 1)
+CEREAL_CLASS_VERSION(ModelResource::AnimationEvent, 1)
 CEREAL_CLASS_VERSION(ModelResource::Animation, 1)
 CEREAL_CLASS_VERSION(ModelResource, 1)
 
@@ -165,12 +166,24 @@ void ModelResource::Keyframe::serialize(Archive& archive, int version)
 }
 
 template<class Archive>
+void ModelResource::AnimationEvent::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(name),
+		CEREAL_NVP(startFrame),
+		CEREAL_NVP(endFrame),
+		CEREAL_NVP(eventNode)
+	);
+}
+
+template<class Archive>
 void ModelResource::Animation::serialize(Archive& archive, int version)
 {
 	archive(
 		CEREAL_NVP(name),
 		CEREAL_NVP(secondsLength),
-		CEREAL_NVP(keyframes)
+		CEREAL_NVP(keyframes),
+		CEREAL_NVP(animationEvents)
 	);
 }
 

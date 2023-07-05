@@ -18,19 +18,24 @@ void PlayerCom::Start()
     wp.y += 6;
     cameraObj->transform_->SetPosition(wp);
 
-    {   //仮アニメーション
-        std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
-        anim->ImportFbxAnimation("Data/Model/pico/attack3Combo.fbx");
-        anim->PlayAnimation(3, true);
-    }
+    //{   //仮アニメーション
+    //    std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
+    //    anim->ImportFbxAnimation("Data/Model/pico/attack3Combo.fbx");
+    //    anim->PlayAnimation(3, true);
+    //}
 
+    //パラメーター初期化
     moveParam_[MOVE_PARAM::WALK].moveMaxSpeed = 3.0f;
     moveParam_[MOVE_PARAM::WALK].moveAcceleration = 0.2f;
     moveParam_[MOVE_PARAM::WALK].turnSpeed =4.0f;
-    moveParam_[MOVE_PARAM::RUN].moveMaxSpeed = 10.0f;
+
+    moveParam_[MOVE_PARAM::RUN].moveMaxSpeed = 8.0f;
     moveParam_[MOVE_PARAM::RUN].moveAcceleration = 0.2f;
     moveParam_[MOVE_PARAM::RUN].turnSpeed =8.0f;
+
+    dashSpeed_ = 15.0f;
 }
+
 static bool aaa = true;
 // 更新処理
 void PlayerCom::Update(float elapsedTime)
@@ -72,14 +77,6 @@ void PlayerCom::Update(float elapsedTime)
         //横方向移動更新
         HorizonUpdate(elapsedTime);
 
-        ////速力処理更新
-        //DirectX::XMFLOAT3 p = GetGameObject()->transform_->GetPosition();
-        //DirectX::XMFLOAT4 r = GetGameObject()->transform_->GetRotation();
-        ////UpdateVelocity(elapsedTime, p, r);
-        ////UpdateVelocity(elapsedTime, p, DirectX::XMFLOAT4(0, 0, 0, 0),up_);
-        //GetGameObject()->transform_->SetPosition(p);
-        //GetGameObject()->transform_->SetRotation(r);
-
         //速力をポジションに更新
         VelocityAppPosition(elapsedTime);
     }
@@ -89,7 +86,7 @@ void PlayerCom::Update(float elapsedTime)
 // GUI描画
 void PlayerCom::OnGUI()
 {
-    ImGui::SliderInt("moveParamType", &moveParamType, 0, 1);
+    ImGui::SliderInt("moveParamType", &moveParamType_, 0, 1);
     int i = 0;
     for (auto& moveP : moveParam_)
     {
@@ -194,17 +191,15 @@ bool PlayerCom::IsMove(float elapsedTime)
 
     //進行ベクトルがゼロベクトルでない場合は入力された
     if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.y * inputMoveVec_.y + inputMoveVec_.z * inputMoveVec_.z <= 0.1f) {
+        //入力が終わると歩きに
+        moveParamType_ = MOVE_PARAM::WALK;
         return false;
     }
 
-    //移動切り替え
+    //ダッシュ
     if (gamePad.GetButton() & GamePad::BTN_LSHIFT)
     {
-        moveParamType = MOVE_PARAM::RUN;
-    }
-    else
-    {
-        moveParamType = MOVE_PARAM::WALK;
+        moveParamType_ = MOVE_PARAM::RUN;
     }
 
     return true;
@@ -220,7 +215,7 @@ void PlayerCom::Trun(float elapsedTime)
     //ゆっくり回転
     DirectX::XMFLOAT4 rota;
     DirectX::XMStoreFloat4(&rota, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&playerQuaternion.dxFloat4),
-        DirectX::XMLoadFloat4(&inputQuaternion.dxFloat4), moveParam_[moveParamType].turnSpeed * elapsedTime));
+        DirectX::XMLoadFloat4(&inputQuaternion.dxFloat4), moveParam_[moveParamType_].turnSpeed * elapsedTime));
 
     GetGameObject()->transform_->SetRotation(rota);
 }
@@ -238,7 +233,7 @@ void PlayerCom::HorizonMove()
     DirectX::XMFLOAT3 forward = GetGameObject()->transform_->GetFront();
     DirectX::XMVECTOR Forward = DirectX::XMLoadFloat3(&forward);
     DirectX::XMFLOAT3 moveVec;
-    DirectX::XMStoreFloat3(&moveVec, DirectX::XMVectorScale(Forward, moveParam_[moveParamType].moveAcceleration));
+    DirectX::XMStoreFloat3(&moveVec, DirectX::XMVectorScale(Forward, moveParam_[moveParamType_].moveAcceleration));
 
     //力に加える
     AddForce(moveVec);
@@ -270,7 +265,7 @@ void PlayerCom::HorizonUpdate(float elapsedTime)
     float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS());
 
     //摩擦力
-    if (horiLength > friction_)
+    if (horiLength > friction)
     {
         DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), -friction);
         DirectX::XMFLOAT3 newVelocity;
@@ -284,9 +279,9 @@ void PlayerCom::HorizonUpdate(float elapsedTime)
     }
 
     //最大速度設定
-    if (horiLength > moveParam_[moveParamType].moveMaxSpeed)
+    if (horiLength > moveParam_[moveParamType_].moveMaxSpeed)
     {
-        DirectX::XMVECTOR MaxSpeed = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), moveParam_[moveParamType].moveMaxSpeed);
+        DirectX::XMVECTOR MaxSpeed = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), moveParam_[moveParamType_].moveMaxSpeed);
         DirectX::XMFLOAT3 newMaxVelocity;
         DirectX::XMStoreFloat3(&newMaxVelocity, MaxSpeed);
         velocity_.x = newMaxVelocity.x;
@@ -317,11 +312,19 @@ void PlayerCom::DashMove(float elapsedTime)
     GamePad& gamePad = Input::Instance().GetGamePad();
     if (gamePad.GetButtonDown() & GamePad::BTN_LSHIFT)
     {
+        //移動速力をリセットする
+        velocity_.x = 0;
+        velocity_.z = 0;
+
         //入力している場合
         if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0)
         {
             dashVelocity_.x = inputMoveVec_.x * dashSpeed_;
             dashVelocity_.z = inputMoveVec_.z * dashSpeed_;
+
+            //ダッシュ時に入力方向にすぐ移動できるように、角度を変える
+            QuaternionStruct dashDirection = QuaternionStruct::LookRotation(dashVelocity_, up_);
+            GetGameObject()->transform_->SetRotation(dashDirection);
         }
         else
         {
@@ -343,7 +346,7 @@ void PlayerCom::DashMove(float elapsedTime)
     float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS());
 
     //摩擦力
-    if (length > friction_)
+    if (length > friction)
     {
         DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVector3Normalize(Dash), -friction);
         DirectX::XMFLOAT3 newVelocity;

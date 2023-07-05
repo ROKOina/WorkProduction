@@ -29,6 +29,21 @@ void SceneGame::Initialize()
 		r->SetShaderID(SHADER_ID::Phong);
 	}
 
+	//enemy
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("picolabo");
+		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+
+		const char* filename = "Data/Model/picolabo/picolabo.mdl";
+		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+		r->LoadModel(filename);
+		r->SetShaderID(SHADER_ID::Phong);
+
+		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+		a->PlayAnimation(0, true);
+	}
+
 	//仮オブジェクト
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
@@ -41,7 +56,8 @@ void SceneGame::Initialize()
 		r->SetShaderID(SHADER_ID::Phong);
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-		
+		a->PlayAnimation(4, true);
+
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
 	
 
@@ -68,6 +84,7 @@ void SceneGame::Initialize()
 		//	}
 		//}
 	}
+
 
 
 	//カメラを生成

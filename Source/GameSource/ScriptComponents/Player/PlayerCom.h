@@ -57,7 +57,7 @@ private:
     //入力値保存
     DirectX::XMFLOAT3 inputMoveVec_;
 
-    //移動パラメーター
+    //速力
     DirectX::XMFLOAT3 velocity_ = { 0,0,0 };
 
     //走りと歩きを切り替える
@@ -73,7 +73,7 @@ private:
         float moveAcceleration = 0.2f;
         float turnSpeed = 8.0f;
     }moveParam_[MOVE_PARAM::MAX];
-    int moveParamType = MOVE_PARAM::WALK;
+    int moveParamType_ = MOVE_PARAM::WALK;
 
     //ダッシュ用の速力
     DirectX::XMFLOAT3 dashVelocity_ = { 0,0,0 };

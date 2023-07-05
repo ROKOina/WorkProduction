@@ -106,11 +106,24 @@ public:
 		template<class Archive>
 		void serialize(Archive& archive, int version);
 	};
+
+	struct AnimationEvent
+	{
+		std::string		name;
+		float			startFrame;
+		float			endFrame;
+		Node			eventNode;
+
+		template<class Archive>
+		void serialize(Archive& archive, int version);
+	};
+
 	struct Animation
 	{
 		std::string					name;
 		float						secondsLength;
 		std::vector<Keyframe>		keyframes;
+		std::vector<AnimationEvent>	animationEvents;
 
 		template<class Archive>
 		void serialize(Archive& archive, int version);

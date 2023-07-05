@@ -26,11 +26,11 @@ float4 main(VS_OUT pin) : SV_TARGET
     color.rgb += brightness;
 
     // コントラスト
-    color.rgb = (color.rgb - contrast) * 1.2 + contrast;
+    color.rgb = (color.rgb - 0.5) * contrast + 0.5;
 
     // 彩度
-    float gray = dot(color.rgb, float3(0.299f, 0.587f, 0.114f)) * saturation;
-    color.rgb = (color.rgb - gray) * 0.3 + gray;
+    float gray = dot(color.rgb, float3(0.299f, 0.587f, 0.114f));
+    color.rgb = (color.rgb - gray) * saturation + gray;
     
 	// カラーフィルター
     color.rgb *= float3(filter.x, filter.y, filter.z);
