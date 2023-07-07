@@ -61,7 +61,7 @@ void LambertShader::Begin(ID3D11DeviceContext* dc, const ShaderParameter3D& rc)
 
 	const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	dc->OMSetBlendState(
-		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
+		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA_ATC).Get(),
 		blend_factor, 0xFFFFFFFF);
 	dc->OMSetDepthStencilState(
 		dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),

@@ -5,6 +5,10 @@
 #include "../RendererCom.h"
 #include "../TransformCom.h"
 #include "../CameraCom.h"
+#include "../ColliderCom.h"
+
+//ゲームオブジェクト
+#pragma region GameObject
 
 // 開始処理
 void GameObject::Start()
@@ -77,9 +81,10 @@ std::shared_ptr<GameObject> GameObject::AddChildObject()
 	return obj;
 }
 
+#pragma endregion
 
-
-///----- マネージャー関数 -----///
+//ゲームオブジェクトマネージャー
+#pragma region GameObjectManager
 
 // 作成
 std::shared_ptr<GameObject> GameObjectManager::Create()
@@ -119,7 +124,7 @@ void GameObjectManager::Update(float elapsedTime)
 			int indexSize = renderSortObject_.size();	//最初のサイズを取得
 			for (int indexID = 0; indexID < renderSortObject_.size(); ++indexID)
 			{
-				if (renderSortObject_[indexID]->GetShaderID() > insertShaderID)
+				if (renderSortObject_[indexID].lock()->GetShaderID() > insertShaderID)
 				{
 					renderSortObject_.insert(renderSortObject_.begin() + indexID, rendererComponent);
 					break;
@@ -128,8 +133,52 @@ void GameObjectManager::Update(float elapsedTime)
 			if (indexSize == renderSortObject_.size())
 				renderSortObject_.emplace_back(rendererComponent);
 		}
+
+		//当たり判定コンポーネント
+		std::shared_ptr<Collider> colliderComponent = obj->GetComponent<Collider>();
+		if (colliderComponent)
+		{
+			colliderObject_.emplace_back(colliderComponent);
+		}
 	}
 	startGameObject_.clear();
+
+	//当たり判定
+	{
+		//判定前のクリア
+		for (auto& col : colliderObject_)
+		{
+			col.lock()->ColliderStartClear();
+		}
+
+		//collider解放
+		for (int col = 0; col < colliderObject_.size(); ++col)
+		{
+			if (colliderObject_[col].expired())
+			{
+				colliderObject_.erase(colliderObject_.begin() + col);
+				--col;
+			}
+		}
+		//renderObject解放
+		for (int ren = 0; ren < renderSortObject_.size(); ++ren)
+		{
+			if (renderSortObject_[ren].expired())
+			{
+				renderSortObject_.erase(renderSortObject_.begin() + ren);
+				--ren;
+			}
+		}
+
+		//判定
+		for (int col1 = 0; col1 < colliderObject_.size(); ++col1)
+		{
+			for (int col2 = col1 + 1; col2 < colliderObject_.size(); ++col2)
+			{
+				colliderObject_[col1].lock()->ColliderVSOther(colliderObject_[col2].lock());
+			}
+		}
+	}
 
 	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 	{
@@ -157,6 +206,7 @@ void GameObjectManager::Update(float elapsedTime)
 		}
 	}
 	removeGameObject_.clear();
+
 }
 
 // 行列更新
@@ -177,11 +227,18 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 	//3D描画
 	Render3D();
 
+	//当たり判定
+	for (auto& col : colliderObject_)
+	{
+		col.lock()->DebugRender();
+	}
+
 	// リスター描画
 	DrawLister();
 
 	// 詳細描画
 	DrawDetail();
+
 }
 
 //ゲームオブジェクトを探す
@@ -287,7 +344,7 @@ void GameObjectManager::SortRenderObject()
 	while (!is_sorted) {
 		if (indexOffset == 1)is_sorted = true;
 		for (size_t index = 0; index < renderSortObject_.size() - indexOffset; ++index) {
-			if (renderSortObject_[index]->GetShaderID() > renderSortObject_[index + indexOffset]->GetShaderID()) {
+			if (renderSortObject_[index].lock()->GetShaderID() > renderSortObject_[index + indexOffset].lock()->GetShaderID()) {
 				std::iter_swap(renderSortObject_.begin() + index, renderSortObject_.begin() + (index + indexOffset));
 				if (is_sorted)is_sorted = false;
 			}
@@ -361,14 +418,14 @@ void GameObjectManager::Render3D()
 		SortRenderObject();
 
 	// 描画
-	int oldShaderID = renderSortObject_[0]->GetShaderID();	//違うシェーダーを使用するため、古いIDを保存
+	int oldShaderID = renderSortObject_[0].lock()->GetShaderID();	//違うシェーダーを使用するため、古いIDを保存
 	Shader* shader = graphics.GetShader(static_cast<SHADER_ID>(oldShaderID));
 	shader->Begin(dc, graphics.shaderParameter3D_);
 
-	for (std::shared_ptr<RendererCom>& renderObj : renderSortObject_)
+	for (std::weak_ptr<RendererCom>& renderObj : renderSortObject_)
 	{
 		//シェーダーIDが変化したら、シェーダーを変更
-		int newShaderID = renderObj->GetShaderID();
+		int newShaderID = renderObj.lock()->GetShaderID();
 		if (oldShaderID != newShaderID)
 		{
 			shader->End(dc);
@@ -379,7 +436,7 @@ void GameObjectManager::Render3D()
 			shader->Begin(dc, graphics.shaderParameter3D_);
 		}
 
-		Model* model = renderObj->GetModel();
+		Model* model = renderObj.lock()->GetModel();
 		if (model != nullptr)
 		{
 			shader->Draw(dc, model);
@@ -389,3 +446,5 @@ void GameObjectManager::Render3D()
 	shader->End(dc);
 
 }
+
+#pragma endregion

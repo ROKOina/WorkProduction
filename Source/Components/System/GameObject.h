@@ -10,6 +10,7 @@
 class Component;
 class TransformCom;
 class RendererCom;
+class Collider;
 
 // ƒQ[ƒ€ƒIƒuƒWƒFƒNƒg
 class GameObject : public std::enable_shared_from_this<GameObject>
@@ -142,8 +143,16 @@ private:
 	std::set<std::shared_ptr<GameObject>>		selectionGameObject_;
 	std::set<std::shared_ptr<GameObject>>		removeGameObject_;
 
+	//“–‚½‚è”»’è‚ğŠi”[
+	//struct HitJudge
+	//{
+	//	std::shared_ptr<Collider> collider;
+	//	int type;
+	//};
+	std::vector<std::weak_ptr<Collider>>	colliderObject_;
+
 	//•`‰æ‡‚ÉŠi”[‚·‚é
-	std::vector<std::shared_ptr<RendererCom>>   renderSortObject_;
+	std::vector<std::weak_ptr<RendererCom>>   renderSortObject_;
 	bool isChangeShaderID = false;
 
 	bool					isHiddenLister_ = false;

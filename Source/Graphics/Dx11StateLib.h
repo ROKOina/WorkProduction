@@ -29,6 +29,7 @@ public:
 public:
     enum class BLEND_STATE_TYPE {
         ALPHA,          //ìßâﬂ
+        ALPHA_ATC,          //ìßâﬂ_AlphaToCoverageEnable
         ADDITION,       //â¡éZ
         ADDITION_ALPHA, //â¡éZÅiìßâﬂÅj
         SUBTRACTION,    //å∏éZ

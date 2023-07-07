@@ -5,6 +5,7 @@
 #include "Components\AnimationCom.h"
 #include <imgui.h>
 #include "Components\RendererCom.h"
+#include "Components\ColliderCom.h"
 
 // 開始処理
 void PlayerCom::Start()
@@ -81,6 +82,13 @@ void PlayerCom::Update(float elapsedTime)
         VelocityAppPosition(elapsedTime);
     }
 
+    //当たり判定
+    std::vector<std::shared_ptr<GameObject>> hitGameObj = GetGameObject()->GetComponent<SphereColliderCom>()->OnHitGameObject();
+    for (auto& hitObj : hitGameObj)
+    {
+        if (std::strcmp(hitObj->GetName(), "picolabo") != 0)continue;
+        GameObjectManager::Instance().Remove(hitObj);
+    }
 }
 
 // GUI描画
@@ -262,8 +270,18 @@ void PlayerCom::HorizonUpdate(float elapsedTime)
     DirectX::XMVECTOR HorizonVelocity = DirectX::XMLoadFloat3(&horizonVelocity);
     float horiLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(HorizonVelocity));
 
-    float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS());
 
+    //最大速度設定
+    if (horiLength > moveParam_[moveParamType_].moveMaxSpeed)
+    {
+        DirectX::XMVECTOR MaxSpeed = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), moveParam_[moveParamType_].moveMaxSpeed);
+        DirectX::XMFLOAT3 newMaxVelocity;
+        DirectX::XMStoreFloat3(&newMaxVelocity, MaxSpeed);
+        velocity_.x = newMaxVelocity.x;
+        velocity_.z = newMaxVelocity.z;
+    }
+
+    float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS());
     //摩擦力
     if (horiLength > friction)
     {
@@ -276,16 +294,6 @@ void PlayerCom::HorizonUpdate(float elapsedTime)
     {
         velocity_.x = 0;
         velocity_.z = 0;
-    }
-
-    //最大速度設定
-    if (horiLength > moveParam_[moveParamType_].moveMaxSpeed)
-    {
-        DirectX::XMVECTOR MaxSpeed = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), moveParam_[moveParamType_].moveMaxSpeed);
-        DirectX::XMFLOAT3 newMaxVelocity;
-        DirectX::XMStoreFloat3(&newMaxVelocity, MaxSpeed);
-        velocity_.x = newMaxVelocity.x;
-        velocity_.z = newMaxVelocity.z;
     }
 }
 

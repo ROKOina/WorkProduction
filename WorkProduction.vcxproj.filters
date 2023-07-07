@@ -254,6 +254,8 @@
     <ClInclude Include="Source\Graphics\Shaders\PostEffect.h" />
     <ClInclude Include="Source\Graphics\Shaders\TextureFormat.h" />
     <ClInclude Include="Source\SystemStruct\QuaternionStruct.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.h" />
+    <ClInclude Include="Source\Components\ColliderCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -431,6 +433,12 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Shaders\TextureFormat.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\ColliderCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

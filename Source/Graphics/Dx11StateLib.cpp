@@ -95,7 +95,14 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			HRESULT hr = device->CreateBlendState(&blendDesc, blendState_[static_cast<int>(BLEND_STATE_TYPE::ALPHA)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
+		{	//“§‰ß_AlphaToCoverageEnable
+			blendDesc.AlphaToCoverageEnable = TRUE;
+
+			HRESULT hr = device->CreateBlendState(&blendDesc, blendState_[static_cast<int>(BLEND_STATE_TYPE::ALPHA_ATC)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
 		{	//‰ÁŽZ
+			blendDesc.AlphaToCoverageEnable = FALSE;
 			blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
 			blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
 

@@ -12,8 +12,10 @@
 #include "Components\TransformCom.h"
 #include "Components\CameraCom.h"
 #include "Components\AnimationCom.h"
+#include "Components\ColliderCom.h"
 
 #include "GameSource\ScriptComponents\Player\PlayerCom.h"
+#include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
 
 // 初期化
 void SceneGame::Initialize()
@@ -30,10 +32,13 @@ void SceneGame::Initialize()
 	}
 
 	//enemy
+	for(int i=0;i<5;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+		obj->transform_->SetPosition({ 2, 0, 0 });
+		obj->transform_->SetEulerRotation({ 0,180,0 });
 
 		const char* filename = "Data/Model/picolabo/picolabo.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
@@ -41,7 +46,13 @@ void SceneGame::Initialize()
 		r->SetShaderID(SHADER_ID::Phong);
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-		a->PlayAnimation(0, true);
+		a->PlayAnimation(5, true);
+
+		std::shared_ptr<SphereColliderCom> c = obj->AddComponent<SphereColliderCom>();
+		c->SetMyTag(COLLIDER_TAG::Enemy);
+		c->SetJudgeTag(COLLIDER_TAG::Player | COLLIDER_TAG::Wall);
+
+		std::shared_ptr<EnemyCom> e = obj->AddComponent<EnemyCom>();
 	}
 
 	//仮オブジェクト
@@ -57,6 +68,10 @@ void SceneGame::Initialize()
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 		a->PlayAnimation(4, true);
+
+		std::shared_ptr<SphereColliderCom> c = obj->AddComponent<SphereColliderCom>();
+		c->SetMyTag(COLLIDER_TAG::Player);
+		c->SetJudgeTag(COLLIDER_TAG::Enemy | COLLIDER_TAG::Wall);
 
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
 	
@@ -197,21 +212,23 @@ void SceneGame::Render()
 	GameObjectManager::Instance().UpdateTransform();
 	GameObjectManager::Instance().Render(mainCamera_->GetView(), mainCamera_->GetProjection());
 
+	// デバッグレンダラ描画実行
+	graphics.GetDebugRenderer()->Render(dc, mainCamera_->GetView(), mainCamera_->GetProjection());
 
 
 
-	// 3Dモデル描画
-	{
-		Shader* shader = graphics.GetShader(SHADER_ID::Phong);
-		shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
+	//// 3Dモデル描画
+	//{
+	//	Shader* shader = graphics.GetShader(SHADER_ID::Phong);
+	//	shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
 
-		////ステージ描画
-		//StageManager::Instance().Render(dc, shader);
-		////プレイヤー描画
-		//player->Render(dc, shader_);
+	//	////ステージ描画
+	//	//StageManager::Instance().Render(dc, shader);
+	//	////プレイヤー描画
+	//	//player->Render(dc, shader_);
 
-		shader->End(dc);
-	}
+	//	shader->End(dc);
+	//}
 
 	//バッファ戻す
 	Graphics::Instance().RestoreRenderTargets();
@@ -248,16 +265,14 @@ void SceneGame::Render()
 
 	//3Dエフェクト描画
 	{
-		EffectManager::Instance().Render(rc.view, rc.projection);
+		EffectManager::Instance().Render(mainCamera_->GetView(), mainCamera_->GetProjection());
 	}
 
 	// 3Dデバッグ描画
 	{
 		// ラインレンダラ描画実行
-		graphics.GetLineRenderer()->Render(dc, rc.view, rc.projection);
+		graphics.GetLineRenderer()->Render(dc, mainCamera_->GetView(), mainCamera_->GetProjection());
 
-		// デバッグレンダラ描画実行
-		graphics.GetDebugRenderer()->Render(dc, rc.view, rc.projection);
 
 	}
 
