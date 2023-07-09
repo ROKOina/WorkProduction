@@ -60,6 +60,7 @@ public:
         FRONTCOUNTER_FALSE_CULLBACK,  //FrontCounterClockwiseとカルモード設定
         FRONTCOUNTER_FALSE_CULLNONE,  
         FRONTCOUNTER_TRUE_CULLNONE,
+        FRONTCOUNTER_FALSE_CULLNONE_WIREFRAME,  //ワイヤフレーム
         PARTICLE,   //パーティクル
         DEFALT,           //何もなし（保険）
     };

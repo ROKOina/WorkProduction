@@ -4,8 +4,8 @@
 #include <d3d11.h>
 #include <wrl.h>
 #include "Graphics/Shaders/Shader.h"
-#include "Graphics/Debug/DebugRenderer.h"
-#include "Graphics/Debug/LineRenderer.h"
+#include "Graphics/DebugRenderer/DebugRenderer.h"
+#include "Graphics/DebugRenderer/LineRenderer.h"
 #include "Graphics\Dx11StateLib.h"
 #include "Shaders\3D\ShaderParameter3D.h"
 

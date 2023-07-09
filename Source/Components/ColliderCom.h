@@ -21,20 +21,27 @@ static COLLIDER_TAG operator& (COLLIDER_TAG L, COLLIDER_TAG R)
 }
 static bool operator== (COLLIDER_TAG L, COLLIDER_TAG R)
 {
-    return static_cast<uint64_t>((static_cast<COLLIDER_TAG>(L) & static_cast<COLLIDER_TAG>(R)))
-                == static_cast<uint64_t>(R);
+    if (static_cast<uint64_t>((static_cast<COLLIDER_TAG>(L) & static_cast<COLLIDER_TAG>(R))) == 0)
+        return false;
+    return true;
 }
 static bool operator!= (COLLIDER_TAG L, COLLIDER_TAG R)
 {
-    return static_cast<uint64_t>((static_cast<COLLIDER_TAG>(L) & static_cast<COLLIDER_TAG>(R)))
-                != static_cast<uint64_t>(R);
+    if (static_cast<uint64_t>((static_cast<COLLIDER_TAG>(L) & static_cast<COLLIDER_TAG>(R))) == 0)
+        return true;
+    return false;
 }
 
 //当たり判定の形
-enum COLLIDER_TYPE {
+enum class COLLIDER_TYPE {
     SphereCollider,
     BoxCollider,
 };
+static bool operator== (int L, COLLIDER_TYPE R)
+{
+    return static_cast<int>(L) == static_cast<int>(R);
+       
+}
 
 //継承して一つの配列に落とし込む
 class Collider : public Component, public std::enable_shared_from_this<Collider>
@@ -79,9 +86,14 @@ public:
     void ColliderVSOther(std::shared_ptr<Collider> otherSide);
 
 private:
-    //当たり判定をする
-    //球v球(当たっていたらtrue)
+    //当たり判定をする(当たっていたらtrue)
+    //球v球
     bool SphereVsSphere(std::shared_ptr<Collider> otherSide);
+    //箱v箱
+    bool BoxVsBox(std::shared_ptr<Collider> otherSide);
+
+    //球v箱
+    bool SphereVsBox(std::shared_ptr<Collider> otherSide);
 
 private:
     //当たり判定タグ
@@ -104,7 +116,7 @@ class SphereColliderCom : public Collider
 {
     //コンポーネントオーバーライド
 public:
-    SphereColliderCom() { colliderType_ = COLLIDER_TYPE::SphereCollider; }
+    SphereColliderCom() { colliderType_ = static_cast<int>(COLLIDER_TYPE::SphereCollider); }
     ~SphereColliderCom() {}
 
     // 名前取得
@@ -135,7 +147,7 @@ class BoxColliderCom : public Collider
 {
     //コンポーネントオーバーライド
 public:
-    BoxColliderCom() { colliderType_ = COLLIDER_TYPE::BoxCollider; }
+    BoxColliderCom() { colliderType_ = static_cast<int>(COLLIDER_TYPE::BoxCollider); }
     ~BoxColliderCom() {}
 
     // 名前取得
@@ -155,9 +167,9 @@ public:
 
     //BoxColliderクラス
 public:
-    void SetSize(DirectX::XMFLOAT2 size) { size_ = size; }
-    DirectX::XMFLOAT2 GetSize() { return size_; }
+    void SetSize(DirectX::XMFLOAT3 size) { size_ = size; }
+    const DirectX::XMFLOAT3 GetSize() const { return size_; }
 
 private:
-    DirectX::XMFLOAT2 size_ = { 0.5f,0.5f };
+    DirectX::XMFLOAT3 size_ = { 0.5f,0.5f,0.5f };
 };

@@ -48,7 +48,7 @@ void SceneGame::Initialize()
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 		a->PlayAnimation(5, true);
 
-		std::shared_ptr<SphereColliderCom> c = obj->AddComponent<SphereColliderCom>();
+		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
 		c->SetMyTag(COLLIDER_TAG::Enemy);
 		c->SetJudgeTag(COLLIDER_TAG::Player | COLLIDER_TAG::Wall);
 

@@ -219,6 +219,14 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			HRESULT hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerState_[static_cast<int>(RASTERIZER_TYPE::FRONTCOUNTER_TRUE_CULLNONE)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
+		{ //FRONTCOUNTER_FALSE_CULLNONE_WIREFRAME
+			rasterizerDesc.FrontCounterClockwise = FALSE;
+			rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+			rasterizerDesc.CullMode = D3D11_CULL_NONE;
+			rasterizerDesc.MultisampleEnable = FALSE;
+			HRESULT hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerState_[static_cast<int>(RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLNONE_WIREFRAME)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
 		{ //PARTICLE
 			rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 			rasterizerDesc.CullMode = D3D11_CULL_BACK;
