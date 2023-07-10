@@ -32,12 +32,12 @@ void SceneGame::Initialize()
 	}
 
 	//enemy
-	for(int i=0;i<5;++i)
+	//for(int i=0;i<2;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		obj->transform_->SetPosition({ 2, 0, 0 });
+		obj->transform_->SetWorldPosition({ 3, 0, 0 });
 		obj->transform_->SetEulerRotation({ 0,180,0 });
 
 		const char* filename = "Data/Model/picolabo/picolabo.mdl";
@@ -48,11 +48,23 @@ void SceneGame::Initialize()
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 		a->PlayAnimation(5, true);
 
-		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
+		std::shared_ptr<SphereColliderCom> c = obj->AddComponent<SphereColliderCom>();
 		c->SetMyTag(COLLIDER_TAG::Enemy);
 		c->SetJudgeTag(COLLIDER_TAG::Player | COLLIDER_TAG::Wall);
 
 		std::shared_ptr<EnemyCom> e = obj->AddComponent<EnemyCom>();
+
+		//攻撃当たり判定用
+		{
+			std::shared_ptr<GameObject> attack = obj->AddChildObject();
+			attack->SetName("picolaboAttack");
+			std::shared_ptr<SphereColliderCom> c2 = attack->AddComponent<SphereColliderCom>();
+			c2->SetMyTag(COLLIDER_TAG::EnemyAttack);
+
+			//std::shared_ptr<RendererCom> r1 = attack->AddComponent<RendererCom>();
+			//filename = "Data/Model/stages/vendingMachine.mdl";
+			//r1->LoadModel(filename);
+		}
 	}
 
 	//仮オブジェクト
@@ -90,7 +102,7 @@ void SceneGame::Initialize()
 		//		obj2->SetName(std::to_string(i).c_str());
 
 
-		//		obj2->transform_->SetPosition({ 10, 0, 0 });
+		//		obj2->worldTransform_->SetLocalPosition({ 10, 0, 0 });
 
 		//		std::shared_ptr<RendererCom> r1 = obj2->AddComponent<RendererCom>();
 		//		filename = "Data/Model/stages/vendingMachine.mdl";
@@ -134,7 +146,7 @@ void SceneGame::Initialize()
 			graphics.GetScreenHeight());
 	}
 
-	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 });
+	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetLocalPosition().x,player->GetLocalPosition().y,player->GetLocalPosition().z,0 });
 }
 
 // 終了化
@@ -156,7 +168,7 @@ void SceneGame::Update(float elapsedTime)
 	Graphics& graphics = Graphics::Instance();
 
 
-	//particle_->integrate(elapsedTime, { player->GetPosition().x,player->GetPosition().y,player->GetPosition().z,0 }, camera->GetView(), camera->GetProjection());
+	//particle_->integrate(elapsedTime, { player->GetLocalPosition().x,player->GetLocalPosition().y,player->GetLocalPosition().z,0 }, camera->GetView(), camera->GetProjection());
 }
 
 // 描画処理
@@ -180,7 +192,7 @@ void SceneGame::Render()
 	//カメラパラメーター設定
 	rc.view = mainCamera_->GetView();
 	rc.projection = mainCamera_->GetProjection();
-	DirectX::XMFLOAT3 cameraPos = mainCamera_->GetGameObject()->transform_->GetPosition();
+	DirectX::XMFLOAT3 cameraPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
 	rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
 
 

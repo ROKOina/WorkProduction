@@ -29,13 +29,13 @@ public:
 public:
     enum class BLEND_STATE_TYPE {
         ALPHA,          //透過
-        ALPHA_ATC,          //透過_AlphaToCoverageEnable
+        ALPHA_ATC,      //透過_AlphaToCoverageEnable
         ADDITION,       //加算
         ADDITION_ALPHA, //加算（透過）
         SUBTRACTION,    //減算
         SCREEN,         //スクリーン
         PARTICLE,       //パーティクル
-        DEFALT,           //何もなし（保険）
+        DEFALT,         //何もなし（保険）
     };
     Microsoft::WRL::ComPtr<ID3D11BlendState> GetBlendState(BLEND_STATE_TYPE blendType) { return blendState_[static_cast<int>(blendType)].Get(); }
 private:

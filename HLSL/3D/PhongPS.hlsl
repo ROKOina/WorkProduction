@@ -39,7 +39,7 @@ float4 main(VS_OUT pin) : SV_TARGET
 	// 法線マップからxyz成分を取得して( -1 ～ +1 )の間にスケーリング
 	float3 normal = normalMap.Sample(
 		diffuseMapSamplerState, pin.texcoord).xyz
-		/**2-1*/;
+		* 2 - 1;
 
 	// 変換用の3X3行列を用意する
 	// 注意点として、頂点シェーダー内で算出した単位ベクトル類はラスタライズの際に数値が頂点間で補間されます。
@@ -70,8 +70,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     float3 directionalDiffuse = 
 		CalcLambertDiffuse(N, L, lightColor.rgb, kd);
 
-    float4 color = diffuseColor;
+    float4 color = diffuseColor;	//アルファ値用
     color.rgb = diffuseColor.rgb * (ambient + directionalDiffuse);
-    color.a = 1;
     return color;
 }

@@ -32,10 +32,10 @@ public:
 	virtual void OnGUI();
 
 	// 名前の設定
-	void SetName(const char* name) { this->name = name; }
+	void SetName(const char* name) { this->name_ = name; }
 
 	// 名前の取得
-	const char* GetName() const { return name.c_str(); }
+	const char* GetName() const { return name_.c_str(); }
 
 	// コンポーネント追加
 	template<class T, class... Args>
@@ -80,7 +80,7 @@ public:
 	std::shared_ptr<TransformCom> transform_;
 
 private:
-	std::string	name;
+	std::string	name_;
 
 	std::vector<std::shared_ptr<Component>>	components_;
 

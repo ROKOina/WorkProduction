@@ -16,7 +16,7 @@ void RendererCom::Update(float elapsedTime)
 	// ƒ‚ƒfƒ‹‚ÌXV
 	if (model_ != nullptr)
 	{
-		DirectX::XMFLOAT4X4 transform = GetGameObject()->GetComponent<TransformCom>()->GetTransform();
+		DirectX::XMFLOAT4X4 transform = GetGameObject()->GetComponent<TransformCom>()->GetWorldTransform();
 		model_->UpdateTransform(transform);
 	}
 }

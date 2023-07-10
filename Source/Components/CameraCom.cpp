@@ -19,12 +19,12 @@ void CameraCom::Update(float elapsedTime)
         //カメラのフォワードをフォーカスする
         DirectX::XMFLOAT3 forwardPoint;
         DirectX::XMFLOAT3 wPos = GetGameObject()->transform_->GetWorldPosition();
-        DirectX::XMFLOAT3 forwardNormalVec = GetGameObject()->transform_->GetFront();
+        DirectX::XMFLOAT3 forwardNormalVec = GetGameObject()->transform_->GetWorldFront();
         forwardPoint = { forwardNormalVec.x * 2 + wPos.x,
             forwardNormalVec.y * 2 + wPos.y,
             forwardNormalVec.z * 2 + wPos.z };
 
-        SetLookAt(forwardPoint, GetGameObject()->transform_->GetUp());
+        SetLookAt(forwardPoint, GetGameObject()->transform_->GetWorldUp());
     }
 
     isLookAt_ = false;
@@ -75,7 +75,7 @@ void CameraCom::SetLookAt(const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT
     this->front_.y   = world._32;
     this->front_.z   = world._33;
 
-    GetGameObject()->transform_->SetTransform(world);
+    GetGameObject()->transform_->SetWorldTransform(world);
 
 
     //視点、注視点を保存

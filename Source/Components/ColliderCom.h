@@ -6,10 +6,11 @@
 //当たり判定のタグ
 enum COLLIDER_TAG : uint64_t
 {
-    NONE    = 1 << 0,
-    Player  = 1 << 1,
-    Enemy   = 1 << 2,
-    Wall    = 1 << 3,
+    NONE            = 1 << 0,
+    Player          = 1 << 1,
+    Enemy           = 1 << 2,
+    EnemyAttack     = 1 << 3,
+    Wall            = 1 << 4,
 };
 static COLLIDER_TAG operator| (COLLIDER_TAG L, COLLIDER_TAG R)
 {
@@ -43,6 +44,12 @@ static bool operator== (int L, COLLIDER_TYPE R)
        
 }
 
+//当たった時用の構造体
+struct HitObj {
+    std::shared_ptr<GameObject> gameObject;
+    float dist; //ポジションからの距離
+};
+
 //継承して一つの配列に落とし込む
 class Collider : public Component, public std::enable_shared_from_this<Collider>
 {
@@ -66,7 +73,7 @@ public:
     //Colliderクラス
 public:
     //この関数で当たった時の処理を書く
-    std::vector<std::shared_ptr<GameObject>> OnHitGameObject() { return hitGameObject_; }
+    std::vector<HitObj> OnHitGameObject() { return hitObj_; }
 
     const int GetColliderType() const { return colliderType_; }
 
@@ -75,6 +82,8 @@ public:
 
     //自分のタグを決める
     void SetMyTag(COLLIDER_TAG tag) { myTag_ = tag; }
+    //自分のタグを見る
+    const uint64_t GetMyTag() const { return myTag_; }
 
     //当たり判定をするタグを決める
     void SetJudgeTag(COLLIDER_TAG tag) { judgeTag_ = tag; }
@@ -84,6 +93,9 @@ public:
 
     //相手を指定して判定
     void ColliderVSOther(std::shared_ptr<Collider> otherSide);
+
+    void SetEnabled(bool enabled) { isEnabled_ = enabled; }
+    const bool const GetEnabled() { return isEnabled_; }
 
 private:
     //当たり判定をする(当たっていたらtrue)
@@ -100,8 +112,9 @@ private:
     COLLIDER_TAG myTag_= NONE;    //自分のタグ
     COLLIDER_TAG judgeTag_ = NONE; //当たり判定をするタグ
 
-    //今のフレームで当たっているGameObjectを保存
-    std::vector<std::shared_ptr<GameObject>> hitGameObject_;
+    //今のフレームで当たっているものを保存
+    std::vector<HitObj> hitObj_;
+
 
 protected:
     //形を保存
@@ -110,6 +123,10 @@ protected:
     float weight_ = 1;
     //オフセット位置
     DirectX::XMFLOAT3 offsetPos_ = { 0,0,0 };
+
+    //有効か
+    bool isEnabled_ = true;
+
 };
 
 class SphereColliderCom : public Collider

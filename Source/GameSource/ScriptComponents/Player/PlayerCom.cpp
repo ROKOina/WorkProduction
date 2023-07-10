@@ -17,7 +17,7 @@ void PlayerCom::Start()
     DirectX::XMFLOAT3 wp = GetGameObject()->transform_->GetWorldPosition();
     wp.z -= 10;
     wp.y += 6;
-    cameraObj->transform_->SetPosition(wp);
+    cameraObj->transform_->SetLocalPosition(wp);
 
     //{   //仮アニメーション
     //    std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
@@ -46,13 +46,13 @@ void PlayerCom::Update(float elapsedTime)
     {
         //カメラをプレイヤーにフォーカスする
         std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
-        cameraObj->transform_->LookAtTransform(GetGameObject()->transform_->GetPosition());
+        cameraObj->transform_->LookAtTransform(GetGameObject()->transform_->GetLocalPosition());
 
         //プレイヤーのワールドポジションを取得
         DirectX::XMFLOAT3 wp = GetGameObject()->transform_->GetWorldPosition();
         wp.z -= 10;
         wp.y += 6;
-        cameraObj->transform_->SetPosition(wp);
+        cameraObj->transform_->SetLocalPosition(wp);
 
     }
 
@@ -83,11 +83,31 @@ void PlayerCom::Update(float elapsedTime)
     }
 
     //当たり判定
-    std::vector<std::shared_ptr<GameObject>> hitGameObj = GetGameObject()->GetComponent<SphereColliderCom>()->OnHitGameObject();
+    std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<SphereColliderCom>()->OnHitGameObject();
     for (auto& hitObj : hitGameObj)
     {
-        if (std::strcmp(hitObj->GetName(), "picolabo") != 0)continue;
-        GameObjectManager::Instance().Remove(hitObj);
+        //名前検索
+        //if (std::strcmp(hitObj.gameObject->GetName(), "picolabo") != 0)continue;
+        //タグ検索
+        if (COLLIDER_TAG::Enemy != hitObj.gameObject->GetComponent<Collider>()->GetMyTag())continue;
+
+        //削除
+        //GameObjectManager::Instance().Remove(hitObj);
+
+        //押し返し
+        DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 hitPos = hitObj.gameObject->transform_->GetWorldPosition();
+
+        DirectX::XMVECTOR PlayerPos = { playerPos.x,playerPos.y,playerPos.z };
+        DirectX::XMVECTOR HitPos = { hitPos.x, hitPos.y, hitPos.z };
+
+        DirectX::XMVECTOR ForceNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(HitPos, PlayerPos));
+        DirectX::XMVectorSetY(ForceNormal, 0);
+        ForceNormal = DirectX::XMVectorScale(ForceNormal, 0.01f);
+        DirectX::XMFLOAT3 force;
+        DirectX::XMStoreFloat3(&force, ForceNormal);
+        hitObj.gameObject->transform_->SetWorldPosition(
+            { hitPos.x + force.x,0,hitPos.z + force.z });
     }
 }
 
@@ -116,7 +136,7 @@ void PlayerCom::OnGUI()
     ImGui::DragFloat3("velocity", &velocity_.x);
 
     DirectX::XMFLOAT3 p;
-    p = GetGameObject()->transform_->GetUp();
+    p = GetGameObject()->transform_->GetWorldUp();
     ImGui::DragFloat3("myUp", &p.x);
     
 
@@ -238,7 +258,7 @@ void PlayerCom::VerticalMove()
 void PlayerCom::HorizonMove()
 {
     //前方向に移動する力を生成
-    DirectX::XMFLOAT3 forward = GetGameObject()->transform_->GetFront();
+    DirectX::XMFLOAT3 forward = GetGameObject()->transform_->GetWorldFront();
     DirectX::XMVECTOR Forward = DirectX::XMLoadFloat3(&forward);
     DirectX::XMFLOAT3 moveVec;
     DirectX::XMStoreFloat3(&moveVec, DirectX::XMVectorScale(Forward, moveParam_[moveParamType_].moveAcceleration));
@@ -254,12 +274,12 @@ void PlayerCom::VerticalUpdate(float elapsedTime)
     AddForce({ 0,gravity,0 });
 
     //とりあえず0以下補正
-    DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetLocalPosition();
     if (playerPos.y < 0 && velocity_.y < 0)
     {
         velocity_.y = 0;
         playerPos.y = 0;
-        GetGameObject()->transform_->SetPosition(playerPos);
+        GetGameObject()->transform_->SetLocalPosition(playerPos);
     }
 }
 
@@ -300,7 +320,7 @@ void PlayerCom::HorizonUpdate(float elapsedTime)
 //速力を更新
 void PlayerCom::VelocityAppPosition(float elapsedTime)
 {
-    DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetLocalPosition();
     DirectX::XMFLOAT3 velocity = velocity_;
 
     //ダッシュ速力追加
@@ -311,7 +331,7 @@ void PlayerCom::VelocityAppPosition(float elapsedTime)
     playerPos.x += velocity.x * elapsedTime;
     playerPos.y += velocity.y * elapsedTime;
     playerPos.z += velocity.z * elapsedTime;
-    GetGameObject()->transform_->SetPosition(playerPos);
+    GetGameObject()->transform_->SetLocalPosition(playerPos);
 }
 
 //ダッシュ
@@ -336,7 +356,7 @@ void PlayerCom::DashMove(float elapsedTime)
         }
         else
         {
-            DirectX::XMFLOAT3 front = GetGameObject()->transform_->GetFront();
+            DirectX::XMFLOAT3 front = GetGameObject()->transform_->GetWorldFront();
             dashVelocity_.x = -front.x * dashSpeed_;
             dashVelocity_.z = -front.z * dashSpeed_;
         }

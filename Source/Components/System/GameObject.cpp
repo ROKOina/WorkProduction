@@ -34,7 +34,7 @@ void GameObject::UpdateTransform()
 	//親子の行列更新
 	if (parentObject_.lock())
 	{
-		DirectX::XMFLOAT4X4 parentTransform = parentObject_.lock()->transform_->GetTransform();
+		DirectX::XMFLOAT4X4 parentTransform = parentObject_.lock()->transform_->GetWorldTransform();
 		transform_->SetParentTransform(parentTransform);
 	}
 
@@ -134,12 +134,14 @@ void GameObjectManager::Update(float elapsedTime)
 				renderSortObject_.emplace_back(rendererComponent);
 		}
 
-		//当たり判定コンポーネント
+		//当たり判定コンポーネント追加
 		std::shared_ptr<Collider> colliderComponent = obj->GetComponent<Collider>();
 		if (colliderComponent)
 		{
 			colliderObject_.emplace_back(colliderComponent);
 		}
+
+		obj->UpdateTransform();
 	}
 	startGameObject_.clear();
 
@@ -230,6 +232,7 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 	//当たり判定
 	for (auto& col : colliderObject_)
 	{
+		if (!col.lock()->GetEnabled())continue;
 		col.lock()->DebugRender();
 	}
 
@@ -410,6 +413,8 @@ void GameObjectManager::RenderShadowmap()
 //3D描画
 void GameObjectManager::Render3D()
 {
+	if (renderSortObject_.size() <= 0)return;
+
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 

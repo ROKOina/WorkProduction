@@ -16,17 +16,23 @@ void TransformCom::Update(float elapsedTime)
 // GUI描画
 void TransformCom::OnGUI()
 {
-	// トランスフォーム
-	ImGui::DragFloat3("Position", &position_.x, 0.1f);
-	ImGui::DragFloat3("WorldPosition", &worldPosition_.x, 0.1f);
+	//ローカルポジション
+	ImGui::DragFloat3("Position", &localPosition_.x, 0.1f);
 
+	//ワールドポジション
+	DirectX::XMFLOAT3 worldPosition = worldPosition_;
+	if (ImGui::DragFloat3("WorldPosition", &worldPosition.x, 0.1f))
+	{
+		SetWorldPosition(worldPosition);
+	}
+
+	//クォータニオン
 	ImGui::DragFloat4("Rotation", &rotation_.x, 0.1f);
 
-	{	//オイラー角
-		DirectX::XMFLOAT3 euler = eulerRotation_;
-		if (ImGui::DragFloat3("EulerRotato", &euler.x)) {
-			SetEulerRotation(euler);
-		}
+	//オイラー角
+	DirectX::XMFLOAT3 euler = eulerRotation_;
+	if (ImGui::DragFloat3("EulerRotato", &euler.x)) {
+		SetEulerRotation(euler);
 	}
 
 	ImGui::DragFloat3("Scale", &scale_.x, 0.1f);
@@ -39,16 +45,15 @@ void TransformCom::UpdateTransform()
 	DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&rotation_.dxFloat4);
 	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale_.x, scale_.y, scale_.z);
 	DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(Q);
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position_.x, position_.y, position_.z);
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(localPosition_.x, localPosition_.y, localPosition_.z);
 
+	DirectX::XMStoreFloat4x4(&localTransform_, S * R * T);
 	DirectX::XMMATRIX L = DirectX::XMLoadFloat4x4(&parentTransform_);
 	DirectX::XMMATRIX W = S * R * T * L;
 
-	DirectX::XMStoreFloat4x4(&transform_, W);
+	DirectX::XMStoreFloat4x4(&worldTransform_, W);
 
-	worldPosition_ = { transform_._41,transform_._42,transform_._43 };
-
-
+	worldPosition_ = { worldTransform_._41,worldTransform_._42,worldTransform_._43 };
 }
 
 //指定方向を向く
@@ -70,7 +75,7 @@ void TransformCom::LookAtTransform(const DirectX::XMFLOAT3& focus, const DirectX
 //指定のUpに合わせる
 void TransformCom::SetUpTransform(const DirectX::XMFLOAT3& up)
 {
-	DirectX::XMFLOAT3 front = GetFront();
+	DirectX::XMFLOAT3 front = GetWorldFront();
 	DirectX::XMFLOAT3 right;
 	DirectX::XMVECTOR Up = DirectX::XMLoadFloat3(&up);
 	DirectX::XMVECTOR Front = DirectX::XMLoadFloat3(&front);

@@ -9,12 +9,16 @@
 //判定前のクリア
 void Collider::ColliderStartClear()
 {
-    hitGameObject_.clear();
+    hitObj_.clear();
 }
 
 //相手を指定して判定
 void Collider::ColliderVSOther(std::shared_ptr<Collider> otherSide)
 {
+    //有効か
+    if (!isEnabled_)return;
+    if (!otherSide->isEnabled_)return;
+
     //タグで判定するか決める
     if ((myTag_ == NONE) || (otherSide->myTag_ == NONE))return;
     if ((judgeTag_ != otherSide->myTag_) && (myTag_ != otherSide->judgeTag_))return;
@@ -44,11 +48,19 @@ void Collider::ColliderVSOther(std::shared_ptr<Collider> otherSide)
     //当たった時はゲームオブジェクトで保存
     if (isJudge)
     {
-        if (judgeTag_ == otherSide->myTag_)
-            hitGameObject_.emplace_back(otherSide->GetGameObject());
+        if (judgeTag_ == otherSide->myTag_) {
+            HitObj h;
+            h.gameObject = otherSide->GetGameObject();
+            hitObj_.emplace_back(h);
+            //hitObj_.emplace_back(otherSide->GetGameObject());
+        }
 
-        if (otherSide->judgeTag_ == myTag_)
-            otherSide->hitGameObject_.emplace_back(GetGameObject());
+        if (otherSide->judgeTag_ == myTag_) {
+            HitObj h;
+            h.gameObject = GetGameObject();
+            otherSide->hitObj_.emplace_back(h);
+            //otherSide->hitObj_.emplace_back(GetGameObject());
+        }
     }
 }
 
@@ -60,9 +72,9 @@ bool Collider::SphereVsSphere(std::shared_ptr<Collider> otherSide)
     std::shared_ptr<SphereColliderCom> otherSphere = std::static_pointer_cast<SphereColliderCom>(otherSide);
 
     //必要なパラメーター取得
-    DirectX::XMFLOAT3 myPos = mySphere->GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 myPos = mySphere->GetGameObject()->transform_->GetWorldPosition();
     myPos = { myPos.x + offsetPos_.x,myPos.y + offsetPos_.y,myPos.z + offsetPos_.z };
-    DirectX::XMFLOAT3 otherPos = otherSphere->GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 otherPos = otherSphere->GetGameObject()->transform_->GetWorldPosition();
     otherPos = { otherPos.x + otherSphere->offsetPos_.x,otherPos.y + otherSphere->offsetPos_.y,otherPos.z + otherSphere->offsetPos_.z };
     DirectX::XMVECTOR MyPos = DirectX::XMLoadFloat3(&myPos);
     DirectX::XMVECTOR OtherPos = DirectX::XMLoadFloat3(&otherPos);
@@ -87,9 +99,9 @@ bool Collider::BoxVsBox(std::shared_ptr<Collider> otherSide)
     std::shared_ptr<BoxColliderCom> otherBox = std::static_pointer_cast<BoxColliderCom>(otherSide);
 
     //必要なパラメーター取得
-    DirectX::XMFLOAT3 myPos = myBox->GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 myPos = myBox->GetGameObject()->transform_->GetWorldPosition();
     myPos = { myPos.x + offsetPos_.x,myPos.y + offsetPos_.y,myPos.z + offsetPos_.z };
-    DirectX::XMFLOAT3 otherPos = otherBox->GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 otherPos = otherBox->GetGameObject()->transform_->GetWorldPosition();
     otherPos = { otherPos.x + otherBox->offsetPos_.x,otherPos.y + otherBox->offsetPos_.y,otherPos.z + otherBox->offsetPos_.z };
     DirectX::XMFLOAT3 mySize = myBox->GetSize();
     DirectX::XMFLOAT3 otherSize = otherBox->GetSize();
@@ -142,8 +154,8 @@ bool Collider::SphereVsBox(std::shared_ptr<Collider> otherSide)
     };
 
     //座標取得
-    DirectX::XMFLOAT3 spherePos = sphere->GetGameObject()->transform_->GetPosition();
-    DirectX::XMFLOAT3 boxPos = box->GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 spherePos = sphere->GetGameObject()->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 boxPos = box->GetGameObject()->transform_->GetWorldPosition();
     //ボックスを基準とした座標にする
     DirectX::XMFLOAT3 spherePosFromBox = { spherePos.x - boxPos.x,spherePos.y - boxPos.y,spherePos.z - boxPos.z };
 
@@ -172,6 +184,7 @@ bool Collider::SphereVsBox(std::shared_ptr<Collider> otherSide)
 // GUI描画
 void SphereColliderCom::OnGUI()
 {
+    ImGui::Checkbox("enabled", &isEnabled_);
     ImGui::DragFloat("radius", &radius_,0.1f);
     ImGui::DragFloat3("offsetPos", &offsetPos_.x,0.1f);
 }
@@ -179,7 +192,7 @@ void SphereColliderCom::OnGUI()
 // debug描画
 void SphereColliderCom::DebugRender()
 {
-    DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
     pos = { pos.x + offsetPos_.x,pos.y + offsetPos_.y,pos.z + offsetPos_.z };
     Graphics::Instance().GetDebugRenderer()->DrawSphere(
        pos, radius_, { 1,0,0,1 });
@@ -193,6 +206,7 @@ void SphereColliderCom::DebugRender()
 // GUI描画
 void BoxColliderCom::OnGUI()
 {
+    ImGui::Checkbox("enabled", &isEnabled_);
     ImGui::DragFloat3("size", &size_.x, 0.1f);
     ImGui::DragFloat3("offsetPos", &offsetPos_.x, 0.1f);
 }
@@ -200,7 +214,7 @@ void BoxColliderCom::OnGUI()
 // debug描画
 void BoxColliderCom::DebugRender()
 {
-    DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetPosition();
+    DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
     pos = { pos.x + offsetPos_.x,pos.y + offsetPos_.y,pos.z + offsetPos_.z };
     Graphics::Instance().GetDebugRenderer()->DrawBox(pos, size_, { 1,0,0,1 });
 }
