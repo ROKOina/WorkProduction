@@ -7,10 +7,14 @@
 enum COLLIDER_TAG : uint64_t
 {
     NONE            = 1 << 0,
+
     Player          = 1 << 1,
-    Enemy           = 1 << 2,
-    EnemyAttack     = 1 << 3,
-    Wall            = 1 << 4,
+    JustAvoid       = 1 << 2,
+
+    Enemy           = 1 << 10,
+    EnemyAttack     = 1 << 11,
+
+    Wall            = 1 << 50,
 };
 static COLLIDER_TAG operator| (COLLIDER_TAG L, COLLIDER_TAG R)
 {
@@ -94,8 +98,8 @@ public:
     //相手を指定して判定
     void ColliderVSOther(std::shared_ptr<Collider> otherSide);
 
-    void SetEnabled(bool enabled) { isEnabled_ = enabled; }
-    const bool const GetEnabled() { return isEnabled_; }
+    void SetOffsetPosition(DirectX::XMFLOAT3& offsetPos) { offsetPos_ = offsetPos; }
+    const DirectX::XMFLOAT3 const GetOffsetPosition() { return offsetPos_; }
 
 private:
     //当たり判定をする(当たっていたらtrue)
@@ -124,8 +128,6 @@ protected:
     //オフセット位置
     DirectX::XMFLOAT3 offsetPos_ = { 0,0,0 };
 
-    //有効か
-    bool isEnabled_ = true;
 
 };
 

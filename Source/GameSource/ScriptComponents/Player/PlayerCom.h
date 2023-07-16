@@ -22,13 +22,16 @@ public:
     // GUI描画
     void OnGUI() override;
 
-    void AddForce(const DirectX::XMFLOAT3& force) {
-        velocity_.x += force.x;
-        velocity_.y += force.y;
-        velocity_.z += force.z;
-    };
-
     //PlayerComクラス
+public:
+    void OnDamage() {
+        isDamage_ = true;
+    }
+
+    bool GetIsInvincible() {
+        return isDamage_;
+    }
+
 private:
     //移動
     //スティック入力値から移動ベクトルを取得
@@ -42,29 +45,22 @@ private:
     void VerticalMove();
     //横方向移動
     void HorizonMove();
-    //縦方向移動更新
-    void VerticalUpdate(float elapsedTime);
-    //横方向移動更新
-    void HorizonUpdate(float elapsedTime);
 
     //ダッシュ
     void DashMove(float elapsedTime);
 
-    //速力を更新
-    void VelocityAppPosition(float elapsedTime);
+private:
 
-
+    //移動系
     //入力値保存
     DirectX::XMFLOAT3 inputMoveVec_;
-
-    //速力
-    DirectX::XMFLOAT3 velocity_ = { 0,0,0 };
 
     //走りと歩きを切り替える
     enum MOVE_PARAM
     {
         WALK,
         RUN,
+        DASH,
         MAX,
     };
     struct
@@ -75,15 +71,17 @@ private:
     }moveParam_[MOVE_PARAM::MAX];
     int moveParamType_ = MOVE_PARAM::WALK;
 
-    //ダッシュ用の速力
-    DirectX::XMFLOAT3 dashVelocity_ = { 0,0,0 };
     //ダッシュ時にプラスで速くなる
     float dashSpeed_ = 10.0f;
     bool isDash_ = false;
-
     float jumpSpeed_ = 20.0f;
-    float gravity_   = -0.25f;  //重力
-    float friction_ = 0.1f;  //摩擦
+
+
+    //状態系
+    bool isDamage_ = false; //ダメージを受けている時にtrue
+    float damageInvincibleTime_ = 1; //ダメージ時の無敵時間
+    float damageTimer_ = 0; //ダメージ時のタイマー
+
 
     DirectX::XMFLOAT3 up_ = {0,1,0};
 };

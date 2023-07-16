@@ -93,6 +93,22 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 					DirectX::XMStoreFloat4(&node.rotate, DirectX::XMQuaternionSlerp(Key0Rotate, Key1Rotate, rate));
 					DirectX::XMStoreFloat3(&node.translate, DirectX::XMVectorLerp(Key0Translate, Key1Translate, rate));
 				}
+
+				//アニメーションイベントの更新
+				for (auto& animEvent : currentAnimationEvents_)
+				{
+					if (animEvent.nodeIndex != nodeIndex)continue;
+					animEvent.enabled = false;
+					//設定されたフレーム内の場合
+
+					if (animEvent.resourceEventData.startFrame > currentAnimationSeconds_
+						|| animEvent.resourceEventData.endFrame < currentAnimationSeconds_)continue;
+
+					animEvent.enabled = true;
+					//ワールドポジションに変換して更新する
+					DirectX::XMVECTOR WorldPos = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&node.translate), DirectX::XMLoadFloat4x4(&node.parent->worldTransform));
+					DirectX::XMStoreFloat3(&animEvent.position, WorldPos);
+				}
 			}
 			break;
 		}
@@ -155,6 +171,35 @@ void AnimationCom::PlayAnimation(int index, bool loop, float blendSeconds)
 	animationEndFlag_ = false;
 	animationBlendTime_ = 0.0f;
 	animationBlendSeconds_ = blendSeconds;
+
+	//アニメーションイベント保存
+	currentAnimationEvents_.clear();
+	Model* model = GetGameObject()->GetComponent<RendererCom>()->GetModel();
+	const FbxModelResource* resource = model->GetResource();
+	const ModelResource::Animation& animation = resource->GetAnimations().at(currentAnimationIndex_);
+	//アニメーションイベントから情報をコピー
+	for (auto& animEvent : animation.animationEvents)
+	{
+		//親のインデックスからノードを見つける
+		int nodeIndex = animEvent.eventNode.parentIndex + 1;
+		while (1)
+		{
+			Model::Node& node = model->GetNodes()[nodeIndex];
+			//名前が同じなら保存
+			if (std::strcmp(node.name, animEvent.eventNode.name.c_str()) == 0)
+			{
+				AnimEvent currentEvent;
+				currentEvent.name = animEvent.name;
+				currentEvent.nodeIndex = nodeIndex;
+				currentEvent.resourceEventData = animEvent;
+				currentAnimationEvents_.emplace_back(currentEvent);
+				break;
+			}
+			nodeIndex++;
+			//見つからない場合
+			if (nodeIndex >= model->GetNodes().size())break;
+		}
+	}
 }
 
 //アニメーション再生中か
@@ -182,4 +227,17 @@ void AnimationCom::ImportFbxAnimation(const char* filename)
 			resource->AddAnimation(filename);
 		}
 	}
+}
+
+//アニメーションイベント取得
+bool  AnimationCom::GetCurrentAnimationEvent(const char* eventName, DirectX::XMFLOAT3& position)//イベントの名前で参照したポジションを返す
+{
+	for (auto& animEvent : currentAnimationEvents_)
+	{
+		if (!animEvent.enabled)continue;
+		if (std::strcmp(eventName, animEvent.name.c_str()) != 0)continue;
+		position = animEvent.position;
+		return true;	//アニメーションイベント中はtrue
+	}
+	return false;
 }

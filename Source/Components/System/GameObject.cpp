@@ -22,6 +22,7 @@ void GameObject::Start()
 // 更新
 void GameObject::Update(float elapsedTime)
 {
+	if (!isEnabled_)return;
 	for (std::shared_ptr<Component>& component : components_)
 	{
 		component->Update(elapsedTime);
@@ -31,6 +32,7 @@ void GameObject::Update(float elapsedTime)
 // 行列の更新
 void GameObject::UpdateTransform()
 {
+	if (!isEnabled_)return;
 	//親子の行列更新
 	if (parentObject_.lock())
 	{
@@ -44,6 +46,10 @@ void GameObject::UpdateTransform()
 // GUI表示
 void GameObject::OnGUI()
 {
+	//有効
+	ImGui::Checkbox(" ", &isEnabled_);
+	ImGui::SameLine();
+
 	// 名前
 	{
 		char buffer[1024];
@@ -81,7 +87,9 @@ std::shared_ptr<GameObject> GameObject::AddChildObject()
 	return obj;
 }
 
-#pragma endregion
+#pragma endregion	endGameObject
+
+
 
 //ゲームオブジェクトマネージャー
 #pragma region GameObjectManager
@@ -175,8 +183,10 @@ void GameObjectManager::Update(float elapsedTime)
 		//判定
 		for (int col1 = 0; col1 < colliderObject_.size(); ++col1)
 		{
+			if (!colliderObject_[col1].lock()->GetGameObject()->GetEnabled())continue;
 			for (int col2 = col1 + 1; col2 < colliderObject_.size(); ++col2)
 			{
+				if (!colliderObject_[col2].lock()->GetGameObject()->GetEnabled())continue;
 				colliderObject_[col1].lock()->ColliderVSOther(colliderObject_[col2].lock());
 			}
 		}
@@ -229,10 +239,11 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 	//3D描画
 	Render3D();
 
-	//当たり判定
+	//当たり判定用デバッグ描画
 	for (auto& col : colliderObject_)
 	{
 		if (!col.lock()->GetEnabled())continue;
+		if (!col.lock()->GetGameObject()->GetEnabled())continue;
 		col.lock()->DebugRender();
 	}
 
@@ -429,6 +440,8 @@ void GameObjectManager::Render3D()
 
 	for (std::weak_ptr<RendererCom>& renderObj : renderSortObject_)
 	{
+		if (!renderObj.lock()->GetGameObject()->GetEnabled())continue;
+
 		//シェーダーIDが変化したら、シェーダーを変更
 		int newShaderID = renderObj.lock()->GetShaderID();
 		if (oldShaderID != newShaderID)
@@ -452,4 +465,4 @@ void GameObjectManager::Render3D()
 
 }
 
-#pragma endregion
+#pragma endregion endGameObjectManager

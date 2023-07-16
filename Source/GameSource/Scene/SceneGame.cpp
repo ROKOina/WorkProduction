@@ -13,6 +13,7 @@
 #include "Components\CameraCom.h"
 #include "Components\AnimationCom.h"
 #include "Components\ColliderCom.h"
+#include "Components\MovementCom.h"
 
 #include "GameSource\ScriptComponents\Player\PlayerCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
@@ -58,16 +59,24 @@ void SceneGame::Initialize()
 		{
 			std::shared_ptr<GameObject> attack = obj->AddChildObject();
 			attack->SetName("picolaboAttack");
-			std::shared_ptr<SphereColliderCom> c2 = attack->AddComponent<SphereColliderCom>();
-			c2->SetMyTag(COLLIDER_TAG::EnemyAttack);
+			std::shared_ptr<SphereColliderCom> attackCol = attack->AddComponent<SphereColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Player);
 
-			//std::shared_ptr<RendererCom> r1 = attack->AddComponent<RendererCom>();
-			//filename = "Data/Model/stages/vendingMachine.mdl";
-			//r1->LoadModel(filename);
+		}
+		//ジャスト回避用
+		{
+			std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
+			justAttack->SetName("picolaboAttackJust");
+			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
+			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
+			justCol->SetSize({ 1.3f,1,1.3f });
+
+			justAttack->transform_->SetLocalPosition({ -1.569f ,0,95.493f });
 		}
 	}
 
-	//仮オブジェクト
+	//仮プレイヤー
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("pico");
@@ -81,9 +90,13 @@ void SceneGame::Initialize()
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 		a->PlayAnimation(4, true);
 
-		std::shared_ptr<SphereColliderCom> c = obj->AddComponent<SphereColliderCom>();
+		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
+
+		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
 		c->SetMyTag(COLLIDER_TAG::Player);
-		c->SetJudgeTag(COLLIDER_TAG::Enemy | COLLIDER_TAG::Wall);
+		c->SetJudgeTag(COLLIDER_TAG::Enemy | COLLIDER_TAG::Wall | COLLIDER_TAG::JustAvoid);
+		c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.8f, 0));
+		c->SetSize(DirectX::XMFLOAT3(0.2f, 0.6f, 0.2f));
 
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
 	

@@ -81,9 +81,6 @@
     <ClInclude Include="Source\Input\GamePad.h">
       <Filter>Source\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Debug\DebugRenderer.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Graphics\Graphics.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
@@ -103,9 +100,6 @@
       <Filter>Source\Input</Filter>
     </ClInclude>
     <ClInclude Include="Source\Graphics\Shaders\3D\ShaderParameter3D.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Graphics\Debug\LineRenderer.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Source\Graphics\Sprite\Sprite.h">
@@ -256,6 +250,9 @@
     <ClInclude Include="Source\SystemStruct\QuaternionStruct.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.h" />
     <ClInclude Include="Source\Components\ColliderCom.h" />
+    <ClInclude Include="Source\Graphics\DebugRenderer\DebugRenderer.h" />
+    <ClInclude Include="Source\Graphics\DebugRenderer\LineRenderer.h" />
+    <ClInclude Include="Source\Components\MovementCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -263,9 +260,6 @@
     </ClCompile>
     <ClCompile Include="Source\Input\GamePad.cpp">
       <Filter>Source\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Graphics\Debug\DebugRenderer.cpp">
-      <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Graphics.cpp">
       <Filter>Source\Graphics</Filter>
@@ -281,9 +275,6 @@
     </ClCompile>
     <ClCompile Include="Source\Input\Input.cpp">
       <Filter>Source\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Graphics\Debug\LineRenderer.cpp">
-      <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Sprite\Sprite.cpp">
       <Filter>Source\Graphics</Filter>
@@ -439,6 +430,15 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Components\ColliderCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\DebugRenderer\DebugRenderer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\DebugRenderer\LineRenderer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\MovementCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

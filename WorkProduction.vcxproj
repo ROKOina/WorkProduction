@@ -130,6 +130,7 @@
     <ClInclude Include="Source\Audio\AudioSource.h" />
     <ClInclude Include="Source\Components\AnimationCom.h" />
     <ClInclude Include="Source\Components\ColliderCom.h" />
+    <ClInclude Include="Source\Components\MovementCom.h" />
     <ClInclude Include="Source\Components\RendererCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCom.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="Source\Audio\AudioSource.cpp" />
     <ClCompile Include="Source\Components\AnimationCom.cpp" />
     <ClCompile Include="Source\Components\ColliderCom.cpp" />
+    <ClCompile Include="Source\Components\MovementCom.cpp" />
     <ClCompile Include="Source\Components\RendererCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCom.cpp" />

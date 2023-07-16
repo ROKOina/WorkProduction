@@ -27,6 +27,13 @@ public:
 	// ゲームオブジェクト取得
 	std::shared_ptr<GameObject> GetGameObject() { return gameObject_.lock(); }
 
+	const bool GetEnabled() const { return isEnabled_; }
+	void SetEnabled(bool enabled) { isEnabled_ = enabled; }
+
 private:
 	std::weak_ptr<GameObject>	gameObject_;
+
+protected:
+	//有効か
+	bool isEnabled_ = true;
 };

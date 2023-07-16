@@ -30,6 +30,17 @@ public:
     void AnimationUpdata(float elapsedTime);
 
     //Animationクラス
+private:
+    //アニメーションイベント用
+    struct AnimEvent
+    {
+        bool enabled = false;
+        std::string name;
+        int nodeIndex = -1;
+        DirectX::XMFLOAT3 position;
+        ModelResource::AnimationEvent resourceEventData;
+    };
+
 public:
 
     //アニメーション再生
@@ -44,6 +55,20 @@ public:
     //アニメーション追加
     void ImportFbxAnimation(const char* filename);
 
+    //アニメーションイベント取得(ポジションと再生中か)
+    bool GetCurrentAnimationEvent(const char* eventName, DirectX::XMFLOAT3& position);
+
+    //アニメーションイベント取得
+    const AnimEvent GetAnimationEvent(const char* eventName) const{
+        for (AnimEvent anim : currentAnimationEvents_)
+        {
+            if (std::strcmp(eventName, anim.name.c_str()) == 0)
+            {
+                return anim;
+            }
+        }
+    }
+
 private:
     int currentAnimationIndex_ = -1;
     float currentAnimationSeconds_ = 0.0f;
@@ -51,4 +76,6 @@ private:
     bool animationEndFlag_ = false;
     float animationBlendTime_ = 0.0f;
     float animationBlendSeconds_ = 0.0f;
+
+    std::vector<AnimEvent> currentAnimationEvents_;
 };

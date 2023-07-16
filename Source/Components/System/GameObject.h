@@ -75,6 +75,17 @@ public:
 
 	//子供達取得 (weak_ptrなので注意)
 	std::vector<std::weak_ptr<GameObject>> GetChildren() { return childrenObject_; }
+	std::shared_ptr<GameObject> GetChildFind(const char* name) {
+		for (auto& child : childrenObject_)
+		{
+			if (std::strcmp(name, child.lock()->GetName()) == 0)
+				return child.lock();
+		}
+		return nullptr;
+	}
+
+	const bool GetEnabled() const { return isEnabled_; }
+	void SetEnabled(bool enabled) { isEnabled_ = enabled; }
 
 public:
 	std::shared_ptr<TransformCom> transform_;
@@ -87,6 +98,9 @@ private:
 	//親子
 	std::weak_ptr<GameObject> parentObject_;
 	std::vector<std::weak_ptr<GameObject>> childrenObject_;
+
+	//有効か
+	bool isEnabled_ = true;
 };
 
 // ゲームオブジェクトマネージャー

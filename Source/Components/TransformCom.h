@@ -43,6 +43,7 @@ public:
             DirectX::XMVECTOR WorldPosition = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&worldPosition), ParentTransformInverse);
             DirectX::XMStoreFloat3(&this->localPosition_, WorldPosition);
         }
+        UpdateTransform();
     }
     const DirectX::XMFLOAT3& GetWorldPosition() const { return worldPosition_; }
 
