@@ -61,9 +61,9 @@ void MovementCom::HorizonUpdate(float elapsedTime)
     if (horiLength > friction)
     {
         DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), -friction);
-        DirectX::XMFLOAT3 newVelocity;
-        DirectX::XMStoreFloat3(&newVelocity, FriVelocity);
-        AddForce(newVelocity);
+        //DirectX::XMFLOAT3 newVelocity;
+        //DirectX::XMStoreFloat3(&newVelocity, FriVelocity);
+        DirectX::XMStoreFloat3(&velocity_, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&velocity_), FriVelocity));
     }
     else
     {
@@ -71,7 +71,7 @@ void MovementCom::HorizonUpdate(float elapsedTime)
         velocity_.z = 0;
     }
 
-
+    //ç≈ëÂë¨ìxÇÃñ≥Ç¢ñÄéCåvéZ
     horizonVelocity = { nonMaxSpeedVelocity_.x,0,nonMaxSpeedVelocity_.z };
     HorizonVelocity = DirectX::XMLoadFloat3(&horizonVelocity);
     horiLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(HorizonVelocity));

@@ -34,9 +34,9 @@ private:
 public:
     //velocity
     void AddForce(const DirectX::XMFLOAT3& force) {
-        velocity_.x += force.x;
-        velocity_.y += force.y;
-        velocity_.z += force.z;
+        velocity_.x += force.x * moveAcceleration_;
+        velocity_.y += force.y * moveAcceleration_;
+        velocity_.z += force.z * moveAcceleration_;
     }
     void ZeroVelocity() {
         velocity_ = { 0,0,0 };

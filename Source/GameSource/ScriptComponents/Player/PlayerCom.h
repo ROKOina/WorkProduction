@@ -60,22 +60,30 @@ private:
     {
         WALK,
         RUN,
+        JUSTDASH,
         DASH,
         MAX,
     };
     struct
     {
         float moveMaxSpeed = 10.0f;
+        float moveSpeed = 1.0f;
         float moveAcceleration = 0.2f;
         float turnSpeed = 8.0f;
     }moveParam_[MOVE_PARAM::MAX];
     int moveParamType_ = MOVE_PARAM::WALK;
+
 
     //ダッシュ時にプラスで速くなる
     float dashSpeed_ = 10.0f;
     bool isDash_ = false;
     float jumpSpeed_ = 20.0f;
 
+    //ジャスト回避
+    float justSpeed_ = 3.0f;    //回避前に少し移動（ジャスト回避適用ダッシュ）
+    float justSpeedTime_ = 0.5f;    //ダッシュに変わる時間
+    float justSpeedTimer_;
+    bool isJustDash_ = false;   //ジャスト回避判定中のダッシュ中か
 
     //状態系
     bool isDamage_ = false; //ダメージを受けている時にtrue

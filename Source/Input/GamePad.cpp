@@ -60,19 +60,19 @@ void GamePad::Update()
 	}
 	else
 	{
-#if 0
+#if 1
 		// XInputで入力情報が取得出来なかった場合はWindowsAPIで取得する
 		JOYINFOEX joyInfo;
 		joyInfo.dwSize = sizeof(JOYINFOEX);
 		joyInfo.dwFlags = JOY_RETURNALL;	// 全ての情報を取得
 
-		if (joyGetPosEx(slot, &joyInfo) == JOYERR_NOERROR)
+		if (joyGetPosEx(JOYSTICKID2, &joyInfo) == JOYERR_NOERROR)
 		{
 			// 製品IDをチェックしてPS4コントローラーだけ対応する
 			static const WORD PS4_PID = 1476;
 
 			JOYCAPS joy_caps;
-			if (joyGetDevCaps(slot, &joy_caps, sizeof(JOYCAPS)) == JOYERR_NOERROR)
+			if (joyGetDevCaps(JOYSTICKID2, &joy_caps, sizeof(JOYCAPS)) == JOYERR_NOERROR)
 			{
 				// 十字キー
 				if (joyInfo.dwPOV != 0xFFFF)
@@ -91,38 +91,38 @@ void GamePad::Update()
 					int angle = joyInfo.dwPOV / 4500;
 					newButtonState |= povBit[angle];
 				}
-				if (joy_caps.wPid == PS4_PID)
+				//if (joy_caps.wPid == PS4_PID)
 				{
 					// ボタン情報
-					if (joyInfo.dwButtons & JOY_BUTTON1)  newButtonState |= BTN_Y;
-					if (joyInfo.dwButtons & JOY_BUTTON2)  newButtonState |= BTN_B;
-					if (joyInfo.dwButtons & JOY_BUTTON3)  newButtonState |= BTN_A;
-					if (joyInfo.dwButtons & JOY_BUTTON4)  newButtonState |= BTN_X;
-					if (joyInfo.dwButtons & JOY_BUTTON5)  newButtonState |= BTN_LEFT_SHOULDER;
-					if (joyInfo.dwButtons & JOY_BUTTON6)  newButtonState |= BTN_RIGHT_SHOULDER;
-					if (joyInfo.dwButtons & JOY_BUTTON7)  newButtonState |= BTN_LEFT_TRIGGER;
-					if (joyInfo.dwButtons & JOY_BUTTON8)  newButtonState |= BTN_RIGHT_TRIGGER;
-					if (joyInfo.dwButtons & JOY_BUTTON9)  newButtonState |= BTN_BACK;
-					if (joyInfo.dwButtons & JOY_BUTTON10) newButtonState |= BTN_START;
-					if (joyInfo.dwButtons & JOY_BUTTON11) newButtonState |= BTN_LEFT_THUMB;
-					if (joyInfo.dwButtons & JOY_BUTTON12) newButtonState |= BTN_RIGHT_THUMB;
+					if (joyInfo.dwButtons & JOY_BUTTON1)  newButtonState |= BTN_Y;				//□
+					if (joyInfo.dwButtons & JOY_BUTTON2)  newButtonState |= BTN_B;				//×
+					if (joyInfo.dwButtons & JOY_BUTTON3)  newButtonState |= BTN_A;				//〇
+					if (joyInfo.dwButtons & JOY_BUTTON4)  newButtonState |= BTN_X;				//△
+					if (joyInfo.dwButtons & JOY_BUTTON5)  newButtonState |= BTN_LEFT_SHOULDER;	//L1
+					if (joyInfo.dwButtons & JOY_BUTTON6)  newButtonState |= BTN_RIGHT_SHOULDER;	//R1
+					if (joyInfo.dwButtons & JOY_BUTTON7)  newButtonState |= BTN_LEFT_TRIGGER;	//L2
+					if (joyInfo.dwButtons & JOY_BUTTON8)  newButtonState |= BTN_RIGHT_TRIGGER;	//R2
+					if (joyInfo.dwButtons & JOY_BUTTON9)  newButtonState |= BTN_BACK;			//SHARE
+					if (joyInfo.dwButtons & JOY_BUTTON10) newButtonState |= BTN_START;			//OPTIONS
+					if (joyInfo.dwButtons & JOY_BUTTON11) newButtonState |= BTN_LEFT_THUMB;		//L3
+					if (joyInfo.dwButtons & JOY_BUTTON12) newButtonState |= BTN_RIGHT_THUMB;	//R3
 					//if (joyInfo.dwButtons & JOY_BUTTON13) newButtonState |= BTN_?;	// PS
 					//if (joyInfo.dwButtons & JOY_BUTTON14) newButtonState |= BTN_?;	// Touch
 
 					// 左スティック
-					axisLx = static_cast<int>(joyInfo.dwXpos - 0x7FFF) / static_cast<float>(0x8000);
-					axisLy = -static_cast<int>(joyInfo.dwYpos - 0x7FFF) / static_cast<float>(0x8000);
+					axisLx_ = static_cast<int>(joyInfo.dwXpos - 0x7FFF) / static_cast<float>(0x8000);
+					axisLy_ = -static_cast<int>(joyInfo.dwYpos - 0x7FFF) / static_cast<float>(0x8000);
 
 					// 右スティック
-					axisRx = static_cast<int>(joyInfo.dwZpos - 0x7FFF) / static_cast<float>(0x8000);
-					axisRy = -static_cast<int>(joyInfo.dwRpos - 0x7FFF) / static_cast<float>(0x8000);
+					axisRx_ = static_cast<int>(joyInfo.dwZpos - 0x7FFF) / static_cast<float>(0x8000);
+					axisRy_ = -static_cast<int>(joyInfo.dwRpos - 0x7FFF) / static_cast<float>(0x8000);
 
 					// LRトリガー
-					triggerL = static_cast<float>(joyInfo.dwVpos) / static_cast<float>(0xFFFF);
-					triggerR = static_cast<float>(joyInfo.dwUpos) / static_cast<float>(0xFFFF);
+					triggerL_ = static_cast<float>(joyInfo.dwVpos) / static_cast<float>(0xFFFF);
+					triggerR_ = static_cast<float>(joyInfo.dwUpos) / static_cast<float>(0xFFFF);
 
-					if (axisLx > -0.25f && axisLx < 0.25f) axisLx = 0.0f;
-					if (axisRx > -0.25f && axisRx < 0.25f) axisRx = 0.0f;
+					if (axisLx_ > -0.25f && axisLx_ < 0.25f) axisLx_ = 0.0f;
+					if (axisRx_ > -0.25f && axisRx_ < 0.25f) axisRx_ = 0.0f;
 				}
 			}
 		}
@@ -148,11 +148,11 @@ void GamePad::Update()
 		if (GetAsyncKeyState('C') & 0x8000) newButtonState |= BTN_X;
 		if (GetAsyncKeyState('V') & 0x8000) newButtonState |= BTN_Y;
 		if (GetAsyncKeyState(' ') & 0x8000) newButtonState |= BTN_SPACE;
-		if (GetAsyncKeyState(VK_LSHIFT) & 0x8000) newButtonState |= BTN_LSHIFT;
-		if (GetAsyncKeyState(VK_UP) & 0x8000)	newButtonState |= BTN_UP;
-		if (GetAsyncKeyState(VK_RIGHT) & 0x8000)	newButtonState |= BTN_RIGHT;
-		if (GetAsyncKeyState(VK_DOWN) & 0x8000)	newButtonState |= BTN_DOWN;
-		if (GetAsyncKeyState(VK_LEFT) & 0x8000)	newButtonState |= BTN_LEFT;
+		if (GetAsyncKeyState(VK_LSHIFT) & 0x8000)	newButtonState |= BTN_LSHIFT;
+		//if (GetAsyncKeyState(VK_UP) & 0x8000)		newButtonState |= BTN_UP;
+		//if (GetAsyncKeyState(VK_RIGHT) & 0x8000)	newButtonState |= BTN_RIGHT;
+		//if (GetAsyncKeyState(VK_DOWN) & 0x8000)		newButtonState |= BTN_DOWN;
+		//if (GetAsyncKeyState(VK_LEFT) & 0x8000)		newButtonState |= BTN_LEFT;
 
 #if 1
 		if (newButtonState & BTN_UP)    ly = 1.0f;
