@@ -74,10 +74,14 @@ private:
     int moveParamType_ = MOVE_PARAM::WALK;
 
 
-    //ダッシュ時にプラスで速くなる
-    float dashSpeed_ = 10.0f;
-    bool isDash_ = false;
+    
     float jumpSpeed_ = 20.0f;
+
+    bool isDash_ = false;       //ダッシュ中か
+    int dashState_ = -1;        //ダッシュの遷移
+    float dashMaxSpeed_ = 20;   //ダッシュの最大スピード
+    float dashStopTime_ = 1;    //後ろダッシュを止めるため
+    float dashStopTimer_;
 
     //ジャスト回避
     float justSpeed_ = 3.0f;    //回避前に少し移動（ジャスト回避適用ダッシュ）

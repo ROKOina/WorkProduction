@@ -12,6 +12,7 @@
 #include "Components\TransformCom.h"
 #include "Components\CameraCom.h"
 #include "Components\AnimationCom.h"
+#include "Components\AnimatorCom.h"
 #include "Components\ColliderCom.h"
 #include "Components\MovementCom.h"
 
@@ -88,7 +89,9 @@ void SceneGame::Initialize()
 		r->SetShaderID(SHADER_ID::Phong);
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-		a->PlayAnimation(4, true);
+		//a->PlayAnimation(4, true);
+
+		std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
 

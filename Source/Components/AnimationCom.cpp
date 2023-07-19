@@ -15,6 +15,28 @@ void AnimationCom::Update(float elapsedTime)
 	AnimationUpdata(elapsedTime);
 }
 
+// GUI描画
+bool isAnimLoop;
+void AnimationCom::OnGUI()
+{
+	if (!GetGameObject()->GetComponent<RendererCom>())return;
+
+	const ModelResource* resource = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResource();
+	const std::vector<ModelResource::Animation>& animations = resource->GetAnimations();
+
+	ImGui::Checkbox("animationLoop", &isAnimLoop);
+	ImGui::Separator();
+	int index = 0;
+	for (ModelResource::Animation anim : animations)
+	{
+		if (ImGui::RadioButton(anim.name.c_str(), false))
+			PlayAnimation(index, isAnimLoop);
+		index++;
+	}
+
+}
+
+
 //アニメーション更新
 void AnimationCom::AnimationUpdata(float elapsedTime)
 {	
@@ -117,8 +139,6 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 	//最終フレーム処理
 	if (animationEndFlag_)
 	{
-		animationEndFlag_ = false;
-		currentAnimationIndex_ = -1;
 		return;
 	}
 
@@ -133,33 +153,13 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 		{
 			//再生時間を巻き戻す
 			currentAnimationSeconds_ = 0;
+			isLooped_ = true;
 		}
 		else
 		{
 			animationEndFlag_ = true;
 		}
 	}
-}
-
-// GUI描画
-bool isAnimLoop;
-void AnimationCom::OnGUI()
-{
-	if (!GetGameObject()->GetComponent<RendererCom>())return;
-
-	const ModelResource* resource = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResource();
-	const std::vector<ModelResource::Animation>& animations = resource->GetAnimations();
-
-	ImGui::Checkbox("animationLoop", &isAnimLoop);
-	ImGui::Separator();
-	int index = 0;
-	for (ModelResource::Animation anim : animations)
-	{
-		if (ImGui::RadioButton(anim.name.c_str(), false))
-			PlayAnimation(index, isAnimLoop);
-		index++;
-	}
-
 }
 
 //アニメーション再生
@@ -171,6 +171,7 @@ void AnimationCom::PlayAnimation(int index, bool loop, float blendSeconds)
 	animationEndFlag_ = false;
 	animationBlendTime_ = 0.0f;
 	animationBlendSeconds_ = blendSeconds;
+	isLooped_ = false;
 
 	//アニメーションイベント保存
 	currentAnimationEvents_.clear();
@@ -208,6 +209,8 @@ bool AnimationCom::IsPlayAnimation()
 	if (currentAnimationIndex_ < 0)return false;
 	const ModelResource* resource = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResource();
 	if (currentAnimationIndex_ >= resource->GetAnimations().size())return false;
+
+	if(animationEndFlag_)return false;
 
 	return true;
 }

@@ -4,11 +4,35 @@
 #include "Components\CameraCom.h"
 #include "Components\TransformCom.h"
 #include "Components\AnimationCom.h"
+#include "Components\AnimatorCom.h"
 #include "Components\RendererCom.h"
 #include "Components\ColliderCom.h"
 #include "Components\MovementCom.h"
-int state = -1;
-float dashMax = 20;
+
+//アニメーションリスト
+enum AnimationPlayer
+{
+    WALK_RUNRUN_1,
+    IDEL_1,
+    IDEL_2,
+    JUMP_1,
+    JUMP_2,
+    RUN_HARD_1,
+    RUN_HARD_2,
+    RUN_SOFT_1,
+    RUN_SOFT_2,
+    WALK_RUNRUN_2,
+};
+//struct AnimPlayerTransition
+//{
+//    AnimationPlayer src;    //遷移元
+//    AnimationPlayer dst;    //遷移先
+//
+//    AnimPlayerTransition(AnimationPlayer src, AnimationPlayer dst) :src(src), dst(dst) {}
+//};
+//std::map<std::string, AnimPlayerTransition> Transition = {
+//    {"IDLE-JUMP",AnimPlayerTransition(IDEL_2,JUMP_2)},
+//};
 
 // 開始処理
 void PlayerCom::Start()
@@ -22,31 +46,63 @@ void PlayerCom::Start()
     wp.y += 6;
     cameraObj->transform_->SetLocalPosition(wp);
 
-    //{   //仮アニメーション
-    //    std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
-    //    anim->ImportFbxAnimation("Data/Model/pico/attack3Combo.fbx");
-    //    anim->PlayAnimation(3, true);
-    //}
-
     //パラメーター初期化
     moveParam_[MOVE_PARAM::WALK].moveMaxSpeed = 5.0f;
     moveParam_[MOVE_PARAM::WALK].moveAcceleration = 1.2f;
-    moveParam_[MOVE_PARAM::WALK].turnSpeed =4.0f;
+    moveParam_[MOVE_PARAM::WALK].turnSpeed = 4.0f;
 
     moveParam_[MOVE_PARAM::RUN].moveMaxSpeed = 8.0f;
     moveParam_[MOVE_PARAM::RUN].moveAcceleration = 1.2f;
-    moveParam_[MOVE_PARAM::RUN].turnSpeed =8.0f;
+    moveParam_[MOVE_PARAM::RUN].turnSpeed = 8.0f;
 
     moveParam_[MOVE_PARAM::DASH].moveMaxSpeed = 20.0f;
     moveParam_[MOVE_PARAM::DASH].moveAcceleration = 1.0f;
-    moveParam_[MOVE_PARAM::DASH].turnSpeed =8.0f;
+    moveParam_[MOVE_PARAM::DASH].turnSpeed = 8.0f;
 
     moveParamType_ = MOVE_PARAM::WALK;
     std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
     move->SetMoveAcceleration(moveParam_[MOVE_PARAM::WALK].moveAcceleration);
     move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);
 
-    dashSpeed_ = 20.0f;
+    //{   //仮アニメーション
+    //    std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
+    //    anim->ImportFbxAnimation("Data/Model/pico/attack3Combo.fbx");
+    //    anim->PlayAnimation(3, true);
+    //}
+
+    //アニメーター
+    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+    //初期のアニメーション
+    animator->SetFirstTransition(AnimationPlayer::IDEL_2);
+    animator->SetLoopAnimation(AnimationPlayer::IDEL_2, true);
+
+    //アニメーションパラメーター追加
+    animator->AddTriggerParameter("jump");
+    animator->AddFloatParameter("moveSpeed");
+
+    //アニメーション遷移とパラメーター設定をする決める
+    {
+        animator->AddAnimatorTransition(IDEL_2, WALK_RUNRUN_2);
+        animator->SetFloatTransition(IDEL_2, WALK_RUNRUN_2,
+            "moveSpeed", 0.1f, ParameterJudge::GREATER);
+        animator->AddAnimatorTransition(WALK_RUNRUN_2, IDEL_2);
+        animator->SetFloatTransition(WALK_RUNRUN_2, IDEL_2,
+            "moveSpeed", 0.1f, ParameterJudge::LESS);
+        animator->SetLoopAnimation(WALK_RUNRUN_2, true);
+
+        animator->AddAnimatorTransition(WALK_RUNRUN_2, RUN_HARD_2);
+        animator->SetFloatTransition(WALK_RUNRUN_2, RUN_HARD_2,
+            "moveSpeed", moveParam_[MOVE_PARAM::WALK].moveMaxSpeed +1, ParameterJudge::GREATER);
+        animator->AddAnimatorTransition(RUN_HARD_2, WALK_RUNRUN_2);
+        animator->SetFloatTransition(RUN_HARD_2, WALK_RUNRUN_2,
+            "moveSpeed", moveParam_[MOVE_PARAM::WALK].moveMaxSpeed +1, ParameterJudge::LESS);
+        animator->SetLoopAnimation(RUN_HARD_2, true);
+
+        //どこからでも遷移する
+        animator->AddAnimatorTransition(JUMP_2);
+        animator->SetTriggerTransition(JUMP_2, "jump");
+        animator->AddAnimatorTransition(JUMP_2, IDEL_2, true);
+    }
 }
 
 static bool aaa = true;
@@ -99,6 +155,14 @@ void PlayerCom::Update(float elapsedTime)
 
         //ダッシュ処理
         DashMove(elapsedTime);
+
+
+        //移動アニメ
+        DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
+        float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
+        //アニメーター
+        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+        animator->SetFloatValue("moveSpeed", length);
     }
 
     //当たり判定
@@ -166,9 +230,10 @@ void PlayerCom::OnGUI()
     ImGui::DragFloat("moveSpeed", &moveParam_[oo].moveSpeed, 0.1f);
     ImGui::DragFloat("moveAcceleration", &moveParam_[oo].moveAcceleration, 0.1f);
 
-    ImGui::DragFloat("dashSpeed", &dashSpeed_);
     ImGui::DragFloat("justSpeed", &justSpeed_);
     ImGui::DragFloat("justSpeedTime", &justSpeedTime_);
+
+    ImGui::InputInt("state", &dashState_);
 
     ImGui::DragFloat("jumpSpeed", &jumpSpeed_, 0.1f);
 
@@ -252,6 +317,9 @@ bool PlayerCom::IsMove(float elapsedTime)
     GamePad& gamePad = Input::Instance().GetGamePad();
     if (gamePad.GetButtonDown() & GamePad::BTN_SPACE)
     {
+        //アニメーター
+        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+        animator->SetTriggerOn("jump");
         inputMoveVec_.y = jumpSpeed_;
     }
 
@@ -330,120 +398,115 @@ void PlayerCom::DashMove(float elapsedTime)
     GamePad& gamePad = Input::Instance().GetGamePad();
     if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_TRIGGER)
     {
-        //ダッシュ時に入力方向にすぐ移動できるように、角度を変える
-        QuaternionStruct dashDirection = QuaternionStruct::LookRotation(inputMoveVec_, up_);
-        GetGameObject()->transform_->SetRotation(dashDirection);
-
-        state = 0;
+        if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
+            dashState_ = 0;
+        else
+            dashState_ = 10;
+        isDash_ = true;
     }
+
+    if (dashState_ < 0)return;
 
     DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
     float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
 
-    switch (state)
+    //ダッシュ更新
+    switch (dashState_)
     {
-    case 0:
-        //ダッシュに変更
-        move->ZeroVelocity();
-        moveParamType_ = MOVE_PARAM::DASH;
-        move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
-        move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
-        state++;
-        break;
-    case 1:
-        if (length > dashMax)
-            state++;
-        break;
-    case 2:
-    {
-        float acce = move->GetMoveAcceleration();
-        acce -= 2 * elapsedTime;
-        move->SetMoveAcceleration(acce);
+            //入力方向ダッシュ
+        case 0:
+        {
+            //角度を変える
+            QuaternionStruct dashDirection = QuaternionStruct::LookRotation(inputMoveVec_, up_);
+            GetGameObject()->transform_->SetRotation(dashDirection);
 
-        if (moveParam_[MOVE_PARAM::RUN].moveMaxSpeed >= length)
-            state++;
-        break;
-    }
-    case 3:
-        moveParamType_ = MOVE_PARAM::RUN;
-        move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::RUN].moveMaxSpeed);
-        move->SetMoveAcceleration(moveParam_[MOVE_PARAM::RUN].moveAcceleration);
-        state = -1;
-        break;
+            //ダッシュに変更
+            move->ZeroVelocity();
+            moveParamType_ = MOVE_PARAM::DASH;
+            move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
+            move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
+            dashState_++;
+            break;
+        }
+        case 1:
+            //最大速度に達したら次のステート
+            if (length > dashMaxSpeed_)
+                dashState_++;
+            break;
+        case 2:
+        {
+            //加速度を下げていく
+            float acce = move->GetMoveAcceleration();
+            acce -= 2 * elapsedTime;
+            move->SetMoveAcceleration(acce);
+
+            if (moveParam_[MOVE_PARAM::RUN].moveMaxSpeed >= length)
+                dashState_++;
+            break;
+        }
+        case 3:
+            //走りに変更
+            moveParamType_ = MOVE_PARAM::RUN;
+            move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::RUN].moveMaxSpeed);
+            move->SetMoveAcceleration(moveParam_[MOVE_PARAM::RUN].moveAcceleration);
+            dashState_ = -1;
+            isDash_ = false;
+            break;
+
+            //後ろ向きダッシュ
+        case 10:
+            //ダッシュに変更
+            move->ZeroVelocity();
+            moveParamType_ = MOVE_PARAM::DASH;
+            move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed*2);
+            move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
+            dashStopTimer_ = dashStopTime_;
+            dashState_++;
+            break;
+        case 11:
+        {
+            DirectX::XMFLOAT3 front = GetGameObject()->transform_->GetWorldFront();
+            DirectX::XMFLOAT3 back = { -front.x,0,-front.z };
+            DirectX::XMStoreFloat3(&back, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&back), moveParam_[moveParamType_].moveSpeed));
+            move->AddForce(back);
+
+            if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
+                dashState_ = 0;
+
+            //最大速度に達したら次のステート
+            dashStopTimer_ -= elapsedTime;
+            if (length > dashMaxSpeed_*0.5f || dashStopTimer_ < 0)
+                dashState_++;
+            break;
+        }
+        case 12:
+        {           
+            move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
+
+            DirectX::XMFLOAT3 front = GetGameObject()->transform_->GetWorldFront();
+            DirectX::XMFLOAT3 back = { -front.x,0,-front.z };
+            DirectX::XMStoreFloat3(&back, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&back), moveParam_[moveParamType_].moveSpeed));
+            move->AddForce(back);
+
+            //加速度を下げていく
+            float acce = move->GetMoveAcceleration();
+            acce -= 2 * elapsedTime;
+            move->SetMoveAcceleration(acce);
+
+            if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
+                dashState_ = 0;
+
+            if (moveParam_[MOVE_PARAM::RUN].moveMaxSpeed >= length)
+                dashState_=3;
+            break;
+        }
     };
 
-
-    //GamePad& gamePad = Input::Instance().GetGamePad();
-    //if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_TRIGGER)
-    //{
-    //    //移動速力をリセットする
-    //    move->ZeroVelocity();
-
-    //    //ダッシュに変更
-    //    moveParamType_ = MOVE_PARAM::DASH;
-    //    move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
-    //    move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
-
-    //    //入力している場合
-    //    DirectX::XMFLOAT3 dashVelocity = { 0,0,0 };
-    //    if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
-    //    {
-    //        dashVelocity.x = inputMoveVec_.x * dashSpeed_;
-    //        dashVelocity.z = inputMoveVec_.z * dashSpeed_;
-
-    //        //回避orダッシュ
-    //        if (isJust) {
-    //            DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
-    //            GetGameObject()->transform_->SetWorldPosition({
-    //                pos.x + inputMoveVec_.x * 3 ,pos.y,pos.z + inputMoveVec_.z * 3 });
-    //        }
-    //        else
-    //            move->AddForce(dashVelocity);
-
-    //        //ダッシュ時に入力方向にすぐ移動できるように、角度を変える
-    //        QuaternionStruct dashDirection = QuaternionStruct::LookRotation(dashVelocity, up_);
-    //        GetGameObject()->transform_->SetRotation(dashDirection);
-    //    }
-    //    else
-    //    {
-    //        DirectX::XMFLOAT3 front = GetGameObject()->transform_->GetWorldFront();
-    //        dashVelocity.x = -front.x * dashSpeed_ * 2;
-    //        dashVelocity.z = -front.z * dashSpeed_ * 2;
-
-    //        //回避orダッシュ
-    //        if (isJust) {
-    //            DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
-    //            GetGameObject()->transform_->SetWorldPosition({
-    //                pos.x - front.x * 3 ,pos.y,pos.z - front.z * 3 });
-    //        }
-    //        else
-    //            move->AddForce(dashVelocity);
-
-    //        move->SetMoveMaxSpeed(dashSpeed_ * 2);
-    //    }
-
-
-    //    isDash_ = true;
-    //}
-
-    //if (!isDash_)return;
-
-
-
-    ////ダッシュ速力更新
-    //DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
-
-    //float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
-
-    ////RUNに切り替え
-    //if (length < moveParam_[MOVE_PARAM::RUN].moveMaxSpeed)
-    //{
-    //    moveParamType_ = MOVE_PARAM::RUN;
-    //    move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::RUN].moveMaxSpeed);
-    //    move->SetMoveAcceleration(moveParam_[MOVE_PARAM::RUN].moveAcceleration);
-    //    isDash_ = false;
-
-    //}
+    if (length < 0.1f&&dashState_<10)
+    {
+        isDash_ = false;
+        dashState_ = -1;
+    }
 
 }
 

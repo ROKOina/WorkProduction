@@ -49,8 +49,14 @@ public:
     //アニメーション再生中か
     bool IsPlayAnimation();
 
+    //アニメーションループしたか
+    bool IsPlayAnimationLooped()const { return isLooped_; }
+
     //現在のアニメーション再生時間取得
     float GetCurrentAnimationSecoonds()const { return currentAnimationSeconds_; }
+
+    //現在のアニメーションindex取得
+    float GetCurrentAnimationIndex()const { return currentAnimationIndex_; }
 
     //アニメーション追加
     void ImportFbxAnimation(const char* filename);
@@ -76,6 +82,8 @@ private:
     bool animationEndFlag_ = false;
     float animationBlendTime_ = 0.0f;
     float animationBlendSeconds_ = 0.0f;
+
+    bool isLooped_ = false;  //ループしたか
 
     std::vector<AnimEvent> currentAnimationEvents_;
 };

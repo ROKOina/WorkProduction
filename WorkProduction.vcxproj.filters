@@ -253,6 +253,7 @@
     <ClInclude Include="Source\Graphics\DebugRenderer\DebugRenderer.h" />
     <ClInclude Include="Source\Graphics\DebugRenderer\LineRenderer.h" />
     <ClInclude Include="Source\Components\MovementCom.h" />
+    <ClInclude Include="Source\Components\AnimatorCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -439,6 +440,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Components\MovementCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\AnimatorCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
