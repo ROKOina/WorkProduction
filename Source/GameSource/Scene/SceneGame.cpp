@@ -18,6 +18,7 @@
 
 #include "GameSource\ScriptComponents\Player\PlayerCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
+#include "GameSource\ScriptComponents\Weapon\Weapon.h"
 
 // 初期化
 void SceneGame::Initialize()
@@ -47,12 +48,18 @@ void SceneGame::Initialize()
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::Phong);
 
-		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-		a->PlayAnimation(5, true);
+		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
 
-		std::shared_ptr<SphereColliderCom> c = obj->AddComponent<SphereColliderCom>();
+		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+		//a->PlayAnimation(5, true);
+
+		std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
+
+		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
 		c->SetMyTag(COLLIDER_TAG::Enemy);
 		c->SetJudgeTag(COLLIDER_TAG::Player | COLLIDER_TAG::Wall);
+		c->SetSize(DirectX::XMFLOAT3(0.5f, 1.2f, 0.5f));
+		c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.9f, 0));
 
 		std::shared_ptr<EnemyCom> e = obj->AddComponent<EnemyCom>();
 
@@ -77,7 +84,7 @@ void SceneGame::Initialize()
 		}
 	}
 
-	//仮プレイヤー
+	//プレイヤー
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("pico");
@@ -95,37 +102,43 @@ void SceneGame::Initialize()
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
 
-		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
+		std::shared_ptr<CapsuleColliderCom> c = obj->AddComponent<CapsuleColliderCom>();
+		//std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
 		c->SetMyTag(COLLIDER_TAG::Player);
 		c->SetJudgeTag(COLLIDER_TAG::Enemy | COLLIDER_TAG::Wall | COLLIDER_TAG::JustAvoid);
-		c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.8f, 0));
-		c->SetSize(DirectX::XMFLOAT3(0.2f, 0.6f, 0.2f));
+		//c->SetSize(DirectX::XMFLOAT3(0.2f, 0.6f, 0.2f));
+		//c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.8f, 0));
 
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
-	
 
+		//攻撃当たり判定用
+		{
+			std::shared_ptr<GameObject> attack = obj->AddChildObject();
+			attack->SetName("picoAttack");
+			std::shared_ptr<SphereColliderCom> attackCol = attack->AddComponent<SphereColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
 
-		////でばふ
-		//{
-		//	std::shared_ptr<GameObject> o[5];
-		//	for (int i = 0; i < 3; ++i)
-		//	{
-		//		std::shared_ptr<GameObject> obj2;
-		//		if (i == 0)
-		//			obj2 = obj->AddChildObject();
-		//		else
-		//			obj2 = o[i - 1]->AddChildObject();
-		//		obj2->SetName(std::to_string(i).c_str());
+		}
 
+		//剣("RightHandMiddle2")
+		{
+			std::shared_ptr<GameObject> sword = obj->AddChildObject();
+			sword->SetName("greatSword");
 
-		//		obj2->worldTransform_->SetLocalPosition({ 10, 0, 0 });
+			const char* filename = "Data/Model/Swords/GreatSword/GreatSword.mdl";
+			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
+			r->LoadModel(filename);
+			r->SetShaderID(SHADER_ID::Phong);
 
-		//		std::shared_ptr<RendererCom> r1 = obj2->AddComponent<RendererCom>();
-		//		filename = "Data/Model/stages/vendingMachine.mdl";
-		//		r1->LoadModel(filename);
-		//		o[i] = obj2;
-		//	}
-		//}
+			std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+
+			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
+			weapon->SetObject(sword->GetParent());
+			weapon->SetNodeName("RightHandMiddle2");
+		}
 	}
 
 

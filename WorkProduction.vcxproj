@@ -138,13 +138,12 @@
     <ClInclude Include="Source\Components\System\Component.h" />
     <ClInclude Include="Source\Components\System\GameObject.h" />
     <ClInclude Include="Source\Components\TransformCom.h" />
-    <ClInclude Include="Source\GameSource\Character\Character.h" />
     <ClInclude Include="Source\GameSource\Math\Collision.h" />
     <ClInclude Include="Source\GameSource\Render\Effect\Effect.h" />
     <ClInclude Include="Source\GameSource\Render\Effect\EffectManager.h" />
     <ClInclude Include="Source\Framework.h" />
     <ClInclude Include="Source\Components\CameraCom.h" />
-    <ClInclude Include="Source\GameSource\Weapon\Weapon.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\Weapon.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\compute\particle.h" />
     <ClInclude Include="Source\Graphics\DebugRenderer\DebugRenderer.h" />
@@ -208,13 +207,12 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCom.cpp" />
     <ClCompile Include="Source\Components\System\GameObject.cpp" />
     <ClCompile Include="Source\Components\TransformCom.cpp" />
-    <ClCompile Include="Source\GameSource\Character\Character.cpp" />
     <ClCompile Include="Source\GameSource\Math\Collision.cpp" />
     <ClCompile Include="Source\GameSource\Render\Effect\Effect.cpp" />
     <ClCompile Include="Source\GameSource\Render\Effect\EffectManager.cpp" />
     <ClCompile Include="Source\Framework.cpp" />
     <ClCompile Include="Source\Components\CameraCom.cpp" />
-    <ClCompile Include="Source\GameSource\Weapon\Weapon.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\Weapon.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\compute\particle.cpp" />
     <ClCompile Include="Source\Graphics\DebugRenderer\DebugRenderer.cpp" />
@@ -286,15 +284,19 @@
     </FxCompile>
     <FxCompile Include="HLSL\3D\LambertPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\3D\LambertVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\3D\PhongPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\3D\PhongVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\compute\ParticleCS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>

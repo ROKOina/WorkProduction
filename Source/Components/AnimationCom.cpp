@@ -143,7 +143,7 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 	}
 
 	//ŠÔŒo‰ß
-	currentAnimationSeconds_ += elapsedTime;
+	currentAnimationSeconds_ += elapsedTime * animationSpeed_;
 	animationBlendTime_ += elapsedTime;
 
 	//Ä¶ŠÔ‚ªI’[ŠÔ‚ğ’´‚¦‚½‚ç

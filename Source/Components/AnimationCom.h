@@ -58,6 +58,10 @@ public:
     //現在のアニメーションindex取得
     float GetCurrentAnimationIndex()const { return currentAnimationIndex_; }
 
+    //再生速度
+    void SetAnimationSpeed(float speed) { animationSpeed_ = speed; }
+    const float GetAnimationSpeed()const { return animationSpeed_; }
+
     //アニメーション追加
     void ImportFbxAnimation(const char* filename);
 
@@ -82,6 +86,7 @@ private:
     bool animationEndFlag_ = false;
     float animationBlendTime_ = 0.0f;
     float animationBlendSeconds_ = 0.0f;
+    float animationSpeed_ = 1.0f;
 
     bool isLooped_ = false;  //ループしたか
 

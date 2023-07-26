@@ -1,5 +1,7 @@
 #include "AnimatorCom.h"
 
+#include <imgui.h>
+
 #include "AnimationCom.h"
 
 // 開始処理
@@ -16,10 +18,9 @@ void AnimatorCom::Update(float elapsedTime)
     //最初だけ入る
     {
         if (firstTransition_ < 0)return;
-        static bool oneFlag = false;
-        if (!oneFlag)
+        if (!oneFlag_)
         {
-            oneFlag = true;
+            oneFlag_ = true;
             animation->PlayAnimation(firstTransition_, animatorData_[firstTransition_].isLoop);
             return;
         }
@@ -153,7 +154,10 @@ void AnimatorCom::Update(float elapsedTime)
 // GUI描画
 void AnimatorCom::OnGUI()
 {
-
+    //アニメーション速度
+    float animSpeed = GetAnimationSpeed();
+    if (ImGui::DragFloat("animSpeed", &animSpeed, 0.01f))
+        SetAnimationSpeed(animSpeed);
 }
 
 
@@ -288,4 +292,20 @@ void AnimatorCom::SetFloatValue(std::string name, float value)
         floatList->value = value;
         return;
     }
+}
+
+//アニメーション再生速度
+void AnimatorCom::SetAnimationSpeed(float speed)
+{
+    std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
+    if (!animation)return;
+
+    animation->SetAnimationSpeed(speed);
+}
+float AnimatorCom::GetAnimationSpeed()
+{
+    std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
+    if (!animation)return 0;
+
+    return animation->GetAnimationSpeed();
 }

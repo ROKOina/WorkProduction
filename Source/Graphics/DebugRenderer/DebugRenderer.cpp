@@ -125,8 +125,29 @@ void DebugRenderer::Render(ID3D11DeviceContext* context, const DirectX::XMFLOAT4
 	{
 		// ワールドビュープロジェクション行列作成
 		DirectX::XMMATRIX S = DirectX::XMMatrixScaling(cylinder.radius, cylinder.height, cylinder.radius);
-		DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(cylinder.position.x, cylinder.position.y, cylinder.position.z);
-		DirectX::XMMATRIX W = S * T;
+
+		QuaternionStruct q;
+		//向き
+		DirectX::XMVECTOR P1 = DirectX::XMLoadFloat3(&cylinder.position1);
+		DirectX::XMVECTOR P2 = DirectX::XMLoadFloat3(&cylinder.position2);
+		DirectX::XMVECTOR P12 = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(P2, P1));
+		DirectX::XMFLOAT3 dir;
+		DirectX::XMStoreFloat3(&dir, P12);
+		//上
+		DirectX::XMVECTOR Right = { 1,0,0 };
+		if (DirectX::XMVectorGetX(P12) * DirectX::XMVectorGetX(P12) - DirectX::XMVectorGetX(Right) * DirectX::XMVectorGetX(Right) < 0.001)
+		{
+			Right = { 0.9f,0.1f,0 };
+		}
+		DirectX::XMVECTOR Up = DirectX::XMVector3Cross(Right, P12);
+		DirectX::XMFLOAT3 up;
+		DirectX::XMStoreFloat3(&up, Up);		
+		//上方向に伸びるのでupを前に
+		q = q.LookRotation(up, dir);
+		DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&q.dxFloat4));
+
+		DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(cylinder.position1.x, cylinder.position1.y, cylinder.position1.z);
+		DirectX::XMMATRIX W = S * R * T;
 		DirectX::XMMATRIX WVP = W * VP;
 
 		// 定数バッファ更新
@@ -161,10 +182,11 @@ void DebugRenderer::DrawBox(const DirectX::XMFLOAT3& center, DirectX::XMFLOAT3	s
 }
 
 // 円柱描画
-void DebugRenderer::DrawCylinder(const DirectX::XMFLOAT3& position, float radius, float height, const DirectX::XMFLOAT4& color)
+void DebugRenderer::DrawCylinder(const DirectX::XMFLOAT3& position1,const DirectX::XMFLOAT3& position2, float radius, float height, const DirectX::XMFLOAT4& color)
 {
 	Cylinder cylinder;
-	cylinder.position = position;
+	cylinder.position1 = position1;
+	cylinder.position2 = position2;
 	cylinder.radius = radius;
 	cylinder.height = height;
 	cylinder.color = color;

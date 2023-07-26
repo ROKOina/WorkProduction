@@ -6,6 +6,7 @@
 #include "../TransformCom.h"
 #include "../CameraCom.h"
 #include "../ColliderCom.h"
+#include "GameSource\ScriptComponents\Weapon\Weapon.h"
 
 //ゲームオブジェクト
 #pragma region GameObject
@@ -33,11 +34,17 @@ void GameObject::Update(float elapsedTime)
 void GameObject::UpdateTransform()
 {
 	if (!isEnabled_)return;
+
 	//親子の行列更新
-	if (parentObject_.lock())
+	//武器コンポーネントがないか
+	if (!this->GetComponent<WeaponCom>())
 	{
-		DirectX::XMFLOAT4X4 parentTransform = parentObject_.lock()->transform_->GetWorldTransform();
-		transform_->SetParentTransform(parentTransform);
+		//親がいるか
+		if (parentObject_.lock())
+		{
+			DirectX::XMFLOAT4X4 parentTransform = parentObject_.lock()->transform_->GetWorldTransform();
+			transform_->SetParentTransform(parentTransform);
+		}
 	}
 
 	transform_->UpdateTransform();

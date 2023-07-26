@@ -35,6 +35,8 @@ void Collider::ColliderVSOther(std::shared_ptr<Collider> otherSide)
             isJudge = SphereVsSphere(otherSide);
         else if (otherType == COLLIDER_TYPE::BoxCollider)//vsボックス
             isJudge = SphereVsBox(otherSide);
+        else if (otherType == COLLIDER_TYPE::CapsuleCollider)//vsカプセル
+            isJudge = SphereVsCapsule(otherSide);
     }
     //ボックス
     else if(myType == COLLIDER_TYPE::BoxCollider)
@@ -42,8 +44,22 @@ void Collider::ColliderVSOther(std::shared_ptr<Collider> otherSide)
         if (otherType == COLLIDER_TYPE::BoxCollider)//vsボックス
             isJudge = BoxVsBox(otherSide);
         else if (otherType == COLLIDER_TYPE::SphereCollider)//vs球
-            isJudge = SphereVsBox(otherSide);
+            isJudge = SphereVsBox(otherSide);        
+        else if (otherType == COLLIDER_TYPE::CapsuleCollider)//vsカプセル
+            isJudge = BoxVsCapsule(otherSide);
+
     }
+    //カプセル
+    else if (myType == COLLIDER_TYPE::CapsuleCollider)
+    {
+        if (otherType == COLLIDER_TYPE::CapsuleCollider)//vsカプセル
+            isJudge = CapsuleVsCapsule(otherSide);
+        else if (otherType == COLLIDER_TYPE::SphereCollider)//vs球
+            isJudge = SphereVsCapsule(otherSide);
+        else if (otherType == COLLIDER_TYPE::BoxCollider)//vsボックス
+            isJudge = BoxVsCapsule(otherSide);
+    }
+
 
     //当たった時はゲームオブジェクトで保存
     if (isJudge)
@@ -51,19 +67,19 @@ void Collider::ColliderVSOther(std::shared_ptr<Collider> otherSide)
         if (judgeTag_ == otherSide->myTag_) {
             HitObj h;
             h.gameObject = otherSide->GetGameObject();
+            h.colliderDist = colliderSizeDist_;
             hitObj_.emplace_back(h);
-            //hitObj_.emplace_back(otherSide->GetGameObject());
         }
 
         if (otherSide->judgeTag_ == myTag_) {
             HitObj h;
             h.gameObject = GetGameObject();
+            h.colliderDist = colliderSizeDist_;
             otherSide->hitObj_.emplace_back(h);
-            //otherSide->hitObj_.emplace_back(GetGameObject());
         }
     }
-}
 
+}
 
 //球v球
 bool Collider::SphereVsSphere(std::shared_ptr<Collider> otherSide)
@@ -87,7 +103,11 @@ bool Collider::SphereVsSphere(std::shared_ptr<Collider> otherSide)
 
     //判定
     if (dist < radius)
+    {
+        //当たり判定のサイズで当たってない距離を保存        
+        colliderSizeDist_ = radius;
         return true;
+    }
 
     return false;
 }
@@ -124,6 +144,98 @@ bool Collider::BoxVsBox(std::shared_ptr<Collider> otherSide)
     return true;
 }
 
+//カプセルvカプセル
+bool Collider::CapsuleVsCapsule(std::shared_ptr<Collider> otherSide)
+{
+    std::shared_ptr<CapsuleColliderCom> myCapsuleCom = std::static_pointer_cast<CapsuleColliderCom>(shared_from_this());
+    std::shared_ptr<CapsuleColliderCom> otherCapsuleCom = std::static_pointer_cast<CapsuleColliderCom>(otherSide);
+
+    //必要なパラメーター取得
+    CapsuleColliderCom::Capsule myCapsule = myCapsuleCom->GetCupsule();
+    CapsuleColliderCom::Capsule otherCapsule = otherCapsuleCom->GetCupsule();
+    DirectX::XMFLOAT3 myCenterPos = GetGameObject()->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 myP0 = { myCenterPos.x + myCapsule.p0.x,myCenterPos.y + myCapsule.p0.y,myCenterPos.z + myCapsule.p0.z };
+    DirectX::XMFLOAT3 myP1 = { myCenterPos.x + myCapsule.p1.x,myCenterPos.y + myCapsule.p1.y,myCenterPos.z + myCapsule.p1.z };
+    DirectX::XMFLOAT3 otherCenterPos = otherCapsuleCom->GetGameObject()->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 otherP0 = { otherCenterPos.x + otherCapsule.p0.x,otherCenterPos.y + otherCapsule.p0.y,otherCenterPos.z + otherCapsule.p0.z };
+    DirectX::XMFLOAT3 otherP1 = { otherCenterPos.x + otherCapsule.p1.x,otherCenterPos.y + otherCapsule.p1.y,otherCenterPos.z + otherCapsule.p1.z };
+
+    DirectX::XMVECTOR dMy = { myP1.x - myP0.x,myP1.y - myP0.y,myP1.z - myP0.z };
+    DirectX::XMVECTOR dOther = { otherP1.x - otherP0.x,otherP1.y - otherP0.y,otherP1.z - otherP0.z };
+    DirectX::XMVECTOR r = { myP0.x - otherP0.x, myP0.y - otherP0.y, myP0.z - otherP0.z };
+
+    //判定開始
+    float a = DirectX::XMVectorGetX(DirectX::XMVector3Dot(dMy, dMy));
+    float e = DirectX::XMVectorGetX(DirectX::XMVector3Dot(dOther, dOther));
+    float f = DirectX::XMVectorGetX(DirectX::XMVector3Dot(dOther, r));
+
+    float t0 = 0.0f, t1 = 0.0f;
+
+    auto Clamp = [](float val, float min, float max)
+    {
+        if (val < min) return min;
+        if (val > max) return max;
+        return val;
+    };
+
+    if (a <= FLT_EPSILON && e <= FLT_EPSILON)	// 両線分が点に縮退している場合
+    {
+        t0 = t1 = 0.0f;
+    }
+    else if (a <= FLT_EPSILON)					// 片方（My）が点に縮退している場合
+    {
+        t0 = 0.0f;
+        t1 = Clamp(f / e, 0.0f, 1.0f);
+    }
+    else
+    {
+        float c = DirectX::XMVectorGetX(DirectX::XMVector3Dot(dMy, r));
+        if (e <= FLT_EPSILON)					// 片方（Other）が点に縮退している場合
+        {
+            t1 = 0.0f;
+            t0 = Clamp(-c / a, 0.0f, 1.0f);
+        }
+        else									// 両方が線分
+        {
+            float b = DirectX::XMVectorGetX(DirectX::XMVector3Dot(dMy, dOther));
+            float denom = a * e - b * b;
+
+            if (denom != 0.0f)					// 平行確認（平行時は t0 = 0.0f（線分の始端）を仮の初期値として計算をすすめる）
+            {
+                t0 = Clamp((b * f - c * e) / denom, 0.0f, 1.0f);
+            }
+
+            t1 = b * t0 + f;
+
+            if (t1 < 0.0f)						// t1が始端より外側にある場合
+            {
+                t1 = 0.0f;
+                t0 = Clamp(-c / a, 0.0f, 1.0f);
+            }
+            else if (t1 > e)					// t1が終端より外側にある場合
+            {
+                t1 = 1.0f;
+                t0 = Clamp((b - c) / a, 0.0f, 1.0f);
+            }
+            else								// t1が線分上にある場合
+            {
+                t1 /= e;
+            }
+        }
+    }
+
+    // 最近点算出
+    DirectX::XMFLOAT3 p0;
+    DirectX::XMFLOAT3 p1;
+    DirectX::XMStoreFloat3(&p0, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&myP0), DirectX::XMVectorScale(dMy, t0)));
+    DirectX::XMStoreFloat3(&p1, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&otherP0), DirectX::XMVectorScale(dOther, t1)));
+
+    // 交差判定
+    DirectX::XMVECTOR q = { p1.x - p0.x, p1.y - p0.y, p1.z - p0.z };
+
+    return DirectX::XMVectorGetX(DirectX::XMVector3Dot(q, q)) < (myCapsule.radius + otherCapsule.radius) * (myCapsule.radius + otherCapsule.radius);
+}
+
 //球v箱
 bool Collider::SphereVsBox(std::shared_ptr<Collider> otherSide)
 {
@@ -155,7 +267,9 @@ bool Collider::SphereVsBox(std::shared_ptr<Collider> otherSide)
 
     //座標取得
     DirectX::XMFLOAT3 spherePos = sphere->GetGameObject()->transform_->GetWorldPosition();
+    spherePos = { spherePos.x + sphere->offsetPos_.x,spherePos.y + sphere->offsetPos_.y,spherePos.z + sphere->offsetPos_.z };
     DirectX::XMFLOAT3 boxPos = box->GetGameObject()->transform_->GetWorldPosition();
+    boxPos = { boxPos.x + box->offsetPos_.x,boxPos.y + box->offsetPos_.y,boxPos.z + box->offsetPos_.z };
     //ボックスを基準とした座標にする
     DirectX::XMFLOAT3 spherePosFromBox = { spherePos.x - boxPos.x,spherePos.y - boxPos.y,spherePos.z - boxPos.z };
 
@@ -172,6 +286,130 @@ bool Collider::SphereVsBox(std::shared_ptr<Collider> otherSide)
     return false;
 }
 
+//球vカプセル
+bool Collider::SphereVsCapsule(std::shared_ptr<Collider> otherSide)
+{
+    //形状を判定
+    std::shared_ptr<SphereColliderCom> sphere;
+    std::shared_ptr<CapsuleColliderCom> capsule;
+
+    if (colliderType_ == COLLIDER_TYPE::SphereCollider)
+    {
+        sphere = std::static_pointer_cast<SphereColliderCom>(shared_from_this());
+        capsule = std::static_pointer_cast<CapsuleColliderCom>(otherSide);
+    }
+    else
+    {
+        sphere = std::static_pointer_cast<SphereColliderCom>(otherSide);
+        capsule = std::static_pointer_cast<CapsuleColliderCom>(shared_from_this());
+    }
+
+    //必要なパラメーター取得
+    //カプセル
+    CapsuleColliderCom::Capsule Capsule = capsule->GetCupsule();
+    DirectX::XMFLOAT3 centerPos = capsule->GetGameObject()->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 cP0 = { centerPos.x + Capsule.p0.x,centerPos.y + Capsule.p0.y,centerPos.z + Capsule.p0.z };
+    DirectX::XMFLOAT3 cP1 = { centerPos.x + Capsule.p1.x,centerPos.y + Capsule.p1.y,centerPos.z + Capsule.p1.z };
+
+    DirectX::XMVECTOR DCapsule = { cP1.x - cP0.x,cP1.y - cP0.y,cP1.z - cP0.z };
+
+    //球
+    DirectX::XMFLOAT3 sPos = sphere->GetGameObject()->transform_->GetWorldPosition();
+    sPos = { sPos.x + sphere->offsetPos_.x,sPos.y + sphere->offsetPos_.y,sPos.z + sphere->offsetPos_.z };
+    float sRadius = sphere->GetRadius();
+
+    //判定開始
+    float l = sqrtf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(DCapsule, DCapsule)));
+    DCapsule = DirectX::XMVector3Normalize(DCapsule);	// 正規化
+
+    FLOAT t = DirectX::XMVectorGetX(DirectX::XMVector3Dot(DCapsule, { sPos.x - cP0.x, sPos.y - cP0.y, sPos.z - cP0.z }));	// 射影長の算出
+    DirectX::XMVECTOR Q = {};	// 最近点
+    if (t < 0)
+        Q = DirectX::XMLoadFloat3(&cP0);
+    else if (t > l)
+        Q = DirectX::XMLoadFloat3(&cP1);
+    else
+        Q = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&cP0), DirectX::XMVectorScale(DCapsule, t));
+
+    // 交差判定
+    DirectX::XMVECTOR Len = DirectX::XMVectorSubtract(Q, DirectX::XMLoadFloat3(&sPos));
+
+    return DirectX::XMVectorGetX(DirectX::XMVector3Dot(Len, Len)) < (sRadius + Capsule.radius) * (sRadius + Capsule.radius);	// ※２乗同士で高速比較
+}
+
+//箱vカプセル
+bool Collider::BoxVsCapsule(std::shared_ptr<Collider> otherSide)
+{
+    //形状を判定
+    std::shared_ptr<BoxColliderCom> box;
+    std::shared_ptr<CapsuleColliderCom> capsule;
+
+    if (colliderType_ == COLLIDER_TYPE::BoxCollider)
+    {
+        box = std::static_pointer_cast<BoxColliderCom>(shared_from_this());
+        capsule = std::static_pointer_cast<CapsuleColliderCom>(otherSide);
+    }
+    else
+    {
+        box = std::static_pointer_cast<BoxColliderCom>(otherSide);
+        capsule = std::static_pointer_cast<CapsuleColliderCom>(shared_from_this());
+    }
+
+    //必要なパラメーター取得
+    //カプセル
+    CapsuleColliderCom::Capsule Capsule = capsule->GetCupsule();
+    DirectX::XMFLOAT3 centerPos = capsule->GetGameObject()->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 cP0 = { centerPos.x + Capsule.p0.x,centerPos.y + Capsule.p0.y,centerPos.z + Capsule.p0.z };
+    DirectX::XMFLOAT3 cP1 = { centerPos.x + Capsule.p1.x,centerPos.y + Capsule.p1.y,centerPos.z + Capsule.p1.z };
+
+    DirectX::XMVECTOR DCapsule = { cP1.x - cP0.x,cP1.y - cP0.y,cP1.z - cP0.z };
+
+    //ボックス
+    DirectX::XMFLOAT3 bPos = box->GetGameObject()->transform_->GetWorldPosition();
+    bPos = { bPos.x + box->offsetPos_.x,bPos.y + box->offsetPos_.y,bPos.z + box->offsetPos_.z };
+    DirectX::XMFLOAT3 bSize = box->GetSize();
+
+    //判定開始
+    float l = sqrtf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(DCapsule, DCapsule)));
+    DCapsule = DirectX::XMVector3Normalize(DCapsule);	// 正規化
+
+    FLOAT t = DirectX::XMVectorGetX(DirectX::XMVector3Dot(DCapsule, { bPos.x - cP0.x, bPos.y - cP0.y, bPos.z - cP0.z }));	// 射影長の算出
+    DirectX::XMVECTOR Q = {};	// 最近点
+    if (t < 0)
+        Q = DirectX::XMLoadFloat3(&cP0);
+    else if (t > l)
+        Q = DirectX::XMLoadFloat3(&cP1);
+    else
+        Q = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&cP0), DirectX::XMVectorScale(DCapsule, t));
+
+    // 交差判定
+    DirectX::XMVECTOR Len = DirectX::XMVectorSubtract(Q, DirectX::XMLoadFloat3(&bPos));
+    DirectX::XMFLOAT3 len;
+    DirectX::XMStoreFloat3(&len, Len);
+
+    //ボックスと点の最短距離を取得
+    auto PointToBoxLengthSq = [](float boxSize, float point)
+    {
+        float SqLen = 0;   // 長さのべき乗の値を格納
+        if (point < -boxSize)
+            SqLen += (point + boxSize) * (point + boxSize);
+        if (point > boxSize)
+            SqLen += (point - boxSize) * (point - boxSize);
+        return SqLen;
+    };
+
+    //球の中心点とボックスの最短距離
+    float nearLengthSq = 0;
+    nearLengthSq += PointToBoxLengthSq(bSize.x, len.x);
+    nearLengthSq += PointToBoxLengthSq(bSize.y, len.y);
+    nearLengthSq += PointToBoxLengthSq(bSize.z, len.z);
+
+    //最短点が球の半径以下なら当たっている
+    if (nearLengthSq < Capsule.radius * Capsule.radius)
+        return true;
+
+    return false;
+}
 
 #pragma endregion
 
@@ -217,6 +455,37 @@ void BoxColliderCom::DebugRender()
     DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
     pos = { pos.x + offsetPos_.x,pos.y + offsetPos_.y,pos.z + offsetPos_.z };
     Graphics::Instance().GetDebugRenderer()->DrawBox(pos, size_, { 1,0,0,1 });
+}
+
+#pragma endregion
+
+//カプセル
+#pragma region CapsuleCollider
+
+// GUI描画
+void CapsuleColliderCom::OnGUI()
+{
+    ImGui::Checkbox("enabled", &isEnabled_);
+    ImGui::DragFloat3("p0", &capsule_.p0.x, 0.1f);
+    ImGui::DragFloat3("p1", &capsule_.p1.x, 0.1f);
+    ImGui::DragFloat("radius", &capsule_.radius, 0.01f);
+}
+
+// debug描画
+void CapsuleColliderCom::DebugRender()
+{
+    //p0
+    DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 pos0 = { capsule_.p0.x + pos.x,capsule_.p0.y + pos.y,capsule_.p0.z + pos.z };
+    Graphics::Instance().GetDebugRenderer()->DrawSphere(pos0, capsule_.radius, { 1,0,0,1 });
+    //p1
+    DirectX::XMFLOAT3 pos1 = { capsule_.p1.x + pos.x,capsule_.p1.y + pos.y,capsule_.p1.z + pos.z };
+    Graphics::Instance().GetDebugRenderer()->DrawSphere(pos1, capsule_.radius, { 1,0,0,1 });
+    //円柱部分
+    DirectX::XMVECTOR P0 = DirectX::XMLoadFloat3(&pos0);
+    DirectX::XMVECTOR P1 = DirectX::XMLoadFloat3(&pos1);
+    float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(P0, P1)));
+    Graphics::Instance().GetDebugRenderer()->DrawCylinder(pos0, pos1, capsule_.radius, length, { 1,0,0,1 });
 }
 
 #pragma endregion

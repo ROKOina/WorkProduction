@@ -94,6 +94,9 @@ public:
     void SetFloatValue(std::string name, float value);
 
 
+    //アニメーション再生速度
+    void SetAnimationSpeed(float speed);
+    float GetAnimationSpeed();
 
     void SetLoopAnimation(int index, bool loop) { animatorData_[index].isLoop = loop; }
 
@@ -111,4 +114,5 @@ private:
 
     //最初のアニメーションを絶対に指定する
     int firstTransition_ = -1;
+    bool oneFlag_ = false;
 };

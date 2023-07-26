@@ -100,5 +100,5 @@ private:
     float friction_ = 0.8f;  //–€ŽC
 
     float moveMaxSpeed_ = 10.0f;
-    float moveAcceleration_ = 0.2f;
+    float moveAcceleration_ = 1.0f;
 };

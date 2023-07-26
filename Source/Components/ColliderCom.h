@@ -9,7 +9,8 @@ enum COLLIDER_TAG : uint64_t
     NONE            = 1 << 0,
 
     Player          = 1 << 1,
-    JustAvoid       = 1 << 2,
+    PlayerAttack    = 1 << 2,
+    JustAvoid       = 1 << 3,
 
     Enemy           = 1 << 10,
     EnemyAttack     = 1 << 11,
@@ -41,6 +42,7 @@ static bool operator!= (COLLIDER_TAG L, COLLIDER_TAG R)
 enum class COLLIDER_TYPE {
     SphereCollider,
     BoxCollider,
+    CapsuleCollider,
 };
 static bool operator== (int L, COLLIDER_TYPE R)
 {
@@ -51,7 +53,7 @@ static bool operator== (int L, COLLIDER_TYPE R)
 //当たった時用の構造体
 struct HitObj {
     std::shared_ptr<GameObject> gameObject;
-    float dist; //ポジションからの距離
+    float colliderDist; //当たり判定のサイズで当たってない距離
 };
 
 //継承して一つの配列に落とし込む
@@ -107,9 +109,15 @@ private:
     bool SphereVsSphere(std::shared_ptr<Collider> otherSide);
     //箱v箱
     bool BoxVsBox(std::shared_ptr<Collider> otherSide);
+    //カプセルvカプセル
+    bool CapsuleVsCapsule(std::shared_ptr<Collider> otherSide);
 
     //球v箱
     bool SphereVsBox(std::shared_ptr<Collider> otherSide);
+    //球vカプセル
+    bool SphereVsCapsule(std::shared_ptr<Collider> otherSide);
+    //箱vカプセル
+    bool BoxVsCapsule(std::shared_ptr<Collider> otherSide);
 
 private:
     //当たり判定タグ
@@ -119,6 +127,7 @@ private:
     //今のフレームで当たっているものを保存
     std::vector<HitObj> hitObj_;
 
+    float colliderSizeDist_; //当たり判定のサイズで当たってない距離を保存
 
 protected:
     //形を保存
@@ -191,4 +200,46 @@ public:
 
 private:
     DirectX::XMFLOAT3 size_ = { 0.5f,0.5f,0.5f };
+};
+
+class CapsuleColliderCom : public Collider
+{
+    //コンポーネントオーバーライド
+public:
+    CapsuleColliderCom() { colliderType_ = static_cast<int>(COLLIDER_TYPE::CapsuleCollider); }
+    ~CapsuleColliderCom() {}
+
+    // 名前取得
+    const char* GetName() const override { return "CapsuleCollider"; }
+
+    // 開始処理
+    void Start() override {}
+
+    // 更新処理
+    void Update(float elapsedTime) override {}
+
+    // GUI描画
+    void OnGUI() override;
+
+    // debug描画
+    void DebugRender() override;
+
+    //CapsuleColliderクラス
+public:
+    // カプセルの定義
+    struct Capsule
+    {
+        DirectX::XMFLOAT3	p0 = { 0,0,0 };	// 円柱の中心線の始端
+        DirectX::XMFLOAT3	p1 = { 0,0,0 };	// 円柱の中心線の終端
+        float				radius = 0.5f;	// 半径
+    };
+
+    void SetPosition1(DirectX::XMFLOAT3 pos) { capsule_.p0 = pos; }
+    void SetPosition2(DirectX::XMFLOAT3 pos) { capsule_.p1 = pos; }
+    void SetRadius(float radius) { capsule_.radius = radius; }
+
+    const Capsule& GetCupsule()const { return capsule_; }
+
+private:
+    Capsule capsule_;
 };

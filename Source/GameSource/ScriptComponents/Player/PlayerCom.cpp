@@ -9,6 +9,8 @@
 #include "Components\ColliderCom.h"
 #include "Components\MovementCom.h"
 
+#include "../Enemy/EnemyCom.h"
+
 //アニメーションリスト
 enum AnimationPlayer
 {
@@ -22,6 +24,12 @@ enum AnimationPlayer
     RUN_SOFT_1,
     RUN_SOFT_2,
     WALK_RUNRUN_2,
+    PUNCH,
+    BIGSWORD_UP,
+    BIGSWORD_LEFT,
+    BIGSWORD_RIGHT,
+    BIGSWORD_DOWN,
+
 };
 //struct AnimPlayerTransition
 //{
@@ -46,7 +54,10 @@ void PlayerCom::Start()
     wp.y += 6;
     cameraObj->transform_->SetLocalPosition(wp);
 
-    //パラメーター初期化
+    //当たり大きさ
+    GetGameObject()->GetComponent<CapsuleColliderCom>()->SetRadius(0.17f);
+
+    //移動パラメーター初期化
     moveParam_[MOVE_PARAM::WALK].moveMaxSpeed = 5.0f;
     moveParam_[MOVE_PARAM::WALK].moveAcceleration = 1.2f;
     moveParam_[MOVE_PARAM::WALK].turnSpeed = 4.0f;
@@ -54,6 +65,10 @@ void PlayerCom::Start()
     moveParam_[MOVE_PARAM::RUN].moveMaxSpeed = 8.0f;
     moveParam_[MOVE_PARAM::RUN].moveAcceleration = 1.2f;
     moveParam_[MOVE_PARAM::RUN].turnSpeed = 8.0f;
+
+    moveParam_[MOVE_PARAM::JUSTDASH].moveMaxSpeed = 3.0f;
+    moveParam_[MOVE_PARAM::JUSTDASH].moveAcceleration = 1.0f;
+    moveParam_[MOVE_PARAM::JUSTDASH].turnSpeed = 4.0f;
 
     moveParam_[MOVE_PARAM::DASH].moveMaxSpeed = 20.0f;
     moveParam_[MOVE_PARAM::DASH].moveAcceleration = 1.0f;
@@ -64,45 +79,9 @@ void PlayerCom::Start()
     move->SetMoveAcceleration(moveParam_[MOVE_PARAM::WALK].moveAcceleration);
     move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);
 
-    //{   //仮アニメーション
-    //    std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
-    //    anim->ImportFbxAnimation("Data/Model/pico/attack3Combo.fbx");
-    //    anim->PlayAnimation(3, true);
-    //}
+    //アニメーション初期化
+    AnimationInitialize();
 
-    //アニメーター
-    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-    //初期のアニメーション
-    animator->SetFirstTransition(AnimationPlayer::IDEL_2);
-    animator->SetLoopAnimation(AnimationPlayer::IDEL_2, true);
-
-    //アニメーションパラメーター追加
-    animator->AddTriggerParameter("jump");
-    animator->AddFloatParameter("moveSpeed");
-
-    //アニメーション遷移とパラメーター設定をする決める
-    {
-        animator->AddAnimatorTransition(IDEL_2, WALK_RUNRUN_2);
-        animator->SetFloatTransition(IDEL_2, WALK_RUNRUN_2,
-            "moveSpeed", 0.1f, ParameterJudge::GREATER);
-        animator->AddAnimatorTransition(WALK_RUNRUN_2, IDEL_2);
-        animator->SetFloatTransition(WALK_RUNRUN_2, IDEL_2,
-            "moveSpeed", 0.1f, ParameterJudge::LESS);
-        animator->SetLoopAnimation(WALK_RUNRUN_2, true);
-
-        animator->AddAnimatorTransition(WALK_RUNRUN_2, RUN_HARD_2);
-        animator->SetFloatTransition(WALK_RUNRUN_2, RUN_HARD_2,
-            "moveSpeed", moveParam_[MOVE_PARAM::WALK].moveMaxSpeed +1, ParameterJudge::GREATER);
-        animator->AddAnimatorTransition(RUN_HARD_2, WALK_RUNRUN_2);
-        animator->SetFloatTransition(RUN_HARD_2, WALK_RUNRUN_2,
-            "moveSpeed", moveParam_[MOVE_PARAM::WALK].moveMaxSpeed +1, ParameterJudge::LESS);
-        animator->SetLoopAnimation(RUN_HARD_2, true);
-
-        //どこからでも遷移する
-        animator->AddAnimatorTransition(JUMP_2);
-        animator->SetTriggerTransition(JUMP_2, "jump");
-        animator->AddAnimatorTransition(JUMP_2, IDEL_2, true);
-    }
 }
 
 static bool aaa = true;
@@ -147,15 +126,19 @@ void PlayerCom::Update(float elapsedTime)
             //移動処理
             //回転
             Trun(elapsedTime);
-            //縦方向移動
-            VerticalMove();
-            //横方向移動
-            HorizonMove();
+
+            //ジャスト回避中は通らない
+            if (!isJustJudge_)
+            {
+                //縦方向移動
+                VerticalMove();
+                //横方向移動
+                HorizonMove();
+            }
         }
 
         //ダッシュ処理
         DashMove(elapsedTime);
-
 
         //移動アニメ
         DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
@@ -165,7 +148,34 @@ void PlayerCom::Update(float elapsedTime)
         animator->SetFloatValue("moveSpeed", length);
     }
 
-    //当たり判定
+    //ジャスト回避
+    {
+        //更新
+        JustAvoidanceAttackUpdate(elapsedTime);
+    }
+
+    //攻撃
+    {
+        //攻撃更新
+        AttackUpdate();
+        //当たり判定
+        AttackJudgeCollision();
+    }
+
+    //カプセル当たり判定設定
+    {
+        std::shared_ptr<CapsuleColliderCom> capsule = GetGameObject()->GetComponent<CapsuleColliderCom>();
+        //足元から頭までカプセルを設定
+        capsule->SetPosition1({ 0,0,0 });
+        Model::Node* headNode = GetGameObject()->GetComponent<RendererCom>()->GetModel()->FindNode("Head");
+        DirectX::XMMATRIX PWorld = DirectX::XMLoadFloat4x4(&headNode->parent->worldTransform);
+        DirectX::XMFLOAT3 pos;
+        DirectX::XMStoreFloat3(&pos, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&headNode->translate), PWorld));
+        DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetWorldPosition();
+        capsule->SetPosition2({ pos.x - playerPos.x,pos.y - playerPos.y,pos.z - playerPos.z });
+    }
+
+    //自分との当たり判定
     std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
     for (auto& hitObj : hitGameObj)
     {
@@ -183,40 +193,31 @@ void PlayerCom::Update(float elapsedTime)
             DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetWorldPosition();
             DirectX::XMFLOAT3 hitPos = hitObj.gameObject->transform_->GetWorldPosition();
 
-            DirectX::XMVECTOR PlayerPos = { playerPos.x,playerPos.y,playerPos.z };
-            DirectX::XMVECTOR HitPos = { hitPos.x, hitPos.y, hitPos.z };
+            DirectX::XMVECTOR PlayerPos = { playerPos.x,0,playerPos.z };
+            DirectX::XMVECTOR HitPos = { hitPos.x,0, hitPos.z };
+
+            //std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+
+            //DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
+            //float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
 
             DirectX::XMVECTOR ForceNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(HitPos, PlayerPos));
-            DirectX::XMVectorSetY(ForceNormal, 0);
-            ForceNormal = DirectX::XMVectorScale(ForceNormal, 0.01f);
-            DirectX::XMFLOAT3 force;
-            DirectX::XMStoreFloat3(&force, ForceNormal);
-            hitObj.gameObject->transform_->SetWorldPosition(
-                { hitPos.x + force.x,0,hitPos.z + force.z });
+            //ForceNormal = DirectX::XMVectorScale(ForceNormal, length);
+            ForceNormal = DirectX::XMVectorScale(ForceNormal, 5);
+
+            DirectX::XMFLOAT3 power;
+            DirectX::XMStoreFloat3(&power, ForceNormal);
+
+            hitObj.gameObject->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
+
+            //ForceNormal = DirectX::XMVectorScale(ForceNormal, 0.01f);
+            //DirectX::XMFLOAT3 force;
+            //DirectX::XMStoreFloat3(&force, ForceNormal);
+            //hitObj.gameObject->transform_->SetWorldPosition(
+            //    { hitPos.x + force.x,0,hitPos.z + force.z });
         }
-
-        ////ジャスト回避
-        //if (COLLIDER_TAG::JustAvoid == hitObj.gameObject->GetComponent<Collider>()->GetMyTag())
-        //{
-        //    GamePad& gamePad = Input::Instance().GetGamePad();
-        //    if (gamePad.GetButtonDown() & GamePad::BTN_LSHIFT)
-        //    {
-        //        //速力をリセットする
-        //        std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
-        //        move->ZeroVelocity();
-
-        //        std::shared_ptr<GameObject> enemy = hitObj.gameObject->GetParent();
-
-        //        DirectX::XMFLOAT3 pos = enemy->transform_->GetWorldPosition();
-        //        DirectX::XMFLOAT3 front = enemy->transform_->GetWorldFront();
-        //        float dist = 2;
-        //        pos = { pos.x - front.x * dist,0,pos.z - front.z * dist };
-
-        //        GetGameObject()->transform_->SetWorldPosition(pos);
-        //    }
-        //}
-
     }
+
 }
 
 int oo = 0;
@@ -230,16 +231,13 @@ void PlayerCom::OnGUI()
     ImGui::DragFloat("moveSpeed", &moveParam_[oo].moveSpeed, 0.1f);
     ImGui::DragFloat("moveAcceleration", &moveParam_[oo].moveAcceleration, 0.1f);
 
-    ImGui::DragFloat("justSpeed", &justSpeed_);
-    ImGui::DragFloat("justSpeedTime", &justSpeedTime_);
-
     ImGui::InputInt("state", &dashState_);
 
     ImGui::DragFloat("jumpSpeed", &jumpSpeed_, 0.1f);
 
     ImGui::DragFloat3("up", &up_.x);
 
-    ImGui::Checkbox("dash", &isDash_);
+    ImGui::Checkbox("dash", &isDashJudge_);
     ImGui::Checkbox("aaa", &aaa);
 
     //入力情報を取得
@@ -250,10 +248,16 @@ void PlayerCom::OnGUI()
     ImGui::DragFloat("y", &ay);
 }
 
+//ダメージ
+void PlayerCom::OnDamage(DirectX::XMFLOAT3& power)
+{
+    isDamage_ = true;
+
+    GetGameObject()->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
+}
 
 
-
-////    移動系処理       ////
+#pragma region 移動系処理
 
 //スティック入力値から移動ベクトルを取得
 DirectX::XMFLOAT3 PlayerCom::GetMoveVec()
@@ -315,7 +319,7 @@ bool PlayerCom::IsMove(float elapsedTime)
 
     //ジャンプ
     GamePad& gamePad = Input::Instance().GetGamePad();
-    if (gamePad.GetButtonDown() & GamePad::BTN_SPACE)
+    if (gamePad.GetButtonDown() & GamePad::BTN_B)
     {
         //アニメーター
         std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
@@ -325,7 +329,7 @@ bool PlayerCom::IsMove(float elapsedTime)
 
     //進行ベクトルがゼロベクトルでない場合は入力された
     if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.y * inputMoveVec_.y + inputMoveVec_.z * inputMoveVec_.z <= 0.1f) {
-        if (!isDash_)
+        if (!isDashJudge_)
         {
             //入力が終わると歩きに
             moveParamType_ = MOVE_PARAM::WALK;
@@ -378,20 +382,32 @@ void PlayerCom::HorizonMove()
 //ダッシュ
 void PlayerCom::DashMove(float elapsedTime)
 {
-    std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();    
-    //当たり判定
+    //ジャスト回避の当たり判定
     std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
-
+    //ジャスト回避したエネミーを保存
     std::shared_ptr<GameObject> enemy;
-    bool isJust = false;
     for (auto& hitObj : hitGameObj)
     {
-        //ジャスト回避した敵を保存＆ジャスト回避フラグをオン
-        if (COLLIDER_TAG::JustAvoid == hitObj.gameObject->GetComponent<Collider>()->GetMyTag())
-        {
-            isJust = true;
+        if (COLLIDER_TAG::JustAvoid != hitObj.gameObject->GetComponent<Collider>()->GetMyTag())continue;
+
+        if (!enemy) {
             enemy = hitObj.gameObject->GetParent();
+            continue;
         }
+        //一番近い敵を保存
+        DirectX::XMFLOAT3 pPos = GetGameObject()->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 ePos = hitObj.gameObject->GetParent()->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 eOldPos = enemy->transform_->GetWorldPosition();
+
+        DirectX::XMVECTOR PPos = DirectX::XMLoadFloat3(&pPos);
+        DirectX::XMVECTOR EPos = DirectX::XMLoadFloat3(&ePos);
+        DirectX::XMVECTOR EOldPos = DirectX::XMLoadFloat3(&eOldPos);
+
+        float currentLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(PPos, EPos)));
+        float oldLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(PPos, EOldPos)));
+
+        if (currentLength < oldLength)
+            enemy = hitObj.gameObject->GetParent();
     }
 
     //ダッシュ
@@ -402,10 +418,23 @@ void PlayerCom::DashMove(float elapsedTime)
             dashState_ = 0;
         else
             dashState_ = 10;
-        isDash_ = true;
+        isDashJudge_ = true;         //ダッシュフラグON
+
+        //ジャスト回避初期化
+        JustInisialize();
     }
 
-    if (dashState_ < 0)return;
+    //ダッシュ時の更新
+    DashStateUpdate(elapsedTime, enemy);
+
+}
+
+//ダッシュ時の更新
+void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> enemy)
+{
+    if (!isDashJudge_)return;
+
+    std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
 
     DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
     float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
@@ -413,7 +442,7 @@ void PlayerCom::DashMove(float elapsedTime)
     //ダッシュ更新
     switch (dashState_)
     {
-            //入力方向ダッシュ
+        //入力方向ダッシュ
         case 0:
         {
             //角度を変える
@@ -425,12 +454,25 @@ void PlayerCom::DashMove(float elapsedTime)
             moveParamType_ = MOVE_PARAM::DASH;
             move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
             move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
+            dashStopTimer_ = dashStopTime_;
             dashState_++;
             break;
         }
         case 1:
+            //ジャスト回避判定
+            if (enemy)
+            {
+                isJustJudge_ = true;
+                justAvoidState_ = 0;
+                dashState_ = -1;
+                isDashJudge_ = false;
+                justHitEnemy_ = enemy;
+                break;
+            }
+
             //最大速度に達したら次のステート
-            if (length > dashMaxSpeed_)
+            dashStopTimer_ -= elapsedTime;
+            if (length > dashMaxSpeed_ || dashStopTimer_ < 0)
                 dashState_++;
             break;
         case 2:
@@ -445,26 +487,38 @@ void PlayerCom::DashMove(float elapsedTime)
             break;
         }
         case 3:
-            //走りに変更
+            //走りに変更(ダッシュ終了)
             moveParamType_ = MOVE_PARAM::RUN;
             move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::RUN].moveMaxSpeed);
             move->SetMoveAcceleration(moveParam_[MOVE_PARAM::RUN].moveAcceleration);
             dashState_ = -1;
-            isDash_ = false;
+            isDashJudge_ = false;
             break;
+
 
             //後ろ向きダッシュ
         case 10:
             //ダッシュに変更
             move->ZeroVelocity();
             moveParamType_ = MOVE_PARAM::DASH;
-            move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed*2);
+            move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed * 2);
             move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
             dashStopTimer_ = dashStopTime_;
             dashState_++;
             break;
         case 11:
         {
+            //ジャスト回避判定
+            if (enemy)
+            {
+                isJustJudge_ = true;
+                justAvoidState_ = 0;
+                dashState_ = -1;
+                isDashJudge_ = false;
+                justHitEnemy_ = enemy;
+                break;
+            }
+
             DirectX::XMFLOAT3 front = GetGameObject()->transform_->GetWorldFront();
             DirectX::XMFLOAT3 back = { -front.x,0,-front.z };
             DirectX::XMStoreFloat3(&back, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&back), moveParam_[moveParamType_].moveSpeed));
@@ -475,12 +529,12 @@ void PlayerCom::DashMove(float elapsedTime)
 
             //最大速度に達したら次のステート
             dashStopTimer_ -= elapsedTime;
-            if (length > dashMaxSpeed_*0.5f || dashStopTimer_ < 0)
+            if (length > dashMaxSpeed_ * 0.5f || dashStopTimer_ < 0)
                 dashState_++;
             break;
         }
         case 12:
-        {           
+        {
             move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
 
             DirectX::XMFLOAT3 front = GetGameObject()->transform_->GetWorldFront();
@@ -497,17 +551,276 @@ void PlayerCom::DashMove(float elapsedTime)
                 dashState_ = 0;
 
             if (moveParam_[MOVE_PARAM::RUN].moveMaxSpeed >= length)
-                dashState_=3;
+                dashState_ = 3;
             break;
         }
     };
 
-    if (length < 0.1f&&dashState_<10)
+    //速力がなくなるかつ、ダッシュステートが10以下の場合（後ろダッシュ時は速力は0なので）
+    //ダッシュ終了
+    if (length < 0.1f && dashState_ < 10)
     {
-        isDash_ = false;
+        isDashJudge_ = false;
         dashState_ = -1;
     }
+}
+
+#pragma endregion
+
+
+
+#pragma region ジャスト回避
+
+//ジャスト回避初期化
+void PlayerCom::JustInisialize()
+{
+    justAvoidState_ = -1;
+    isJustJudge_ = false;
+}
+
+//ジャスト回避反撃更新処理
+void PlayerCom::JustAvoidanceAttackUpdate(float elapsedTime)
+{
+    //ジャスト回避判定時
+    if (isJustJudge_)
+    {
+        //ジャスト回避移動処理
+        JustAvoidanceMove(elapsedTime);
+
+        //ジャスト回避後反撃入力確認
+        JustAvoidanceAttackInput();
+    }
+
+    //反撃処理更新
 
 }
 
-/////////////////////////////////////////
+//ジャスト回避移動処理
+void PlayerCom::JustAvoidanceMove(float elapsedTime)
+{
+    std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+
+    switch (justAvoidState_)
+    {
+    case 0:
+        //ジャスト回避に変更
+        moveParamType_ = MOVE_PARAM::JUSTDASH;
+        move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::JUSTDASH].moveMaxSpeed);
+        move->SetMoveAcceleration(moveParam_[MOVE_PARAM::JUSTDASH].moveAcceleration);
+        justAvoidTimer_ = justAvoidTime_;
+        justAvoidState_++;
+        break;
+    case 1:
+    {
+        //ジャスト回避終了タイマー
+        justAvoidTimer_ -= elapsedTime;
+        if (justAvoidTimer_ < 0)
+        {
+            JustInisialize();
+            moveParamType_ = MOVE_PARAM::RUN;
+            move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::RUN].moveMaxSpeed);
+            move->SetMoveAcceleration(moveParam_[MOVE_PARAM::RUN].moveAcceleration);
+            break;
+        }
+
+        //移動方向を決める（ジャスト回避中は勝手に移動する）
+        DirectX::XMFLOAT3 Direction;
+        if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
+        {
+            Direction = { inputMoveVec_.x ,0,inputMoveVec_.z };
+        }
+        else
+        {
+            Direction = GetGameObject()->transform_->GetWorldFront();
+            //yを消して逆向きにする
+            Direction.x *= -1;
+            Direction.y = 0;
+            Direction.z *= -1;
+            //正規化
+            DirectX::XMStoreFloat3(&Direction, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&Direction)));
+        }
+        Direction.x *= moveParam_[MOVE_PARAM::JUSTDASH].moveSpeed;
+        Direction.z *= moveParam_[MOVE_PARAM::JUSTDASH].moveSpeed;
+        //力に加える
+        move->AddForce(Direction);
+
+        break;
+    }
+    }
+}
+
+//ジャスト回避反撃入力確認
+void PlayerCom::JustAvoidanceAttackInput()
+{
+    std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+
+    //ボタンで反撃変える
+    GamePad& gamePad = Input::Instance().GetGamePad();
+
+    //□の場合
+    if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+    {
+        JustInisialize();
+        moveParamType_ = MOVE_PARAM::RUN;
+        move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::RUN].moveMaxSpeed);
+        move->SetMoveAcceleration(moveParam_[MOVE_PARAM::RUN].moveAcceleration);
+
+        ////アニメーター
+        //std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+        //animator->SetTriggerOn("bigSwordUp");
+
+        justAvoidKey_ = JUST_AVOID_KEY::SQUARE;
+    }
+}
+
+#pragma endregion
+
+
+
+#pragma region 攻撃
+
+//攻撃更新
+void PlayerCom::AttackUpdate()
+{
+    //ジャスト回避は別の攻撃に移る
+    if (isJustJudge_)return;
+
+    GamePad& gamePad = Input::Instance().GetGamePad();
+    if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+    {
+        //アニメーター
+        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+        animator->SetTriggerOn("bigSwordLeft");
+    }
+}
+
+//攻撃当たり判定
+void PlayerCom::AttackJudgeCollision()
+{
+    //子供の攻撃オブジェクトの当たり
+    DirectX::XMFLOAT3 attackPos;
+    std::shared_ptr<GameObject> attackChild = GetGameObject()->GetChildFind("picoAttack");
+    //AnimationEvent取得して当たり判定をセット
+    if (GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationEvent("attackPunch", attackPos)) {
+        attackChild->GetComponent<Collider>()->SetEnabled(true);
+        attackChild->transform_->SetWorldPosition(attackPos);
+    }
+    else
+    {
+        attackChild->GetComponent<Collider>()->SetEnabled(false);
+    }
+
+    //子供の攻撃オブジェクトの当たり判定
+    std::vector<HitObj> hitAttack = attackChild->GetComponent<Collider>()->OnHitGameObject();
+    for (auto& hitObj : hitAttack)
+    {
+        //敵に攻撃があたったら
+        if (COLLIDER_TAG::Enemy == hitObj.gameObject->GetComponent<Collider>()->GetMyTag())
+        {
+            std::shared_ptr<EnemyCom> enemy = hitObj.gameObject->GetComponent<EnemyCom>();
+
+            //無敵中は攻撃できない
+            if (enemy->GetIsInvincible())continue;
+
+            DirectX::XMFLOAT3 powerForce = { 0,0,0 };
+            float power = 30;
+
+            //プレイヤーからエネミーの方向に飛ばす
+            ////プレイヤーポジション
+            //DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetWorldPosition();
+            ////エネミーポジション
+            //DirectX::XMFLOAT3 enemyPos = hitObj.gameObject->transform_->GetWorldPosition();
+
+            ////押し出す力を作る
+            //powerForce = { enemyPos.x - playerPos.x,0,enemyPos.z - playerPos.z };
+            ////正規化するために長さを求める
+            //float length = sqrtf(powerForce.x * powerForce.x + powerForce.z * powerForce.z);
+            //powerForce.x = powerForce.x / length * power;
+            //powerForce.z = powerForce.z / length * power;
+
+            //プレイヤーの前方向に飛ばす
+            DirectX::XMFLOAT3 playerForward = GetGameObject()->transform_->GetWorldFront();
+            powerForce.x = playerForward.x * power;
+            powerForce.z = playerForward.z * power;
+
+
+            enemy->OnDamage(powerForce);
+        }
+    }
+}
+
+#pragma endregion
+
+
+
+//アニメーション初期化設定
+void PlayerCom::AnimationInitialize()
+{
+    //アニメーター
+    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+    //初期のアニメーション
+    animator->SetFirstTransition(AnimationPlayer::IDEL_2);
+    animator->SetLoopAnimation(AnimationPlayer::IDEL_2, true);
+
+    //アニメーションパラメーター追加
+    animator->AddTriggerParameter("jump");
+    animator->AddTriggerParameter("punch");
+    animator->AddTriggerParameter("bigSwordUp");
+    animator->AddTriggerParameter("bigSwordDown");
+    animator->AddTriggerParameter("bigSwordRight");
+    animator->AddTriggerParameter("bigSwordLeft");
+    animator->AddFloatParameter("moveSpeed");
+
+    //アニメーション遷移とパラメーター設定をする決める
+    {
+        //idle
+        animator->AddAnimatorTransition(IDEL_2, WALK_RUNRUN_2);
+        animator->SetFloatTransition(IDEL_2, WALK_RUNRUN_2,
+            "moveSpeed", 0.1f, ParameterJudge::GREATER);
+
+        //walk
+        animator->AddAnimatorTransition(WALK_RUNRUN_2, IDEL_2);
+        animator->SetFloatTransition(WALK_RUNRUN_2, IDEL_2,
+            "moveSpeed", 0.1f, ParameterJudge::LESS);
+        animator->SetLoopAnimation(WALK_RUNRUN_2, true);
+
+        animator->AddAnimatorTransition(WALK_RUNRUN_2, RUN_HARD_2);
+        animator->SetFloatTransition(WALK_RUNRUN_2, RUN_HARD_2,
+            "moveSpeed", moveParam_[MOVE_PARAM::WALK].moveMaxSpeed + 1, ParameterJudge::GREATER);
+
+        //run
+        animator->AddAnimatorTransition(RUN_HARD_2, WALK_RUNRUN_2);
+        animator->SetFloatTransition(RUN_HARD_2, WALK_RUNRUN_2,
+            "moveSpeed", moveParam_[MOVE_PARAM::WALK].moveMaxSpeed + 1, ParameterJudge::LESS);
+        animator->SetLoopAnimation(RUN_HARD_2, true);
+
+        //どこからでも遷移する
+        //jump
+        animator->AddAnimatorTransition(JUMP_2);
+        animator->SetTriggerTransition(JUMP_2, "jump");
+        animator->AddAnimatorTransition(JUMP_2, IDEL_2, true);
+
+        //punch
+        animator->AddAnimatorTransition(PUNCH);
+        animator->SetTriggerTransition(PUNCH, "punch");
+        animator->AddAnimatorTransition(PUNCH, IDEL_2, true);
+
+        //bigSword
+        //up
+        animator->AddAnimatorTransition(BIGSWORD_UP);
+        animator->SetTriggerTransition(BIGSWORD_UP, "bigSwordUp");
+        animator->AddAnimatorTransition(BIGSWORD_UP, IDEL_2, true);
+        //down
+        animator->AddAnimatorTransition(BIGSWORD_DOWN);
+        animator->SetTriggerTransition(BIGSWORD_DOWN, "bigSwordDown");
+        animator->AddAnimatorTransition(BIGSWORD_DOWN, IDEL_2, true);
+        //right
+        animator->AddAnimatorTransition(BIGSWORD_RIGHT);
+        animator->SetTriggerTransition(BIGSWORD_RIGHT, "bigSwordRight");
+        animator->AddAnimatorTransition(BIGSWORD_RIGHT, IDEL_2, true);
+        //left
+        animator->AddAnimatorTransition(BIGSWORD_LEFT);
+        animator->SetTriggerTransition(BIGSWORD_LEFT, "bigSwordLeft");
+        animator->AddAnimatorTransition(BIGSWORD_LEFT, IDEL_2, true);
+    }
+}

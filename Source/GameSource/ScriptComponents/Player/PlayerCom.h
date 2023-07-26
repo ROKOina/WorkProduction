@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Components\System\Component.h"
-#include "GameSource\Character\Character.h"
 
-class PlayerCom : public Component/*, public Character*/
+class PlayerCom : public Component
 {
     //コンポーネントオーバーライド
 public:
@@ -23,17 +22,25 @@ public:
     void OnGUI() override;
 
     //PlayerComクラス
+#pragma region 状態
 public:
-    void OnDamage() {
-        isDamage_ = true;
-    }
+    //ダメージ
+    void OnDamage(DirectX::XMFLOAT3& power = DirectX::XMFLOAT3(0, 0, 0));
 
     bool GetIsInvincible() {
         return isDamage_;
     }
 
 private:
-    //移動
+    //状態系
+    bool isDamage_ = false; //ダメージを受けている時にtrue
+    float damageInvincibleTime_ = 1; //ダメージ時の無敵時間
+    float damageTimer_ = 0; //ダメージ時のタイマー
+
+#pragma endregion 
+
+#pragma region 移動
+private:
     //スティック入力値から移動ベクトルを取得
     DirectX::XMFLOAT3 GetMoveVec();
 
@@ -48,9 +55,10 @@ private:
 
     //ダッシュ
     void DashMove(float elapsedTime);
+    //ダッシュ時の更新
+    void DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> enemy);
 
 private:
-
     //移動系
     //入力値保存
     DirectX::XMFLOAT3 inputMoveVec_;
@@ -74,25 +82,62 @@ private:
     int moveParamType_ = MOVE_PARAM::WALK;
 
 
-    
+
     float jumpSpeed_ = 20.0f;
 
-    bool isDash_ = false;       //ダッシュ中か
+    bool isDashJudge_ = false;  //ダッシュ中か
     int dashState_ = -1;        //ダッシュの遷移
     float dashMaxSpeed_ = 20;   //ダッシュの最大スピード
-    float dashStopTime_ = 1;    //後ろダッシュを止めるため
+    float dashStopTime_ = 1;    //ダッシュ無理やり止めるため
     float dashStopTimer_;
 
-    //ジャスト回避
-    float justSpeed_ = 3.0f;    //回避前に少し移動（ジャスト回避適用ダッシュ）
-    float justSpeedTime_ = 0.5f;    //ダッシュに変わる時間
-    float justSpeedTimer_;
-    bool isJustDash_ = false;   //ジャスト回避判定中のダッシュ中か
+#pragma endregion
 
-    //状態系
-    bool isDamage_ = false; //ダメージを受けている時にtrue
-    float damageInvincibleTime_ = 1; //ダメージ時の無敵時間
-    float damageTimer_ = 0; //ダメージ時のタイマー
+#pragma region ジャスト回避
+private:
+    //ジャスト回避初期化
+    void JustInisialize();
+    //ジャスト回避反撃更新処理
+    void JustAvoidanceAttackUpdate(float elapsedTime);
+    //ジャスト回避中移動
+    void JustAvoidanceMove(float elapsedTime);
+    //ジャスト回避反撃の入力を見る
+    void JustAvoidanceAttackInput();
+
+private:
+    //ジャスト回避判定
+    bool isJustJudge_ = false;  //ジャスト回避判定
+    int justAvoidState_ = -1;   //ジャスト回避の遷移
+    float justAvoidTime_ = 1;   //ジャスト回避時間
+    float justAvoidTimer_ = 0;
+    std::shared_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
+
+    //ジャスト回避反撃
+    enum class JUST_AVOID_KEY   //入力を判定
+    {
+        SQUARE,     //□
+        TRIANGLE,   //△
+
+        NULL_KEY,
+    };
+    JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
+
+#pragma endregion
+
+#pragma region 攻撃
+private:
+    //攻撃更新
+    void AttackUpdate();
+    //攻撃当たり判定
+    void AttackJudgeCollision();
+
+#pragma endregion
+
+private:
+    //アニメーション初期化設定
+    void AnimationInitialize();
+
+private:
 
 
     DirectX::XMFLOAT3 up_ = {0,1,0};
