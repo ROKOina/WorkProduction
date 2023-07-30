@@ -18,7 +18,8 @@
 
 #include "GameSource\ScriptComponents\Player\PlayerCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
-#include "GameSource\ScriptComponents\Weapon\Weapon.h"
+#include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
+#include "GameSource\ScriptComponents\CharacterStatusCom.h"
 
 // ‰Šú‰»
 void SceneGame::Initialize()
@@ -49,6 +50,7 @@ void SceneGame::Initialize()
 		r->SetShaderID(SHADER_ID::Phong);
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
+		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 		//a->PlayAnimation(5, true);
@@ -101,6 +103,7 @@ void SceneGame::Initialize()
 		std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
+		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
 
 		std::shared_ptr<CapsuleColliderCom> c = obj->AddComponent<CapsuleColliderCom>();
 		//std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
@@ -140,8 +143,6 @@ void SceneGame::Initialize()
 			weapon->SetNodeName("RightHandMiddle2");
 		}
 	}
-
-
 
 	//ƒJƒƒ‰‚ğ¶¬
 	{

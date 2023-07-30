@@ -250,7 +250,8 @@
     <ClInclude Include="Source\Graphics\DebugRenderer\LineRenderer.h" />
     <ClInclude Include="Source\Components\MovementCom.h" />
     <ClInclude Include="Source\Components\AnimatorCom.h" />
-    <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\Weapon.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -436,7 +437,10 @@
     <ClCompile Include="Source\Components\AnimatorCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\Weapon.cpp">
+    <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\CharacterStatusCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

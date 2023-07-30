@@ -118,12 +118,22 @@ public:
 		void serialize(Archive& archive, int version);
 	};
 
+	struct RootPosition
+	{
+		float frame;
+		DirectX::XMFLOAT3 pos;
+
+		template<class Archive>
+		void serialize(Archive& archive, int version);
+	};
+
 	struct Animation
 	{
 		std::string					name;
 		float						secondsLength;
 		std::vector<Keyframe>		keyframes;
 		std::vector<AnimationEvent>	animationEvents;
+		std::vector<RootPosition>	rootPosition;
 
 		template<class Archive>
 		void serialize(Archive& archive, int version);

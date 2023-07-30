@@ -68,7 +68,7 @@ public:
     //アニメーションイベント取得(ポジションと再生中か)
     bool GetCurrentAnimationEvent(const char* eventName, DirectX::XMFLOAT3& position);
 
-    //アニメーションイベント取得
+    //アニメーションイベント名前取得
     const AnimEvent GetAnimationEvent(const char* eventName) const{
         for (AnimEvent anim : currentAnimationEvents_)
         {
@@ -79,6 +79,11 @@ public:
         }
     }
 
+    //現在のアニメーションイベント取得
+    const std::vector<AnimEvent> GetCurrentAnimationEventsData()const {
+        return currentAnimationEvents_;
+    }
+
 private:
     int currentAnimationIndex_ = -1;
     float currentAnimationSeconds_ = 0.0f;
@@ -87,6 +92,9 @@ private:
     float animationBlendTime_ = 0.0f;
     float animationBlendSeconds_ = 0.0f;
     float animationSpeed_ = 1.0f;
+
+    //ルート用
+    DirectX::XMFLOAT3 oldRootPos_ = {};
 
     bool isLooped_ = false;  //ループしたか
 

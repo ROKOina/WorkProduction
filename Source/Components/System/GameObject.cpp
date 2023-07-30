@@ -6,7 +6,7 @@
 #include "../TransformCom.h"
 #include "../CameraCom.h"
 #include "../ColliderCom.h"
-#include "GameSource\ScriptComponents\Weapon\Weapon.h"
+#include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
 
 //ゲームオブジェクト
 #pragma region GameObject

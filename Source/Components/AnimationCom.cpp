@@ -1,6 +1,7 @@
 #include "AnimationCom.h"
 
 #include "RendererCom.h"
+#include "TransformCom.h"
 #include <imgui.h>
 
 // 開始処理
@@ -125,13 +126,47 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 
 					if (animEvent.resourceEventData.startFrame > currentAnimationSeconds_
 						|| animEvent.resourceEventData.endFrame < currentAnimationSeconds_)continue;
-
+					//イベント再生時間ならtrue
 					animEvent.enabled = true;
+
+					//ルートノードの場合はpositionを無視してcontinue
+					if (nodeIndex == 0)continue;
+
 					//ワールドポジションに変換して更新する
 					DirectX::XMVECTOR WorldPos = DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&node.translate), DirectX::XMLoadFloat4x4(&node.parent->worldTransform));
 					DirectX::XMStoreFloat3(&animEvent.position, WorldPos);
 				}
 			}
+			break;
+		}
+	}
+
+	//ルート移動
+	std::vector<ModelResource::RootPosition> rootP = animation.rootPosition;
+	int rootKeyCount = rootP.size();
+	for (int keyIndex = 0; keyIndex < rootKeyCount - 1; ++keyIndex)
+	{
+		// 現在の時間がどのキーフレームの間にいるか判定する
+		float frame0 = rootP[keyIndex].frame;
+		float frame1 = rootP[keyIndex + 1].frame;
+		if (currentAnimationSeconds_ >= frame0 && currentAnimationSeconds_ <= frame1)
+		{
+			float rate = (currentAnimationSeconds_ - frame0) / (frame1 - frame0);
+			// ２つのキーフレーム間の補完計算
+			DirectX::XMVECTOR T0 = DirectX::XMLoadFloat3(&rootP[keyIndex].pos);
+			DirectX::XMVECTOR T1 = DirectX::XMLoadFloat3(&rootP[keyIndex + 1].pos);
+			DirectX::XMVECTOR T = DirectX::XMVectorLerp(T0, T1, rate);
+			DirectX::XMVECTOR TOld = DirectX::XMLoadFloat3(&oldRootPos_);
+
+			//前回と今回の移動値をポジションに足す
+			DirectX::XMFLOAT3 dist;
+			DirectX::XMMATRIX Mat = DirectX::XMLoadFloat4x4(&GetGameObject()->transform_->GetLocalTransform());
+			DirectX::XMStoreFloat3(&dist, DirectX::XMVector3TransformCoord(DirectX::XMVectorSubtract(T, TOld), Mat));
+
+			GetGameObject()->transform_->SetWorldPosition(dist);
+
+			DirectX::XMStoreFloat3(&oldRootPos_, T);	//今回のposを保存
+
 			break;
 		}
 	}
@@ -154,6 +189,9 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 			//再生時間を巻き戻す
 			currentAnimationSeconds_ = 0;
 			isLooped_ = true;
+			//ルート
+			if (rootKeyCount > 0)
+				oldRootPos_ = animation.rootPosition[0].pos;
 		}
 		else
 		{
@@ -200,6 +238,12 @@ void AnimationCom::PlayAnimation(int index, bool loop, float blendSeconds)
 			//見つからない場合
 			if (nodeIndex >= model->GetNodes().size())break;
 		}
+	}
+
+	//ルート
+	if (animation.rootPosition.size() > 0)
+	{
+		oldRootPos_ = animation.rootPosition[0].pos;
 	}
 }
 

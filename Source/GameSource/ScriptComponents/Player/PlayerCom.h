@@ -22,22 +22,6 @@ public:
     void OnGUI() override;
 
     //PlayerComクラス
-#pragma region 状態
-public:
-    //ダメージ
-    void OnDamage(DirectX::XMFLOAT3& power = DirectX::XMFLOAT3(0, 0, 0));
-
-    bool GetIsInvincible() {
-        return isDamage_;
-    }
-
-private:
-    //状態系
-    bool isDamage_ = false; //ダメージを受けている時にtrue
-    float damageInvincibleTime_ = 1; //ダメージ時の無敵時間
-    float damageTimer_ = 0; //ダメージ時のタイマー
-
-#pragma endregion 
 
 #pragma region 移動
 private:
@@ -81,10 +65,12 @@ private:
     }moveParam_[MOVE_PARAM::MAX];
     int moveParamType_ = MOVE_PARAM::WALK;
 
-
+    //入力で移動できるか
+    bool isInputMove_ = true;
 
     float jumpSpeed_ = 20.0f;
 
+    bool isDash_ = true;        //ダッシュできるか
     bool isDashJudge_ = false;  //ダッシュ中か
     int dashState_ = -1;        //ダッシュの遷移
     float dashMaxSpeed_ = 20;   //ダッシュの最大スピード
@@ -103,6 +89,8 @@ private:
     void JustAvoidanceMove(float elapsedTime);
     //ジャスト回避反撃の入力を見る
     void JustAvoidanceAttackInput();
+    //□反撃
+    void JustAvoidanceSquare(float elapsedTime);
 
 private:
     //ジャスト回避判定
@@ -128,8 +116,15 @@ private:
 private:
     //攻撃更新
     void AttackUpdate();
+
+    //□攻撃
+    void AttackSquare(float elapsedTime);
+
     //攻撃当たり判定
     void AttackJudgeCollision();
+
+private:
+    bool isNormalAttack = true;     //攻撃できるか
 
 #pragma endregion
 

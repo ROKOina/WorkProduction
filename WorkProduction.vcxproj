@@ -133,6 +133,7 @@
     <ClInclude Include="Source\Components\ColliderCom.h" />
     <ClInclude Include="Source\Components\MovementCom.h" />
     <ClInclude Include="Source\Components\RendererCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCom.h" />
     <ClInclude Include="Source\Components\System\Component.h" />
@@ -143,7 +144,7 @@
     <ClInclude Include="Source\GameSource\Render\Effect\EffectManager.h" />
     <ClInclude Include="Source\Framework.h" />
     <ClInclude Include="Source\Components\CameraCom.h" />
-    <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\Weapon.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\compute\particle.h" />
     <ClInclude Include="Source\Graphics\DebugRenderer\DebugRenderer.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="Source\Components\ColliderCom.cpp" />
     <ClCompile Include="Source\Components\MovementCom.cpp" />
     <ClCompile Include="Source\Components\RendererCom.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\CharacterStatusCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCom.cpp" />
     <ClCompile Include="Source\Components\System\GameObject.cpp" />
@@ -212,7 +214,7 @@
     <ClCompile Include="Source\GameSource\Render\Effect\EffectManager.cpp" />
     <ClCompile Include="Source\Framework.cpp" />
     <ClCompile Include="Source\Components\CameraCom.cpp" />
-    <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\Weapon.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\compute\particle.cpp" />
     <ClCompile Include="Source\Graphics\DebugRenderer\DebugRenderer.cpp" />

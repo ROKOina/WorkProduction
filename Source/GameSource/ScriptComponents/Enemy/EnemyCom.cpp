@@ -29,19 +29,6 @@ void EnemyCom::Start()
 // 更新処理
 void EnemyCom::Update(float elapsedTime)
 {
-    //状態
-    {
-        //ダメージ
-        if (isDamage_)
-        {
-            damageTimer_ += elapsedTime;
-            if (damageTimer_ > damageInvincibleTime_)
-            {
-                isDamage_ = false;
-                damageTimer_ = 0;
-            }
-        }
-    }
 
     //仮でジャスト回避当たり判定を切り、アタック当たり判定をしている
     DirectX::XMFLOAT3 pos;
@@ -106,14 +93,6 @@ void EnemyCom::Update(float elapsedTime)
 void EnemyCom::OnGUI()
 {
 
-}
-
-//ダメージ
-void EnemyCom::OnDamage(DirectX::XMFLOAT3& power)
-{
-    isDamage_ = true;
-
-    GetGameObject()->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
 }
 
 //アニメーション初期化設定

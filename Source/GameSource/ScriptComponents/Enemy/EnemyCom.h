@@ -22,25 +22,11 @@ public:
     void OnGUI() override;
 
     //EnemyComクラス
-public:
-    //ダメージ
-    void OnDamage(DirectX::XMFLOAT3& power = DirectX::XMFLOAT3(0, 0, 0));
-
-    bool GetIsInvincible() {
-        return isDamage_;
-    }
-
 private:
     //アニメーション初期化設定
     void AnimationInitialize();
 
 
 
-private:
-
-    //状態系
-    bool isDamage_ = false; //ダメージを受けている時にtrue
-    float damageInvincibleTime_ = 1; //ダメージ時の無敵時間
-    float damageTimer_ = 0; //ダメージ時のタイマー
 
 };
