@@ -13,7 +13,7 @@
 void WeaponCom::Start()
 {
     //‰ñ“]
-    GetGameObject()->transform_->SetEulerRotation(DirectX::XMFLOAT3(-90, 0, 0));
+    GetGameObject()->transform_->SetEulerRotation(DirectX::XMFLOAT3(-154, -85, 82));
     //“–‚½‚è‘å‚«‚³
     GetGameObject()->GetComponent<CapsuleColliderCom>()->SetRadius(0.19f);
 }

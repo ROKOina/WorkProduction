@@ -10,12 +10,13 @@ enum COLLIDER_TAG : uint64_t
 
     Player          = 1 << 1,
     PlayerAttack    = 1 << 2,
-    JustAvoid       = 1 << 3,
+    PlayerAttackAssist      = 1 << 3,
+    JustAvoid       = 1 << 4,
 
     Enemy           = 1 << 10,
     EnemyAttack     = 1 << 11,
 
-    Wall            = 1 << 50,
+    Wall            = 1 << 30,
 };
 static COLLIDER_TAG operator| (COLLIDER_TAG L, COLLIDER_TAG R)
 {
@@ -81,15 +82,15 @@ public:
     //この関数で当たった時の処理を書く
     std::vector<HitObj> OnHitGameObject() { return hitObj_; }
 
-    const int GetColliderType() const { return colliderType_; }
+    int GetColliderType() const { return colliderType_; }
 
     void SetWeight(float weight) { weight_ = weight; }
-    const float GetWeight() const { return weight_; }
+    float GetWeight() const { return weight_; }
 
     //自分のタグを決める
     void SetMyTag(COLLIDER_TAG tag) { myTag_ = tag; }
     //自分のタグを見る
-    const uint64_t GetMyTag() const { return myTag_; }
+    uint64_t GetMyTag() const { return myTag_; }
 
     //当たり判定をするタグを決める
     void SetJudgeTag(COLLIDER_TAG tag) { judgeTag_ = tag; }
@@ -101,7 +102,7 @@ public:
     void ColliderVSOther(std::shared_ptr<Collider> otherSide);
 
     void SetOffsetPosition(DirectX::XMFLOAT3& offsetPos) { offsetPos_ = offsetPos; }
-    const DirectX::XMFLOAT3 const GetOffsetPosition() { return offsetPos_; }
+    DirectX::XMFLOAT3 const GetOffsetPosition() { return offsetPos_; }
 
 private:
     //当たり判定をする(当たっていたらtrue)

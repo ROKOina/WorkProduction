@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Components\System\Component.h"
+#include "AttackPlayer.h"
 
 class PlayerCom : public Component
 {
@@ -41,6 +42,8 @@ private:
     void DashMove(float elapsedTime);
     //ダッシュ時の更新
     void DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> enemy);
+    //強制的にダッシュを終わらせる（攻撃時等）
+    void DashEndFlag();
 
 private:
     //移動系
@@ -67,8 +70,11 @@ private:
 
     //入力で移動できるか
     bool isInputMove_ = true;
+    //回転できるか
+    bool isInputTrun_ = true;
 
     float jumpSpeed_ = 20.0f;
+    int jumpCount_ = 2;
 
     bool isDash_ = true;        //ダッシュできるか
     bool isDashJudge_ = false;  //ダッシュ中か
@@ -89,6 +95,7 @@ private:
     void JustAvoidanceMove(float elapsedTime);
     //ジャスト回避反撃の入力を見る
     void JustAvoidanceAttackInput();
+
     //□反撃
     void JustAvoidanceSquare(float elapsedTime);
 
@@ -117,14 +124,16 @@ private:
     //攻撃更新
     void AttackUpdate();
 
-    //□攻撃
-    void AttackSquare(float elapsedTime);
-
     //攻撃当たり判定
     void AttackJudgeCollision();
 
+    //強制的に攻撃を終わらせる（ジャンプ時等）
+    void AttackFlagEnd();
+
 private:
-    bool isNormalAttack = true;     //攻撃できるか
+    bool isNormalAttack_ = true;     //攻撃できるか
+    std::string nextAnimName_ = "";
+    int comboAttackCount_ = 0;
 
 #pragma endregion
 
@@ -134,6 +143,8 @@ private:
 
 private:
 
-
     DirectX::XMFLOAT3 up_ = {0,1,0};
+
+    //プレイヤーの攻撃の動きのみ管理する
+    std::shared_ptr<AttackPlayer> attackPlayer_;
 };

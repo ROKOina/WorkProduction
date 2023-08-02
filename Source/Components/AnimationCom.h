@@ -56,7 +56,7 @@ public:
     float GetCurrentAnimationSecoonds()const { return currentAnimationSeconds_; }
 
     //現在のアニメーションindex取得
-    float GetCurrentAnimationIndex()const { return currentAnimationIndex_; }
+    int GetCurrentAnimationIndex()const { return currentAnimationIndex_; }
 
     //再生速度
     void SetAnimationSpeed(float speed) { animationSpeed_ = speed; }
@@ -67,6 +67,9 @@ public:
 
     //アニメーションイベント取得(ポジションと再生中か)
     bool GetCurrentAnimationEvent(const char* eventName, DirectX::XMFLOAT3& position);
+    //アニメーションイベント取得(エンドフレーム後なら)
+    bool GetCurrentAnimationEventIsEnd(const char* eventName);
+
 
     //アニメーションイベント名前取得
     const AnimEvent GetAnimationEvent(const char* eventName) const{

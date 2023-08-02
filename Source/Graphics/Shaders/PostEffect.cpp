@@ -62,7 +62,9 @@ PostEffect::PostEffect(UINT width, UINT height)
     renderPost_[4] = std::make_unique<PostRenderTarget>(device, wB, hB);
 
     //フルスクリーン用
-    renderPostFull_ = std::make_unique<PostRenderTarget>(device, Graphics::Instance().GetScreenWidth(), Graphics::Instance().GetScreenHeight());
+    renderPostFull_ = std::make_unique<PostRenderTarget>(device, 
+        static_cast<UINT>(Graphics::Instance().GetScreenWidth()), 
+        static_cast<UINT>(Graphics::Instance().GetScreenHeight()));
 }
 
 //描画
@@ -257,7 +259,7 @@ void PostEffect::Render()
                 //シェーダーリソースビュー設定
                 drawTexture_->SetShaderResourceView(
                     renderPost_[1]->diffuseMap,
-                    viewport.Width, viewport.Height);
+                    static_cast<int>(viewport.Width), static_cast<int>(viewport.Height));
 
                 ID3D11ShaderResourceView* srvs[] =
                 {
@@ -335,9 +337,9 @@ void PostEffect::Render()
         //シェーダーリソースビュー設定
         PostRenderTarget* ps = graphics.GetPostEffectModelRenderTarget().get();
         drawTexture_->SetShaderResourceView(
-            renderPostFull_->diffuseMap, ps->width, ps->height);
+            renderPostFull_->diffuseMap, static_cast<int>(ps->width), static_cast<int>(ps->height));
 
-        drawTexture_->Update(0, 0, ps->width, ps->height,
+        drawTexture_->Update(0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
             0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
             0,
             1, 1, 1, 1);
@@ -349,9 +351,9 @@ void PostEffect::Render()
         {
             //シェーダーリソースビュー設定
             drawTexture_->SetShaderResourceView(
-                renderPostFull_->diffuseMap, ps->width, ps->height);
+                renderPostFull_->diffuseMap, static_cast<int>(ps->width), static_cast<int>(ps->height));
 
-            drawTexture_->Update(0, 0, ps->width, ps->height,
+            drawTexture_->Update(0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
                 0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
                 0,
                 1, 1, 1, 1);

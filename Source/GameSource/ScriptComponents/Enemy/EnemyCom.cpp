@@ -8,7 +8,7 @@
 #include "../Player/PlayerCom.h"
 
 //アニメーションリスト
-enum AnimationEnemy
+enum ANIMATION_ENEMY
 {
     WALK,
     RUN,
@@ -101,8 +101,8 @@ void EnemyCom::AnimationInitialize()
     //アニメーター
     std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
     //初期のアニメーション
-    animator->SetFirstTransition(AnimationEnemy::IDEL);
-    animator->SetLoopAnimation(AnimationEnemy::IDEL, true);
+    animator->SetFirstTransition(ANIMATION_ENEMY::IDEL);
+    animator->SetLoopAnimation(ANIMATION_ENEMY::IDEL, true);
 
     //アニメーションパラメーター追加
     animator->AddTriggerParameter("kick");

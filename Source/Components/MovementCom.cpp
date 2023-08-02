@@ -21,6 +21,7 @@ void MovementCom::Update(float elapsedTime)
 void MovementCom::OnGUI()
 {
     ImGui::DragFloat3("velocity", &velocity_.x);
+    ImGui::DragFloat3("nonMaxSpeedVelocity_", &nonMaxSpeedVelocity_.x);
     ImGui::DragFloat("gravity", &gravity_, 0.1f);
     ImGui::DragFloat("friction", &friction_, 0.1f);
     ImGui::DragFloat("moveMaxSpeed", &moveMaxSpeed_, 0.1f);
@@ -33,7 +34,7 @@ void MovementCom::VerticalUpdate(float elapsedTime)
     float gravity = gravity_ * (elapsedTime * Graphics::Instance().GetFPS());
     //float gravity = gravity_ * (elapsedTime*100 /** Graphics::Instance().GetFPS()*/);
     AddForce({ 0,gravity,0 });
-    AddNonMaxSpeedForce({ 0,gravity,0 });
+    //AddNonMaxSpeedForce({ 0,gravity,0 });
 }
 
 //‰¡•ûŒüˆÚ“®XV
@@ -112,12 +113,16 @@ void MovementCom::VelocityAppPosition(float elapsedTime)
         velocity_.y = 0;
         position.y = 0;
         GetGameObject()->transform_->SetWorldPosition(position);
-    }
-    if (position.y <= 0)
-    {
+
         nonMaxSpeedVelocity_.y = 0;
         position.y = 0;
         GetGameObject()->transform_->SetWorldPosition(position);
+
+        onGround_ = true;
+    }
+    else
+    {
+        onGround_ = false;
     }
 
 

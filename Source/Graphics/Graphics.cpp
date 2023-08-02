@@ -184,8 +184,8 @@ Graphics::Graphics(HWND hWnd)
 		}
 
 		//ポストエフェクト用
-		postEffectModelRenderTarget = std::make_unique<PostRenderTarget>(device_.Get(), screenWidth_, screenHeight_,  DXGI_FORMAT_R8G8B8A8_UNORM);
-		postEffectModelDepthStencil = std::make_unique<PostDepthStencil>(device_.Get(), screenWidth_, screenHeight_);
+		postEffectModelRenderTarget = std::make_unique<PostRenderTarget>(device_.Get(), static_cast<UINT>(screenWidth_), static_cast<UINT>(screenHeight_),  DXGI_FORMAT_R8G8B8A8_UNORM);
+		postEffectModelDepthStencil = std::make_unique<PostDepthStencil>(device_.Get(), static_cast<UINT>(screenWidth_), static_cast<UINT>(screenHeight_));
 	}
 
 	// レンダラ

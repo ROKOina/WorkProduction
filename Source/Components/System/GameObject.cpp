@@ -136,7 +136,7 @@ void GameObjectManager::Update(float elapsedTime)
 		{
 			//シェーダーID順にソートして入れる
 			int insertShaderID = rendererComponent->GetShaderID();
-			int indexSize = renderSortObject_.size();	//最初のサイズを取得
+			int indexSize = static_cast<int>(renderSortObject_.size());	//最初のサイズを取得
 			for (int indexID = 0; indexID < renderSortObject_.size(); ++indexID)
 			{
 				if (renderSortObject_[indexID].lock()->GetShaderID() > insertShaderID)

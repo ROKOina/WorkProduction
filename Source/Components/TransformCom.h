@@ -49,7 +49,7 @@ public:
 
     // クォータニオン回転
     void SetRotation(const DirectX::XMFLOAT4& rotation) { this->rotation_ = rotation; }
-    const DirectX::XMFLOAT4& GetRotation() const { return rotation_; }
+    const DirectX::XMFLOAT4& GetRotation() { return rotation_.dxFloat4; }
 
     // オイラー回転(クォータニオン->オイラーはきついのでセットだけ)
     void SetEulerRotation(const DirectX::XMFLOAT3& setEuler) { 
@@ -78,18 +78,18 @@ public:
 
     //ワールド行列
     void SetWorldTransform(const DirectX::XMFLOAT4X4& transform) { this->worldTransform_ = transform; }
-    const DirectX::XMFLOAT4X4& GetWorldTransform() const { return worldTransform_; }
-    const DirectX::XMFLOAT3& GetWorldUp() const {
+    const DirectX::XMFLOAT4X4& GetWorldTransform() { return worldTransform_; }
+    const DirectX::XMFLOAT3 GetWorldUp() const {
         DirectX::XMFLOAT3 up = {worldTransform_._21, worldTransform_._22, worldTransform_._23};
         DirectX::XMStoreFloat3(&up, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&up)));
         return up; 
     }
-    const DirectX::XMFLOAT3& GetWorldFront() const {
+    const DirectX::XMFLOAT3 GetWorldFront() const {
         DirectX::XMFLOAT3 front = {worldTransform_._31, worldTransform_._32, worldTransform_._33};
         DirectX::XMStoreFloat3(&front, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&front)));
         return front;
     }
-    const DirectX::XMFLOAT3& GetWorldRight() const {
+    const DirectX::XMFLOAT3 GetWorldRight() const {
         DirectX::XMFLOAT3 right = {worldTransform_._11, worldTransform_._12, worldTransform_._13};
         DirectX::XMStoreFloat3(&right, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&right)));
         return right;
@@ -104,7 +104,7 @@ public:
 private:
     DirectX::XMFLOAT3	localPosition_ = DirectX::XMFLOAT3(0, 0, 0);
     DirectX::XMFLOAT3	worldPosition_ = DirectX::XMFLOAT3(0, 0, 0);
-
+    
     QuaternionStruct	rotation_ = DirectX::XMFLOAT4(0, 0, 0, 1);   //基準はクォータニオン
     DirectX::XMFLOAT3   eulerRotation_ = DirectX::XMFLOAT3(0, 0, 0);
     DirectX::XMFLOAT3	scale_ = DirectX::XMFLOAT3(1, 1, 1);

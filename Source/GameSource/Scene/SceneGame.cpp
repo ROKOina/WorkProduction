@@ -114,7 +114,17 @@ void SceneGame::Initialize()
 
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
 
-		//UŒ‚“–‚½‚è”»’è—p
+		//UŒ‚•â³‹——£“–‚½‚è”»’è
+		{
+			std::shared_ptr<GameObject> attackAssist = obj->AddChildObject();
+			attackAssist->SetName("attackAssist");
+			std::shared_ptr<SphereColliderCom> attackAssistCol = attackAssist->AddComponent<SphereColliderCom>();
+			attackAssistCol->SetMyTag(COLLIDER_TAG::PlayerAttackAssist);
+			attackAssistCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+			attackAssistCol->SetRadius(3);
+		}
+
+		//‘fèUŒ‚“–‚½‚è”»’è—p
 		{
 			std::shared_ptr<GameObject> attack = obj->AddChildObject();
 			attack->SetName("picoAttack");
@@ -172,8 +182,8 @@ void SceneGame::Initialize()
 	{
 		Graphics& graphics = Graphics::Instance();
 		postEff = std::make_unique<PostEffect>(
-			graphics.GetScreenWidth() ,
-			graphics.GetScreenHeight());
+			static_cast<UINT>(graphics.GetScreenWidth()) ,
+			static_cast<UINT>(graphics.GetScreenHeight()));
 	}
 
 	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetLocalPosition().x,player->GetLocalPosition().y,player->GetLocalPosition().z,0 });

@@ -35,11 +35,14 @@ public:
     //velocity
     void AddForce(const DirectX::XMFLOAT3& force) {
         velocity_.x += force.x * moveAcceleration_;
-        velocity_.y += force.y * moveAcceleration_;
+        velocity_.y += force.y;
         velocity_.z += force.z * moveAcceleration_;
     }
     void ZeroVelocity() {
         velocity_ = { 0,0,0 };
+    }
+    void ZeroVelocityY() {
+        velocity_ = { velocity_.x,0,velocity_.z };
     }
     const DirectX::XMFLOAT3& GetVelocity()const {
         return velocity_;
@@ -48,7 +51,7 @@ public:
     //nonMaxSpeedVelocity
     void AddNonMaxSpeedForce(const DirectX::XMFLOAT3& force) {
         nonMaxSpeedVelocity_.x += force.x;
-        nonMaxSpeedVelocity_.y += force.y;
+        velocity_.y += force.y;
         nonMaxSpeedVelocity_.z += force.z;
     }
     void ZeroNonMaxSpeedVelocity() {
@@ -65,6 +68,9 @@ public:
     void SetGravity(float gravity) {
         gravity_ = gravity;
     }
+
+    //接地判定
+    const bool OnGround() { return onGround_; }
 
     //摩擦
     const float& GetFriction()const {
@@ -97,6 +103,7 @@ private:
     DirectX::XMFLOAT3 nonMaxSpeedVelocity_ = { 0,0,0 }; //最大スピードを無視した速力
 
     float gravity_ = -0.25f;  //重力
+    bool onGround_ = false;      //地面についているか
     float friction_ = 0.8f;  //摩擦
 
     float moveMaxSpeed_ = 10.0f;

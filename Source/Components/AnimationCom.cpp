@@ -143,7 +143,7 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 
 	//ルート移動
 	std::vector<ModelResource::RootPosition> rootP = animation.rootPosition;
-	int rootKeyCount = rootP.size();
+	int rootKeyCount = static_cast<int>(rootP.size());
 	for (int keyIndex = 0; keyIndex < rootKeyCount - 1; ++keyIndex)
 	{
 		// 現在の時間がどのキーフレームの間にいるか判定する
@@ -285,6 +285,19 @@ bool  AnimationCom::GetCurrentAnimationEvent(const char* eventName, DirectX::XMF
 		if (std::strcmp(eventName, animEvent.name.c_str()) != 0)continue;
 		position = animEvent.position;
 		return true;	//アニメーションイベント中はtrue
+	}
+	return false;
+}
+
+//アニメーションイベント取得(エンドフレーム後なら)
+bool AnimationCom::GetCurrentAnimationEventIsEnd(const char* eventName)
+{
+	for (auto& animEvent : currentAnimationEvents_)
+	{
+		if (animEvent.enabled)continue;
+		if (std::strcmp(eventName, animEvent.name.c_str()) != 0)continue;
+		if (animEvent.resourceEventData.endFrame > currentAnimationSeconds_)continue;
+		return true;	//アニメーションイベントのエンドフレーム後ならtrue
 	}
 	return false;
 }
