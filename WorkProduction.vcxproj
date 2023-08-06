@@ -136,6 +136,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCameraCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCom.h" />
     <ClInclude Include="Source\Components\System\Component.h" />
     <ClInclude Include="Source\Components\System\GameObject.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\CharacterStatusCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCameraCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCom.cpp" />
     <ClCompile Include="Source\Components\System\GameObject.cpp" />
     <ClCompile Include="Source\Components\TransformCom.cpp" />

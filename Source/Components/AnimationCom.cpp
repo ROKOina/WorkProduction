@@ -158,7 +158,7 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 			DirectX::XMVECTOR T = DirectX::XMVectorLerp(T0, T1, rate);
 			DirectX::XMVECTOR TOld = DirectX::XMLoadFloat3(&oldRootPos_);
 
-			//前回と今回の移動値をポジションに足す
+			//前回と今回の移動値をポジションにする
 			DirectX::XMFLOAT3 dist;
 			DirectX::XMMATRIX Mat = DirectX::XMLoadFloat4x4(&GetGameObject()->transform_->GetLocalTransform());
 			DirectX::XMStoreFloat3(&dist, DirectX::XMVector3TransformCoord(DirectX::XMVectorSubtract(T, TOld), Mat));

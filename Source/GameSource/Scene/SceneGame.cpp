@@ -17,6 +17,7 @@
 #include "Components\MovementCom.h"
 
 #include "GameSource\ScriptComponents\Player\PlayerCom.h"
+#include "GameSource\ScriptComponents\Player\PlayerCameraCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
 #include "GameSource\ScriptComponents\CharacterStatusCom.h"
@@ -113,6 +114,7 @@ void SceneGame::Initialize()
 		//c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.8f, 0));
 
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
+		std::shared_ptr<PlayerCameraCom> playerCamera = obj->AddComponent<PlayerCameraCom>();
 
 		//UŒ‚•â³‹——£“–‚½‚è”»’è
 		{

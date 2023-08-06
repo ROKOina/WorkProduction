@@ -91,25 +91,9 @@ void PlayerCom::Start()
 
 }
 
-static bool aaa = true;
 // 更新処理
 void PlayerCom::Update(float elapsedTime)
 {
-    //カメラ設定
-    if(aaa)
-    {
-        //カメラをプレイヤーにフォーカスする
-        std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
-        cameraObj->transform_->LookAtTransform(GetGameObject()->transform_->GetLocalPosition());
-
-        //プレイヤーのワールドポジションを取得
-        DirectX::XMFLOAT3 wp = GetGameObject()->transform_->GetWorldPosition();
-        wp.z -= 10;
-        wp.y += 6;
-        cameraObj->transform_->SetLocalPosition(wp);
-
-    }
-
     //移動
     {
         std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
@@ -233,7 +217,6 @@ void PlayerCom::OnGUI()
     ImGui::DragFloat3("up", &up_.x);
 
     ImGui::Checkbox("dash", &isDashJudge_);
-    ImGui::Checkbox("aaa", &aaa);
 
     //入力情報を取得
     GamePad& gamePad = Input::Instance().GetGamePad();
@@ -441,8 +424,8 @@ void PlayerCom::DashMove(float elapsedTime)
         //JustInisialize();
         //isNormalAttack_ = true;
 
-        //コンボリセット
-        comboAttackCount_ = 0;
+        //アタックリセット
+        AttackFlagEnd();
     }
 
     //ダッシュ時の更新

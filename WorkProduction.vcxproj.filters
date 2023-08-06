@@ -253,6 +253,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCameraCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -445,6 +446,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCameraCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
