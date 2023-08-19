@@ -31,7 +31,8 @@ void MovementCom::OnGUI()
 //c•ûŒüˆÚ“®XV
 void MovementCom::VerticalUpdate(float elapsedTime)
 {
-    float gravity = gravity_ * (elapsedTime * Graphics::Instance().GetFPS());
+    float gravity = gravity_ * (elapsedTime);
+    //float gravity = gravity_ * (elapsedTime * Graphics::Instance().GetFPS());
     //float gravity = gravity_ * (elapsedTime*100 /** Graphics::Instance().GetFPS()*/);
     AddForce({ 0,gravity,0 });
     //AddNonMaxSpeedForce({ 0,gravity,0 });
@@ -55,13 +56,14 @@ void MovementCom::HorizonUpdate(float elapsedTime)
         velocity_.z = newMaxVelocity.z;
     }
 
-    float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS());
     //float friction = friction_ * (elapsedTime);
+    float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS());
     //float friction = friction_ * (elapsedTime*100 /** Graphics::Instance().GetFPS()*/);
     //–€ŽC—Í
     if (horiLength > friction)
     {
-        DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), -friction);
+        DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVectorScale(HorizonVelocity, -1), friction);
+        //DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), -friction);
         //DirectX::XMFLOAT3 newVelocity;
         //DirectX::XMStoreFloat3(&newVelocity, FriVelocity);
         DirectX::XMStoreFloat3(&velocity_, DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&velocity_), FriVelocity));
@@ -80,7 +82,7 @@ void MovementCom::HorizonUpdate(float elapsedTime)
     //–€ŽC—Í
     if (horiLength > friction)
     {
-        DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), -friction);
+        DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVectorScale(HorizonVelocity, -1), friction);
         DirectX::XMFLOAT3 newVelocity;
         DirectX::XMStoreFloat3(&newVelocity, FriVelocity);
         AddNonMaxSpeedForce(newVelocity);

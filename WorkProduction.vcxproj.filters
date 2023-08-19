@@ -254,6 +254,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCameraCom.h" />
+    <ClInclude Include="Source\Graphics\Shaders\3D\UnityChanToonShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -451,6 +452,9 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerCameraCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Graphics\Shaders\3D\UnityChanToonShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Debugs\Debug.hlsli">
@@ -469,6 +473,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="HLSL\3D\Lambert.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="HLSL\3D\UnityChanToon.hlsli">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>
@@ -534,6 +541,12 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\2D\PostEffect\BloomKawase.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\UnityChanToonPS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\UnityChanToonVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

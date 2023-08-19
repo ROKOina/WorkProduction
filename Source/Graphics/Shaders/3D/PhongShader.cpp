@@ -101,7 +101,95 @@ void PhongShader::Draw(ID3D11DeviceContext* dc, const Model* model)
     const std::vector<Model::Node>& nodes = model->GetNodes();
     Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
 
-    for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+
+    //透明マテリアル
+    std::vector<ModelResource::Mesh> alphaMesh;
+
+    //描画関数（透明と不透明を分けるため）
+    //alphaMat(true : 透明描画)
+    //auto DrawLambda = [&](std::vector<ModelResource::Mesh> meshContainer, bool alphaMat)
+    //{
+        for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+        {
+            // メッシュ用定数バッファ更新
+            CbMesh cbMesh;
+            ::memset(&cbMesh, 0, sizeof(cbMesh));
+            if (mesh.nodeIndices.size() > 0)
+            {
+                for (size_t i = 0; i < mesh.nodeIndices.size(); ++i)
+                {
+                    DirectX::XMMATRIX worldTransform = DirectX::XMLoadFloat4x4(&nodes.at(mesh.nodeIndices.at(i)).worldTransform);
+                    DirectX::XMMATRIX offsetTransform = DirectX::XMLoadFloat4x4(&mesh.offsetTransforms.at(i));
+                    DirectX::XMMATRIX boneTransform = offsetTransform * worldTransform;
+                    DirectX::XMStoreFloat4x4(&cbMesh.boneTransforms[i], boneTransform);
+                }
+            }
+            else
+            {
+                cbMesh.boneTransforms[0] = nodes.at(mesh.nodeIndex).worldTransform;
+            }
+            dc->UpdateSubresource(meshConstantBuffer_.Get(), 0, 0, &cbMesh, 0, 0);
+
+            UINT stride = sizeof(ModelResource::Vertex);
+            UINT offset = 0;
+            dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
+            dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+            dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+            for (const ModelResource::Subset& subset : mesh.subsets)
+            {
+                CbSubset cbSubset;
+                cbSubset.materialColor = subset.material->color;
+
+                ////透明描画なら後回しにする
+                //if (!alphaMat)
+                //{
+                //    if (cbSubset.materialColor.w < 1)
+                //    {
+                //        alphaMesh.emplace_back(mesh);
+                //        continue;
+                //    }
+                //}
+
+                dc->UpdateSubresource(subsetConstantBuffer_.Get(), 0, 0, &cbSubset, 0, 0);
+                ID3D11ShaderResourceView* srvs[] =
+                {
+                    subset.material->diffuseMap.Get(),
+                    subset.material->normalMap.Get(),
+                };
+                dc->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
+
+                dc->PSSetSamplers(0, 1, dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP).GetAddressOf());
+                dc->DrawIndexed(subset.indexCount, subset.startIndex, 0);
+            }
+        }
+    //};
+
+    //Alpha(dc,model,resource->GetMeshes(), true);
+    //Alpha(dc, model, Alpha(dc, model, resource->GetMeshes(), false), true);
+
+
+}
+
+void PhongShader::End(ID3D11DeviceContext* context)
+{
+    context->VSSetShader(nullptr, nullptr, 0);
+    context->PSSetShader(nullptr, nullptr, 0);
+    context->IASetInputLayout(nullptr);
+
+    ID3D11ShaderResourceView* srvs[] = { nullptr, nullptr, nullptr };
+    context->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
+}
+
+std::vector<ModelResource::Mesh> PhongShader::Alpha(ID3D11DeviceContext* dc, const Model* model,std::vector<ModelResource::Mesh> meshContainer, bool alphaMat)
+{
+    const ModelResource* resource = model->GetResource();
+    const std::vector<Model::Node>& nodes = model->GetNodes();
+    Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
+
+    std::vector<ModelResource::Mesh> alphaMesh;
+
+    for (const ModelResource::Mesh& mesh : meshContainer)
     {
         // メッシュ用定数バッファ更新
         CbMesh cbMesh;
@@ -132,6 +220,18 @@ void PhongShader::Draw(ID3D11DeviceContext* dc, const Model* model)
         {
             CbSubset cbSubset;
             cbSubset.materialColor = subset.material->color;
+
+
+            //透明描画なら後回しにする
+            if (!alphaMat)
+            {
+                if (cbSubset.materialColor.w < 1)
+                {
+                    alphaMesh.emplace_back(mesh);
+                    continue;
+                }
+            }
+
             dc->UpdateSubresource(subsetConstantBuffer_.Get(), 0, 0, &cbSubset, 0, 0);
             ID3D11ShaderResourceView* srvs[] =
             {
@@ -139,19 +239,11 @@ void PhongShader::Draw(ID3D11DeviceContext* dc, const Model* model)
                 subset.material->normalMap.Get(),
             };
             dc->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
-            
+
             dc->PSSetSamplers(0, 1, dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP).GetAddressOf());
             dc->DrawIndexed(subset.indexCount, subset.startIndex, 0);
         }
     }
-}
 
-void PhongShader::End(ID3D11DeviceContext* context)
-{
-    context->VSSetShader(nullptr, nullptr, 0);
-    context->PSSetShader(nullptr, nullptr, 0);
-    context->IASetInputLayout(nullptr);
-
-    ID3D11ShaderResourceView* srvs[] = { nullptr, nullptr, nullptr };
-    context->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
+    return alphaMesh;
 }

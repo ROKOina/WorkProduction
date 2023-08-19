@@ -6,6 +6,8 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 
+#include "../Shaders/3D/ShaderParameter3D.h"
+
 class ModelResource
 {
 public:
@@ -34,6 +36,9 @@ public:
 		std::string			textureFilename;
 		std::string			normalFilename;
 		DirectX::XMFLOAT4	color = { 0.8f, 0.8f, 0.8f, 1.0f };
+
+		//トゥーンシェーダー用の構造体
+		UnityChanToonStruct toonStruct;
 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> diffuseMap;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalMap;

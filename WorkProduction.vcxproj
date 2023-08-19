@@ -148,6 +148,7 @@
     <ClInclude Include="Source\Components\CameraCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
+    <ClInclude Include="Source\Graphics\Shaders\3D\UnityChanToonShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\compute\particle.h" />
     <ClInclude Include="Source\Graphics\DebugRenderer\DebugRenderer.h" />
     <ClInclude Include="Source\Graphics\Dx11StateLib.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="Source\Components\CameraCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp" />
+    <ClCompile Include="Source\Graphics\Shaders\3D\UnityChanToonShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\compute\particle.cpp" />
     <ClCompile Include="Source\Graphics\DebugRenderer\DebugRenderer.cpp" />
     <ClCompile Include="Source\Graphics\Dx11StateLib.cpp" />
@@ -254,6 +256,7 @@
   <ItemGroup>
     <None Include="HLSL\3D\Lambert.hlsli" />
     <None Include="HLSL\3D\Phong.hlsli" />
+    <None Include="HLSL\3D\UnityChanToon.hlsli" />
     <None Include="HLSL\compute\Particle.hlsli" />
     <None Include="HLSL\Debugs\Debug.hlsli" />
     <None Include="HLSL\Debugs\Line.hlsli" />
@@ -301,6 +304,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\3D\PhongVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\UnityChanToonPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\UnityChanToonVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

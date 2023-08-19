@@ -171,7 +171,8 @@ int Framework::Run()
 
 			float elapsedTime = syncInterval == 0
 				? timer_.TimeInterval()
-				: syncInterval / fps_
+				: syncInterval / 60.0f
+				//: syncInterval / fps_
 				;
 			Update(elapsedTime, fps_);
 			Render(elapsedTime);

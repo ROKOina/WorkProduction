@@ -46,25 +46,25 @@ PostEffect::PostEffect(UINT width, UINT height)
 
     //レンダーターゲット設定
     //輝度抽出用
-    renderPost_[0] = std::make_unique<PostRenderTarget>(device, width, height);
+    renderPost_[0] = std::make_unique<PostRenderTarget>(device, width, height, DXGI_FORMAT_R16G16B16A16_FLOAT);
     //ブラー用
     UINT wB = width/2;
     UINT hB = height/2;
-    renderPost_[1] = std::make_unique<PostRenderTarget>(device, wB, hB);
+    renderPost_[1] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
     wB /= 2;
     hB /= 2;
-    renderPost_[2] = std::make_unique<PostRenderTarget>(device, wB, hB);
+    renderPost_[2] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
     wB /= 2;
     hB /= 2;
-    renderPost_[3] = std::make_unique<PostRenderTarget>(device, wB, hB);
+    renderPost_[3] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
     wB /= 2;
     hB /= 2;
-    renderPost_[4] = std::make_unique<PostRenderTarget>(device, wB, hB);
+    renderPost_[4] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
     //フルスクリーン用
     renderPostFull_ = std::make_unique<PostRenderTarget>(device, 
         static_cast<UINT>(Graphics::Instance().GetScreenWidth()), 
-        static_cast<UINT>(Graphics::Instance().GetScreenHeight()));
+        static_cast<UINT>(Graphics::Instance().GetScreenHeight()), DXGI_FORMAT_R16G16B16A16_FLOAT);
 }
 
 //描画

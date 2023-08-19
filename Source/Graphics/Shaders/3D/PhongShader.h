@@ -15,6 +15,9 @@ public:
     void End(ID3D11DeviceContext* context)override;
 
 private:
+    std::vector<ModelResource::Mesh> Alpha(ID3D11DeviceContext* dc, const Model* model,std::vector<ModelResource::Mesh> meshContainer, bool alphaMat);
+
+
     static const int MaxBones = 128;
 
     struct CbScene

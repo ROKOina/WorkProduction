@@ -15,6 +15,7 @@ enum SHADER_ID
 {
 	Default,
 	Phong,
+	UnityChanToon,
 
 	MAX,	//Å‘å”‚ğ•Û‚·‚é
 };

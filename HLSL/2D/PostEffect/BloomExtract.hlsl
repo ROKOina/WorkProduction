@@ -24,13 +24,16 @@ float4 main(VS_OUT pin) : SV_TARGET
     float luminance = dot(luminanceValue, tex.rgb);
     
     //閾値との差を算出
-    float contribution = max(0, luminance - threshold);
+    float contribution = smoothstep(threshold, threshold + 0.5, luminance);
+    //float contribution = max(0, luminance - threshold);
+    
 
-	// 出力する色を補正する
-    contribution /= luminance;
+    
+	//// 出力する色を補正する
+ //   contribution /= luminance;
     
     float4 color = float4(0,0,0,0);
-    color.rgb = contribution * intensity;
+    color.rgb = contribution * tex.rgb * intensity;
     color.a = 1;
     
     return color;

@@ -25,6 +25,7 @@ void RendererCom::Update(float elapsedTime)
 const char* shaderNames[SHADER_ID::MAX] = { //シェーダーを追加したらこっちでも追加する
     "Default",
     "Phong",
+    "UnityChanToon",
 };
 // GUI描画
 void RendererCom::OnGUI()

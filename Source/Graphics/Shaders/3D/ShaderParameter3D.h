@@ -46,6 +46,47 @@ struct BloomData2
 	DirectX::XMFLOAT2 dummy;
 };
 
+//ユニティちゃんトゥーン
+struct UnityChanToonStruct
+{
+	//ライトの色を反映するか（ ベースと影両方に使う）
+	float _Is_LightColor_Base = 1;
+	//影のレベル調整
+	float _Tweak_SystemShadowsLevel = 0;
+	//影の表示閾値
+	float _BaseColor_Step = 0.5f;
+	//影のぼかし
+	float _BaseShade_Feather = 0.001f;
+
+	DirectX::XMFLOAT4 _BaseColor = { 1,1,1,1 };
+
+	DirectX::XMFLOAT4 _1st_ShadeColor =
+	{ 153.0f / 255.0f,197.0f / 255.0f,202.0f / 255.0f,1 };
+	//DirectX::XMFLOAT4 _1st_ShadeColor = { 1,0.8f,0.7f,1 };
+
+	//ハイカラーの色
+	DirectX::XMFLOAT4 _Set_HighColorMask = { 1,1,1,1 };
+
+	//ハイカラーの強さ（ 範囲）
+	float _HighColor_Power = 0.3f;
+
+	float dummy = 0;
+
+	//リムライト強さ
+	float _RimLight_Power = 0.25f;
+	//リムライトON,OFF
+	float _RimLight = 1;
+
+	//リムライトカラー
+	DirectX::XMFLOAT4 _RimLightColor = { 1,1,1,1 };
+	//エミッシブカラー
+	DirectX::XMFLOAT4 _Emissive_Color = { 0,0,0,1 };
+
+	template<class Archive>
+	void serialize(Archive& archive, int version);
+};
+
+
 // コンスタントバッファに使うパラメーター
 struct ShaderParameter3D
 {

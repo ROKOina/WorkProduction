@@ -1,6 +1,7 @@
 #include "Misc.h"
 #include "Graphics/Shaders/3D/LambertShader.h"
 #include "Graphics/Shaders/3D/PhongShader.h"
+#include "Graphics/Shaders/3D/UnityChanToonShader.h"
 #include "Graphics/Graphics.h"
 
 Graphics* Graphics::instance_ = nullptr;
@@ -135,6 +136,7 @@ Graphics::Graphics(HWND hWnd)
 
 		shader_[SHADER_ID::Default] = std::make_unique<LambertShader>(device_.Get());
 		shader_[SHADER_ID::Phong] = std::make_unique<PhongShader>(device_.Get());
+		shader_[SHADER_ID::UnityChanToon] = std::make_unique<UnityChanToonShader>(device_.Get());
 
 		//パラメーター設定
 		{
@@ -184,7 +186,7 @@ Graphics::Graphics(HWND hWnd)
 		}
 
 		//ポストエフェクト用
-		postEffectModelRenderTarget = std::make_unique<PostRenderTarget>(device_.Get(), static_cast<UINT>(screenWidth_), static_cast<UINT>(screenHeight_),  DXGI_FORMAT_R8G8B8A8_UNORM);
+		postEffectModelRenderTarget = std::make_unique<PostRenderTarget>(device_.Get(), static_cast<UINT>(screenWidth_), static_cast<UINT>(screenHeight_), DXGI_FORMAT_R16G16B16A16_FLOAT);
 		postEffectModelDepthStencil = std::make_unique<PostDepthStencil>(device_.Get(), static_cast<UINT>(screenWidth_), static_cast<UINT>(screenHeight_));
 	}
 

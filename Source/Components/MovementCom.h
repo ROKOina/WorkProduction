@@ -102,9 +102,9 @@ private:
     DirectX::XMFLOAT3 velocity_ = { 0,0,0 };
     DirectX::XMFLOAT3 nonMaxSpeedVelocity_ = { 0,0,0 }; //最大スピードを無視した速力
 
-    float gravity_ = -0.25f;  //重力
+    float gravity_ = -80.25f;  //重力
     bool onGround_ = false;      //地面についているか
-    float friction_ = 0.8f;  //摩擦
+    float friction_ = 0.1f;  //摩擦
 
     float moveMaxSpeed_ = 10.0f;
     float moveAcceleration_ = 1.0f;

@@ -15,6 +15,8 @@
 #include "ModelResource.h"
 
 // CEREALバージョン定義
+CEREAL_CLASS_VERSION(UnityChanToonStruct, 1)
+
 CEREAL_CLASS_VERSION(ModelResource::Node, 1)
 CEREAL_CLASS_VERSION(ModelResource::Material, 1)
 CEREAL_CLASS_VERSION(ModelResource::Subset, 1)
@@ -84,6 +86,26 @@ namespace DirectX
 }
 
 template<class Archive>
+void UnityChanToonStruct::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(_Is_LightColor_Base),
+		CEREAL_NVP(_Tweak_SystemShadowsLevel),
+		CEREAL_NVP(_BaseColor_Step),
+		CEREAL_NVP(_BaseShade_Feather),
+		CEREAL_NVP(_BaseColor),
+		CEREAL_NVP(_1st_ShadeColor),
+		CEREAL_NVP(_Set_HighColorMask),
+		CEREAL_NVP(_HighColor_Power),
+		CEREAL_NVP(dummy),
+		CEREAL_NVP(_RimLight_Power),
+		CEREAL_NVP(_RimLight),
+		CEREAL_NVP(_RimLightColor),
+		CEREAL_NVP(_Emissive_Color)
+	);
+}
+
+template<class Archive>
 void ModelResource::Node::serialize(Archive& archive, int version)
 {
 	archive(
@@ -104,7 +126,8 @@ void ModelResource::Material::serialize(Archive& archive, int version)
 		CEREAL_NVP(name),
 		CEREAL_NVP(textureFilename),
 		CEREAL_NVP(normalFilename),
-		CEREAL_NVP(color)
+		CEREAL_NVP(color),
+		CEREAL_NVP(toonStruct)
 	);
 }
 

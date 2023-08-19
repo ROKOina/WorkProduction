@@ -35,6 +35,10 @@ enum ANIMATION_PLAYER
     BIGSWORD_COM1_01,
     BIGSWORD_COM1_02,
     BIGSWORD_COM1_03,
+    BIGSWORD_COM2_01,
+    BIGSWORD_COM2_02,
+    BIGSWORD_COM2_03,
+    BIGSWORD_DASH,
 
 };
 
@@ -67,7 +71,7 @@ void PlayerCom::Start()
     moveParam_[MOVE_PARAM::JUSTDASH].turnSpeed = 4.0f;
 
     moveParam_[MOVE_PARAM::DASH].moveMaxSpeed = 20.0f;
-    moveParam_[MOVE_PARAM::DASH].moveAcceleration = 1.0f;
+    moveParam_[MOVE_PARAM::DASH].moveAcceleration = 2.0f;
     moveParam_[MOVE_PARAM::DASH].turnSpeed = 8.0f;
 
     moveParamType_ = MOVE_PARAM::WALK;
@@ -79,9 +83,9 @@ void PlayerCom::Start()
     std::shared_ptr<WeaponCom> weapon = GetGameObject()->GetChildFind("greatSword")->GetComponent<WeaponCom>();
     weapon->SetAttackStatus(BIGSWORD_RIGHT, 1, 30,0.7f,0.3f);
     weapon->SetAttackStatus(BIGSWORD_UP, 1, 30, 0.2f, 0.8f);
-    weapon->SetAttackStatus(BIGSWORD_COM1_01, 1, 30, 0.8f, 0.2f);
-    weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 30, 0.3f, 0.7f);
-    weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 30, 0.9f, 0.1f);
+    weapon->SetAttackStatus(BIGSWORD_COM1_01, 1, 15, 0.8f, 0.2f);
+    weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
+    weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f);
 
     //攻撃管理を初期化
     attackPlayer_ = std::make_shared<AttackPlayer>(GetGameObject()->GetComponent<PlayerCom>());
@@ -137,6 +141,15 @@ void PlayerCom::Update(float elapsedTime)
     {
         //攻撃更新
         AttackUpdate();
+        if (!isNormalAttack_)
+        {
+            GamePad& gamePad = Input::Instance().GetGamePad();
+            if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+            {
+                std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+                animator->SetTriggerOn("squareDash");
+            }
+        }
 
         attackPlayer_->Update(elapsedTime);
 
@@ -169,32 +182,32 @@ void PlayerCom::Update(float elapsedTime)
         capsule->SetPosition2({ pos.x - playerPos.x,pos.y - playerPos.y,pos.z - playerPos.z });
     }
 
-    //自分との当たり判定
-    std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
-    for (auto& hitObj : hitGameObj)
-    {
-        //名前検索
-        //if (std::strcmp(hitObj.gameObject->GetName(), "picolabo") != 0)continue;
-        //タグ検索
-        //敵との当たり（仮）
-        if (COLLIDER_TAG::Enemy == hitObj.gameObject->GetComponent<Collider>()->GetMyTag())
-        {
-            //押し返し
-            DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetWorldPosition();
-            DirectX::XMFLOAT3 hitPos = hitObj.gameObject->transform_->GetWorldPosition();
+    ////自分との当たり判定
+    //std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
+    //for (auto& hitObj : hitGameObj)
+    //{
+    //    //名前検索
+    //    //if (std::strcmp(hitObj.gameObject->GetName(), "picolabo") != 0)continue;
+    //    //タグ検索
+    //    //敵との当たり（仮）
+    //    if (COLLIDER_TAG::Enemy == hitObj.gameObject->GetComponent<Collider>()->GetMyTag())
+    //    {
+    //        //押し返し
+    //        DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetWorldPosition();
+    //        DirectX::XMFLOAT3 hitPos = hitObj.gameObject->transform_->GetWorldPosition();
 
-            DirectX::XMVECTOR PlayerPos = { playerPos.x,0,playerPos.z };
-            DirectX::XMVECTOR HitPos = { hitPos.x,0, hitPos.z };
+    //        DirectX::XMVECTOR PlayerPos = { playerPos.x,0,playerPos.z };
+    //        DirectX::XMVECTOR HitPos = { hitPos.x,0, hitPos.z };
 
-            DirectX::XMVECTOR ForceNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(HitPos, PlayerPos));
-            ForceNormal = DirectX::XMVectorScale(ForceNormal, 5);
+    //        DirectX::XMVECTOR ForceNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(HitPos, PlayerPos));
+    //        ForceNormal = DirectX::XMVectorScale(ForceNormal, 5);
 
-            DirectX::XMFLOAT3 power;
-            DirectX::XMStoreFloat3(&power, ForceNormal);
+    //        DirectX::XMFLOAT3 power;
+    //        DirectX::XMStoreFloat3(&power, ForceNormal);
 
-            hitObj.gameObject->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
-        }
-    }
+    //        hitObj.gameObject->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
+    //    }
+    //}
 
 }
 
@@ -410,7 +423,9 @@ void PlayerCom::DashMove(float elapsedTime)
     {
         //入力があればstate=0
         if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
+        {
             dashState_ = 0;
+        }
         else
             dashState_ = 10;
         isDashJudge_ = true;        //ダッシュフラグON
@@ -464,6 +479,7 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
             move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
             move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
             dashStopTimer_ = dashStopTime_;
+            isNormalAttack_ = false;
             dashState_++;
             break;
         }
@@ -488,7 +504,7 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
         {
             //加速度を下げていく
             float acce = move->GetMoveAcceleration();
-            acce -= 2 * elapsedTime;
+            acce -= 5 * elapsedTime;
             move->SetMoveAcceleration(acce);
 
             if (moveParam_[MOVE_PARAM::RUN].moveMaxSpeed >= length)
@@ -503,6 +519,7 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
             dashState_ = -1;
             isDashJudge_ = false;
             isInputMove_ = true;
+            isNormalAttack_ = true;
             break;
 
 
@@ -557,7 +574,7 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
 
             //加速度を下げていく
             float acce = move->GetMoveAcceleration();
-            acce -= 2 * elapsedTime;
+            acce -= 5 * elapsedTime;
             move->SetMoveAcceleration(acce);
 
             if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
@@ -715,7 +732,6 @@ void PlayerCom::JustAvoidanceAttackInput()
 
         isInputTrun_ = false;
 
-        comboAttackCount_++;
 
         //敵の方を向く
         GetGameObject()->transform_->LookAtTransform(justHitEnemy_->transform_->GetWorldPosition());
@@ -745,10 +761,8 @@ void PlayerCom::JustAvoidanceSquare(float elapsedTime)
             isNormalAttack_ = true;
             isDash_ = true;
 
-            //アニメーター
-            std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-            animator->SetTriggerOn("squareJust");
-
+            //アタック処理に引き継ぐ
+            justAnimFlagName_ = "squareJust";
         }
 
         DirectX::XMVECTOR Dir = DirectX::XMVector3Normalize(PE);
@@ -775,51 +789,75 @@ void PlayerCom::AttackUpdate()
     if (!isNormalAttack_)return;
 
     int currentAnimIndex = GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
-    if (currentAnimIndex == IDEL_2)
+
+    //コンボ後処理
+    if (comboAttackCount_ > 0)
     {
-        comboAttackCount_ = 0;
-        isInputMove_ = true;
-        isInputTrun_ = true;
+        //前フレームのコンボとアニメーションを見て
+        //コンボ終了か見る
+        static int oldCount = 0;
+        static int oldAnim = 0;
+        if (oldCount == comboAttackCount_)
+        {
+            if (oldAnim != currentAnimIndex)
+            {
+                //コンボ終了
+                AttackFlagEnd();
+            }
+        }
+        oldCount = comboAttackCount_;
+        oldAnim = currentAnimIndex;
     }
+    //アニメーター
+    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+
+    //ジャスト回避攻撃
+    if (justAnimFlagName_.size() > 0)
+    {
+        animator->SetTriggerOn(justAnimFlagName_);
+        comboAttackCount_++;
+        justAnimFlagName_ = "";
+    }
+    else
+    {
+        GamePad& gamePad = Input::Instance().GetGamePad();
+        if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+        {
+
+            //今の状態で遷移を変える
+            //if (currentAnimIndex != BIGSWORD_COM1_01) {
+            if (comboAttackCount_ == 0)
+            {
+                animator->SetTriggerOn("squareIdle");
+                attackPlayer_->NormalAttack();
+                comboAttackCount_++;
+
+                //ダッシュ終了フラグ
+                DashEndFlag();
+                return;
+            }
+
+            if (comboAttackCount_ >= 3)return;
+
+            if (attackPlayer_->DoComboAttack())
+            {
+                animator->SetTriggerOn("square");
+                attackPlayer_->NormalAttack();
+                comboAttackCount_++;
+            }
+
+            ////アニメーションと次の攻撃の種類を選択
+            //nextAnimName_ = "squareIdle";
+        }
+    }
+
+    //コンボ中処理
     if (comboAttackCount_ > 0)
     {
         isInputMove_ = false;
         isInputTrun_ = false;
     }
 
-
-    GamePad& gamePad = Input::Instance().GetGamePad();
-    if (gamePad.GetButtonDown() & GamePad::BTN_Y)
-    {
-        //アニメーター
-        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-        int currentAnimIndex = GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
-
-        //今の状態で遷移を変える
-        //if (currentAnimIndex != BIGSWORD_COM1_01) {
-        if (comboAttackCount_ == 0)
-        {
-            animator->SetTriggerOn("squareIdle");
-            attackPlayer_->NormalAttack();
-            comboAttackCount_++;
-
-            //ダッシュ終了フラグ
-            DashEndFlag();
-            return;
-        }
-
-        if (comboAttackCount_ >= 3)return;
-
-        if (attackPlayer_->DoComboAttack())
-        {
-            animator->SetTriggerOn("square");
-            attackPlayer_->NormalAttack();
-            comboAttackCount_++;
-        }
-
-        ////アニメーションと次の攻撃の種類を選択
-        //nextAnimName_ = "squareIdle";
-    }
 }
 
 //攻撃当たり判定
@@ -895,6 +933,7 @@ void PlayerCom::AnimationInitialize()
     animator->AddTriggerParameter("triangle");  //△
     //入力無し
     animator->AddTriggerParameter("squareIdle");
+    animator->AddTriggerParameter("squareDash");
     animator->AddTriggerParameter("triangleIdle");
     //ジャスト時
     animator->AddTriggerParameter("squareJust");
@@ -925,6 +964,10 @@ void PlayerCom::AnimationInitialize()
             "moveSpeed", moveParam_[MOVE_PARAM::WALK].moveMaxSpeed + 1, PATAMETER_JUDGE::LESS);
         animator->SetLoopAnimation(RUN_HARD_2, true);
 
+        //dash切り
+        animator->AddAnimatorTransition(DASH_ANIM, BIGSWORD_DASH);
+        animator->SetTriggerTransition(DASH_ANIM, BIGSWORD_DASH, "squareDash");
+
         //どこからでも遷移する
         //jump
         animator->AddAnimatorTransition(JUMP_2);
@@ -936,28 +979,11 @@ void PlayerCom::AnimationInitialize()
         animator->SetTriggerTransition(PUNCH, "punch");
         animator->AddAnimatorTransition(PUNCH, IDEL_2, true);
 
-        ////bigSword
-        ////up
-        //animator->AddAnimatorTransition(BIGSWORD_UP);
-        //animator->SetTriggerTransition(BIGSWORD_UP, "squareIdle");
-        //animator->AddAnimatorTransition(BIGSWORD_UP, IDEL_2, true);
-        ////down
-        //animator->AddAnimatorTransition(BIGSWORD_DOWN);
-        //animator->SetTriggerTransition(BIGSWORD_DOWN, "squareIdle");
-        //animator->AddAnimatorTransition(BIGSWORD_DOWN, IDEL_2, true);
-        ////right
-        //animator->AddAnimatorTransition(BIGSWORD_RIGHT);
-        //animator->SetTriggerTransition(BIGSWORD_RIGHT, "squareIdle");
-        //animator->AddAnimatorTransition(BIGSWORD_RIGHT, IDEL_2, true);
-        ////left
-        //animator->AddAnimatorTransition(BIGSWORD_LEFT);
-        //animator->SetTriggerTransition(BIGSWORD_LEFT, "squareIdle");
-        //animator->AddAnimatorTransition(BIGSWORD_LEFT, IDEL_2, true);
-
         //dash
         animator->AddAnimatorTransition(DASH_ANIM);
         animator->SetTriggerTransition(DASH_ANIM, "dash");
         animator->AddAnimatorTransition(DASH_ANIM, IDEL_2, true);
+
 
         {   //□□□
             //combo01

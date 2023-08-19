@@ -117,6 +117,9 @@ private:
     };
     JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
 
+    //ƒWƒƒƒXƒg‰ñ”ğŒã‚ÌUŒ‚‚ğUŒ‚‚Éˆø‚«Œp‚®—p
+    std::string justAnimFlagName_ = "";
+
 #pragma endregion
 
 #pragma region UŒ‚
@@ -132,7 +135,6 @@ private:
 
 private:
     bool isNormalAttack_ = true;     //UŒ‚‚Å‚«‚é‚©
-    std::string nextAnimName_ = "";
     int comboAttackCount_ = 0;
 
 #pragma endregion
