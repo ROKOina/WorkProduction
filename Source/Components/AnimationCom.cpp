@@ -44,6 +44,9 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 	//再生中でないなら処理しない
 	if (!IsPlayAnimation())return;
 
+	//停止中なら処理しない
+	if (isStop_)return;
+
 	//モデルからリソースを取得
 	Model* model = GetGameObject()->GetComponent<RendererCom>()->GetModel();
 	const FbxModelResource* resource = model->GetResource();

@@ -41,7 +41,7 @@ private:
     //ダッシュ
     void DashMove(float elapsedTime);
     //ダッシュ時の更新
-    void DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> enemy);
+    void DashStateUpdate(float elapsedTime);
     //強制的にダッシュを終わらせる（攻撃時等）
     void DashEndFlag();
 
@@ -117,8 +117,6 @@ private:
     };
     JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
 
-    //ジャスト回避後の攻撃を攻撃に引き継ぐ用
-    std::string justAnimFlagName_ = "";
 
 #pragma endregion
 
@@ -135,7 +133,11 @@ private:
 
 private:
     bool isNormalAttack_ = true;     //攻撃できるか
-    int comboAttackCount_ = 0;
+    int comboAttackCount_ = 0;   
+
+    //他から攻撃に引き継ぐ用
+    std::string animFlagName_ = "";
+
 
 #pragma endregion
 
@@ -144,6 +146,24 @@ private:
     void AnimationInitialize();
 
 private:
+
+    //今のプレイヤーの遷移状態
+    enum class PLAYER_STATUS
+    {
+        IDLE,
+        MOVE,
+        DASH,
+        BACK_DASH,
+        JUMP,
+        JUST,
+        JUMP_DASH,
+        JUMP_BACK_DASH,
+        JUMP_JUST,
+
+        ATTACK,
+        ATTACK_DASH,
+    };
+    PLAYER_STATUS playerStatus_ = PLAYER_STATUS::IDLE;
 
     DirectX::XMFLOAT3 up_ = {0,1,0};
 

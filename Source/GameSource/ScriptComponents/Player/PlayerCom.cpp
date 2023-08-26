@@ -45,6 +45,7 @@ enum ANIMATION_PLAYER
 // 開始処理
 void PlayerCom::Start()
 {
+    
     //カメラをプレイヤーにフォーカスする
     std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
 
@@ -59,11 +60,11 @@ void PlayerCom::Start()
 
     //移動パラメーター初期化
     moveParam_[MOVE_PARAM::WALK].moveMaxSpeed = 5.0f;
-    moveParam_[MOVE_PARAM::WALK].moveAcceleration = 1.2f;
+    moveParam_[MOVE_PARAM::WALK].moveAcceleration = 2.0f;
     moveParam_[MOVE_PARAM::WALK].turnSpeed = 4.0f;
 
     moveParam_[MOVE_PARAM::RUN].moveMaxSpeed = 8.0f;
-    moveParam_[MOVE_PARAM::RUN].moveAcceleration = 1.2f;
+    moveParam_[MOVE_PARAM::RUN].moveAcceleration = 2.0f;
     moveParam_[MOVE_PARAM::RUN].turnSpeed = 8.0f;
 
     moveParam_[MOVE_PARAM::JUSTDASH].moveMaxSpeed = 3.0f;
@@ -71,7 +72,7 @@ void PlayerCom::Start()
     moveParam_[MOVE_PARAM::JUSTDASH].turnSpeed = 4.0f;
 
     moveParam_[MOVE_PARAM::DASH].moveMaxSpeed = 20.0f;
-    moveParam_[MOVE_PARAM::DASH].moveAcceleration = 2.0f;
+    moveParam_[MOVE_PARAM::DASH].moveAcceleration = 6.0f;
     moveParam_[MOVE_PARAM::DASH].turnSpeed = 8.0f;
 
     moveParamType_ = MOVE_PARAM::WALK;
@@ -86,6 +87,7 @@ void PlayerCom::Start()
     weapon->SetAttackStatus(BIGSWORD_COM1_01, 1, 15, 0.8f, 0.2f);
     weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
     weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f);
+    weapon->SetAttackStatus(BIGSWORD_DASH, 1, 100, 0.9f, 0.1f);
 
     //攻撃管理を初期化
     attackPlayer_ = std::make_shared<AttackPlayer>(GetGameObject()->GetComponent<PlayerCom>());
@@ -141,15 +143,6 @@ void PlayerCom::Update(float elapsedTime)
     {
         //攻撃更新
         AttackUpdate();
-        if (!isNormalAttack_)
-        {
-            GamePad& gamePad = Input::Instance().GetGamePad();
-            if (gamePad.GetButtonDown() & GamePad::BTN_Y)
-            {
-                std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-                animator->SetTriggerOn("squareDash");
-            }
-        }
 
         attackPlayer_->Update(elapsedTime);
 
@@ -215,7 +208,6 @@ int oo = 0;
 // GUI描画
 void PlayerCom::OnGUI()
 {
-
     ImGui::InputInt("nowMoveParamType", &moveParamType_);
     ImGui::SliderInt("moveParamType", &oo, 0, MOVE_PARAM::MAX-1);
     ImGui::DragFloat("moveMaxSpeed", &moveParam_[oo].moveMaxSpeed, 0.1f);
@@ -237,6 +229,9 @@ void PlayerCom::OnGUI()
     float ay = gamePad.GetAxisLY();
     ImGui::DragFloat("x", &ax);
     ImGui::DragFloat("y", &ay);
+
+    int stats = (int)playerStatus_;
+    ImGui::InputInt("status", &stats);
 }
 
 
@@ -300,7 +295,11 @@ bool PlayerCom::IsMove(float elapsedTime)
     //進行ベクトル取得
     inputMoveVec_ = GetMoveVec();
 
-    if (move->OnGround())jumpCount_ = 2;
+    if (move->OnGround() && jumpCount_ < 2)
+    {
+        jumpCount_ = 2;
+        playerStatus_ = PLAYER_STATUS::IDLE;
+    }
 
     //ジャンプ
     GamePad& gamePad = Input::Instance().GetGamePad();
@@ -323,6 +322,7 @@ bool PlayerCom::IsMove(float elapsedTime)
                 move->ZeroVelocityY();
                 --jumpCount_;
 
+                playerStatus_ = PLAYER_STATUS::JUMP;
             }
         }
     }
@@ -337,12 +337,25 @@ bool PlayerCom::IsMove(float elapsedTime)
             //if (!isDashJudge_)
         {
             //入力が終わると歩きに
-            moveParamType_ = MOVE_PARAM::WALK;
-            move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);
-            move->SetMoveAcceleration(moveParam_[MOVE_PARAM::WALK].moveAcceleration);
+            if (playerStatus_ != PLAYER_STATUS::JUMP)
+                if (comboAttackCount_ <= 0)
+                    if (!isDashJudge_)
+                    {
+                        moveParamType_ = MOVE_PARAM::WALK;
+                        move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);
+                        move->SetMoveAcceleration(moveParam_[MOVE_PARAM::WALK].moveAcceleration);
+
+                        playerStatus_ = PLAYER_STATUS::IDLE;
+                    }
         }
         return false;
     }
+
+    //状態更新
+    if (playerStatus_ != PLAYER_STATUS::JUMP)
+        if (!isDashJudge_ && !isJustJudge_ && comboAttackCount_ <= 0)
+            playerStatus_ = PLAYER_STATUS::MOVE;
+
     return true;
 }
 
@@ -353,10 +366,12 @@ void PlayerCom::Trun(float elapsedTime)
     QuaternionStruct inputQuaternion = QuaternionStruct::LookRotation(inputMoveVec_, up_);
     QuaternionStruct playerQuaternion = GetGameObject()->transform_->GetRotation();
 
+    float worldSpeed = Graphics::Instance().GetWorldSpeed();
+
     //ゆっくり回転
     DirectX::XMFLOAT4 rota;
     DirectX::XMStoreFloat4(&rota, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&playerQuaternion.dxFloat4),
-        DirectX::XMLoadFloat4(&inputQuaternion.dxFloat4), moveParam_[moveParamType_].turnSpeed * elapsedTime));
+        DirectX::XMLoadFloat4(&inputQuaternion.dxFloat4), moveParam_[moveParamType_].turnSpeed * (elapsedTime * worldSpeed)));
 
     GetGameObject()->transform_->SetRotation(rota);
 }
@@ -389,6 +404,70 @@ void PlayerCom::DashMove(float elapsedTime)
 {
     if (!isDash_)return;
 
+    //ダッシュ
+    GamePad& gamePad = Input::Instance().GetGamePad();
+    if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_TRIGGER)
+    {
+        isDashJudge_ = true;        //ダッシュフラグON
+
+        //アニメーター
+        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+
+        //ダッシュ後コンボ
+        if (playerStatus_ == PLAYER_STATUS::ATTACK_DASH)
+        {
+            if (attackPlayer_->OnHitEnemy())
+            {
+                Graphics::Instance().SetWorldSpeed(1.0f);
+                playerStatus_ = PLAYER_STATUS::DASH;
+
+                animFlagName_ = "jump";
+                attackPlayer_->DashAttack(2);
+                animator->SetIsStop(true);
+                return;
+            }
+        }
+
+        //アタックリセット
+        AttackFlagEnd();
+
+        //入力があればstate=0
+        if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
+        {
+            dashState_ = 0;
+            if (playerStatus_ == PLAYER_STATUS::JUMP)
+                playerStatus_ = PLAYER_STATUS::JUMP_DASH;
+            else
+                playerStatus_ = PLAYER_STATUS::DASH;
+        }
+        else
+        {
+            dashState_ = 10;
+            if (playerStatus_ == PLAYER_STATUS::JUMP)
+                playerStatus_ = PLAYER_STATUS::JUMP_BACK_DASH;
+            else
+                playerStatus_ = PLAYER_STATUS::BACK_DASH;
+        }
+
+        animator->SetTriggerOn("dash");
+
+
+        ////ジャスト回避初期化
+        //JustInisialize();
+        //isNormalAttack_ = true;
+
+    }
+
+    //ダッシュ時の更新
+    DashStateUpdate(elapsedTime);
+
+}
+
+//ダッシュ時の更新
+void PlayerCom::DashStateUpdate(float elapsedTime)
+{
+    if (!isDashJudge_)return;
+
     //ジャスト回避の当たり判定
     std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
     //ジャスト回避したエネミーを保存
@@ -417,41 +496,6 @@ void PlayerCom::DashMove(float elapsedTime)
             enemy = hitObj.gameObject->GetParent();
     }
 
-    //ダッシュ
-    GamePad& gamePad = Input::Instance().GetGamePad();
-    if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_TRIGGER)
-    {
-        //入力があればstate=0
-        if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
-        {
-            dashState_ = 0;
-        }
-        else
-            dashState_ = 10;
-        isDashJudge_ = true;        //ダッシュフラグON
-
-        //アニメーター
-        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-        animator->SetTriggerOn("dash");
-
-
-        ////ジャスト回避初期化
-        //JustInisialize();
-        //isNormalAttack_ = true;
-
-        //アタックリセット
-        AttackFlagEnd();
-    }
-
-    //ダッシュ時の更新
-    DashStateUpdate(elapsedTime, enemy);
-
-}
-
-//ダッシュ時の更新
-void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> enemy)
-{
-    if (!isDashJudge_)return;
 
     std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
 
@@ -472,6 +516,7 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
         case 1:
         {
             isInputMove_ = true;
+            isNormalAttack_ = false;
 
             //ダッシュに変更
             move->ZeroVelocity();
@@ -479,7 +524,6 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
             move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
             move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
             dashStopTimer_ = dashStopTime_;
-            isNormalAttack_ = false;
             dashState_++;
             break;
         }
@@ -498,13 +542,16 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
             //最大速度に達したら次のステート
             dashStopTimer_ -= elapsedTime;
             if (length > dashMaxSpeed_ || dashStopTimer_ < 0)
+            {
                 dashState_++;
+                isNormalAttack_ = true;
+            }
             break;
         case 3:
         {
             //加速度を下げていく
             float acce = move->GetMoveAcceleration();
-            acce -= 5 * elapsedTime;
+            acce -= 10 * elapsedTime;
             move->SetMoveAcceleration(acce);
 
             if (moveParam_[MOVE_PARAM::RUN].moveMaxSpeed >= length)
@@ -519,7 +566,6 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
             dashState_ = -1;
             isDashJudge_ = false;
             isInputMove_ = true;
-            isNormalAttack_ = true;
             break;
 
 
@@ -574,7 +620,7 @@ void PlayerCom::DashStateUpdate(float elapsedTime, std::shared_ptr<GameObject> e
 
             //加速度を下げていく
             float acce = move->GetMoveAcceleration();
-            acce -= 5 * elapsedTime;
+            acce -= 10 * elapsedTime;
             move->SetMoveAcceleration(acce);
 
             if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
@@ -668,6 +714,7 @@ void PlayerCom::JustAvoidanceMove(float elapsedTime)
         //敵の方を向く
         GetGameObject()->transform_->LookAtTransform(justHitEnemy_->transform_->GetWorldPosition());
          
+        playerStatus_ = PLAYER_STATUS::JUST;
 
         break;
     case 1:
@@ -732,6 +779,7 @@ void PlayerCom::JustAvoidanceAttackInput()
 
         isInputTrun_ = false;
 
+        playerStatus_ = PLAYER_STATUS::ATTACK;
 
         //敵の方を向く
         GetGameObject()->transform_->LookAtTransform(justHitEnemy_->transform_->GetWorldPosition());
@@ -762,7 +810,7 @@ void PlayerCom::JustAvoidanceSquare(float elapsedTime)
             isDash_ = true;
 
             //アタック処理に引き継ぐ
-            justAnimFlagName_ = "squareJust";
+            animFlagName_ = "squareJust";
         }
 
         DirectX::XMVECTOR Dir = DirectX::XMVector3Normalize(PE);
@@ -774,7 +822,6 @@ void PlayerCom::JustAvoidanceSquare(float elapsedTime)
         move->AddForce(dir);
 
     }
-        //isInputMove_ = true;
 }
 
 #pragma endregion
@@ -788,52 +835,119 @@ void PlayerCom::AttackUpdate()
 {
     if (!isNormalAttack_)return;
 
+    //アニメーター
+    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+
+    //ダッシュコンボ入力にする
+    if (playerStatus_ == PLAYER_STATUS::DASH && comboAttackCount_ == 2)
+    {
+        if (attackPlayer_->EndAttackState())
+        {
+            animator->SetIsStop(false);
+            Graphics::Instance().SetWorldSpeed(0.3f);
+        }
+    }
+
+
     int currentAnimIndex = GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
 
     //コンボ後処理
-    if (comboAttackCount_ > 0)
     {
-        //前フレームのコンボとアニメーションを見て
-        //コンボ終了か見る
         static int oldCount = 0;
         static int oldAnim = 0;
-        if (oldCount == comboAttackCount_)
-        {
-            if (oldAnim != currentAnimIndex)
+        if (comboAttackCount_ > 0) {
+            //前フレームのコンボとアニメーションを見て
+            //コンボ終了か見る
+            if (oldCount == comboAttackCount_)
             {
-                //コンボ終了
-                AttackFlagEnd();
+                if (oldAnim != currentAnimIndex)
+                {
+                    //コンボ終了
+                    AttackFlagEnd();
+                }
             }
         }
         oldCount = comboAttackCount_;
         oldAnim = currentAnimIndex;
     }
-    //アニメーター
-    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
 
-    //ジャスト回避攻撃
-    if (justAnimFlagName_.size() > 0)
+    if (playerStatus_ == PLAYER_STATUS::ATTACK_DASH)
     {
-        animator->SetTriggerOn(justAnimFlagName_);
+        if (attackPlayer_->DoComboAttack())
+        {
+            isDash_ = true;
+            if (attackPlayer_->OnHitEnemy())
+            {
+                Graphics::Instance().SetWorldSpeed(0.3f);
+            }
+        }
+    }
+
+
+    //引き継ぎ攻撃アニメーション
+    if (animFlagName_.size() > 0)
+    {
+        animator->SetTriggerOn(animFlagName_);
         comboAttackCount_++;
-        justAnimFlagName_ = "";
+        animFlagName_ = "";
     }
     else
     {
         GamePad& gamePad = Input::Instance().GetGamePad();
-        if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+        if (gamePad.GetButtonDown() & GamePad::BTN_X)   //△
         {
 
+            if (comboAttackCount_ == 0)
+            {
+                //ダッシュ攻撃か判定
+                if (playerStatus_ == PLAYER_STATUS::DASH)
+                {
+                    //ダッシュ後コンボのためダッシュを出来なくする
+                    isDash_ = false;
+                    animator->SetTriggerOn("triangleDash");
+                    playerStatus_ = PLAYER_STATUS::ATTACK_DASH;
+                    attackPlayer_->DashAttack(1);
+
+                    comboAttackCount_++;
+
+                    //ダッシュ終了フラグ
+                    DashEndFlag();
+                }
+
+
+                return;
+            }
+        }
+
+        if (gamePad.GetButtonDown() & GamePad::BTN_Y)   //□
+        {
             //今の状態で遷移を変える
             //if (currentAnimIndex != BIGSWORD_COM1_01) {
             if (comboAttackCount_ == 0)
             {
-                animator->SetTriggerOn("squareIdle");
-                attackPlayer_->NormalAttack();
+                //ダッシュ攻撃か判定
+                if (playerStatus_ == PLAYER_STATUS::DASH)
+                {
+                    ////ダッシュ後コンボのためダッシュを出来なくする
+                    //isDash_ = false;
+                    //animator->SetTriggerOn("squareDash");
+                    //playerStatus_ = PLAYER_STATUS::ATTACK_DASH;
+                    //attackPlayer_->DashAttack();
+                    return;
+                }
+                else
+                {
+                    animator->SetTriggerOn("squareIdle");
+                    playerStatus_ = PLAYER_STATUS::ATTACK;
+                    attackPlayer_->NormalAttack();
+                }
+
                 comboAttackCount_++;
 
                 //ダッシュ終了フラグ
                 DashEndFlag();
+
+
                 return;
             }
 
@@ -841,9 +955,27 @@ void PlayerCom::AttackUpdate()
 
             if (attackPlayer_->DoComboAttack())
             {
+                if (playerStatus_ == PLAYER_STATUS::ATTACK)
+                {
+                    animator->SetTriggerOn("square");
+                    attackPlayer_->NormalAttack();
+                    comboAttackCount_++;
+
+                    playerStatus_ = PLAYER_STATUS::ATTACK;
+                    return;
+                }
+            }
+
+            if (playerStatus_ == PLAYER_STATUS::DASH)
+            {
                 animator->SetTriggerOn("square");
-                attackPlayer_->NormalAttack();
+
+                //仮で
+                playerStatus_ = PLAYER_STATUS::ATTACK;
+                Graphics::Instance().SetWorldSpeed(1.0f);
                 comboAttackCount_++;
+
+                return;
             }
 
             ////アニメーションと次の攻撃の種類を選択
@@ -908,6 +1040,15 @@ void PlayerCom::AttackFlagEnd()
     comboAttackCount_ = 0;
     isInputMove_ = true;
     isInputTrun_ = true;
+    attackPlayer_->ResetState();
+
+    if (playerStatus_ == PLAYER_STATUS::ATTACK_DASH ||
+        playerStatus_ == PLAYER_STATUS::DASH)
+    {
+        Graphics::Instance().SetWorldSpeed(1.0f);
+    }
+
+    playerStatus_ = PLAYER_STATUS::IDLE;
 }
 
 
@@ -935,6 +1076,7 @@ void PlayerCom::AnimationInitialize()
     animator->AddTriggerParameter("squareIdle");
     animator->AddTriggerParameter("squareDash");
     animator->AddTriggerParameter("triangleIdle");
+    animator->AddTriggerParameter("triangleDash");
     //ジャスト時
     animator->AddTriggerParameter("squareJust");
     animator->AddTriggerParameter("triangleJust");
@@ -964,9 +1106,19 @@ void PlayerCom::AnimationInitialize()
             "moveSpeed", moveParam_[MOVE_PARAM::WALK].moveMaxSpeed + 1, PATAMETER_JUDGE::LESS);
         animator->SetLoopAnimation(RUN_HARD_2, true);
 
-        //dash切り
-        animator->AddAnimatorTransition(DASH_ANIM, BIGSWORD_DASH);
-        animator->SetTriggerTransition(DASH_ANIM, BIGSWORD_DASH, "squareDash");
+        {   //dashコンボ
+            //dash切り
+            animator->AddAnimatorTransition(BIGSWORD_DASH);
+            animator->SetTriggerTransition(BIGSWORD_DASH, "triangleDash");
+            animator->AddAnimatorTransition(BIGSWORD_DASH, IDEL_2, true, 3.5f);
+
+            //コンボ3
+            animator->AddAnimatorTransition(JUMP_2, BIGSWORD_COM1_01);
+            animator->SetTriggerTransition(JUMP_2, BIGSWORD_COM1_01, "square");
+            animator->AddAnimatorTransition(BIGSWORD_COM1_01, IDEL_2, true, 3.5f);
+
+
+        }
 
         //どこからでも遷移する
         //jump
@@ -983,7 +1135,6 @@ void PlayerCom::AnimationInitialize()
         animator->AddAnimatorTransition(DASH_ANIM);
         animator->SetTriggerTransition(DASH_ANIM, "dash");
         animator->AddAnimatorTransition(DASH_ANIM, IDEL_2, true);
-
 
         {   //□□□
             //combo01

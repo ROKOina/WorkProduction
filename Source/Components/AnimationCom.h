@@ -87,6 +87,10 @@ public:
         return currentAnimationEvents_;
     }
 
+    //í‚é~Ç∑ÇÈÇ©
+    bool GetIsStop() { return isStop_; }
+    void SetIsStop(bool stop) { isStop_ = stop; }
+
 private:
     int currentAnimationIndex_ = -1;
     float currentAnimationSeconds_ = 0.0f;
@@ -100,6 +104,8 @@ private:
     DirectX::XMFLOAT3 oldRootPos_ = {};
 
     bool isLooped_ = false;  //ÉãÅ[ÉvÇµÇΩÇ©
+
+    bool isStop_ = false;    //í‚é~Ç∑ÇÈÇ©
 
     std::vector<AnimEvent> currentAnimationEvents_;
 };

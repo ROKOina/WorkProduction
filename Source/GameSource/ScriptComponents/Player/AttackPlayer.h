@@ -28,12 +28,25 @@ public:
 private:
     int NormalAttackUpdate(float elapsedTime);
 
+
+public: 
+    //ダッシュコンボ番号を引数で指定（１から）
+    void DashAttack(int comboNum);
+
+private:
+    int DashAttackUpdate(float elapsedTime);
+
 public:
     //攻撃アニメーション判定
-    bool DoAnimation() { return state == ATTACK_CODE::EnterAttack; }
+    bool EndAttackState() { return state_ == ATTACK_CODE::EnterAttack; }
 
     //コンボ出来るか判定
     bool DoComboAttack();
+
+    //直前の攻撃が当たっているか
+    bool OnHitEnemy() { return onHitEnemy_; }
+
+    void ResetState() { state_ = -1; }
 
 private:
     //アシスト範囲を索敵して近い敵を返す
@@ -46,26 +59,30 @@ private:
     bool ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> enemy, float rollSpeed);
 
 private:
-    std::weak_ptr<PlayerCom> player;
+    bool onHitEnemy_ = false;
 
-    std::shared_ptr<GameObject> enemyCopy;  //敵保存
+    std::weak_ptr<PlayerCom> player_;
+
+    std::shared_ptr<GameObject> enemyCopy_;  //敵保存
 
     //現在の攻撃の種類
     enum class ATTACK_FLAG
     {
         Normal,
+        Dash,
 
         Null,
     };
-    ATTACK_FLAG attackFlagState = ATTACK_FLAG::Null;
+    ATTACK_FLAG attackFlagState_ = ATTACK_FLAG::Null;
 
     //攻撃の動きを管理
-    int state = -1;
+    int state_ = -1;
 };
 
 /*
-コンボ図
+コンボ図（＞:次の行動、＾:どちらでも繋がる）
 
-
+ダッシュ
+DASH＞△＞DASH＞□＾△
 
 */

@@ -24,6 +24,8 @@ void WeaponCom::Update(float elapsedTime)
     assert(parentObject_);
     assert(nodeName_.size() > 0);
 
+    onHit_ = false;
+
     std::shared_ptr<RendererCom> rendererCom = parentObject_->GetComponent<RendererCom>();
     Model::Node* node = rendererCom->GetModel()->FindNode(nodeName_.c_str());
 
@@ -70,6 +72,8 @@ void WeaponCom::Update(float elapsedTime)
             //‚Á”ò‚Î‚µ
             float power = attackStatus_[animIndex].impactPower;
             status->OnDamage(DirectX::XMFLOAT3(dir.x * power, dir.y * power, dir.z * power ));
+
+            onHit_ = true;
         }
     }
 }

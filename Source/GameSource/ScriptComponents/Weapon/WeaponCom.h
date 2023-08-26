@@ -43,11 +43,17 @@ public:
     //アニメーションとステータスを紐づける
     void SetAttackStatus(int animIndex, int damage, float impactPower, float front = 1, float up = 0);
 
+    //ヒット確認
+    bool GetOnHit() { return onHit_; }
+
 private:
     //アニメイベント名から当たり判定を付けるか判断("AutoCollision"から始まるイベントを自動で取得)
     bool CollsionFromEventJudge();
 
 private:
+    //攻撃のヒット確認
+    bool onHit_ = false;
+
     //武器の親になるオブジェクト
     std::shared_ptr<GameObject> parentObject_;
     //武器の子にさせたいノードの名前

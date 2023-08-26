@@ -102,6 +102,10 @@ public:
 
     void SetFirstTransition(int index) { firstTransition_ = index; }
     
+    //アニメーション停止
+    void SetIsStop(bool stop);
+    bool GetIsStop();
+
 private:
     //キーをそのままアニメーションのindexに使う
     std::map<int, AnimatorData> animatorData_;

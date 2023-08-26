@@ -133,5 +133,13 @@ private:
 
 	float fps_;
 	std::mutex	mutex_;
+
+	//¢ŠE‚Ì‘¬“x
+public:
+	float GetWorldSpeed() { return worldSpeed_; }
+	void SetWorldSpeed(float speed) { worldSpeed_ = speed; }
+
+private:
+	float worldSpeed_ = 1.0f;
 };
 

@@ -21,8 +21,8 @@ void PlayerCameraCom::Update(float elapsedTime)
 
     //“ü—Íî•ñ‚ğæ“¾
     GamePad& gamePad = Input::Instance().GetGamePad();
-    angleY_ += gamePad.GetAxisRX() * 0.5f;
-    angleX_ -= gamePad.GetAxisRY() * 0.3f;
+    angleY_ += gamePad.GetAxisRX() * 180.0f * elapsedTime;
+    angleX_ -= gamePad.GetAxisRY() * 100.0f * elapsedTime;
 
 
     //Šp“x§ŒÀ(c‚Ì‚İ)

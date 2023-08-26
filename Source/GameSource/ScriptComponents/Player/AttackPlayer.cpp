@@ -6,9 +6,10 @@
 #include "Components\MovementCom.h"
 #include "Components\AnimationCom.h"
 #include "SystemStruct\QuaternionStruct.h"
+#include "../Weapon\WeaponCom.h"
 
 AttackPlayer::AttackPlayer(std::shared_ptr<PlayerCom> player)
-    :player(player)
+    :player_(player)
 {
 
 }
@@ -21,60 +22,120 @@ AttackPlayer::~AttackPlayer()
 void AttackPlayer::Update(float elapsedTime)
 {
     //state初期化
-    if (DoAnimation())state = -1;
+    if (EndAttackState())state_ = -1;
 
     //攻撃の種類によって動きを変える
-    switch (attackFlagState)
+    switch (attackFlagState_)
     {
     case ATTACK_FLAG::Normal:
         if (NormalAttackUpdate(elapsedTime) == ATTACK_CODE::EnterAttack)
-            attackFlagState = ATTACK_FLAG::Null;
+            attackFlagState_ = ATTACK_FLAG::Null;
         break;
+    case ATTACK_FLAG::Dash:
+        if (DashAttackUpdate(elapsedTime) == ATTACK_CODE::EnterAttack)
+            attackFlagState_ = ATTACK_FLAG::Null;
+        break;
+    }
+
+
+    //攻撃が当たっているか見る
+    std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
+    //武器ステータス初期化
+    std::shared_ptr<WeaponCom> weapon = playerObj->GetChildFind("greatSword")->GetComponent<WeaponCom>();
+
+    //一回でも攻撃が当たっているなら次の攻撃が来るまで、trueにする
+    if (weapon->GetOnHit())
+    {
+        onHitEnemy_ = true;
     }
 }
 
 void AttackPlayer::NormalAttack()
 {
-    state = 0;
-    attackFlagState = ATTACK_FLAG::Normal;
+    state_ = 0;
+    onHitEnemy_ = false;    //攻撃が入力されたらfalseに
+    attackFlagState_ = ATTACK_FLAG::Normal;
 }
 
 int AttackPlayer::NormalAttackUpdate(float elapsedTime)
 {
-    switch (state)
+    switch (state_)
     {
     case 0:
         //範囲内に敵はいるか
-        enemyCopy = AssistGetNearEnemy();
-        if (!enemyCopy)
+        enemyCopy_ = AssistGetNearEnemy();
+        if (!enemyCopy_)
         {
-            state = ATTACK_CODE::EnterAttack;
+            state_ = ATTACK_CODE::EnterAttack;
             break;
         }
-        state++;
+        state_++;
         break;
 
     case 1:
         //回転
-        if (ForcusEnemy(elapsedTime, enemyCopy, 10))
-            state++;
+        if (ForcusEnemy(elapsedTime, enemyCopy_, 10))
+            state_++;
        break;
 
     case 2:
         //接近
-        if (ApproachEnemy(enemyCopy, 1.5f))
-            state = ATTACK_CODE::EnterAttack;
+        if (ApproachEnemy(enemyCopy_, 1.5f))
+            state_ = ATTACK_CODE::EnterAttack;
         break;
     }
 
-    return state;
+    return state_;
+}
+
+void AttackPlayer::DashAttack(int comboNum)
+{
+    if (comboNum == 1)
+        state_ = 0;
+    if (comboNum == 2)
+        state_ = 10;
+    onHitEnemy_ = false;    //攻撃が入力されたらfalseに
+    attackFlagState_ = ATTACK_FLAG::Dash;
+}
+
+int AttackPlayer::DashAttackUpdate(float elapsedTime)
+{
+    switch (state_)
+    {
+        //コンボ１
+    case 0:
+        //範囲内に敵はいるか
+        enemyCopy_ = AssistGetNearEnemy();
+        if (!enemyCopy_)
+        {
+            state_ = ATTACK_CODE::EnterAttack;
+            break;
+        }
+        state_++;
+        break;
+
+    case 1:
+        //回転
+        if (ForcusEnemy(elapsedTime, enemyCopy_, 10))
+            state_ = ATTACK_CODE::EnterAttack;
+        break;
+
+        //コンボ２
+    case 10:
+        //接近
+        if (ApproachEnemy(enemyCopy_, 1.5f,2))
+            state_ = ATTACK_CODE::EnterAttack;
+        break;
+    }
+
+    return state_;
 }
 
 
 //コンボ出来るか判定
 bool AttackPlayer::DoComboAttack()
 {
-    std::shared_ptr<GameObject> playerObj = player.lock()->GetGameObject();
+    std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
 
     std::shared_ptr<AnimationCom> animCom = playerObj->GetComponent<AnimationCom>();
     for (auto& animEvent : animCom->GetCurrentAnimationEventsData())
@@ -93,7 +154,7 @@ bool AttackPlayer::DoComboAttack()
 //アシスト範囲を索敵して近い敵を返す
 std::shared_ptr<GameObject> AttackPlayer::AssistGetNearEnemy()
 {
-    std::shared_ptr<GameObject> playerObj = player.lock()->GetGameObject();
+    std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
     std::shared_ptr<GameObject> enemyNearObj;   //一番近い敵を入れる
 
     //アシスト判定取得
@@ -129,7 +190,7 @@ std::shared_ptr<GameObject> AttackPlayer::AssistGetNearEnemy()
 //敵に接近する( true:接近完了　false:接近中 )
 bool AttackPlayer::ApproachEnemy(std::shared_ptr<GameObject> enemy, float dist, float speed)
 {
-    std::shared_ptr<GameObject> playerObj = player.lock()->GetGameObject();
+    std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
 
     DirectX::XMVECTOR P = DirectX::XMLoadFloat3(&playerObj->transform_->GetWorldPosition());
     DirectX::XMVECTOR E = DirectX::XMLoadFloat3(&enemy->transform_->GetWorldPosition());
@@ -152,10 +213,11 @@ bool AttackPlayer::ApproachEnemy(std::shared_ptr<GameObject> enemy, float dist, 
     return false;
 }
 
+
 //敵の方向へ回転する ( true:完了 )
 bool AttackPlayer::ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> enemy, float rollSpeed)
 {
-    std::shared_ptr<GameObject> playerObj = player.lock()->GetGameObject();
+    std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
 
     DirectX::XMVECTOR P = DirectX::XMLoadFloat3(&playerObj->transform_->GetWorldPosition());
     DirectX::XMVECTOR E = DirectX::XMLoadFloat3(&enemy->transform_->GetWorldPosition());
@@ -171,7 +233,7 @@ bool AttackPlayer::ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> en
 
     float rot = DirectX::XMVectorGetX(DirectX::XMQuaternionDot(PQ, PEQ));
 
-    if (1 - rot * rot < 0.1f)return true;
+    if (1 - rot * rot < 0.01f)return true;
 
     //プレイヤー向きから、エネミーの方向へ補間する
     PQ = DirectX::XMQuaternionSlerp(PQ, PEQ, rollSpeed * elapsedTime);

@@ -327,6 +327,17 @@ void SceneGame::Render()
 		// ラインレンダラ描画実行
 		graphics.GetLineRenderer()->Render(dc, mainCamera_->GetView(), mainCamera_->GetProjection());
 
+		ImGui::SetNextWindowPos(ImVec2(950, 50), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_FirstUseEver);
+
+		ImGui::Begin("WorldSetting", nullptr, ImGuiWindowFlags_None);
+
+		//世界のスピード
+		float worldSpeed = graphics.GetWorldSpeed();
+		ImGui::DragFloat("worldSpeed", &worldSpeed, 0.01f, 0, 2);
+		graphics.SetWorldSpeed(worldSpeed);
+
+		ImGui::End();
 
 	}
 

@@ -3,6 +3,7 @@
 #include <imgui.h>
 
 #include "AnimationCom.h"
+#include "Graphics/Graphics.h"
 
 // 開始処理
 void AnimatorCom::Start()
@@ -12,6 +13,9 @@ void AnimatorCom::Start()
 // 更新処理
 void AnimatorCom::Update(float elapsedTime)
 {
+    //世界の速度に合わせる
+    SetAnimationSpeed(Graphics::Instance().GetWorldSpeed());
+
     std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
     if (!animation)return;
 
@@ -158,6 +162,11 @@ void AnimatorCom::OnGUI()
     float animSpeed = GetAnimationSpeed();
     if (ImGui::DragFloat("animSpeed", &animSpeed, 0.01f))
         SetAnimationSpeed(animSpeed);
+
+    //アニメーション停止
+    bool snimStop = GetIsStop();
+    if (ImGui::Checkbox("animStop", &snimStop))
+        SetIsStop(snimStop);
 }
 
 
@@ -308,4 +317,20 @@ float AnimatorCom::GetAnimationSpeed()
     if (!animation)return 0;
 
     return animation->GetAnimationSpeed();
+}
+
+//アニメーション停止
+void AnimatorCom::SetIsStop(bool stop)
+{
+    std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
+    if (!animation)return;
+
+    animation->SetIsStop(stop);
+}
+bool AnimatorCom::GetIsStop()
+{
+    std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
+    if (!animation)return false;
+
+    return animation->GetIsStop();
 }

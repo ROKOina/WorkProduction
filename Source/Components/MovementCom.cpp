@@ -31,7 +31,8 @@ void MovementCom::OnGUI()
 //ècï˚å¸à⁄ìÆçXêV
 void MovementCom::VerticalUpdate(float elapsedTime)
 {
-    float gravity = gravity_ * (elapsedTime);
+    float worldSpeed = Graphics::Instance().GetWorldSpeed();
+    float gravity = gravity_ * (elapsedTime * worldSpeed);
     //float gravity = gravity_ * (elapsedTime * Graphics::Instance().GetFPS());
     //float gravity = gravity_ * (elapsedTime*100 /** Graphics::Instance().GetFPS()*/);
     AddForce({ 0,gravity,0 });
@@ -56,11 +57,13 @@ void MovementCom::HorizonUpdate(float elapsedTime)
         velocity_.z = newMaxVelocity.z;
     }
 
-    //float friction = friction_ * (elapsedTime);
-    float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS());
+    float worldSpeed = Graphics::Instance().GetWorldSpeed();
+
+    float friction = friction_ * (elapsedTime * worldSpeed);
+    //float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS() * worldSpeed);
     //float friction = friction_ * (elapsedTime*100 /** Graphics::Instance().GetFPS()*/);
     //ñÄéCóÕ
-    if (horiLength > friction)
+    if (horiLength > 0.1f)
     {
         DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVectorScale(HorizonVelocity, -1), friction);
         //DirectX::XMVECTOR FriVelocity = DirectX::XMVectorScale(DirectX::XMVector3Normalize(HorizonVelocity), -friction);
@@ -104,9 +107,10 @@ void MovementCom::VelocityAppPosition(float elapsedTime)
     velocity.z = velocity_.z + nonMaxSpeedVelocity_.z;
 
 
-    position.x += velocity.x * elapsedTime;
-    position.y += velocity.y * elapsedTime;
-    position.z += velocity.z * elapsedTime;
+    float worldSpeed = Graphics::Instance().GetWorldSpeed();
+    position.x += velocity.x * (elapsedTime * worldSpeed);
+    position.y += velocity.y * (elapsedTime * worldSpeed);
+    position.z += velocity.z * (elapsedTime * worldSpeed);
 
 
     //Ç∆ÇËÇ†Ç¶Ç∏0à»â∫ï‚ê≥

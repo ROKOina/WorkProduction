@@ -63,18 +63,18 @@ void EnemyCom::Update(float elapsedTime)
         attackChild->GetComponent<Collider>()->SetEnabled(false);
     }
 
-    //とりあえず近くにいたら攻撃(仮)
-    DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
-    DirectX::XMFLOAT3 myPos = GetGameObject()->transform_->GetWorldPosition();
-    if (playerPos.x * playerPos.x - myPos.x * myPos.x < 5 * 5)
-    {
-        if (playerPos.z * playerPos.z - myPos.z * myPos.z < 5 * 5)
-        {
-            //アニメーター
-            std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-            animator->SetTriggerOn("kick");
-        }
-    }
+    ////とりあえず近くにいたら攻撃(仮)
+    //DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
+    //DirectX::XMFLOAT3 myPos = GetGameObject()->transform_->GetWorldPosition();
+    //if (playerPos.x * playerPos.x - myPos.x * myPos.x < 5 * 5)
+    //{
+    //    if (playerPos.z * playerPos.z - myPos.z * myPos.z < 5 * 5)
+    //    {
+    //        //アニメーター
+    //        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+    //        animator->SetTriggerOn("kick");
+    //    }
+    //}
 
     ////アタック当たり判定
     //hitObj = attackChild->GetComponent<Collider>()->OnHitGameObject();
