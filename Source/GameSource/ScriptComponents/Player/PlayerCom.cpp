@@ -416,7 +416,7 @@ void PlayerCom::DashMove(float elapsedTime)
         //ダッシュ後コンボ
         if (playerStatus_ == PLAYER_STATUS::ATTACK_DASH)
         {
-            if (attackPlayer_->OnHitEnemy())
+            if (attackPlayer_->OnHitEnemy() && attackPlayer_->ComboReadyEnemy())
             {
                 Graphics::Instance().SetWorldSpeed(1.0f);
                 playerStatus_ = PLAYER_STATUS::DASH;
@@ -876,7 +876,7 @@ void PlayerCom::AttackUpdate()
         if (attackPlayer_->DoComboAttack())
         {
             isDash_ = true;
-            if (attackPlayer_->OnHitEnemy())
+            if (attackPlayer_->OnHitEnemy() && attackPlayer_->ComboReadyEnemy())
             {
                 Graphics::Instance().SetWorldSpeed(0.3f);
             }
@@ -968,12 +968,14 @@ void PlayerCom::AttackUpdate()
 
             if (playerStatus_ == PLAYER_STATUS::DASH)
             {
-                animator->SetTriggerOn("square");
+                if (animator->GetIsStop())return;
+                //animator->SetTriggerOn("square");
+                animator->SetTriggerOn("squareIdle");
 
                 //仮で
                 playerStatus_ = PLAYER_STATUS::ATTACK;
                 Graphics::Instance().SetWorldSpeed(1.0f);
-                comboAttackCount_++;
+                comboAttackCount_=1;
 
                 return;
             }

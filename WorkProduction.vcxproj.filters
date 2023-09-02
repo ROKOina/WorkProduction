@@ -255,6 +255,13 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerCameraCom.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\UnityChanToonShader.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionBase.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentBase.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\NodeBase.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\BehaviorData.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionDerived.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -453,6 +460,21 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Shaders\3D\UnityChanToonShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionDerived.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\NodeBase.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\BehaviorTree.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\BehaviorData.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

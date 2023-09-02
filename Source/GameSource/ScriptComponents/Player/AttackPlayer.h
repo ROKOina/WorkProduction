@@ -48,6 +48,12 @@ public:
 
     void ResetState() { state_ = -1; }
 
+    //“G‚ğ‘¨‚¦‚Ä‚¢‚é‚©
+    bool ComboReadyEnemy() { 
+        if (enemyCopy_)return true;
+        return false;
+    }
+
 private:
     //ƒAƒVƒXƒg”ÍˆÍ‚ğõ“G‚µ‚Ä‹ß‚¢“G‚ğ•Ô‚·
     std::shared_ptr<GameObject> AssistGetNearEnemy();

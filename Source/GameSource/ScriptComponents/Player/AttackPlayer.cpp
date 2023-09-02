@@ -123,7 +123,13 @@ int AttackPlayer::DashAttackUpdate(float elapsedTime)
         //ÉRÉìÉ{ÇQ
     case 10:
         //ê⁄ãﬂ
-        if (ApproachEnemy(enemyCopy_, 1.5f,2))
+        if (!enemyCopy_)
+        {
+            state_ = ATTACK_CODE::EnterAttack;
+            break;
+        }
+
+        if (ApproachEnemy(enemyCopy_, 1.5f, 2))
             state_ = ATTACK_CODE::EnterAttack;
         break;
     }
