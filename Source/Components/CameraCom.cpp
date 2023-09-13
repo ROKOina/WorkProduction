@@ -1,6 +1,8 @@
 #include "CameraCom.h"
 
 #include "TransformCom.h"
+#include "Graphics/Graphics.h"
+#include "GameSource/Math/Mathf.h"
 #include <imgui.h>
 #include <cmath>
 
@@ -14,15 +16,50 @@ void CameraCom::Start()
 // 更新処理
 void CameraCom::Update(float elapsedTime)
 {
+    //カメラシェイク
+    if (shakeSec_ > 0)
+    {
+        shakeSec_ -= elapsedTime;
+
+        DirectX::XMFLOAT3 upDir = GetGameObject()->transform_->GetWorldUp();
+        DirectX::XMFLOAT3 rightDir = GetGameObject()->transform_->GetWorldRight();
+
+        float random = Mathf::RandomRange(-1, 1) * shakePower_;
+        upDir = { upDir.x * random,upDir.y * random,upDir.z * random };
+        random = Mathf::RandomRange(-1, 1) * shakePower_;
+        rightDir = { rightDir.x * random,rightDir.y * random,rightDir.z * random };
+
+        shakePos_ = { upDir.x + rightDir.x,upDir.y + rightDir.y,upDir.z + rightDir.z };
+    }
+    else
+    {
+        shakePos_ = { 0,0,0 };
+    }
+
+    //ヒットストップ
+    if (isHitStop_)
+    {
+        if (hitTimer_ > 0)
+        {
+            hitTimer_ -= elapsedTime;
+            Graphics::Instance().SetWorldSpeed(0);
+        }
+        else
+        {
+            isHitStop_ = false;
+            Graphics::Instance().SetWorldSpeed(1);
+        }
+    }
+
     //LookAt関数使っていないなら更新する
     if (!isLookAt_) {
         //カメラのフォワードをフォーカスする
         DirectX::XMFLOAT3 forwardPoint;
         DirectX::XMFLOAT3 wPos = GetGameObject()->transform_->GetWorldPosition();
         DirectX::XMFLOAT3 forwardNormalVec = GetGameObject()->transform_->GetWorldFront();
-        forwardPoint = { forwardNormalVec.x * 2 + wPos.x,
-            forwardNormalVec.y * 2 + wPos.y,
-            forwardNormalVec.z * 2 + wPos.z };
+        forwardPoint = { forwardNormalVec.x * 2 + wPos.x + shakePos_.x,
+            forwardNormalVec.y * 2 + wPos.y + shakePos_.y,
+            forwardNormalVec.z * 2 + wPos.z + shakePos_.z };
 
         SetLookAt(forwardPoint, GetGameObject()->transform_->GetWorldUp());
     }
@@ -34,6 +71,10 @@ void CameraCom::Update(float elapsedTime)
 void CameraCom::OnGUI()
 {
     ImGui::DragFloat3("Focus", &focus_.x);
+
+    ImGui::DragFloat3("shakePos_", &shakePos_.x);
+    ImGui::DragFloat("shakeSec", &shakeSec_);
+    ImGui::DragFloat("shakePower", &shakePower_);
 }
 
 //指定方向を向く

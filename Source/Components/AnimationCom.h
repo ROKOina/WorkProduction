@@ -80,6 +80,7 @@ public:
                 return anim;
             }
         }
+        return {};
     }
 
     //現在のアニメーションイベント取得

@@ -100,7 +100,7 @@ void PhongShader::Draw(ID3D11DeviceContext* dc, const Model* model)
     const ModelResource* resource = model->GetResource();
     const std::vector<Model::Node>& nodes = model->GetNodes();
     Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
-
+    
 
     //“§–¾ƒ}ƒeƒŠƒAƒ‹
     std::vector<ModelResource::Mesh> alphaMesh;
@@ -139,7 +139,10 @@ void PhongShader::Draw(ID3D11DeviceContext* dc, const Model* model)
             for (const ModelResource::Subset& subset : mesh.subsets)
             {
                 CbSubset cbSubset;
-                cbSubset.materialColor = subset.material->color;
+
+                //cbSubset.materialColor = subset.material->color;
+                cbSubset.materialColor = model->GetMaterialColor();
+
 
                 ////“§–¾•`‰æ‚È‚çŒã‰ñ‚µ‚É‚·‚é
                 //if (!alphaMat)

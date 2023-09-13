@@ -103,12 +103,13 @@ void UnityChanToonShader::Draw(ID3D11DeviceContext* dc, const Model* model)
     const std::vector<Model::Node>& nodes = model->GetNodes();
     Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
 
+
     //透明マテリアル
     std::vector<ModelResource::Mesh> alphaMesh;
 
     //描画関数（透明と不透明を分けるため）
     //alphaMat(true : 透明描画)
-    auto DrawLambda = [&](std::vector<ModelResource::Mesh> meshContainer, bool alphaMat)
+    auto DrawLambda = [&](std::vector<ModelResource::Mesh>& meshContainer, bool alphaMat)
     {
         for (const ModelResource::Mesh& mesh : meshContainer)
         {
@@ -169,7 +170,8 @@ void UnityChanToonShader::Draw(ID3D11DeviceContext* dc, const Model* model)
         }
     };
 
-    DrawLambda(resource->GetMeshes(), false);
+    
+    DrawLambda(model->GetResourceShared()->GetMeshesEdit(), false);
     DrawLambda(alphaMesh, true);
 
 }

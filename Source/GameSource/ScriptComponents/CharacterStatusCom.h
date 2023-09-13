@@ -16,6 +16,9 @@ public:
     // 開始処理
     void Start() override;
 
+    //更新前
+    void UpdateStart() override;
+
     // 更新処理
     void Update(float elapsedTime) override;
 
@@ -31,9 +34,16 @@ public:
         return isDamage_;
     }
 
+    //ダメージを受けた時だけtrueを返す
+    bool GetFrameDamage() { return isFrameDamage_; }
+
+
+
 private:
     //状態系
     bool isDamage_ = false; //ダメージを受けている時にtrue
+    bool isFrameDamage_ = false; //ダメージを受けた時だけtrue
+    bool oneFrameJudge = false;
     float damageInvincibleTime_ = 1; //ダメージ時の無敵時間
     float damageTimer_ = 0; //ダメージ時のタイマー
 

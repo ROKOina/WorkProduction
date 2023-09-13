@@ -29,7 +29,10 @@ public:
     void UpdateTransform();
 
     // ローカルポジション
-    void SetLocalPosition(const DirectX::XMFLOAT3& position) { this->localPosition_ = position; }
+    void SetLocalPosition(const DirectX::XMFLOAT3& position) {
+        this->localPosition_ = position; 
+        UpdateTransform();
+    }
     const DirectX::XMFLOAT3& GetLocalPosition() const { return localPosition_; }
 
     // ワールドポジション

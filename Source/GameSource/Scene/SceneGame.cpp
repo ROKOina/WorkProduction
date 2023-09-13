@@ -37,7 +37,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemy
-	//for(int i=0;i<50;++i)
+	//for(int i=0;i<3;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -48,7 +48,12 @@ void SceneGame::Initialize()
 		const char* filename = "Data/Model/picolabo/picolabo.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
-		r->SetShaderID(SHADER_ID::Phong);
+		r->SetShaderID(SHADER_ID::UnityChanToon);
+
+		//発光を消す
+		std::vector<ModelResource::Material>& materials = r->GetModel()->GetResourceShared()->GetMaterialsEdit();
+		materials[0].toonStruct._Emissive_Color.w = 0;
+
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
 		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
@@ -73,7 +78,6 @@ void SceneGame::Initialize()
 			std::shared_ptr<SphereColliderCom> attackCol = attack->AddComponent<SphereColliderCom>();
 			attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
 			attackCol->SetJudgeTag(COLLIDER_TAG::Player);
-
 		}
 		//ジャスト回避用
 		{
@@ -96,7 +100,7 @@ void SceneGame::Initialize()
 		const char* filename = "Data/Model/pico/picoAnim.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
-		r->SetShaderID(SHADER_ID::Phong);
+		r->SetShaderID(SHADER_ID::UnityChanToon);
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 		//a->PlayAnimation(4, true);
@@ -144,7 +148,7 @@ void SceneGame::Initialize()
 			const char* filename = "Data/Model/Swords/GreatSword/GreatSword.mdl";
 			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
 			r->LoadModel(filename);
-			r->SetShaderID(SHADER_ID::Phong);
+			r->SetShaderID(SHADER_ID::UnityChanToon);
 
 			std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
 			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
@@ -153,6 +157,25 @@ void SceneGame::Initialize()
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(sword->GetParent());
 			weapon->SetNodeName("RightHandMiddle2");
+		}
+
+		//ジャスト回避用プレイヤー
+		for (int i = 0; i < 4; ++i)
+		{
+			std::shared_ptr<GameObject> picoJust = obj->AddChildObject();
+			std::string s = "picoJust" + std::to_string(i);
+			picoJust->SetName(s.c_str());
+			picoJust->SetEnabled(false);
+
+			const char* filename = "Data/Model/pico/picoAnim.mdl";
+			std::shared_ptr<RendererCom> picoJustRenderer = picoJust->AddComponent<RendererCom>();
+			picoJustRenderer->LoadModel(filename);
+			picoJustRenderer->SetShaderID(SHADER_ID::UnityChanToon);
+			picoJustRenderer->GetModel()->SetMaterialColor({ 1.2f,1.2f,0.1f,0.65f });
+
+			picoJust->AddComponent<AnimationCom>();
+
+			picoJust->transform_->SetWorldPosition({ 0,0,100 });
 		}
 	}
 
@@ -186,9 +209,13 @@ void SceneGame::Initialize()
 		postEff = std::make_unique<PostEffect>(
 			static_cast<UINT>(graphics.GetScreenWidth()) ,
 			static_cast<UINT>(graphics.GetScreenHeight()));
+
+		graphics.shaderParameter3D_.bloomData2.intensity = 5;
+		graphics.shaderParameter3D_.bloomData2.threshold = 1;
 	}
 
-	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->GetLocalPosition().x,player->GetLocalPosition().y,player->GetLocalPosition().z,0 });
+	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
+	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->transform_->GetWorldPosition().x, player->transform_->GetWorldPosition().y, player->transform_->GetWorldPosition().z,0 });
 }
 
 // 終了化
@@ -209,8 +236,9 @@ void SceneGame::Update(float elapsedTime)
 
 	Graphics& graphics = Graphics::Instance();
 
-
-	//particle_->integrate(elapsedTime, { player->GetLocalPosition().x,player->GetLocalPosition().y,player->GetLocalPosition().z,0 }, camera->GetView(), camera->GetProjection());
+	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
+	//std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+	//particle_->integrate(elapsedTime, { player->transform_->GetWorldPosition().x, player->transform_->GetWorldPosition().y, player->transform_->GetWorldPosition().z, 0 }, camera->GetView(), camera->GetProjection());
 }
 
 // 描画処理
@@ -264,6 +292,7 @@ void SceneGame::Render()
 
 
 	GameObjectManager::Instance().UpdateTransform();
+
 	GameObjectManager::Instance().Render(mainCamera_->GetView(), mainCamera_->GetProjection());
 
 	// デバッグレンダラ描画実行
@@ -284,13 +313,7 @@ void SceneGame::Render()
 	//	shader->End(dc);
 	//}
 
-	//バッファ戻す
-	Graphics::Instance().RestoreRenderTargets();
-
-	postEff->Render();
-	postEff->ImGuiRender();
-
-	////パーティクル
+	//	//パーティクル
 	//{
 	//	Dx11StateLib* dx11State_ = Graphics::Instance().GetDx11State().get();
 	//	const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -304,7 +327,7 @@ void SceneGame::Render()
 	//		dx11State_->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
 	//	);
 
-	//	particle_->Render(shaderParameter3D_);
+	//	particle_->Render(graphics.shaderParameter3D_);
 
 	//	dc->OMSetBlendState(
 	//		dx11State_->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
@@ -316,6 +339,13 @@ void SceneGame::Render()
 	//		dx11State_->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
 	//	);
 	//}
+
+	//バッファ戻す
+	Graphics::Instance().RestoreRenderTargets();
+
+	postEff->Render();
+	postEff->ImGuiRender();
+
 
 	//3Dエフェクト描画
 	{

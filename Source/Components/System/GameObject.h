@@ -24,6 +24,7 @@ public:
 
 	// 更新処理
 	virtual void Update(float elapsedTime);
+	virtual void UpdateStart();
 
 	// 行列の更新
 	virtual void UpdateTransform();

@@ -166,7 +166,7 @@ void AnimationCom::AnimationUpdata(float elapsedTime)
 			DirectX::XMMATRIX Mat = DirectX::XMLoadFloat4x4(&GetGameObject()->transform_->GetLocalTransform());
 			DirectX::XMStoreFloat3(&dist, DirectX::XMVector3TransformCoord(DirectX::XMVectorSubtract(T, TOld), Mat));
 
-			GetGameObject()->transform_->SetWorldPosition(dist);
+			GetGameObject()->transform_->SetLocalPosition(dist);
 
 			DirectX::XMStoreFloat3(&oldRootPos_, T);	//¡‰ñ‚Ìpos‚ğ•Û‘¶
 

@@ -94,10 +94,6 @@ public:
     void SetFloatValue(std::string name, float value);
 
 
-    //アニメーション再生速度
-    void SetAnimationSpeed(float speed);
-    float GetAnimationSpeed();
-
     void SetLoopAnimation(int index, bool loop) { animatorData_[index].isLoop = loop; }
 
     void SetFirstTransition(int index) { firstTransition_ = index; }
@@ -105,6 +101,18 @@ public:
     //アニメーション停止
     void SetIsStop(bool stop);
     bool GetIsStop();
+
+    //アニメーションスピード（オフセット）
+    void SetAnimationSpeedOffset(float speed) { animSpeedOffset_ = speed; }
+    float GetAnimationSpeedOffset() { return  animSpeedOffset_; }
+
+    //パラメーターをリセットする
+    void ResetParameterList();
+
+private:
+    //アニメーション再生速度
+    void SetAnimationSpeed(float speed);
+    float GetAnimationSpeed();
 
 private:
     //キーをそのままアニメーションのindexに使う
@@ -119,4 +127,7 @@ private:
     //最初のアニメーションを絶対に指定する
     int firstTransition_ = -1;
     bool oneFlag_ = false;
+
+    //アニメーションスピードオフセット
+    float animSpeedOffset_ = 1;
 };

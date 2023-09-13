@@ -40,8 +40,14 @@ public:
 	//ノード検索
 	Node* FindNode(const char* name);
 
+	//カラー
+	const DirectX::XMFLOAT4 GetMaterialColor() const { return materialColor_; }
+	void SetMaterialColor(DirectX::XMFLOAT4 color) { materialColor_ = color; }
+
 private:
 	//std::shared_ptr<ModelResource>	resource;
 	std::shared_ptr<FbxModelResource>	modelResource_;	//fbx用
 	std::vector<Node>				nodes_;
+
+	DirectX::XMFLOAT4 materialColor_ = { 1,1,1,1 };
 };

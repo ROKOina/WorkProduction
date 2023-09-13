@@ -59,6 +59,7 @@ void MovementCom::HorizonUpdate(float elapsedTime)
 
     float worldSpeed = Graphics::Instance().GetWorldSpeed();
 
+
     float friction = friction_ * (elapsedTime * worldSpeed);
     //float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS() * worldSpeed);
     //float friction = friction_ * (elapsedTime*100 /** Graphics::Instance().GetFPS()*/);

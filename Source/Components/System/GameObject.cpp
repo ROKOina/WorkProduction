@@ -20,6 +20,16 @@ void GameObject::Start()
 	}
 }
 
+// 更新前
+void GameObject::UpdateStart()
+{
+	if (!isEnabled_)return;
+	for (std::shared_ptr<Component>& component : components_)
+	{
+		component->UpdateStart();
+	}
+}
+
 // 更新
 void GameObject::Update(float elapsedTime)
 {
@@ -197,6 +207,12 @@ void GameObjectManager::Update(float elapsedTime)
 				colliderObject_[col1].lock()->ColliderVSOther(colliderObject_[col2].lock());
 			}
 		}
+	}
+
+	//アップデート前に呼ぶ関数
+	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
+	{
+		obj->UpdateStart();
 	}
 
 	for (std::shared_ptr<GameObject>& obj : updateGameObject_)

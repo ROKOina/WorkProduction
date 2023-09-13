@@ -14,7 +14,7 @@ void AnimatorCom::Start()
 void AnimatorCom::Update(float elapsedTime)
 {
     //世界の速度に合わせる
-    SetAnimationSpeed(Graphics::Instance().GetWorldSpeed());
+    SetAnimationSpeed(Graphics::Instance().GetWorldSpeed() * animSpeedOffset_);
 
     std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
     if (!animation)return;
@@ -162,6 +162,11 @@ void AnimatorCom::OnGUI()
     float animSpeed = GetAnimationSpeed();
     if (ImGui::DragFloat("animSpeed", &animSpeed, 0.01f))
         SetAnimationSpeed(animSpeed);
+
+    //アニメーション速度オフセット
+    float animSpeedOffset = GetAnimationSpeedOffset();
+    if (ImGui::DragFloat("animSpeedOffset", &animSpeedOffset, 0.01f))
+        SetAnimationSpeedOffset(animSpeedOffset);
 
     //アニメーション停止
     bool snimStop = GetIsStop();
@@ -333,4 +338,13 @@ bool AnimatorCom::GetIsStop()
     if (!animation)return false;
 
     return animation->GetIsStop();
+}
+
+//パラメーターをリセットする
+void AnimatorCom::ResetParameterList()
+{
+    for (auto& triggerList : triggerParameterList_)
+    {
+        triggerList->trigger = false;
+    }
 }

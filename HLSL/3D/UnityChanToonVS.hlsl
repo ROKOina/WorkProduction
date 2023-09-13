@@ -26,7 +26,7 @@ VertexOutput main(
     o.normal = normalize(n);
     o.tangent = normalize(t);
     o.binormal = cross(o.normal, o.tangent);
-    o.world_position = float4(p, 0);
+    o.world_position = float4(p, 0.0f);
     o.position = mul(float4(p, 1.0f), viewProjection);
     o.color = color * materialColor;
 

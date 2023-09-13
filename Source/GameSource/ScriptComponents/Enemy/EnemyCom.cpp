@@ -10,17 +10,8 @@
 #include "GameSource/Math/Mathf.h"
 
 #include "../Player/PlayerCom.h"
+#include "../CharacterStatusCom.h"
 
-//アニメーションリスト
-enum ANIMATION_ENEMY
-{
-    WALK,
-    RUN,
-    RUN_BACK,
-    JUMP,
-    IDEL,
-    KICK,
-};
 
 //AI遷移
 enum class AI_TREE
@@ -30,8 +21,9 @@ enum class AI_TREE
 
     //2層
     //ROOT 
-    SCOUT,
+    DAMAGE,
     BATTLE,
+    SCOUT,
 
     //3層
     //SCOUT 
@@ -71,7 +63,7 @@ void EnemyCom::Start()
     aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::PURSUIT, 2, BehaviorTree::SelectRule::Non, nullptr, new PursuitAction(this));
 
     //4層
-    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 1, BehaviorTree::SelectRule::Non, new AttackJudgment(this), new AttackAction(this));
+    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 1, BehaviorTree::SelectRule::Priority, new AttackJudgment(this), new AttackAction(this));
 
     SetRandomTargetPosition();
 }
@@ -107,13 +99,22 @@ void EnemyCom::Update(float elapsedTime)
     DirectX::XMFLOAT3 pos;
     //ジャスト
     std::shared_ptr<GameObject> justChild = GetGameObject()->GetChildFind("picolaboAttackJust");
-    if (GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationEvent("kick_left_just", pos)) {
-        justChild->GetComponent<Collider>()->SetEnabled(true);
-        //justChild->transform_->SetWorldPosition(pos);
-    }
-    else
+
+    //ジャスト当たり判定を切っておく
+    justChild->GetComponent<Collider>()->SetEnabled(false);
+
+    std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
+    for (auto& animEvent : animation->GetCurrentAnimationEventsData())
     {
-        justChild->GetComponent<Collider>()->SetEnabled(false);
+        //justが入っているならなら
+        if (animEvent.name.find("just") == std::string::npos)continue;
+        if(isJustAvoid_)justChild->GetComponent<Collider>()->SetEnabled(true);
+        //イベント中なら当たり判定を出す
+        if (animation->GetCurrentAnimationEvent(animEvent.name.c_str(), pos))
+        {
+            isJustAvoid_ = false;
+            justChild->GetComponent<Collider>()->SetEnabled(true);
+        }
     }
 
     //ジャスト当たり判定
@@ -124,17 +125,17 @@ void EnemyCom::Update(float elapsedTime)
         int i = 0;
     }
 
-    //アタックアニメーションイベント取得
-    //イベント中は子のアタックオブジェクトをオンに
-    std::shared_ptr<GameObject> attackChild = GetGameObject()->GetChildFind("picolaboAttack");
-    if (GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationEvent("kick_left", pos)) {
-        attackChild->GetComponent<Collider>()->SetEnabled(true);
-        attackChild->transform_->SetWorldPosition(pos);
-    }
-    else
-    {
-        attackChild->GetComponent<Collider>()->SetEnabled(false);
-    }
+    ////アタックアニメーションイベント取得
+    ////イベント中は子のアタックオブジェクトをオンに
+    //std::shared_ptr<GameObject> attackChild = GetGameObject()->GetChildFind("picolaboAttack");
+    //if (GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationEvent("kick_left", pos)) {
+    //    attackChild->GetComponent<Collider>()->SetEnabled(true);
+    //    attackChild->transform_->SetWorldPosition(pos);
+    //}
+    //else
+    //{
+    //    attackChild->GetComponent<Collider>()->SetEnabled(false);
+    //}
 
     ////とりあえず近くにいたら攻撃(仮)
     //DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
@@ -188,11 +189,17 @@ bool EnemyCom::SearchPlayer()
     float vz = playerPos.z - pos.z;
     float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 
-    if (dist < 5)
+    if (dist < searchRange_)
     {
         return true;
     }
     return false;
+}
+
+//ダメージ確認
+bool EnemyCom::OnDamageEnemy()
+{
+    return GetGameObject()->GetComponent<CharacterStatusCom>()->GetFrameDamage();
 }
 
 //アニメーション初期化設定
@@ -206,9 +213,12 @@ void EnemyCom::AnimationInitialize()
 
     //アニメーションパラメーター追加
     animator->AddTriggerParameter("kick");
+    animator->AddTriggerParameter("rightPunch01");
+    animator->AddTriggerParameter("leftUpper01");
     animator->AddTriggerParameter("idle");
     animator->AddTriggerParameter("walk");
     animator->AddTriggerParameter("run");
+    animator->AddTriggerParameter("damage");
 
     animator->AddAnimatorTransition(IDEL);
     animator->SetTriggerTransition(IDEL, "idle");
@@ -223,5 +233,14 @@ void EnemyCom::AnimationInitialize()
 
     animator->AddAnimatorTransition(KICK);
     animator->SetTriggerTransition(KICK, "kick");
+
+    animator->AddAnimatorTransition(RIGHT_STRAIGHT01, false, 0);
+    animator->SetTriggerTransition(RIGHT_STRAIGHT01, "rightPunch01");
+
+    animator->AddAnimatorTransition(LEFT_UPPER01);
+    animator->SetTriggerTransition(LEFT_UPPER01, "leftUpper01");
+
+    animator->AddAnimatorTransition(DAMAGE);
+    animator->SetTriggerTransition(DAMAGE, "damage");
 
 }

@@ -50,7 +50,20 @@ public:
     //右方向取得
     const DirectX::XMFLOAT3& GetRight()const { return right_; }
 
+    //カメラシェイク実行
+    void CameraShake(float power, float seconds) { 
+        shakePower_ = power; 
+        shakeSec_ = seconds;
+    }
+
+    //ヒットストップ
+    void HitStop(float sec){
+        isHitStop_ = true;
+        hitTimer_ = sec;
+    }
+
 private:
+    //座標系
     DirectX::XMFLOAT4X4 view_;
     DirectX::XMFLOAT4X4 projection_;
 
@@ -62,4 +75,14 @@ private:
 
     bool isLookAt_ = false;
 
+
+    //演出系
+    //カメラシェイク
+    float shakeSec_;    //秒数
+    float shakePower_;  //強さ
+    DirectX::XMFLOAT3 shakePos_;
+
+    //ヒットストップ
+    float hitTimer_ = 0;
+    bool isHitStop_ = false;
 };

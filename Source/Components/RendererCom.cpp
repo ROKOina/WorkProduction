@@ -47,6 +47,33 @@ void RendererCom::OnGUI()
         }
         ImGui::EndPopup();
     }
+
+    if (ImGui::TreeNode("UnityChanToon"))
+    {
+        for (ModelResource::Material& mat : model_->GetResourceShared()->GetMaterialsEdit())
+        {
+            if (ImGui::TreeNode(mat.name.c_str()))
+            {
+                if (shaderID_ == 2)
+                {
+                    DirectX::XMFLOAT4 w = mat.toonStruct._Emissive_Color;
+                    if (ImGui::DragFloat4("emissivePower", &w.x, 0.01f, 0, 3))
+                    {
+                        mat.toonStruct._Emissive_Color = w;
+                    }
+                }
+                ImGui::TreePop();
+            }
+        }
+        ImGui::TreePop();
+    }
+
+    DirectX::XMFLOAT4 color = model_->GetMaterialColor();
+    if (ImGui::DragFloat4("materialColor", &color.x, 0.01f, 0, 5))
+    {
+        model_->SetMaterialColor(color);
+    }
+
 }
 
 // ƒ‚ƒfƒ‹‚Ì“Ç‚İ‚İ

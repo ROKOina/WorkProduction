@@ -36,7 +36,7 @@ bool AttackJudgment::Judgment()
 
 		float dot = DirectX::XMVectorGetX(DirectX::XMQuaternionDot(DirectX::XMLoadFloat4(&myQ.dxFloat4), DirectX::XMVectorScale(DirectX::XMLoadFloat4(&focusQ.dxFloat4), -1)));
 
-		if (dot * dot > 0.8f)
+		if (dot * dot > 0.99f)
 			// AttackNode‚Ö‘JˆÚ‚Å‚«‚é
 			return true;
 	}
@@ -58,8 +58,14 @@ bool WanderJudgment::Judgment()
 	float radius = 0.5f;
 	if (distSq > radius * radius)
 	{
-		return true;
+		return true;	//“ž’…
 	}
 
 	return false;
+}
+
+// DamageNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool DamageJudgment::Judgment()
+{
+	return owner_->OnDamageEnemy();
 }

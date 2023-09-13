@@ -4,6 +4,8 @@
 #include "Components/AnimatorCom.h"
 #include "Components/AnimationCom.h"
 #include "Components/MovementCom.h"
+#include "Components/RendererCom.h"
+#include "Components/ColliderCom.h"
 
 
 // 待機行動
@@ -85,7 +87,7 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 		DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&position);
 		DirectX::XMVECTOR TPos = DirectX::XMLoadFloat3(&targetPosition);
 		DirectX::XMFLOAT3 force;
-		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 0.3f));
+		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 20.0f * elapsedTime));
 
 		std::shared_ptr<MovementCom> move = owner_->GetGameObject()->GetComponent<MovementCom>();
 		move->AddForce(force);
@@ -146,7 +148,7 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&position);
 		DirectX::XMVECTOR TPos = DirectX::XMLoadFloat3(&targetPosition);
 		DirectX::XMFLOAT3 force;
-		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 0.5f));
+		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 40.0f * elapsedTime));
 
 		std::shared_ptr<MovementCom> move = owner_->GetGameObject()->GetComponent<MovementCom>();
 		move->AddForce(force);
@@ -191,7 +193,126 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 	{
 		//アニメーター
 		std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
-		animator->SetTriggerOn("kick");
+		animator->SetTriggerOn("rightPunch01");
+		step_++;
+		break;
+	}
+	//攻撃前行動
+	case 1:
+	{		
+		//アニメーション
+		std::shared_ptr<AnimationCom> animation = owner_->GetGameObject()->GetComponent<AnimationCom>();
+		//アニメーションイベントの中から攻撃前（DoAttack）を名前検索する
+		ModelResource::AnimationEvent animEvent = animation->GetAnimationEvent("DoAttack").resourceEventData;
+		if (animEvent.name.size() <= 0)
+		{
+			return ActionBase::State::Failed;
+		}
+
+		if (animation->GetCurrentAnimationSecoonds() > animEvent.endFrame)
+		{
+			//アニメーター
+			std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+			animator->SetIsStop(true);
+			timer_ = 0.3f;
+
+			//発光準備
+			std::shared_ptr<RendererCom> renderer = owner_->GetGameObject()->GetComponent<RendererCom>();
+			std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
+			materials[0].toonStruct._Emissive_Color.w = 0.3f;
+
+			step_++;
+		}
+		break;
+	}
+	case 2:
+	{
+		timer_ -= elapsedTime;
+
+		//発光
+		std::shared_ptr<RendererCom> renderer = owner_->GetGameObject()->GetComponent<RendererCom>();
+		std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
+		materials[0].toonStruct._Emissive_Color.w += 2.5f * elapsedTime;
+
+		if (timer_ < 0)
+		{
+			//アニメーター
+			std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+			animator->SetIsStop(false);
+
+			materials[0].toonStruct._Emissive_Color.w = 0;
+			
+			owner_->SetIsJustAvoid(true);
+
+			step_++;
+		}
+		break;
+	}
+	case 3:
+	{
+		//アタックアニメーションイベント取得
+		//イベント中は子のアタックオブジェクトをオンに
+		std::shared_ptr<GameObject> attackChild = owner_->GetGameObject()->GetChildFind("picolaboAttack");
+		DirectX::XMFLOAT3 pos;
+		if (owner_->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationEvent("AttackEnemy", pos)) {
+			attackChild->GetComponent<Collider>()->SetEnabled(true);
+			attackChild->transform_->SetWorldPosition(pos);
+		}
+		else
+		{
+			attackChild->GetComponent<Collider>()->SetEnabled(false);
+		}
+
+		// アニメーションが終了しているとき
+		if (!owner_->GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
+		{
+			step_ = 0;
+			// 攻撃成功を返す
+			return ActionBase::State::Complete;
+		}
+		break;
+	}
+	case 5:
+		// アニメーションが終了しているとき
+		if (!owner_->GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
+		{
+			step_ = 0;
+			// 攻撃失敗を返す
+			return ActionBase::State::Failed;
+		}
+		break;
+	}
+
+	//ダメージを受けた時
+	if (owner_->OnDamageEnemy())
+	{
+		//アニメーター
+		step_ = 5;
+		std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+		animator->SetIsStop(false);
+		animator->SetTriggerOn("damage");
+
+		std::shared_ptr<RendererCom> renderer = owner_->GetGameObject()->GetComponent<RendererCom>();
+		std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
+		materials[0].toonStruct._Emissive_Color.w = 0;
+
+		owner_->GetGameObject()->GetChildFind("picolaboAttack")->GetComponent<Collider>()->SetEnabled(false);
+	}
+
+	// スキル中を返す
+	return ActionBase::State::Run;
+}
+
+// ダメージ
+ActionBase::State DamageAction::Run(float elapsedTime)
+{
+	switch (step_)
+	{
+	case 0:
+	{
+		//アニメーター
+		std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+		animator->SetTriggerOn("damage");
 
 		step_++;
 		break;

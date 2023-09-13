@@ -11,7 +11,7 @@ SamplerState shadowMapSamplerState : register(s1);
 float3 ClacHalfLambert(float3 normal, float3 lightVector, float3 lightColor, float3 kd)
 {
     float d = clamp(
-		(dot(-lightVector, normal) * 0.5f + 0.5f), 0, 1)
+		(dot(-lightVector, normal) * 0.5f + 0.5f), 0.0f, 1.0f)
 		* lightColor * kd;
 
     return lightColor * d * kd;
@@ -71,6 +71,6 @@ float4 main(VS_OUT pin) : SV_TARGET
 		CalcLambertDiffuse(N, L, lightColor.rgb, kd);
 
     float4 color = diffuseColor;	//アルファ値用
-    color.rgb = diffuseColor.rgb * (ambient + directionalDiffuse);
+    color.rgb = diffuseColor.rgb * (ambient + directionalDiffuse) * materialColor.rgb;
     return color;
 }

@@ -6,6 +6,7 @@
 #include "Components\RendererCom.h"
 #include "Components\ColliderCom.h"
 #include "Components\AnimationCom.h"
+#include "Components\AnimatorCom.h"
 
 #include "../CharacterStatusCom.h"
 
@@ -85,12 +86,15 @@ void WeaponCom::OnGUI()
 }
 
 
-void WeaponCom::SetAttackStatus(int animIndex, int damage, float impactPower, float front, float up)
+void WeaponCom::SetAttackStatus(int animIndex, int damage, float impactPower, float front, float up, float animSpeed)
 {
     attackStatus_[animIndex].damage = damage;
     attackStatus_[animIndex].impactPower = impactPower;
     attackStatus_[animIndex].front = front;
     attackStatus_[animIndex].up = up;
+
+    //アニメーションスピード
+    attackStatus_[animIndex].animSpeed = animSpeed;
 }
 
 
@@ -98,10 +102,21 @@ void WeaponCom::SetAttackStatus(int animIndex, int damage, float impactPower, fl
 bool WeaponCom::CollsionFromEventJudge()
 {
     std::shared_ptr<AnimationCom> animCom = GetGameObject()->GetParent()->GetComponent<AnimationCom>();
+    //攻撃速度をいじる
+    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetParent()->GetComponent<AnimatorCom>();
+    animator->SetAnimationSpeedOffset(1);
     for (auto& animEvent : animCom->GetCurrentAnimationEventsData())
     {
         //頭がAutoCollisionなら当たり判定をする
         if (animEvent.name.compare(0, 13, "AutoCollision") != 0)continue;
+
+        //エンドフレーム前なら
+        if (!animCom->GetCurrentAnimationEventIsEnd(animEvent.name.c_str()))
+        {
+            //アニメーションスピードを設定
+            animator->SetAnimationSpeedOffset(attackStatus_[animCom->GetCurrentAnimationIndex()].animSpeed);
+        }
+
         if (!animCom->GetCurrentAnimationEvent(animEvent.name.c_str(), DirectX::XMFLOAT3()))continue;
 
         return true;

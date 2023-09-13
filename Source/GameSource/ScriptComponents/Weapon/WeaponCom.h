@@ -39,9 +39,12 @@ public:
         //吹っ飛ばし方向
         float front = 1;    //1~0で強さを決める
         float up = 0;       //両方1なら斜めになる
+
+        //攻撃時のアニメーションスピード
+        float animSpeed = 1;
     };
     //アニメーションとステータスを紐づける
-    void SetAttackStatus(int animIndex, int damage, float impactPower, float front = 1, float up = 0);
+    void SetAttackStatus(int animIndex, int damage, float impactPower, float front = 1, float up = 0, float animSpeed = 1);
 
     //ヒット確認
     bool GetOnHit() { return onHit_; }

@@ -8,9 +8,26 @@ void CharacterStatusCom::Start()
 
 }
 
+//更新前
+void CharacterStatusCom::UpdateStart()
+{
+}
+
 // 更新処理
 void CharacterStatusCom::Update(float elapsedTime)
 {
+    //1フレームだけisFrameDamage_をtrueにする
+    if (isFrameDamage_)
+    {
+        if (oneFrameJudge)
+        {
+            isFrameDamage_ = false;
+            oneFrameJudge = false;
+        }
+        else
+            oneFrameJudge = true;
+    }
+
     //ダメージ
     if (isDamage_)
     {
@@ -34,6 +51,7 @@ void CharacterStatusCom::OnGUI()
 void CharacterStatusCom::OnDamage(DirectX::XMFLOAT3& power)
 {
     isDamage_ = true;
+    isFrameDamage_ = true;
 
     GetGameObject()->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
 }

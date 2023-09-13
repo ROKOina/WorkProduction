@@ -83,7 +83,7 @@ NodeBase* NodeBase::Inference(EnemyCom* enemy, BehaviorData* data)
 			if (children_.at(i)->judgment_->Judgment())list.emplace_back(children_.at(i));
 		}
 		else {
-			// TODO 04_03 判定クラスがなければ無条件に追加
+			//判定クラスがなければ無条件に追加
 			list.emplace_back(children_.at(i));
 		}
 	}
