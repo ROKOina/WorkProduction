@@ -130,4 +130,10 @@ private:
 
     //アニメーションスピードオフセット
     float animSpeedOffset_ = 1;
+
+    //次のアニメーションに行くか
+    bool hasExit_ = false; 
+    int saveIndex_ = -1;
+    float saveBlendTime_ = -1;
+
 };

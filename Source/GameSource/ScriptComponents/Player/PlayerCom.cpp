@@ -94,6 +94,7 @@ void PlayerCom::Start()
 
     //攻撃管理を初期化
     attackPlayer_ = std::make_shared<AttackPlayer>(GetGameObject()->GetComponent<PlayerCom>());
+    movePlayer_ = std::make_shared<MovePlayer>(GetGameObject()->GetComponent<PlayerCom>());
 
     //アニメーション初期化
     AnimationInitialize();
@@ -104,36 +105,38 @@ void PlayerCom::Start()
 void PlayerCom::Update(float elapsedTime)
 {
     //移動
-    {
-        std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
-        //移動が入力されていたら
-        if (IsMove(elapsedTime))
-        {
-            //移動処理
-            //回転
-            if (isInputTrun_)
-                Trun(elapsedTime);
+    //{
+    //    std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+    //    //移動が入力されていたら
+    //    if (IsMove(elapsedTime))
+    //    {
+    //        //移動処理
+    //        //回転
+    //        if (isInputTrun_)
+    //            Trun(elapsedTime);
 
-            //ジャスト回避中は通らない
-            if (isInputMove_)
-            {
-                //縦方向移動
-                VerticalMove();
-                //横方向移動
-                HorizonMove();
-            }
-        }
+    //        //ジャスト回避中は通らない
+    //        if (isInputMove_)
+    //        {
+    //            //縦方向移動
+    //            VerticalMove();
+    //            //横方向移動
+    //            HorizonMove();
+    //        }
+    //    }
 
-        //ダッシュ処理
-        DashMove(elapsedTime);
+    //    //ダッシュ処理
+    //    DashMove(elapsedTime);
 
-        //移動アニメ用に速力長さを取得
-        DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
-        float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
-        //アニメーター
-        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-        animator->SetFloatValue("moveSpeed", length);
-    }
+    //    //移動アニメ用に速力長さを取得
+    //    DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
+    //    float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
+    //    //アニメーター
+    //    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+    //    animator->SetFloatValue("moveSpeed", length);
+    //}
+
+    movePlayer_->Update(elapsedTime);
 
     //ジャスト回避
     {
@@ -309,7 +312,7 @@ bool PlayerCom::IsMove(float elapsedTime)
             {
                 //攻撃と回避終了フラグ
                 AttackFlagEnd();
-                DashEndFlag();
+                DashEndFlag(false);
 
                 //アニメーター
                 std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
@@ -400,13 +403,22 @@ void PlayerCom::HorizonMove()
 //ダッシュ
 void PlayerCom::DashMove(float elapsedTime)
 {
+    //ダッシュクールタイム更新
+    if (dashCoolTimer_ >= 0)
+    {
+        dashCoolTimer_ -= elapsedTime;
+    }
+
     if (!isDash_)return;
 
     //ダッシュ
     GamePad& gamePad = Input::Instance().GetGamePad();
-    if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_TRIGGER)
+    if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_TRIGGER &&
+        dashCoolTimer_ < 0)
     {
         isDashJudge_ = true;        //ダッシュフラグON
+
+        dashCoolTimer_ = dashCoolTime_; //クールタイム
 
         //アニメーター
         std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
@@ -642,15 +654,18 @@ void PlayerCom::DashStateUpdate(float elapsedTime)
 }
 
 //強制的にダッシュを終わらせる（攻撃時等）
-void PlayerCom::DashEndFlag()
+void PlayerCom::DashEndFlag(bool isWalk)
 {
     isDashJudge_ = false;
     dashState_ = -1;
 
-    std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
-    moveParamType_ = MOVE_PARAM::WALK;
-    move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);
-    move->SetMoveAcceleration(moveParam_[MOVE_PARAM::WALK].moveAcceleration);
+    if (isWalk)
+    {
+        std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+        moveParamType_ = MOVE_PARAM::WALK;
+        move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);
+        move->SetMoveAcceleration(moveParam_[MOVE_PARAM::WALK].moveAcceleration);
+    }
 }
 
 #pragma endregion
@@ -729,6 +744,8 @@ void PlayerCom::JustAvoidanceMove(float elapsedTime)
 
         //アニメーション再生
         std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+
+        //animator->SetAnimationSpeedOffset(0.3f);
 
         bool inputFlag = false;
         if (DirectX::XMVectorGetX(DirectX::XMVector3Length(Input)) > 0.1f)
@@ -815,7 +832,7 @@ void PlayerCom::JustAvoidanceMove(float elapsedTime)
             for (int i = 0; i < 4; ++i)
             {
                 std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
-                justAnim->SetAnimationSpeed(1.0f);
+                //justAnim->SetAnimationSpeed(1.0f);
             }
             justAvoidState_++;
         }
@@ -847,6 +864,20 @@ void PlayerCom::JustAvoidanceMove(float elapsedTime)
         //反撃受け入れ
     case 3:
     {
+        //アニメ終了で反撃終了
+        if (!GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
+        {
+            int i = 0;
+            for (int i = 0; i < 4; ++i)
+            {
+                std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
+                justAnim->SetAnimationSpeed(1.0f);
+            }
+
+            std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+            animator->SetAnimationSpeedOffset(1.0f);
+        }
+
         //ジャスト回避終了タイマー
         justAvoidTimer_ -= elapsedTime;
         if (justAvoidTimer_ < 0)
@@ -1018,6 +1049,7 @@ void PlayerCom::AttackUpdate()
             if (attackPlayer_->OnHitEnemy() && attackPlayer_->ComboReadyEnemy())
             {
                 Graphics::Instance().SetWorldSpeed(0.3f);
+                dashCoolTimer_ = 0;
             }
         }
     }

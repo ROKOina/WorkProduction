@@ -57,6 +57,9 @@ private:
     //攻撃のヒット確認
     bool onHit_ = false;
 
+    //アニメーション速度を変更したフラグ
+    bool isAnimSetting = false;
+
     //武器の親になるオブジェクト
     std::shared_ptr<GameObject> parentObject_;
     //武器の子にさせたいノードの名前

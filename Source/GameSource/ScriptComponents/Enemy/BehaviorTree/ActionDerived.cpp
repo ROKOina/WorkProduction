@@ -87,7 +87,7 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 		DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&position);
 		DirectX::XMVECTOR TPos = DirectX::XMLoadFloat3(&targetPosition);
 		DirectX::XMFLOAT3 force;
-		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 20.0f * elapsedTime));
+		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 30.0f * elapsedTime));
 
 		std::shared_ptr<MovementCom> move = owner_->GetGameObject()->GetComponent<MovementCom>();
 		move->AddForce(force);

@@ -8,16 +8,6 @@
 #include "SystemStruct\QuaternionStruct.h"
 #include "../Weapon\WeaponCom.h"
 
-AttackPlayer::AttackPlayer(std::shared_ptr<PlayerCom> player)
-    :player_(player)
-{
-
-}
-
-AttackPlayer::~AttackPlayer()
-{
-
-}
 
 void AttackPlayer::Update(float elapsedTime)
 {

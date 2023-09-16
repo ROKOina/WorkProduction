@@ -2,6 +2,7 @@
 
 #include "Components\System\Component.h"
 #include "AttackPlayer.h"
+#include "MovePlayer.h"
 
 class PlayerCom : public Component
 {
@@ -43,7 +44,8 @@ private:
     //ダッシュ時の更新
     void DashStateUpdate(float elapsedTime);
     //強制的にダッシュを終わらせる（攻撃時等）
-    void DashEndFlag();
+    //引数は歩きにするか
+    void DashEndFlag(bool isWalk = true);
 
 private:
     //移動系
@@ -82,6 +84,9 @@ private:
     float dashMaxSpeed_ = 20;   //ダッシュの最大スピード
     float dashStopTime_ = 1;    //ダッシュ無理やり止めるため
     float dashStopTimer_;
+    float dashCoolTime_ = 0.6f;       //ダッシュのクールタイム
+    float dashCoolTimer_;      
+ 
 
 #pragma endregion
 
@@ -99,7 +104,7 @@ private:
     //□反撃
     void JustAvoidanceSquare(float elapsedTime);
 
-private:
+public:
     //ジャスト回避判定
     bool isJustJudge_ = false;  //ジャスト回避判定
     int justAvoidState_ = -1;   //ジャスト回避の遷移
@@ -121,7 +126,7 @@ private:
 #pragma endregion
 
 #pragma region 攻撃
-private:
+public:
     //攻撃更新
     void AttackUpdate();
 
@@ -131,7 +136,7 @@ private:
     //強制的に攻撃を終わらせる（ジャンプ時等）
     void AttackFlagEnd();
 
-private:
+public:
     bool isNormalAttack_ = true;     //攻撃できるか
     int comboAttackCount_ = 0;   
 
@@ -145,8 +150,7 @@ private:
     //アニメーション初期化設定
     void AnimationInitialize();
 
-private:
-
+public:
     //今のプレイヤーの遷移状態
     enum class PLAYER_STATUS
     {
@@ -163,10 +167,15 @@ private:
         ATTACK,
         ATTACK_DASH,
     };
+    PLAYER_STATUS GetPlayerStatus() { return playerStatus_; }
+    void SetPlayerStatus(PLAYER_STATUS status) { playerStatus_ = status; }
+
+public:
     PLAYER_STATUS playerStatus_ = PLAYER_STATUS::IDLE;
 
     DirectX::XMFLOAT3 up_ = {0,1,0};
 
     //プレイヤーの攻撃の動きのみ管理する
     std::shared_ptr<AttackPlayer> attackPlayer_;
+    std::shared_ptr<MovePlayer> movePlayer_;
 };

@@ -57,10 +57,7 @@ public:
     }
 
     //ヒットストップ
-    void HitStop(float sec){
-        isHitStop_ = true;
-        hitTimer_ = sec;
-    }
+    void HitStop(float sec);
 
 private:
     //座標系
@@ -84,5 +81,6 @@ private:
 
     //ヒットストップ
     float hitTimer_ = 0;
+    float saveWorldSpeed_ = 0;
     bool isHitStop_ = false;
 };

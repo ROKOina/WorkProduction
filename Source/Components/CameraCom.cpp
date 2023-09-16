@@ -47,7 +47,7 @@ void CameraCom::Update(float elapsedTime)
         else
         {
             isHitStop_ = false;
-            Graphics::Instance().SetWorldSpeed(1);
+            Graphics::Instance().SetWorldSpeed(saveWorldSpeed_);
         }
     }
 
@@ -131,4 +131,12 @@ void CameraCom::SetPerspectiveFov(float fovY, float aspect, float nearZ, float f
     //画角、画面比率、クリップ距離からプロジェクション行列を作成
     DirectX::XMMATRIX Projection = DirectX::XMMatrixPerspectiveFovLH(fovY, aspect, nearZ, farZ);	//プロジェクション行列作成
     DirectX::XMStoreFloat4x4(&projection_, Projection);	//rcに渡す
+}
+
+//ヒットストップ
+void CameraCom::HitStop(float sec)
+{
+    saveWorldSpeed_ = Graphics::Instance().GetWorldSpeed();
+    isHitStop_ = true;
+    hitTimer_ = sec;
 }

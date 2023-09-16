@@ -10,9 +10,8 @@ class GameObject;
 class AttackPlayer
 {
 public:
-    AttackPlayer(std::shared_ptr<PlayerCom> player);
-    AttackPlayer() {}
-    ~AttackPlayer();
+    AttackPlayer(std::shared_ptr<PlayerCom> player) : player_(player) {}
+    ~AttackPlayer(){}
 
     void Update(float elapsedTime);
 
@@ -65,8 +64,6 @@ private:
     bool ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> enemy, float rollSpeed);
 
 private:
-    bool onHitEnemy_ = false;
-
     std::weak_ptr<PlayerCom> player_;
 
     std::shared_ptr<GameObject> enemyCopy_;  //“G•Û‘¶
@@ -80,6 +77,8 @@ private:
         Null,
     };
     ATTACK_FLAG attackFlagState_ = ATTACK_FLAG::Null;
+
+    bool onHitEnemy_ = false;
 
     //UŒ‚‚Ì“®‚«‚ğŠÇ—
     int state_ = -1;

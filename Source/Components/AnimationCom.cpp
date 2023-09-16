@@ -257,6 +257,10 @@ bool AnimationCom::IsPlayAnimation()
 	const ModelResource* resource = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResource();
 	if (currentAnimationIndex_ >= resource->GetAnimations().size())return false;
 
+	if (std::strcmp(GetGameObject()->GetName(), "pico")==0)
+	{
+		int i=0;
+	}
 	if(animationEndFlag_)return false;
 
 	return true;

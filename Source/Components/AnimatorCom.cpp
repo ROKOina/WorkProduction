@@ -77,6 +77,19 @@ void AnimatorCom::Update(float elapsedTime)
 
     }
 
+    //次に遷移
+    if (hasExit_)
+    {
+        //アニメーション遷移
+        animation->PlayAnimation(
+            saveIndex_,
+            animatorData_[saveIndex_].isLoop,
+            saveBlendTime_);
+        hasExit_ = false;
+        saveIndex_ = -1;
+        saveBlendTime_ = -1;
+    }
+
     //現在のアニメーション
     int currentIndex = animation->GetCurrentAnimationIndex();
     //遷移先があるか
@@ -131,21 +144,27 @@ void AnimatorCom::Update(float elapsedTime)
                 //ループ有り場合
                 if (animation->IsPlayAnimationLooped())
                 {
-                    //アニメーション遷移
-                    animation->PlayAnimation(
-                        transition.transitionIndex,
-                        animatorData_[transition.transitionIndex].isLoop,
-                        transition.blendTime);
+                    hasExit_ = true;
+                    saveIndex_ = transition.transitionIndex;
+                    saveBlendTime_ = transition.blendTime;
+                    ////アニメーション遷移
+                    //animation->PlayAnimation(
+                    //    transition.transitionIndex,
+                    //    animatorData_[transition.transitionIndex].isLoop,
+                    //    transition.blendTime);
                     return;
                 }
                 //ループ無し場合
                 if (!animation->IsPlayAnimation())
                 {
-                    //アニメーション遷移
-                    animation->PlayAnimation(
-                        transition.transitionIndex,
-                        animatorData_[transition.transitionIndex].isLoop,
-                        transition.blendTime);
+                    hasExit_ = true;
+                    saveIndex_ = transition.transitionIndex;
+                    saveBlendTime_ = transition.blendTime;
+                    ////アニメーション遷移
+                    //animation->PlayAnimation(
+                    //    transition.transitionIndex,
+                    //    animatorData_[transition.transitionIndex].isLoop,
+                    //    transition.blendTime);
                     return;
                 }
             }

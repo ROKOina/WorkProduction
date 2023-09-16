@@ -102,9 +102,15 @@ void WeaponCom::SetAttackStatus(int animIndex, int damage, float impactPower, fl
 bool WeaponCom::CollsionFromEventJudge()
 {
     std::shared_ptr<AnimationCom> animCom = GetGameObject()->GetParent()->GetComponent<AnimationCom>();
+
     //攻撃速度をいじる
     std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetParent()->GetComponent<AnimatorCom>();
-    animator->SetAnimationSpeedOffset(1);
+    if (isAnimSetting)
+    {
+        animator->SetAnimationSpeedOffset(1);
+        isAnimSetting = false;
+    }
+
     for (auto& animEvent : animCom->GetCurrentAnimationEventsData())
     {
         //頭がAutoCollisionなら当たり判定をする
@@ -115,6 +121,7 @@ bool WeaponCom::CollsionFromEventJudge()
         {
             //アニメーションスピードを設定
             animator->SetAnimationSpeedOffset(attackStatus_[animCom->GetCurrentAnimationIndex()].animSpeed);
+            isAnimSetting = true;
         }
 
         if (!animCom->GetCurrentAnimationEvent(animEvent.name.c_str(), DirectX::XMFLOAT3()))continue;
