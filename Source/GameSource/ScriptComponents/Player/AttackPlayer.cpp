@@ -5,12 +5,173 @@
 #include "Components\TransformCom.h"
 #include "Components\MovementCom.h"
 #include "Components\AnimationCom.h"
+#include "Components\AnimatorCom.h"
 #include "SystemStruct\QuaternionStruct.h"
 #include "../Weapon\WeaponCom.h"
+#include "Graphics/Graphics.h"
+#include "Input/Input.h"
 
 
 void AttackPlayer::Update(float elapsedTime)
 {
+    if (!isNormalAttack_)return;
+
+    //アニメーター
+    std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+
+    //ダッシュコンボ入力にする
+    if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH && comboAttackCount_ == 2)
+    {
+        if (EndAttackState())
+        {
+            animator->SetIsStop(false);
+            Graphics::Instance().SetWorldSpeed(0.3f);
+            player_.lock()->GetMovePlayer()->isDash_ = true;
+        }
+    }
+
+    int currentAnimIndex = player_.lock()->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
+
+    //コンボ後処理
+    {
+        static int oldCount = 0;
+        static int oldAnim = 0;
+        if (comboAttackCount_ > 0) {
+            //前フレームのコンボとアニメーションを見て
+            //コンボ終了か見る
+            if (oldCount == comboAttackCount_)
+            {
+                if (oldAnim != currentAnimIndex)
+                {
+                    //コンボ終了
+                    AttackFlagEnd();
+
+                    player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::IDLE);
+                }
+            }
+        }
+        oldCount = comboAttackCount_;
+        oldAnim = currentAnimIndex;
+    }
+
+    //ダッシュアタック時の処理
+    if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
+    {
+        if (DoComboAttack())
+        {
+            //ダッシュ有効か
+            player_.lock()->GetMovePlayer()->isDash_ = true;
+            //当たっていた時
+            if (OnHitEnemy() && ComboReadyEnemy())
+            {
+                Graphics::Instance().SetWorldSpeed(0.3f);
+                player_.lock()->GetMovePlayer()->dashCoolTimer_ = 0;
+            }
+        }
+    }
+
+
+    //引き継ぎ攻撃アニメーション
+    if (animFlagName_.size() > 0)
+    {
+        animator->SetTriggerOn(animFlagName_);
+        comboAttackCount_++;
+        animFlagName_ = "";
+    }
+    else
+    {
+        GamePad& gamePad = Input::Instance().GetGamePad();
+        if (gamePad.GetButtonDown() & GamePad::BTN_X)   //△
+        {
+
+            if (comboAttackCount_ == 0)
+            {
+                //ダッシュ攻撃か判定
+                if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH)
+                {
+                    //ダッシュ後コンボのためダッシュを出来なくする
+                    player_.lock()->GetMovePlayer()->isDash_ = false;
+                    animator->SetTriggerOn("triangleDash");
+                    player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::DASH);
+                    DashAttack(1);
+
+                    comboAttackCount_++;
+
+                    //ダッシュ終了フラグ
+                    player_.lock()->GetMovePlayer()->DashEndFlag();
+                }
+
+
+                return;
+            }
+        }
+
+        if (gamePad.GetButtonDown() & GamePad::BTN_Y)   //□
+        {
+            //今の状態で遷移を変える
+            if (comboAttackCount_ == 0)
+            {
+                //ダッシュ攻撃か判定
+                if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH)
+                {
+                    return;
+                }
+                else
+                {
+                    animator->SetTriggerOn("squareIdle");
+                    player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
+                    NormalAttack();
+                }
+
+                comboAttackCount_++;
+
+                //ダッシュ終了フラグ
+                player_.lock()->GetMovePlayer()->DashEndFlag();
+
+                return;
+            }
+
+            if (comboAttackCount_ >= 3)return;
+
+            if (DoComboAttack())
+            {
+                if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK)
+                {
+                    animator->SetTriggerOn("square");
+                    NormalAttack();
+                    comboAttackCount_++;
+
+                    player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
+                    return;
+                }
+            }
+
+            if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH)
+            {
+                if (animator->GetIsStop())return;
+                animator->SetTriggerOn("squareIdle");
+
+                //仮で
+                player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
+                Graphics::Instance().SetWorldSpeed(1.0f);
+                comboAttackCount_ = 1;
+
+                return;
+            }
+
+            ////アニメーションと次の攻撃の種類を選択
+            //nextAnimName_ = "squareIdle";
+        }
+    }
+
+    //コンボ中処理
+    if (comboAttackCount_ > 0)
+    {
+        player_.lock()->GetMovePlayer()->isInputMove_ = false;
+        player_.lock()->GetMovePlayer()->isInputTrun_ = false;
+    }
+
+
     //state初期化
     if (EndAttackState())state_ = -1;
 
@@ -240,4 +401,24 @@ bool AttackPlayer::ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> en
     playerObj->transform_->SetRotation(playerQuaternion);
 
     return false;
+}
+
+//強制的に攻撃を終わらせる（ジャンプ時等）
+void AttackPlayer::AttackFlagEnd()
+{
+    comboAttackCount_ = 0;
+    player_.lock()->GetMovePlayer()->isInputMove_ = true;
+    player_.lock()->GetMovePlayer()->isInputTrun_ = true;
+    ResetState();
+    //アニメーター
+    std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+    animator->SetAnimationSpeedOffset(1);
+
+    if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH ||
+        player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH)
+    {
+        Graphics::Instance().SetWorldSpeed(1.0f);
+    }
+
+    //playerStatus_ = PLAYER_STATUS::IDLE;
 }

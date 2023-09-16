@@ -263,6 +263,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionDerived.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\MovePlayer.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -479,6 +480,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\MovePlayer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

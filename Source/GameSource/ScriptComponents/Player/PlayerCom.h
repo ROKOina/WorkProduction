@@ -3,6 +3,7 @@
 #include "Components\System\Component.h"
 #include "AttackPlayer.h"
 #include "MovePlayer.h"
+#include "JustAvoidPlayer.h"
 
 class PlayerCom : public Component
 {
@@ -25,126 +26,41 @@ public:
 
     //PlayerComクラス
 
-#pragma region 移動
-private:
-    //スティック入力値から移動ベクトルを取得
-    DirectX::XMFLOAT3 GetMoveVec();
+//#pragma region ジャスト回避
+//private:
+//    //ジャスト回避初期化
+//    void JustInisialize();
+//    //ジャスト回避反撃更新処理
+//    void JustAvoidanceAttackUpdate(float elapsedTime);
+//    //ジャスト回避中移動
+//    void JustAvoidanceMove(float elapsedTime);
+//    //ジャスト回避反撃の入力を見る
+//    void JustAvoidanceAttackInput();
+//
+//    //□反撃
+//    void JustAvoidanceSquare(float elapsedTime);
+//
+//public:
+//    //ジャスト回避判定
+//    bool isJustJudge_ = false;  //ジャスト回避判定
+//    int justAvoidState_ = -1;   //ジャスト回避の遷移
+//    float justAvoidTime_ = 1;   //ジャスト回避時間
+//    float justAvoidTimer_ = 0;
+//    std::shared_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
+//
+//    //ジャスト回避反撃
+//    enum class JUST_AVOID_KEY   //入力を判定
+//    {
+//        SQUARE,     //□
+//        TRIANGLE,   //△
+//
+//        NULL_KEY,
+//    };
+//    JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
+//
+//
+//#pragma endregion
 
-    //移動入力処理
-    bool IsMove(float elapsedTime);
-    //回転
-    void Trun(float elapsedTime);
-    //縦方向移動
-    void VerticalMove();
-    //横方向移動
-    void HorizonMove();
-
-    //ダッシュ
-    void DashMove(float elapsedTime);
-    //ダッシュ時の更新
-    void DashStateUpdate(float elapsedTime);
-    //強制的にダッシュを終わらせる（攻撃時等）
-    //引数は歩きにするか
-    void DashEndFlag(bool isWalk = true);
-
-private:
-    //移動系
-    //入力値保存
-    DirectX::XMFLOAT3 inputMoveVec_;
-
-    //走りと歩きを切り替える
-    enum MOVE_PARAM
-    {
-        WALK,
-        RUN,
-        JUSTDASH,
-        DASH,
-        MAX,
-    };
-    struct
-    {
-        float moveMaxSpeed = 10.0f;
-        float moveSpeed = 1.0f;
-        float moveAcceleration = 0.2f;
-        float turnSpeed = 8.0f;
-    }moveParam_[MOVE_PARAM::MAX];
-    int moveParamType_ = MOVE_PARAM::WALK;
-
-    //入力で移動できるか
-    bool isInputMove_ = true;
-    //回転できるか
-    bool isInputTrun_ = true;
-
-    float jumpSpeed_ = 20.0f;
-    int jumpCount_ = 2;
-
-    bool isDash_ = true;        //ダッシュできるか
-    bool isDashJudge_ = false;  //ダッシュ中か
-    int dashState_ = -1;        //ダッシュの遷移
-    float dashMaxSpeed_ = 20;   //ダッシュの最大スピード
-    float dashStopTime_ = 1;    //ダッシュ無理やり止めるため
-    float dashStopTimer_;
-    float dashCoolTime_ = 0.6f;       //ダッシュのクールタイム
-    float dashCoolTimer_;      
- 
-
-#pragma endregion
-
-#pragma region ジャスト回避
-private:
-    //ジャスト回避初期化
-    void JustInisialize();
-    //ジャスト回避反撃更新処理
-    void JustAvoidanceAttackUpdate(float elapsedTime);
-    //ジャスト回避中移動
-    void JustAvoidanceMove(float elapsedTime);
-    //ジャスト回避反撃の入力を見る
-    void JustAvoidanceAttackInput();
-
-    //□反撃
-    void JustAvoidanceSquare(float elapsedTime);
-
-public:
-    //ジャスト回避判定
-    bool isJustJudge_ = false;  //ジャスト回避判定
-    int justAvoidState_ = -1;   //ジャスト回避の遷移
-    float justAvoidTime_ = 1;   //ジャスト回避時間
-    float justAvoidTimer_ = 0;
-    std::shared_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
-
-    //ジャスト回避反撃
-    enum class JUST_AVOID_KEY   //入力を判定
-    {
-        SQUARE,     //□
-        TRIANGLE,   //△
-
-        NULL_KEY,
-    };
-    JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
-
-
-#pragma endregion
-
-#pragma region 攻撃
-public:
-    //攻撃更新
-    void AttackUpdate();
-
-    //攻撃当たり判定
-    void AttackJudgeCollision();
-
-    //強制的に攻撃を終わらせる（ジャンプ時等）
-    void AttackFlagEnd();
-
-public:
-    bool isNormalAttack_ = true;     //攻撃できるか
-    int comboAttackCount_ = 0;   
-
-    //他から攻撃に引き継ぐ用
-    std::string animFlagName_ = "";
-
-
-#pragma endregion
 
 private:
     //アニメーション初期化設定
@@ -170,12 +86,15 @@ public:
     PLAYER_STATUS GetPlayerStatus() { return playerStatus_; }
     void SetPlayerStatus(PLAYER_STATUS status) { playerStatus_ = status; }
 
-public:
-    PLAYER_STATUS playerStatus_ = PLAYER_STATUS::IDLE;
+    std::shared_ptr<MovePlayer> GetMovePlayer() { return movePlayer_; }
+    std::shared_ptr<AttackPlayer> GetAttackPlayer() { return attackPlayer_; }
+    std::shared_ptr<JustAvoidPlayer> GetJustAvoidPlayer() { return justAvoidPlayer_; }
 
-    DirectX::XMFLOAT3 up_ = {0,1,0};
+private:
+    PLAYER_STATUS playerStatus_ = PLAYER_STATUS::IDLE;
 
     //プレイヤーの攻撃の動きのみ管理する
     std::shared_ptr<AttackPlayer> attackPlayer_;
     std::shared_ptr<MovePlayer> movePlayer_;
+    std::shared_ptr<JustAvoidPlayer> justAvoidPlayer_;
 };

@@ -11,7 +11,7 @@ class GameObject;
 class MovePlayer
 {
 public:
-    MovePlayer(std::shared_ptr<PlayerCom> player) : player_(player) {}
+    MovePlayer(std::shared_ptr<PlayerCom> player);
     ~MovePlayer(){}
 
     void Update(float elapsedTime);
@@ -33,13 +33,14 @@ private:
     void DashMove(float elapsedTime);
     //ダッシュ時の更新
     void DashStateUpdate(float elapsedTime);
+
+
+public:
     //強制的にダッシュを終わらせる（攻撃時等）
     //引数は歩きにするか
     void DashEndFlag(bool isWalk = true);
 
-private:
-    std::weak_ptr<PlayerCom> player_;
-
+public:
     //入力値保存
     DirectX::XMFLOAT3 inputMoveVec_;
 
@@ -78,5 +79,6 @@ private:
     float dashCoolTime_ = 0.6f;       //ダッシュのクールタイム
     float dashCoolTimer_;
 
-
+private:
+    std::weak_ptr<PlayerCom> player_;
 };

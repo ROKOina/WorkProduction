@@ -10,6 +10,31 @@
 #include "SystemStruct/QuaternionStruct.h"
 #include "Graphics/Graphics.h"
 
+MovePlayer::MovePlayer(std::shared_ptr<PlayerCom> player) : player_(player)
+{
+    //移動パラメーター初期化
+    moveParam_[MOVE_PARAM::WALK].moveMaxSpeed = 5.0f;
+    moveParam_[MOVE_PARAM::WALK].moveAcceleration = 1.0f;
+    moveParam_[MOVE_PARAM::WALK].turnSpeed = 4.0f;
+
+    moveParam_[MOVE_PARAM::RUN].moveMaxSpeed = 8.0f;
+    moveParam_[MOVE_PARAM::RUN].moveAcceleration = 2.0f;
+    moveParam_[MOVE_PARAM::RUN].turnSpeed = 8.0f;
+
+    moveParam_[MOVE_PARAM::JUSTDASH].moveMaxSpeed = 3.0f;
+    moveParam_[MOVE_PARAM::JUSTDASH].moveAcceleration = 1.0f;
+    moveParam_[MOVE_PARAM::JUSTDASH].turnSpeed = 4.0f;
+
+    moveParam_[MOVE_PARAM::DASH].moveMaxSpeed = 15.0f;
+    moveParam_[MOVE_PARAM::DASH].moveAcceleration = 6.0f;
+    moveParam_[MOVE_PARAM::DASH].turnSpeed = 8.0f;
+
+    moveParamType_ = MOVE_PARAM::WALK;
+    std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
+    move->SetMoveAcceleration(moveParam_[MOVE_PARAM::WALK].moveAcceleration);
+    move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);
+}
+
 void MovePlayer::Update(float elapsedTime)
 {
     std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
@@ -118,10 +143,10 @@ bool MovePlayer::IsMove(float elapsedTime)
         if (jumpCount_ > 0)
         {
             //ジャスト回避中のみジャンプできない
-            if (!player_.lock()->isJustJudge_)
+            if (!player_.lock()->GetJustAvoidPlayer()->isJustJudge_)
             {
                 //攻撃と回避終了フラグ
-                player_.lock()->AttackFlagEnd();
+                player_.lock()->GetAttackPlayer()->AttackFlagEnd();
                 DashEndFlag(false);
 
                 //アニメーター
@@ -149,7 +174,7 @@ bool MovePlayer::IsMove(float elapsedTime)
         {
             //入力が終わると歩きに
             if (player_.lock()->GetPlayerStatus() != PlayerCom::PLAYER_STATUS::JUMP)
-                if (player_.lock()->comboAttackCount_ <= 0)
+                if (player_.lock()->GetAttackPlayer()->comboAttackCount_ <= 0)
                     if (!isDashJudge_)
                     {
                         moveParamType_ = MOVE_PARAM::WALK;
@@ -164,7 +189,7 @@ bool MovePlayer::IsMove(float elapsedTime)
 
     //状態更新
     if (player_.lock()->GetPlayerStatus() != PlayerCom::PLAYER_STATUS::JUMP)
-        if (!isDashJudge_ && !player_.lock()->isJustJudge_ && player_.lock()->comboAttackCount_ <= 0)
+        if (!isDashJudge_ && !player_.lock()->GetJustAvoidPlayer()->isJustJudge_ && player_.lock()->GetAttackPlayer()->comboAttackCount_ <= 0)
             player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::MOVE);
 
 
@@ -175,7 +200,7 @@ bool MovePlayer::IsMove(float elapsedTime)
 void MovePlayer::Trun(float elapsedTime)
 {
     //入力方向のクォータニオン生成
-    QuaternionStruct inputQuaternion = QuaternionStruct::LookRotation(inputMoveVec_, player_.lock()->up_);
+    QuaternionStruct inputQuaternion = QuaternionStruct::LookRotation(inputMoveVec_);
     QuaternionStruct playerQuaternion = player_.lock()->GetGameObject()->transform_->GetRotation();
 
     float worldSpeed = Graphics::Instance().GetWorldSpeed();
@@ -237,15 +262,15 @@ void MovePlayer::DashMove(float elapsedTime)
         //ダッシュ後コンボ
         if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
         {
-            if (player_.lock()->attackPlayer_->OnHitEnemy() && player_.lock()->attackPlayer_->ComboReadyEnemy())
+            if (player_.lock()->GetAttackPlayer()->OnHitEnemy() && player_.lock()->GetAttackPlayer()->ComboReadyEnemy())
             {
                 Graphics::Instance().SetWorldSpeed(1.0f);
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::DASH);
 
 
-                player_.lock()->animFlagName_ = "jump";
+                player_.lock()->GetAttackPlayer()->animFlagName_ = "jump";
                 animator->ResetParameterList();
-                player_.lock()->attackPlayer_->DashAttack(2);
+                player_.lock()->GetAttackPlayer()->DashAttack(2);
                 animator->SetIsStop(true);
                 isDash_ = false;
                 return;
@@ -253,7 +278,7 @@ void MovePlayer::DashMove(float elapsedTime)
         }
 
         //アタックリセット
-        player_.lock()->AttackFlagEnd();
+        player_.lock()->GetAttackPlayer()->AttackFlagEnd();
 
         //入力があればstate=0
         if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
@@ -332,7 +357,7 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
     case 0:
     {
         //角度を変える
-        QuaternionStruct dashDirection = QuaternionStruct::LookRotation(inputMoveVec_, player_.lock()->up_);
+        QuaternionStruct dashDirection = QuaternionStruct::LookRotation(inputMoveVec_);
         player_.lock()->GetGameObject()->transform_->SetRotation(dashDirection);
     }
     [[fallthrough]];    //フォースルー(1にそのままいく)
@@ -340,7 +365,7 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
     case 1:
     {
         isInputMove_ = true;
-        player_.lock()->isNormalAttack_ = false;
+        player_.lock()->GetAttackPlayer()->isNormalAttack_ = false;
 
         //ダッシュに変更
         move->ZeroVelocity();
@@ -355,11 +380,11 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
         //ジャスト回避判定
         if (enemy)
         {
-            player_.lock()->isJustJudge_ = true;
-            player_.lock()->justAvoidState_ = 0;
+            player_.lock()->GetJustAvoidPlayer()->isJustJudge_ = true;
+            player_.lock()->GetJustAvoidPlayer()->justAvoidState_ = 0;
             dashState_ = -1;
             isDashJudge_ = false;
-            player_.lock()->justHitEnemy_ = enemy;
+            player_.lock()->GetJustAvoidPlayer()->justHitEnemy_ = enemy;
             break;
         }
 
@@ -368,7 +393,7 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
         if (length > dashMaxSpeed_ || dashStopTimer_ < 0)
         {
             dashState_++;
-            player_.lock()->isNormalAttack_ = true;
+            player_.lock()->GetAttackPlayer()->isNormalAttack_ = true;
         }
         break;
     case 3:
@@ -411,11 +436,11 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
         //ジャスト回避判定
         if (enemy)
         {
-            player_.lock()->isJustJudge_ = true;
-            player_.lock()->justAvoidState_ = 0;
+            player_.lock()->GetJustAvoidPlayer()->isJustJudge_ = true;
+            player_.lock()->GetJustAvoidPlayer()->justAvoidState_ = 0;
             dashState_ = -1;
             isDashJudge_ = false;
-            player_.lock()->justHitEnemy_ = enemy;
+            player_.lock()->GetJustAvoidPlayer()->justHitEnemy_ = enemy;
             break;
         }
 
