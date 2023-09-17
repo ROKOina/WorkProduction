@@ -26,41 +26,6 @@ public:
 
     //PlayerComクラス
 
-//#pragma region ジャスト回避
-//private:
-//    //ジャスト回避初期化
-//    void JustInisialize();
-//    //ジャスト回避反撃更新処理
-//    void JustAvoidanceAttackUpdate(float elapsedTime);
-//    //ジャスト回避中移動
-//    void JustAvoidanceMove(float elapsedTime);
-//    //ジャスト回避反撃の入力を見る
-//    void JustAvoidanceAttackInput();
-//
-//    //□反撃
-//    void JustAvoidanceSquare(float elapsedTime);
-//
-//public:
-//    //ジャスト回避判定
-//    bool isJustJudge_ = false;  //ジャスト回避判定
-//    int justAvoidState_ = -1;   //ジャスト回避の遷移
-//    float justAvoidTime_ = 1;   //ジャスト回避時間
-//    float justAvoidTimer_ = 0;
-//    std::shared_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
-//
-//    //ジャスト回避反撃
-//    enum class JUST_AVOID_KEY   //入力を判定
-//    {
-//        SQUARE,     //□
-//        TRIANGLE,   //△
-//
-//        NULL_KEY,
-//    };
-//    JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
-//
-//
-//#pragma endregion
-
 
 private:
     //アニメーション初期化設定

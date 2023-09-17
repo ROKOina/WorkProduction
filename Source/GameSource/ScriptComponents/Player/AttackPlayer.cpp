@@ -14,6 +14,14 @@
 
 void AttackPlayer::Update(float elapsedTime)
 {
+    AttackInputUpdate(elapsedTime);
+
+    AttackMoveUpdate(elapsedTime);
+}
+
+//攻撃入力処理
+void AttackPlayer::AttackInputUpdate(float elapsedTime)
+{
     if (!isNormalAttack_)return;
 
     //アニメーター
@@ -92,7 +100,7 @@ void AttackPlayer::Update(float elapsedTime)
                     //ダッシュ後コンボのためダッシュを出来なくする
                     player_.lock()->GetMovePlayer()->isDash_ = false;
                     animator->SetTriggerOn("triangleDash");
-                    player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::DASH);
+                    player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_DASH);
                     DashAttack(1);
 
                     comboAttackCount_++;
@@ -171,7 +179,11 @@ void AttackPlayer::Update(float elapsedTime)
         player_.lock()->GetMovePlayer()->isInputTrun_ = false;
     }
 
+}
 
+//攻撃動き処理
+void AttackPlayer::AttackMoveUpdate(float elapsedTime)
+{
     //state初期化
     if (EndAttackState())state_ = -1;
 
@@ -199,7 +211,9 @@ void AttackPlayer::Update(float elapsedTime)
     {
         onHitEnemy_ = true;
     }
+
 }
+
 
 void AttackPlayer::NormalAttack()
 {

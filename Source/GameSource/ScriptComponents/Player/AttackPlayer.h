@@ -16,6 +16,13 @@ public:
 
     void Update(float elapsedTime);
 
+
+private:
+    //攻撃入力処理
+    void AttackInputUpdate(float elapsedTime);
+    //攻撃動き処理
+    void AttackMoveUpdate(float elapsedTime);
+
 public://intでステートを返す、ステートをコードにする
     enum ATTACK_CODE
     {
