@@ -77,6 +77,9 @@ void GameObject::OnGUI()
 		}
 	}
 
+	//オブジェクトスピード
+	ImGui::DragFloat("objSpeed", &objSpeed_, 0.01f);
+
 	// コンポーネント
 	for (std::shared_ptr<Component>& component : components_)
 	{

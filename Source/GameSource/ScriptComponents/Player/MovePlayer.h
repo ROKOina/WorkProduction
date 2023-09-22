@@ -16,6 +16,8 @@ public:
 
     void Update(float elapsedTime);
 
+    void OnGui();
+
 private:
     //スティック入力値から移動ベクトルを取得
     DirectX::XMFLOAT3 GetMoveVec();
@@ -34,6 +36,10 @@ private:
     //ダッシュ時の更新
     void DashStateUpdate(float elapsedTime);
 
+    //走り切り替えし
+    void RunTurnMove();
+    void RunTurnJudge();
+    void EndRunTurn();
 
 public:
     //強制的にダッシュを終わらせる（攻撃時等）
@@ -67,13 +73,21 @@ public:
     //回転できるか
     bool isInputTrun_ = true;
 
+    //走り切り替えし
+    bool isRunTurn_ = false;
+    int runTurnState_ = -1;
+    DirectX::XMFLOAT3 saveTurnVec_;
+
+    //走りからストップモーションフラグ
+    bool isStopRunStop_ = false;
+
     float jumpSpeed_ = 20.0f;
     int jumpCount_ = 2;
 
     bool isDash_ = true;        //ダッシュできるか
     bool isDashJudge_ = false;  //ダッシュ中か
     int dashState_ = -1;        //ダッシュの遷移
-    float dashMaxSpeed_ = 20;   //ダッシュの最大スピード
+    float dashMaxSpeed_ = 15;   //ダッシュの最大スピード
     float dashStopTime_ = 1;    //ダッシュ無理やり止めるため
     float dashStopTimer_;
     float dashCoolTime_ = 0.6f;       //ダッシュのクールタイム

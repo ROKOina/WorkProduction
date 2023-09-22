@@ -112,7 +112,7 @@ void FbxModelResource::Load(ID3D11Device* device, const char* filename, const ch
 			fbxImporter->Import(fbxScene);
 			fbxImporter->Destroy();	// シーンを流し込んだらImporterは解放してOK
 
-									// ジオメトリを三角形化しておく
+			// ジオメトリを三角形化しておく
 			FbxGeometryConverter fbxGeometryConverter(fbxManager);
 			fbxGeometryConverter.Triangulate(fbxScene, true);
 			fbxGeometryConverter.RemoveBadPolygonsFromMeshes(fbxScene);
@@ -142,6 +142,9 @@ void FbxModelResource::Load(ID3D11Device* device, const char* filename, const ch
 
 			// マネージャ解放
 			fbxManager->Destroy();		// 関連するすべてのオブジェクトが解放される
+
+			//.cerealに作成
+			Export(cereal_filenameString.c_str());
 		}
 		else
 		{
@@ -152,7 +155,6 @@ void FbxModelResource::Load(ID3D11Device* device, const char* filename, const ch
 			SetupIgnoreMotionNode(ignoreRootMotionNodeName);
 		}
 
-		Export(cereal_filenameString.c_str());
 	}
 	// モデル構築
 	BuildModel(device, dirname);

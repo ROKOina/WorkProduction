@@ -33,6 +33,11 @@ void JustAvoidPlayer::Update(float elapsedTime)
     }
 }
 
+void JustAvoidPlayer::OnGui()
+{
+
+}
+
 
 //ジャスト回避初期化
 void JustAvoidPlayer::JustInisialize()
@@ -101,7 +106,7 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             justPico[i]->transform_->SetLocalPosition({ 0,0,0 });
             justAnim->SetAnimationSpeed(0.2f);  //アニメ速度スローに
             Model* justModel = justPico[i]->GetComponent<RendererCom>()->GetModel();
-            justModel->SetMaterialColor({ 1.2f,1.2f,0.1f,0.65f });  //色初期化
+            justModel->SetMaterialColor({ 0.4f,0.3f,0.1f,0.65f });  //色初期化
 
             //出す
             justPico[i]->SetEnabled(true);

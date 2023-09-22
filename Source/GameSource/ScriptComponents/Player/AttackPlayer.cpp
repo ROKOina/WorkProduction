@@ -19,6 +19,11 @@ void AttackPlayer::Update(float elapsedTime)
     AttackMoveUpdate(elapsedTime);
 }
 
+void AttackPlayer::OnGui()
+{
+
+}
+
 //攻撃入力処理
 void AttackPlayer::AttackInputUpdate(float elapsedTime)
 {
@@ -27,20 +32,10 @@ void AttackPlayer::AttackInputUpdate(float elapsedTime)
     //アニメーター
     std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 
-    //ダッシュコンボ入力にする
-    if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH && comboAttackCount_ == 2)
-    {
-        if (EndAttackState())
-        {
-            animator->SetIsStop(false);
-            Graphics::Instance().SetWorldSpeed(0.3f);
-            player_.lock()->GetMovePlayer()->isDash_ = true;
-        }
-    }
-
+    //現在のアニメインデックス
     int currentAnimIndex = player_.lock()->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
 
-    //コンボ後処理
+    //コンボ継続判定処理
     {
         static int oldCount = 0;
         static int oldAnim = 0;
@@ -62,18 +57,32 @@ void AttackPlayer::AttackInputUpdate(float elapsedTime)
         oldAnim = currentAnimIndex;
     }
 
-    //ダッシュアタック時の処理
-    if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
+    //ダッシュコンボ処理
     {
-        if (DoComboAttack())
+        //ダッシュコンボ入力にする
+        if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH && comboAttackCount_ == 2)
         {
-            //ダッシュ有効か
-            player_.lock()->GetMovePlayer()->isDash_ = true;
-            //当たっていた時
-            if (OnHitEnemy() && ComboReadyEnemy())
+            if (EndAttackState())
             {
+                animator->SetIsStop(false);
                 Graphics::Instance().SetWorldSpeed(0.3f);
-                player_.lock()->GetMovePlayer()->dashCoolTimer_ = 0;
+                player_.lock()->GetMovePlayer()->isDash_ = true;
+            }
+        }
+
+        //ダッシュアタック時の処理
+        if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
+        {
+            if (DoComboAttack())
+            {
+                //ダッシュ有効に
+                player_.lock()->GetMovePlayer()->isDash_ = true;
+                //当たっていた時
+                if (OnHitEnemy() && ComboReadyEnemy())
+                {
+                    Graphics::Instance().SetWorldSpeed(0.3f);
+                    player_.lock()->GetMovePlayer()->dashCoolTimer_ = 0;
+                }
             }
         }
     }
@@ -166,9 +175,6 @@ void AttackPlayer::AttackInputUpdate(float elapsedTime)
 
                 return;
             }
-
-            ////アニメーションと次の攻撃の種類を選択
-            //nextAnimName_ = "squareIdle";
         }
     }
 

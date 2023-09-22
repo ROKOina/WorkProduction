@@ -15,6 +15,8 @@ public:
 
     void Update(float elapsedTime);
 
+    void OnGui();
+
 private:
     //ƒWƒƒƒXƒg‰ñ”ğ‰Šú‰»
     void JustInisialize();

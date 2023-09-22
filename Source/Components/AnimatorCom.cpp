@@ -14,7 +14,7 @@ void AnimatorCom::Start()
 void AnimatorCom::Update(float elapsedTime)
 {
     //¢ŠE‚Ì‘¬“x‚É‡‚í‚¹‚é
-    SetAnimationSpeed(Graphics::Instance().GetWorldSpeed() * animSpeedOffset_);
+    SetAnimationSpeed(Graphics::Instance().GetWorldSpeed() * animSpeedOffset_ * GetGameObject()->GetObjSpeed());
 
     std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
     if (!animation)return;

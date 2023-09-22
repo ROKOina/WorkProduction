@@ -170,8 +170,8 @@ void SceneGame::Initialize()
 			const char* filename = "Data/Model/pico/picoAnim.mdl";
 			std::shared_ptr<RendererCom> picoJustRenderer = picoJust->AddComponent<RendererCom>();
 			picoJustRenderer->LoadModel(filename);
-			picoJustRenderer->SetShaderID(SHADER_ID::UnityChanToon);
-			picoJustRenderer->GetModel()->SetMaterialColor({ 1.2f,1.2f,0.1f,0.65f });
+			picoJustRenderer->SetShaderID(SHADER_ID::Phong);
+			picoJustRenderer->GetModel()->SetMaterialColor({ 0.4f,0.3f,0.1f,0.65f });
 
 			picoJust->AddComponent<AnimationCom>();
 

@@ -5,6 +5,43 @@
 #include "MovePlayer.h"
 #include "JustAvoidPlayer.h"
 
+//アニメーションリスト
+enum ANIMATION_PLAYER
+{
+    WALK_RUNRUN_1,
+    IDEL_1,
+    IDEL_2,
+    JUMP_1,
+    JUMP_2,
+    RUN_HARD_1,
+    RUN_HARD_2,
+    RUN_SOFT_1,
+    RUN_SOFT_2,
+    WALK_RUNRUN_2,
+    PUNCH,
+    BIGSWORD_UP,
+    BIGSWORD_LEFT,
+    BIGSWORD_RIGHT,
+    BIGSWORD_DOWN,
+    DASH_ANIM,
+    BIGSWORD_COM1_01,
+    BIGSWORD_COM1_02,
+    BIGSWORD_COM1_03,
+    BIGSWORD_COM2_01,
+    BIGSWORD_COM2_02,
+    BIGSWORD_COM2_03,
+    BIGSWORD_DASH,
+    JUMP_IN,
+    DODGE_BACK,
+    DODGE_FRONT,
+    DODGE_LEFT,
+    DODGE_RIGHT,
+    DASH_BACK,
+    RUN_TURN,
+    RUN_STOP,
+    RUN_TURN_FORWARD,
+};
+
 class PlayerCom : public Component
 {
     //コンポーネントオーバーライド

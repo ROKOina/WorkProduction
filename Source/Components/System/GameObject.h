@@ -88,6 +88,9 @@ public:
 	const bool GetEnabled() const { return isEnabled_; }
 	void SetEnabled(bool enabled) { isEnabled_ = enabled; }
 
+	const float GetObjSpeed() const { return objSpeed_; }
+	void SetObjSpeed(float speed) { objSpeed_ = speed; }
+
 public:
 	std::shared_ptr<TransformCom> transform_;
 
@@ -102,6 +105,9 @@ private:
 
 	//有効か
 	bool isEnabled_ = true;
+
+	//オブジェクトスピード（スローにできる）
+	float objSpeed_ = 1;
 };
 
 // ゲームオブジェクトマネージャー

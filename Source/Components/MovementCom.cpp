@@ -31,8 +31,11 @@ void MovementCom::OnGUI()
 //縦方向移動更新
 void MovementCom::VerticalUpdate(float elapsedTime)
 {
+    //世界のスピード
     float worldSpeed = Graphics::Instance().GetWorldSpeed();
-    float gravity = gravity_ * (elapsedTime * worldSpeed);
+    //オブジェクトのスピード
+    float objSpeed = GetGameObject()->GetObjSpeed();
+    float gravity = gravity_ * (elapsedTime * worldSpeed * objSpeed);
     //float gravity = gravity_ * (elapsedTime * Graphics::Instance().GetFPS());
     //float gravity = gravity_ * (elapsedTime*100 /** Graphics::Instance().GetFPS()*/);
     AddForce({ 0,gravity,0 });
@@ -57,10 +60,13 @@ void MovementCom::HorizonUpdate(float elapsedTime)
         velocity_.z = newMaxVelocity.z;
     }
 
+    //世界のスピード
     float worldSpeed = Graphics::Instance().GetWorldSpeed();
+    //オブジェクトのスピード
+    float objSpeed = GetGameObject()->GetObjSpeed();
 
 
-    float friction = friction_ * (elapsedTime * worldSpeed);
+    float friction = friction_ * (elapsedTime * worldSpeed * objSpeed);
     //float friction = friction_ * (elapsedTime * Graphics::Instance().GetFPS() * worldSpeed);
     //float friction = friction_ * (elapsedTime*100 /** Graphics::Instance().GetFPS()*/);
     //摩擦力
@@ -108,10 +114,14 @@ void MovementCom::VelocityAppPosition(float elapsedTime)
     velocity.z = velocity_.z + nonMaxSpeedVelocity_.z;
 
 
+    //世界のスピード
     float worldSpeed = Graphics::Instance().GetWorldSpeed();
-    position.x += velocity.x * (elapsedTime * worldSpeed);
-    position.y += velocity.y * (elapsedTime * worldSpeed);
-    position.z += velocity.z * (elapsedTime * worldSpeed);
+    //オブジェクトのスピード
+    float objSpeed = GetGameObject()->GetObjSpeed();
+
+    position.x += velocity.x * (elapsedTime * worldSpeed * objSpeed);
+    position.y += velocity.y * (elapsedTime * worldSpeed * objSpeed);
+    position.z += velocity.z * (elapsedTime * worldSpeed * objSpeed);
 
 
     //とりあえず0以下補正

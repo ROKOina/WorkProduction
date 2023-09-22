@@ -13,39 +13,6 @@
 #include "../Weapon\WeaponCom.h"
 #include "../CharacterStatusCom.h"
 
-//アニメーションリスト
-enum ANIMATION_PLAYER
-{
-    WALK_RUNRUN_1,
-    IDEL_1,
-    IDEL_2,
-    JUMP_1,
-    JUMP_2,
-    RUN_HARD_1,
-    RUN_HARD_2,
-    RUN_SOFT_1,
-    RUN_SOFT_2,
-    WALK_RUNRUN_2,
-    PUNCH,
-    BIGSWORD_UP,
-    BIGSWORD_LEFT,
-    BIGSWORD_RIGHT,
-    BIGSWORD_DOWN,
-    DASH_ANIM,
-    BIGSWORD_COM1_01,
-    BIGSWORD_COM1_02,
-    BIGSWORD_COM1_03,
-    BIGSWORD_COM2_01,
-    BIGSWORD_COM2_02,
-    BIGSWORD_COM2_03,
-    BIGSWORD_DASH,
-    JUMP_IN,
-    DODGE_BACK,
-    DODGE_FRONT,
-    DODGE_LEFT,
-    DODGE_RIGHT,
-};
-
 // 開始処理
 void PlayerCom::Start()
 {
@@ -72,7 +39,9 @@ void PlayerCom::Start()
 
     //攻撃管理を初期化
     attackPlayer_ = std::make_shared<AttackPlayer>(GetGameObject()->GetComponent<PlayerCom>());
+    //移動管理を初期化
     movePlayer_ = std::make_shared<MovePlayer>(GetGameObject()->GetComponent<PlayerCom>());
+    //ジャスト回避管理を初期化
     justAvoidPlayer_ = std::make_shared<JustAvoidPlayer>(GetGameObject()->GetComponent<PlayerCom>());
 
     //アニメーション初期化
@@ -87,22 +56,10 @@ void PlayerCom::Update(float elapsedTime)
     movePlayer_->Update(elapsedTime);
 
     //ジャスト回避
-    {
-        ////更新
-        //JustAvoidanceAttackUpdate(elapsedTime);
-        justAvoidPlayer_->Update(elapsedTime);
-    }
+    justAvoidPlayer_->Update(elapsedTime);
 
     //攻撃
-    {
-        ////攻撃更新
-        //AttackUpdate();
-
-        attackPlayer_->Update(elapsedTime);
-
-        ////当たり判定
-        //AttackJudgeCollision();
-    }
+    attackPlayer_->Update(elapsedTime);
 
     //カプセル当たり判定設定
     {
@@ -176,12 +133,23 @@ void PlayerCom::OnGUI()
 
     int stats = (int)playerStatus_;
     ImGui::InputInt("status", &stats);
+
+    if(ImGui::TreeNode("Attack"))
+    {
+        attackPlayer_->OnGui();
+        ImGui::TreePop();
+    }
+    if(ImGui::TreeNode("JustAvo"))
+    {
+        justAvoidPlayer_->OnGui();
+        ImGui::TreePop();
+    }
+    if(ImGui::TreeNode("Move"))
+    {
+        movePlayer_->OnGui();
+        ImGui::TreePop();
+    }
 }
-
-
-
-
-
 
 
 //アニメーション初期化設定
@@ -198,6 +166,9 @@ void PlayerCom::AnimationInitialize()
     animator->AddTriggerParameter("jump");
     animator->AddTriggerParameter("punch");
     animator->AddTriggerParameter("dash");
+    animator->AddTriggerParameter("dashBack");
+    animator->AddTriggerParameter("runTurn");
+    animator->AddTriggerParameter("runStop");
 
     animator->AddTriggerParameter("square");    //□
     animator->AddTriggerParameter("triangle");  //△
@@ -240,6 +211,20 @@ void PlayerCom::AnimationInitialize()
             "moveSpeed", movePlayer_->moveParam_[MovePlayer::MOVE_PARAM::WALK].moveMaxSpeed + 1, PATAMETER_JUDGE::LESS);
         animator->SetLoopAnimation(RUN_HARD_2, true);
 
+        //run切り替えし
+        animator->AddAnimatorTransition(RUN_HARD_2, RUN_TURN_FORWARD);
+        animator->SetTriggerTransition(RUN_HARD_2, RUN_TURN_FORWARD, "runTurn");
+        animator->AddAnimatorTransition(RUN_TURN_FORWARD, RUN_HARD_2, true);
+
+        //run止まり
+        animator->AddAnimatorTransition(RUN_STOP);
+        //animator->AddAnimatorTransition(RUN_HARD_2, RUN_STOP);
+        animator->SetTriggerTransition(RUN_STOP, "runStop");
+        //animator->SetTriggerTransition(RUN_HARD_2, RUN_STOP, "runStop");
+        animator->AddAnimatorTransition(RUN_STOP, IDEL_2, true);
+
+
+
         {   //dashコンボ
             //dash切り
             animator->AddAnimatorTransition(BIGSWORD_DASH);
@@ -271,6 +256,12 @@ void PlayerCom::AnimationInitialize()
         animator->AddAnimatorTransition(DASH_ANIM);
         animator->SetTriggerTransition(DASH_ANIM, "dash");
         animator->AddAnimatorTransition(DASH_ANIM, IDEL_2, true);
+
+        //dash_back
+        animator->AddAnimatorTransition(DASH_BACK);
+        animator->SetTriggerTransition(DASH_BACK, "dashBack");
+        animator->AddAnimatorTransition(DASH_BACK, IDEL_2);
+        animator->SetTriggerTransition(DASH_BACK, IDEL_2, "idle");
 
         //ジャスト回避回避
         //back
