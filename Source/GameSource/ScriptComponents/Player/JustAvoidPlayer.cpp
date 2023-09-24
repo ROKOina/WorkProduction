@@ -104,7 +104,6 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
             //初期化
             justPico[i]->transform_->SetLocalPosition({ 0,0,0 });
-            justAnim->SetAnimationSpeed(0.2f);  //アニメ速度スローに
             Model* justModel = justPico[i]->GetComponent<RendererCom>()->GetModel();
             justModel->SetMaterialColor({ 0.4f,0.3f,0.1f,0.65f });  //色初期化
 
@@ -135,13 +134,21 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
     //分身移動処理＆アニメスピード戻す
     case 1:
     {
+        //ステートエンドフラグ
         bool endFlag = false;
+
+        //演出用ピコポジション
         DirectX::XMFLOAT3 justPicoPos[4];
         for (int i = 0; i < 4; ++i)
         {
             justPicoPos[i] = justPico[i]->transform_->GetLocalPosition();
+
+            //アニメスピードをプレイヤーに合わせる
+            std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
+            std::shared_ptr<AnimationCom> picoAnim = player_.lock()->GetGameObject()->GetComponent<AnimationCom>();
+            justAnim->SetAnimationSpeed(picoAnim->GetAnimationSpeed());  
         }
-        //縦
+        //縦位置更新
         for (int f = 0; f < 2; ++f)
         {
             float g = 1;
@@ -152,7 +159,7 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
                 justPico[f]->transform_->SetLocalPosition(justPicoPos[f]);
             }
         }
-        //横
+        //横位置更新
         for (int r = 0; r < 2; ++r)
         {
             float g = 1;
@@ -166,16 +173,9 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
                 endFlag = true;
         }
 
-        //ステート終わりにアニメスピードを戻す
+        //ステート終わり
         if (endFlag)
-        {
-            for (int i = 0; i < 4; ++i)
-            {
-                std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
-                //justAnim->SetAnimationSpeed(1.0f);
-            }
             justAvoidState_++;
-        }
 
         break;
     }
@@ -183,7 +183,10 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
     //プレイヤー出す
     case 2:
     {
+        //ステートエンドフラグ
         bool endFlag = false;
+
+        //徐々に透明に
         for (int i = 0; i < 4; ++i)
         {
             Model* justModel = justPico[i]->GetComponent<RendererCom>()->GetModel();
@@ -195,6 +198,11 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
                 justPico[i]->SetEnabled(false);
                 endFlag = true;
             }
+
+            //アニメスピードをプレイヤーに合わせる
+            std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
+            std::shared_ptr<AnimationCom> picoAnim = player_.lock()->GetGameObject()->GetComponent<AnimationCom>();
+            justAnim->SetAnimationSpeed(picoAnim->GetAnimationSpeed());  //アニメ速度スローに
         }
         if (endFlag)
             justAvoidState_++;
@@ -207,13 +215,7 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         //アニメ終了で反撃終了
         if (!player_.lock()->GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
         {
-            int i = 0;
-            for (int i = 0; i < 4; ++i)
-            {
-                std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
-                justAnim->SetAnimationSpeed(1.0f);
-            }
-
+            //プレイヤーアニメスピード戻す
             std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
             animator->SetAnimationSpeedOffset(1.0f);
         }

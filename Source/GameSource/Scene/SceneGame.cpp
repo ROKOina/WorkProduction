@@ -85,6 +85,7 @@ void SceneGame::Initialize()
 			justAttack->SetName("picolaboAttackJust");
 			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
 			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
+			justCol->SetJudgeTag(COLLIDER_TAG::Player);
 			justCol->SetSize({ 1.3f,1,1.3f });
 
 			justAttack->transform_->SetLocalPosition({ -1.569f ,0,95.493f });

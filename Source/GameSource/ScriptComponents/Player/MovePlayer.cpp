@@ -189,7 +189,6 @@ bool MovePlayer::IsMove(float elapsedTime)
     //ストップモーションフラグ処理
     if (isStopRunStop_)
     {
-        //アニメーター
         std::shared_ptr<AnimationCom> animation = player_.lock()->GetGameObject()->GetComponent<AnimationCom>();
         if (animation->IsPlayAnimation())
         {
@@ -225,6 +224,7 @@ bool MovePlayer::IsMove(float elapsedTime)
                                 std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
                                 animator->SetTriggerOn("runStop");
                                 isStopRunStop_ = true;
+                                move->ZeroVelocity();
 
                                 moveParamType_ = MOVE_PARAM::WALK;
                                 move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);

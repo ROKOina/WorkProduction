@@ -74,30 +74,30 @@ void PlayerCom::Update(float elapsedTime)
         capsule->SetPosition2({ pos.x - playerPos.x,pos.y - playerPos.y,pos.z - playerPos.z });
     }
 
-    //Ž©•ª‚Æ“G‚Ì‰Ÿ‚µ•Ô‚µ
-    std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
-    for (auto& hitObj : hitGameObj)
-    {
-        //ƒ^ƒOŒŸõ
-        //“G‚Æ‚Ì“–‚½‚èi‰¼j
-        if (COLLIDER_TAG::Enemy == hitObj.gameObject->GetComponent<Collider>()->GetMyTag())
-        {
-            //‰Ÿ‚µ•Ô‚µ
-            DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetWorldPosition();
-            DirectX::XMFLOAT3 hitPos = hitObj.gameObject->transform_->GetWorldPosition();
+    ////Ž©•ª‚Æ“G‚Ì‰Ÿ‚µ•Ô‚µ
+    //std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
+    //for (auto& hitObj : hitGameObj)
+    //{
+    //    //ƒ^ƒOŒŸõ
+    //    //“G‚Æ‚Ì“–‚½‚èi‰¼j
+    //    if (COLLIDER_TAG::Enemy == hitObj.gameObject->GetComponent<Collider>()->GetMyTag())
+    //    {
+    //        //‰Ÿ‚µ•Ô‚µ
+    //        DirectX::XMFLOAT3 playerPos = GetGameObject()->transform_->GetWorldPosition();
+    //        DirectX::XMFLOAT3 hitPos = hitObj.gameObject->transform_->GetWorldPosition();
 
-            DirectX::XMVECTOR PlayerPos = { playerPos.x,0,playerPos.z };
-            DirectX::XMVECTOR HitPos = { hitPos.x,0, hitPos.z };
+    //        DirectX::XMVECTOR PlayerPos = { playerPos.x,0,playerPos.z };
+    //        DirectX::XMVECTOR HitPos = { hitPos.x,0, hitPos.z };
 
-            DirectX::XMVECTOR ForceNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(HitPos, PlayerPos));
-            ForceNormal = DirectX::XMVectorScale(ForceNormal, 4);
+    //        DirectX::XMVECTOR ForceNormal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(HitPos, PlayerPos));
+    //        ForceNormal = DirectX::XMVectorScale(ForceNormal, 4);
 
-            DirectX::XMFLOAT3 power;
-            DirectX::XMStoreFloat3(&power, ForceNormal);
+    //        DirectX::XMFLOAT3 power;
+    //        DirectX::XMStoreFloat3(&power, ForceNormal);
 
-            hitObj.gameObject->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
-        }
-    }
+    //        hitObj.gameObject->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
+    //    }
+    //}
 
 }
 

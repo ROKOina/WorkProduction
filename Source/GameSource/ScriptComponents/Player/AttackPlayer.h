@@ -19,8 +19,16 @@ public:
     void OnGui();
 
 private:
+
+    //コンボ継続確認処理
+    void ComboJudge();
     //攻撃入力処理
-    void AttackInputUpdate(float elapsedTime);
+    bool IsAttackInput(float elapsedTime);
+    void SquareInput();
+    void TriangleInput();
+    //コンボ処理
+    void ComboProcess(float elapsedTime);
+
     //攻撃動き処理
     void AttackMoveUpdate(float elapsedTime);
 
@@ -88,6 +96,16 @@ public:
         Null,
     };
     ATTACK_FLAG attackFlagState_ = ATTACK_FLAG::Null;
+
+    //入力の種類を保存
+    enum class ATTACK_KEY   //入力を判定
+    {
+        SQUARE,     //□
+        TRIANGLE,   //△
+
+        NULL_KEY,
+    };
+    ATTACK_KEY attackKey_ = ATTACK_KEY::NULL_KEY;
 
     bool isNormalAttack_ = true;     //攻撃できるか
     int comboAttackCount_ = 0;
