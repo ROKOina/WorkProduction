@@ -7,14 +7,36 @@
 // 開始処理
 void AnimationCom::Start()
 {
-
+	neckNode = nullptr;
+	if (std::strcmp(GetGameObject()->GetName(), "pico") == 0)
+	{
+		Model* model = GetGameObject()->GetComponent<RendererCom>()->GetModel();
+		neckNode = model->FindNode("Neck");
+	}
 }
 
 // 更新処理
 void AnimationCom::Update(float elapsedTime)
 {
+
 	AnimationUpdata(elapsedTime);
+
+	//// 首のボーンを制御する
+	//if (neckNode)
+	//{
+	//	//DirectX::XMFLOAT3 look = GetGameObject()->GetChildFind("look")->transform_->GetLocalPosition();
+	//	DirectX::XMFLOAT3 look = GameObjectManager::Instance().Find("picolabo")->transform_->GetWorldPosition();
+
+	//	DirectX::XMMATRIX IW =DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&GetGameObject()->transform_->GetWorldTransform()));
+	//	DirectX::XMVECTOR E = DirectX::XMLoadFloat3(&look);
+	//	DirectX::XMFLOAT3 pos;
+	//	DirectX::XMStoreFloat3(&pos, DirectX::XMVector3TransformCoord(E, IW));
+
+	//	neckNode->rotate = QuaternionStruct::LookRotation(pos);
+	//}
+
 }
+
 
 // GUI描画
 bool isAnimLoop;
@@ -34,6 +56,8 @@ void AnimationCom::OnGUI()
 			PlayAnimation(index, isAnimLoop);
 		index++;
 	}
+
+	//ImGui::DragFloat3()
 
 }
 

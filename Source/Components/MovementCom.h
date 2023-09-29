@@ -2,6 +2,10 @@
 
 #include "System\Component.h"
 
+#define GRAVITY_NORMAL -80
+#define GRAVITY_FALL -120
+#define GRAVITY_ZERO 0
+
 class MovementCom : public Component
 {
     //コンポーネントオーバーライド
@@ -102,7 +106,7 @@ private:
     DirectX::XMFLOAT3 velocity_ = { 0,0,0 };
     DirectX::XMFLOAT3 nonMaxSpeedVelocity_ = { 0,0,0 }; //最大スピードを無視した速力
 
-    float gravity_ = -80.25f;  //重力
+    float gravity_ = GRAVITY_NORMAL;  //重力
     bool onGround_ = false;      //地面についているか
     float friction_ = 15;  //摩擦
     //float friction_ = 0.1f;  //摩擦

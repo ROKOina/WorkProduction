@@ -36,6 +36,7 @@ void PlayerCom::Start()
     weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
     weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f, 2.0f);
     weapon->SetAttackStatus(BIGSWORD_DASH, 1, 100, 0.9f, 0.1f);
+    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 50, 0.0f, 1.0f,2.0f);
 
     //攻撃管理を初期化
     attackPlayer_ = std::make_shared<AttackPlayer>(GetGameObject()->GetComponent<PlayerCom>());
@@ -164,6 +165,7 @@ void PlayerCom::AnimationInitialize()
     //アニメーションパラメーター追加
     animator->AddTriggerParameter("idle");
     animator->AddTriggerParameter("jump");
+    animator->AddTriggerParameter("jumpFall");
     animator->AddTriggerParameter("punch");
     animator->AddTriggerParameter("dash");
     animator->AddTriggerParameter("dashBack");
@@ -175,8 +177,18 @@ void PlayerCom::AnimationInitialize()
     //入力無し
     animator->AddTriggerParameter("squareIdle");
     animator->AddTriggerParameter("squareDash");
+    animator->AddTriggerParameter("squareJump");
+
     animator->AddTriggerParameter("triangleIdle");
     animator->AddTriggerParameter("triangleDash");
+    animator->AddTriggerParameter("triangleJump");
+    animator->AddTriggerParameter("triangleJumpDown");
+
+    animator->AddTriggerParameter("jumpAttackEnd");
+
+    //dashコンボの待機
+    animator->AddTriggerParameter("dashComboWait");
+
     //ジャスト時
     animator->AddTriggerParameter("squareJust");
     animator->AddTriggerParameter("triangleJust");
@@ -191,7 +203,7 @@ void PlayerCom::AnimationInitialize()
     //アニメーション遷移とパラメーター設定をする決める
     {
         //idle
-        animator->AddAnimatorTransition(IDEL_2, WALK_RUNRUN_2,false,0.5f);
+        animator->AddAnimatorTransition(IDEL_2, WALK_RUNRUN_2, false, 0.5f);
         animator->SetFloatTransition(IDEL_2, WALK_RUNRUN_2,
             "moveSpeed", 0.1f, PATAMETER_JUDGE::GREATER);
 
@@ -203,12 +215,12 @@ void PlayerCom::AnimationInitialize()
 
         animator->AddAnimatorTransition(WALK_RUNRUN_2, RUN_HARD_2);
         animator->SetFloatTransition(WALK_RUNRUN_2, RUN_HARD_2,
-            "moveSpeed", movePlayer_->moveParam_[MovePlayer::MOVE_PARAM::WALK].moveMaxSpeed + 1, PATAMETER_JUDGE::GREATER);
+            "moveSpeed", movePlayer_->GetMoveParam(MovePlayer::MOVE_PARAM::WALK).moveMaxSpeed + 1, PATAMETER_JUDGE::GREATER);
 
         //run
         animator->AddAnimatorTransition(RUN_HARD_2, WALK_RUNRUN_2);
         animator->SetFloatTransition(RUN_HARD_2, WALK_RUNRUN_2,
-            "moveSpeed", movePlayer_->moveParam_[MovePlayer::MOVE_PARAM::WALK].moveMaxSpeed + 1, PATAMETER_JUDGE::LESS);
+            "moveSpeed", movePlayer_->GetMoveParam(MovePlayer::MOVE_PARAM::WALK).moveMaxSpeed + 1, PATAMETER_JUDGE::LESS);
         animator->SetLoopAnimation(RUN_HARD_2, true);
 
         //run切り替えし
@@ -231,9 +243,15 @@ void PlayerCom::AnimationInitialize()
             animator->SetTriggerTransition(BIGSWORD_DASH, "triangleDash");
             animator->AddAnimatorTransition(BIGSWORD_DASH, IDEL_2, true, 3.5f);
 
+            //コンボ2(攻撃待機
+            animator->AddAnimatorTransition(BIGSWORD_DASH_3);
+            animator->SetTriggerTransition(BIGSWORD_DASH_3, "dashComboWait");
+            animator->AddAnimatorTransition(BIGSWORD_DASH_3, IDEL_2, true);
+
+
             //コンボ3
-            animator->AddAnimatorTransition(JUMP_IN, BIGSWORD_COM1_01);
-            animator->SetTriggerTransition(JUMP_IN, BIGSWORD_COM1_01, "square");
+            animator->AddAnimatorTransition(BIGSWORD_DASH_3, BIGSWORD_COM1_01);
+            animator->SetTriggerTransition(BIGSWORD_DASH_3, BIGSWORD_COM1_01, "square");
             animator->AddAnimatorTransition(BIGSWORD_COM1_01, IDEL_2, true, 3.5f);
 
 
@@ -246,6 +264,13 @@ void PlayerCom::AnimationInitialize()
         animator->SetTriggerTransition(JUMP_IN, "jump");
         animator->AddAnimatorTransition(JUMP_IN, IDEL_2);
         animator->SetTriggerTransition(JUMP_IN, IDEL_2, "idle");
+
+        //jumpFall
+        animator->AddAnimatorTransition(JUMP_FALL, false, 1.0f);
+        animator->SetTriggerTransition(JUMP_FALL, "jumpFall");
+        animator->AddAnimatorTransition(JUMP_FALL, IDEL_2);
+        animator->SetTriggerTransition(JUMP_FALL, IDEL_2, "idle");
+        animator->SetLoopAnimation(JUMP_FALL, true);
 
         //punch
         animator->AddAnimatorTransition(PUNCH);
@@ -303,6 +328,40 @@ void PlayerCom::AnimationInitialize()
             //animator->SetTriggerTransition(BIGSWORD_COM1_03, "squareJust");
             animator->AddAnimatorTransition(BIGSWORD_COM1_03, IDEL_2, true, 3.5f);
         }
+
+        //ジャンプコンボ
+        {   //J△□□
+            //combo01
+            animator->AddAnimatorTransition(JUMP_ATTACK_UPPER);
+            animator->SetTriggerTransition(JUMP_ATTACK_UPPER, "triangleJump");
+            animator->AddAnimatorTransition(JUMP_ATTACK_UPPER, IDEL_2, true, 3.5f);
+        }
+
+        //ジャンプ中下強攻撃
+        {   //J△
+            animator->AddAnimatorTransition(JUMP_ATTACK_DOWN_START);
+            animator->SetTriggerTransition(JUMP_ATTACK_DOWN_START, "triangleJumpDown");
+            animator->AddAnimatorTransition(JUMP_ATTACK_DOWN_START, JUMP_ATTACK_DOWN_DO, true);
+
+            animator->SetLoopAnimation(JUMP_ATTACK_DOWN_DO, true);
+
+            animator->AddAnimatorTransition(JUMP_ATTACK_DOWN_DO, JUMP_ATTACK_DOWN_END);
+            animator->SetTriggerTransition(JUMP_ATTACK_DOWN_DO, JUMP_ATTACK_DOWN_END, "idle");
+
+            animator->AddAnimatorTransition(JUMP_ATTACK_DOWN_END, IDEL_2, true);
+        }
+
+        //ジャンプ攻撃
+        {
+            animator->AddAnimatorTransition(JUMP_ATTACK_01);
+            animator->SetTriggerTransition(JUMP_ATTACK_01, "squareJump");
+            animator->AddAnimatorTransition(JUMP_ATTACK_01, IDEL_2, true);
+
+            animator->AddAnimatorTransition(JUMP_ATTACK_01, JUMP_ATTACK_02);
+            animator->SetTriggerTransition(JUMP_ATTACK_01, JUMP_ATTACK_02, "square");
+            animator->AddAnimatorTransition(JUMP_ATTACK_02, IDEL_2, true);
+        }
+
 
     }
 

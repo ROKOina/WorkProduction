@@ -26,6 +26,7 @@ void MovementCom::OnGUI()
     ImGui::DragFloat("friction", &friction_, 0.1f);
     ImGui::DragFloat("moveMaxSpeed", &moveMaxSpeed_, 0.1f);
     ImGui::DragFloat("moveAcceleration", &moveAcceleration_, 0.1f);
+    ImGui::Checkbox("onGround", &onGround_);
 }
 
 //c•ûŒüˆÚ“®XV

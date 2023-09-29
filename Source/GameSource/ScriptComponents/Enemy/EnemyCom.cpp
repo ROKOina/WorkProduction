@@ -116,51 +116,6 @@ void EnemyCom::Update(float elapsedTime)
             justChild->GetComponent<Collider>()->SetEnabled(true);
         }
     }
-
-    //ジャスト当たり判定
-    std::vector<HitObj> hitObj = justChild->GetComponent<Collider>()->OnHitGameObject();
-    for (auto& h : hitObj)
-    {
-        if (h.gameObject->GetComponent<Collider>()->GetMyTag() != COLLIDER_TAG::Player)continue;
-        int i = 0;
-    }
-
-    ////アタックアニメーションイベント取得
-    ////イベント中は子のアタックオブジェクトをオンに
-    //std::shared_ptr<GameObject> attackChild = GetGameObject()->GetChildFind("picolaboAttack");
-    //if (GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationEvent("kick_left", pos)) {
-    //    attackChild->GetComponent<Collider>()->SetEnabled(true);
-    //    attackChild->transform_->SetWorldPosition(pos);
-    //}
-    //else
-    //{
-    //    attackChild->GetComponent<Collider>()->SetEnabled(false);
-    //}
-
-    ////とりあえず近くにいたら攻撃(仮)
-    //DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
-    //DirectX::XMFLOAT3 myPos = GetGameObject()->transform_->GetWorldPosition();
-    //if (playerPos.x * playerPos.x - myPos.x * myPos.x < 5 * 5)
-    //{
-    //    if (playerPos.z * playerPos.z - myPos.z * myPos.z < 5 * 5)
-    //    {
-    //        //アニメーター
-    //        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-    //        animator->SetTriggerOn("kick");
-    //    }
-    //}
-
-    ////アタック当たり判定
-    //hitObj = attackChild->GetComponent<Collider>()->OnHitGameObject();
-    //for (auto& h : hitObj)
-    //{
-    //    if (h.gameObject->GetComponent<Collider>()->GetMyTag() != COLLIDER_TAG::Player)continue;
-    //    //プレイヤーにダメージ
-    //    std::shared_ptr<GameObject> player = h.gameObject;
-    //    if (player->GetComponent<PlayerCom>()->GetIsInvincible())continue;
-    //    player->GetComponent<MovementCom>()->AddNonMaxSpeedForce({ 0, 0, -30 });
-    //    player->GetComponent<PlayerCom>()->OnDamage();
-    //}
 }
 
 // GUI描画

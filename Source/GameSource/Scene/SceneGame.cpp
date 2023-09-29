@@ -131,16 +131,6 @@ void SceneGame::Initialize()
 			attackAssistCol->SetRadius(3);
 		}
 
-		//‘fèUŒ‚“–‚½‚è”»’è—p
-		{
-			std::shared_ptr<GameObject> attack = obj->AddChildObject();
-			attack->SetName("picoAttack");
-			std::shared_ptr<SphereColliderCom> attackCol = attack->AddComponent<SphereColliderCom>();
-			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
-			attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
-
-		}
-
 		//Œ•("RightHandMiddle2")
 		{
 			std::shared_ptr<GameObject> sword = obj->AddChildObject();
@@ -177,6 +167,13 @@ void SceneGame::Initialize()
 			picoJust->AddComponent<AnimationCom>();
 
 			picoJust->transform_->SetWorldPosition({ 0,0,100 });
+		}
+
+		//Œ©‚é
+		{
+			std::shared_ptr<GameObject> look = obj->AddChildObject();
+			look->SetName("look");
+			look->AddComponent<SphereColliderCom>();
 		}
 	}
 

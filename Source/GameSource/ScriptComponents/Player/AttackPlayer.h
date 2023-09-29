@@ -26,6 +26,7 @@ private:
     bool IsAttackInput(float elapsedTime);
     void SquareInput();
     void TriangleInput();
+    void DashInput();
     //ƒRƒ“ƒ{ˆ—
     void ComboProcess(float elapsedTime);
 
@@ -84,7 +85,18 @@ private:
     //“G‚Ì•ûŒü‚Ö‰ñ“]‚·‚é ( true:Š®—¹ )
     bool ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> enemy, float rollSpeed);
 
-public:
+public: 
+    //ƒQƒbƒ^[•ƒZƒbƒ^[
+    const bool& GetIsNormalAttack()const { return isNormalAttack_; }
+    void SetIsNormalAttack(bool flag) { isNormalAttack_ = flag; }
+
+    const int& GetComboAttackCount()const { return comboAttackCount_; }
+    void SetComboAttackCount(int count) { comboAttackCount_ = count; }
+
+    void SetAnimFlagName(std::string str) { animFlagName_ = str; }
+
+
+private:
     std::shared_ptr<GameObject> enemyCopy_;  //“G•Û‘¶
 
     //Œ»İ‚ÌUŒ‚‚Ìí—Ş
@@ -102,13 +114,19 @@ public:
     {
         SQUARE,     // 
         TRIANGLE,   //¢
+        DASH,       //DASH
 
         NULL_KEY,
     };
     ATTACK_KEY attackKey_ = ATTACK_KEY::NULL_KEY;
 
     bool isNormalAttack_ = true;     //UŒ‚‚Å‚«‚é‚©
+
+    //UŒ‚‚Ì’iŠKiƒRƒ“ƒ{‰ñ”‚Å‚Í‚È‚¢j
     int comboAttackCount_ = 0;
+
+    //~‰ºUŒ‚’†‚©
+    bool isJumpFall_ = false;
 
     //‘¼‚©‚çUŒ‚‚Éˆø‚«Œp‚®—p
     std::string animFlagName_ = "";

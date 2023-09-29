@@ -4,6 +4,7 @@
 
 #include "System\Component.h"
 
+#include "Graphics\Model\Model.h"
 #include "Graphics\Model\ModelResource.h"
 
 //アニメーション
@@ -109,4 +110,7 @@ private:
     bool isStop_ = false;    //停止するか
 
     std::vector<AnimEvent> currentAnimationEvents_;
+
+    //首のボーンの制御
+    Model::Node* neckNode;
 };

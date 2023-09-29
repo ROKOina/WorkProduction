@@ -467,6 +467,7 @@ void GameObjectManager::Render3D()
 	for (std::weak_ptr<RendererCom>& renderObj : renderSortObject_)
 	{
 		if (!renderObj.lock()->GetGameObject()->GetEnabled())continue;
+		if (!renderObj.lock()->GetEnabled())continue;
 
 		//シェーダーIDが変化したら、シェーダーを変更
 		int newShaderID = renderObj.lock()->GetShaderID();

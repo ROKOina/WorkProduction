@@ -46,10 +46,6 @@ public:
     //引数は歩きにするか
     void DashEndFlag(bool isWalk = true);
 
-public:
-    //入力値保存
-    DirectX::XMFLOAT3 inputMoveVec_;
-
     //走りと歩きを切り替える
     enum MOVE_PARAM
     {
@@ -59,6 +55,26 @@ public:
         DASH,
         MAX,
     };
+
+    //ゲッター＆セッター
+    void SetMoveParamType(MOVE_PARAM moveParam);
+    const auto& GetMoveParam(MOVE_PARAM moveParam) const { return moveParam_[moveParam]; }
+
+    const DirectX::XMFLOAT3& GetInputMoveVec()const { return inputMoveVec_; }
+
+    const bool& GetIsInputMove()const { return isInputMove_; }
+    void SetIsInputMove(bool flag) { isInputMove_ = flag; }
+
+    const bool& GetIsInputTurn()const { return isInputTurn_; }
+    void SetIsInputTurn(bool flag) { isInputTurn_ = flag; }
+
+    const bool& GetIsDash()const { return isDash_; }
+    void SetIsDash(bool flag) { isDash_ = flag; }
+
+    const int& GetJumpCount()const { return jumpCount_; }
+    void SetJumpCount(int count) { jumpCount_ = count; }
+
+private:
     struct
     {
         float moveMaxSpeed = 10.0f;
@@ -68,10 +84,13 @@ public:
     }moveParam_[MOVE_PARAM::MAX];
     int moveParamType_ = MOVE_PARAM::WALK;
 
+    //入力値保存
+    DirectX::XMFLOAT3 inputMoveVec_;
+
     //入力で移動できるか
     bool isInputMove_ = true;
     //回転できるか
-    bool isInputTrun_ = true;
+    bool isInputTurn_ = true;
 
     //走り切り替えし
     bool isRunTurn_ = false;
@@ -81,9 +100,12 @@ public:
     //走りからストップモーションフラグ
     bool isStopRunStop_ = false;
 
+    //ジャンプ関連
     float jumpSpeed_ = 20.0f;
     int jumpCount_ = 2;
+    int jumpDashCount_ = 1; //空中ダッシュできる回数
 
+    //ダッシュ関連
     bool isDash_ = true;        //ダッシュできるか
     bool isDashJudge_ = false;  //ダッシュ中か
     int dashState_ = -1;        //ダッシュの遷移

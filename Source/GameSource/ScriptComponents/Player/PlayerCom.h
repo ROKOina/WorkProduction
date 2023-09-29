@@ -40,6 +40,18 @@ enum ANIMATION_PLAYER
     RUN_TURN,
     RUN_STOP,
     RUN_TURN_FORWARD,
+    JUMP_ATTACK_UPPER,
+    JUMP_ATTACK_DOWN_START,
+    JUMP_ATTACK_DOWN_END,
+    JUMP_ATTACK_DOWN_DO,
+    JUMP_FALL,
+    JUMP_ATTACK_06,
+    JUMP_ATTACK_05,
+    JUMP_ATTACK_04,
+    JUMP_ATTACK_03,
+    JUMP_ATTACK_02,
+    JUMP_ATTACK_01,
+    BIGSWORD_DASH_3,
 };
 
 class PlayerCom : public Component
@@ -84,9 +96,16 @@ public:
 
         ATTACK,
         ATTACK_DASH,
+        ATTACK_JUMP,
+        ATTACK_JUMP_FALL,
     };
     PLAYER_STATUS GetPlayerStatus() { return playerStatus_; }
-    void SetPlayerStatus(PLAYER_STATUS status) { playerStatus_ = status; }
+    PLAYER_STATUS GetPlayerStatusOld() { return playerStatusOld_; }
+    void SetPlayerStatus(PLAYER_STATUS status) {
+        if (status != playerStatus_)
+            playerStatusOld_ = playerStatus_;
+        playerStatus_ = status;
+    }
 
     std::shared_ptr<MovePlayer> GetMovePlayer() { return movePlayer_; }
     std::shared_ptr<AttackPlayer> GetAttackPlayer() { return attackPlayer_; }
@@ -94,6 +113,7 @@ public:
 
 private:
     PLAYER_STATUS playerStatus_ = PLAYER_STATUS::IDLE;
+    PLAYER_STATUS playerStatusOld_ = PLAYER_STATUS::IDLE;
 
     //ÉvÉåÉCÉÑÅ[ÇÃçUåÇÇÃìÆÇ´ÇÃÇ›ä«óùÇ∑ÇÈ
     std::shared_ptr<AttackPlayer> attackPlayer_;

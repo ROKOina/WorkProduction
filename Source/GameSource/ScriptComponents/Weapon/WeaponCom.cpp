@@ -105,6 +105,8 @@ bool WeaponCom::CollsionFromEventJudge()
 
     //攻撃速度をいじる
     std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetParent()->GetComponent<AnimatorCom>();
+
+    //アニメーション速度変更していたら戻す
     if (isAnimSetting)
     {
         animator->SetAnimationSpeedOffset(1);

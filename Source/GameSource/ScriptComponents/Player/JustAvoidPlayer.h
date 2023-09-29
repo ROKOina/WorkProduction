@@ -29,12 +29,30 @@ private:
     void JustAvoidanceSquare(float elapsedTime);
 
 public:
+    //ジャスト回避出来たか判定
+    void JustAvoidJudge();
+
+    //ジャスト回避を開始する
+    void StartJustAvoid()
+    {
+        isJustJudge_ = true;
+        justAvoidState_ = 0;
+    }
+
+    //ゲッター＆セッター
+    const std::weak_ptr<GameObject> GetJustHitEnemy() const { return justHitEnemy_; }
+
+    const bool& GetIsJustJudge() const { return isJustJudge_; }
+
+
+private:
     //ジャスト回避判定
     bool isJustJudge_ = false;  //ジャスト回避判定
     int justAvoidState_ = -1;   //ジャスト回避の遷移
     float justAvoidTime_ = 1;   //ジャスト回避時間
     float justAvoidTimer_ = 0;
-    std::shared_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
+    std::weak_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
+    //std::shared_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
 
     //ジャスト回避反撃
     enum class JUST_AVOID_KEY   //入力を判定

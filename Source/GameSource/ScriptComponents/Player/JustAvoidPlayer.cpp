@@ -6,6 +6,7 @@
 #include "Components\AnimatorCom.h"
 #include "Components\TransformCom.h"
 #include "Components\RendererCom.h"
+#include "Components\ColliderCom.h"
 #include "Components\CameraCom.h"
 #include "Input/Input.h"
 
@@ -70,17 +71,16 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
     case 0:
     {
         //ジャスト回避に変更
-        player_.lock()->GetMovePlayer()->moveParamType_ = MovePlayer::MOVE_PARAM::JUSTDASH;
-        move->SetMoveMaxSpeed(player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::JUSTDASH].moveMaxSpeed);
-        move->SetMoveAcceleration(player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::JUSTDASH].moveAcceleration);
+
+        player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::JUSTDASH);
         justAvoidTimer_ = justAvoidTime_;
 
-        player_.lock()->GetMovePlayer()->isInputMove_ = false;
-        player_.lock()->GetAttackPlayer()->isNormalAttack_ = false;
-        player_.lock()->GetMovePlayer()->isDash_ = false;
+        player_.lock()->GetMovePlayer()->SetIsInputMove(false);
+        player_.lock()->GetAttackPlayer()->SetIsNormalAttack(false);
+        player_.lock()->GetMovePlayer()->SetIsDash(false);
 
         //入力方向をみてアニメーション再生
-        DirectX::XMVECTOR Input = DirectX::XMLoadFloat3(&player_.lock()->GetMovePlayer()->inputMoveVec_);
+        DirectX::XMVECTOR Input = DirectX::XMLoadFloat3(&player_.lock()->GetMovePlayer()->GetInputMoveVec());
 
         //アニメーション再生
         std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
@@ -116,7 +116,7 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         }
 
         //敵の方を向く
-        player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_->transform_->GetWorldPosition());
+        player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_.lock()->transform_->GetWorldPosition());
 
         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUST);
 
@@ -225,12 +225,10 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         if (justAvoidTimer_ < 0)
         {
             JustInisialize();
-            player_.lock()->GetMovePlayer()->moveParamType_ = MovePlayer::MOVE_PARAM::RUN;
-            move->SetMoveMaxSpeed(player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::RUN].moveMaxSpeed);
-            move->SetMoveAcceleration(player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::RUN].moveAcceleration);
-            player_.lock()->GetMovePlayer()->isInputMove_ = true;
-            player_.lock()->GetAttackPlayer()->isNormalAttack_ = true;
-            player_.lock()->GetMovePlayer()->isDash_ = true;
+            player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::RUN);
+            player_.lock()->GetMovePlayer()->SetIsInputMove(true);
+            player_.lock()->GetAttackPlayer()->SetIsNormalAttack(true);
+            player_.lock()->GetMovePlayer()->SetIsDash(true);
             break;
         }
 
@@ -240,12 +238,12 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
 
     //移動出来るか
     int animIndex = player_.lock()->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
-    if (animIndex != 25 && animIndex != 24)
+    if (animIndex != ANIMATION_PLAYER::DODGE_FRONT && animIndex != ANIMATION_PLAYER::DODGE_BACK)
     {
         //移動方向を決める（ジャスト回避中は勝手に移動する）
         DirectX::XMFLOAT3 Direction;
 
-        DirectX::XMFLOAT3 inputVec = player_.lock()->GetMovePlayer()->inputMoveVec_;
+        DirectX::XMFLOAT3 inputVec = player_.lock()->GetMovePlayer()->GetInputMoveVec();
         if (inputVec.x * inputVec.x + inputVec.z * inputVec.z > 0.1f)
         {
             Direction = { inputVec.x ,0,inputVec.z };
@@ -260,8 +258,8 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             //正規化
             DirectX::XMStoreFloat3(&Direction, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&Direction)));
         }
-        Direction.x *= player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::JUSTDASH].moveSpeed;
-        Direction.z *= player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::JUSTDASH].moveSpeed;
+
+        player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::JUSTDASH);
         //力に加える
         move->AddForce(Direction);
     }
@@ -281,18 +279,16 @@ void JustAvoidPlayer::JustAvoidanceAttackInput()
     if (gamePad.GetButtonDown() & GamePad::BTN_Y)
     {
         JustInisialize();
-        player_.lock()->GetMovePlayer()->moveParamType_ = MovePlayer::MOVE_PARAM::DASH;
-        move->SetMoveMaxSpeed(player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::DASH].moveMaxSpeed);
-        move->SetMoveAcceleration(player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::DASH].moveAcceleration);
+        player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::DASH);
 
         justAvoidKey_ = JUST_AVOID_KEY::SQUARE;
 
-        player_.lock()->GetMovePlayer()->isInputTrun_ = false;
+        player_.lock()->GetMovePlayer()->SetIsInputMove(false);
 
         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
 
         //敵の方を向く
-        player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_->transform_->GetWorldPosition());
+        player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_.lock()->transform_->GetWorldPosition());
     }
 }
 
@@ -304,27 +300,25 @@ void JustAvoidPlayer::JustAvoidanceSquare(float elapsedTime)
         std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
 
         DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldPosition());
-        DirectX::XMVECTOR EnemyPos = DirectX::XMLoadFloat3(&justHitEnemy_->transform_->GetWorldPosition());
+        DirectX::XMVECTOR EnemyPos = DirectX::XMLoadFloat3(&justHitEnemy_.lock()->transform_->GetWorldPosition());
         DirectX::XMVECTOR PE = DirectX::XMVectorSubtract(EnemyPos, Pos);
         float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(PE));
         //敵の近くまで移動する
         if (length < 1.5f)
         {
             JustInisialize();
-            player_.lock()->GetMovePlayer()->moveParamType_ = MovePlayer::MOVE_PARAM::RUN;
-            move->SetMoveMaxSpeed(player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::RUN].moveMaxSpeed);
-            move->SetMoveAcceleration(player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::RUN].moveAcceleration);
+            player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::RUN);
             justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
-            player_.lock()->GetMovePlayer()->isInputMove_ = true;
-            player_.lock()->GetAttackPlayer()->isNormalAttack_ = true;
-            player_.lock()->GetMovePlayer()->isDash_ = true;
+            player_.lock()->GetMovePlayer()->SetIsInputMove(true);
+            player_.lock()->GetAttackPlayer()->SetIsNormalAttack(true);
+            player_.lock()->GetMovePlayer()->SetIsDash(true);
 
             //アタック処理に引き継ぐ
-            player_.lock()->GetAttackPlayer()->animFlagName_ = "squareJust";
+            player_.lock()->GetAttackPlayer()->SetAnimFlagName("squareJust");
         }
 
         DirectX::XMVECTOR Dir = DirectX::XMVector3Normalize(PE);
-        Dir = DirectX::XMVectorScale(Dir, player_.lock()->GetMovePlayer()->moveParam_[MovePlayer::MOVE_PARAM::DASH].moveSpeed);
+        Dir = DirectX::XMVectorScale(Dir, player_.lock()->GetMovePlayer()->GetMoveParam(MovePlayer::MOVE_PARAM::DASH).moveSpeed);
         DirectX::XMFLOAT3 dir;
         DirectX::XMStoreFloat3(&dir, Dir);
 
@@ -332,4 +326,40 @@ void JustAvoidPlayer::JustAvoidanceSquare(float elapsedTime)
         move->AddForce(dir);
 
     }
+}
+
+//ジャスト回避出来たか判定
+void JustAvoidPlayer::JustAvoidJudge()
+{
+    //ジャスト回避の当たり判定
+    std::vector<HitObj> hitGameObj = player_.lock()->GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
+    //ジャスト回避したエネミーを保存
+    std::shared_ptr<GameObject> enemy;
+    for (auto& hitObj : hitGameObj)
+    {
+        if (COLLIDER_TAG::JustAvoid != hitObj.gameObject->GetComponent<Collider>()->GetMyTag())continue;
+
+        //最初だけそのまま入れる
+        if (!enemy) {
+            enemy = hitObj.gameObject->GetParent();
+            continue;
+        }
+        //一番近い敵を保存
+        DirectX::XMFLOAT3 pPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 ePos = hitObj.gameObject->GetParent()->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 eOldPos = enemy->transform_->GetWorldPosition();
+
+        DirectX::XMVECTOR PPos = DirectX::XMLoadFloat3(&pPos);
+        DirectX::XMVECTOR EPos = DirectX::XMLoadFloat3(&ePos);
+        DirectX::XMVECTOR EOldPos = DirectX::XMLoadFloat3(&eOldPos);
+
+        float currentLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(PPos, EPos)));
+        float oldLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(PPos, EOldPos)));
+
+        //比較
+        if (currentLength < oldLength)
+            enemy = hitObj.gameObject->GetParent();
+    }
+
+    justHitEnemy_ = enemy;
 }
