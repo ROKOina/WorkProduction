@@ -22,12 +22,20 @@ void AttackPlayer::Update(float elapsedTime)
     //入力を見て処理をする
     if (IsAttackInput(elapsedTime))
     {
+        //アニメインデックスで、コンボカウントリセット
+        AttackComboCountReset();
+
         switch (attackKey_)
         {
         case AttackPlayer::ATTACK_KEY::SQUARE:
+            //ブレイク処理
+            if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_JUMP_FALL)break;
+            if (!isSquareAttack_)break;
             SquareInput();
             break;
         case AttackPlayer::ATTACK_KEY::TRIANGLE:
+            //ブレイク処理
+            if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_JUMP_FALL)break;
             TriangleInput();
             break;
         case AttackPlayer::ATTACK_KEY::DASH:
@@ -48,6 +56,7 @@ void AttackPlayer::Update(float elapsedTime)
 void AttackPlayer::OnGui()
 {
     ImGui::InputInt("comboCount", &comboAttackCount_, ImGuiInputTextFlags_ReadOnly);
+    ImGui::Checkbox("isSquareAttack", &isSquareAttack_);
 }
 
 //コンボ継続確認処理
@@ -72,11 +81,24 @@ void AttackPlayer::ComboJudge()
 
                     std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
 
-                    //プレイヤーステータスの更新
+                    //空中かの判定
                     if (playerObj->GetComponent<MovementCom>()->OnGround())
+                    {
+                        //プレイヤーステータスの更新
                         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::IDLE);
+                    }
                     else
+                    {
+                        //プレイヤーステータスの更新
                         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUMP);
+                        //□攻撃できなくする
+                        if (isJumpSquareInput_)
+                        {
+                            isSquareAttack_ = false;
+                            isJumpSquareInput_ = false;
+                        }
+                    }
+
 
                 }
             }
@@ -89,7 +111,7 @@ void AttackPlayer::ComboJudge()
     if (comboAttackCount_ > 0)
     {
         player_.lock()->GetMovePlayer()->SetIsInputMove(false);
-        player_.lock()->GetMovePlayer()->SetIsInputTurn(false);
+        //player_.lock()->GetMovePlayer()->SetIsInputTurn(false);
     }
 }
 
@@ -156,6 +178,7 @@ void AttackPlayer::SquareInput()
             animator->SetTriggerOn("squareJump");
             player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_JUMP);
 
+            isJumpSquareInput_ = true;
                 //return;
             //}
         }
@@ -168,6 +191,7 @@ void AttackPlayer::SquareInput()
             }
             else
             {
+                animator->ResetParameterList();
                 animator->SetTriggerOn("squareIdle");
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
                 NormalAttack();
@@ -264,6 +288,7 @@ void AttackPlayer::TriangleInput()
             //ダッシュ終了フラグ
             player_.lock()->GetMovePlayer()->DashEndFlag();
         }
+        //ジャンプ攻撃
         else if(player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::IDLE
             || player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::MOVE)
         {
@@ -320,6 +345,7 @@ void AttackPlayer::ComboProcess(float elapsedTime)
     //アニメーター
     std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 
+
     //ダッシュコンボ処理
     {
         //ダッシュアタック時の処理(ダッシュに続く)
@@ -356,10 +382,12 @@ void AttackPlayer::ComboProcess(float elapsedTime)
 
         //重力設定
         static bool isSetGravity = false;
-        if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_JUMP)  //空中の時
+        //アニメーションイベントを見て重力を設定する
+        if (player_.lock()->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationEvent("ZeroGravity",DirectX::XMFLOAT3())
+            && player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_JUMP)
         {
             playerObj->GetComponent<MovementCom>()->ZeroVelocityY();
-            playerObj->GetComponent<MovementCom>()->SetGravity(0);
+            playerObj->GetComponent<MovementCom>()->SetGravity(GRAVITY_ZERO);
             isSetGravity = true;
         }
         else if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_JUMP_FALL)    //切り下ろし攻撃時
@@ -396,6 +424,12 @@ void AttackPlayer::ComboProcess(float elapsedTime)
             player_.lock()->GetMovePlayer()->SetIsInputMove(true);
             isJumpAttackEnd = false;
         }
+
+        ////空中攻撃中に地面に着いた時の処理
+        //if (playerObj->GetComponent<MovementCom>()->OnGround() && player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_JUMP)
+        //{
+        //    //animator->SetTriggerOn("idle");
+        //}
     }
 }
 
@@ -421,9 +455,9 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
     }
 
 
-    //攻撃が当たっているか見る
     std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
-    //武器ステータス初期化
+
+    //武器取得
     std::shared_ptr<WeaponCom> weapon = playerObj->GetChildFind("greatSword")->GetComponent<WeaponCom>();
 
     //一回でも攻撃が当たっているなら次の攻撃が来るまで、trueにする
@@ -432,6 +466,41 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
         onHitEnemy_ = true;
     }
 
+
+    //攻撃中の時
+    if (comboAttackCount_ > 0)
+    {
+        //回転不能
+        player_.lock()->GetMovePlayer()->SetIsInputTurn(false);
+
+        //攻撃フレーム前だけ回転可能に
+        std::shared_ptr<AnimationCom> animCom = playerObj->GetComponent<AnimationCom>();
+        for (auto& animEvent : animCom->GetCurrentAnimationEventsData())
+        {
+            //頭がAutoCollisionなら
+            if (animEvent.name.compare(0, 13, "AutoCollision") != 0)continue;
+
+            //アニメーションイベントのスタートフレーム前なら回転可能
+            if (!animCom->GetCurrentAnimationEventIsStart(animEvent.name.c_str()))continue;
+
+            //回転可能
+            player_.lock()->GetMovePlayer()->SetIsInputTurn(true);
+        }
+    }
+
+
+}
+
+//アニメインデックスで、コンボカウントリセット
+void AttackPlayer::AttackComboCountReset()
+{
+    //現在のアニメインデックス
+    int currentAnimIndex = player_.lock()->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
+
+    if (currentAnimIndex == ANIMATION_PLAYER::JUMP_ATTACK_01)
+    {
+        comboAttackCount_ = 1;
+    }
 }
 
 
@@ -635,6 +704,18 @@ bool AttackPlayer::ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> en
     playerObj->transform_->SetRotation(playerQuaternion);
 
     return false;
+}
+
+//着地時攻撃処理
+void AttackPlayer::AttackOnGround()
+{
+    isSquareAttack_ = true;
+}
+
+//ジャンプ時攻撃処理
+void AttackPlayer::AttackJump()
+{
+    isSquareAttack_ = true;
 }
 
 //強制的に攻撃を終わらせる（ジャンプ時等）

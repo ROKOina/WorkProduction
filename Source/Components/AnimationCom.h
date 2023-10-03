@@ -70,6 +70,8 @@ public:
     bool GetCurrentAnimationEvent(const char* eventName, DirectX::XMFLOAT3& position);
     //アニメーションイベント取得(エンドフレーム後なら)
     bool GetCurrentAnimationEventIsEnd(const char* eventName);
+    //アニメーションイベント取得(スタートフレーム前なら)
+    bool GetCurrentAnimationEventIsStart(const char* eventName);
 
 
     //アニメーションイベント名前取得

@@ -328,3 +328,17 @@ bool AnimationCom::GetCurrentAnimationEventIsEnd(const char* eventName)
 	}
 	return false;
 }
+
+//アニメーションイベント取得(スタートフレーム前なら)
+bool AnimationCom::GetCurrentAnimationEventIsStart(const char* eventName)
+{
+	for (auto& animEvent : currentAnimationEvents_)
+	{
+		if (animEvent.enabled)continue;
+		if (std::strcmp(eventName, animEvent.name.c_str()) != 0)continue;
+		if (animEvent.resourceEventData.startFrame < currentAnimationSeconds_)continue;
+		return true;	//アニメーションイベントのスタートフレーム前ならtrue
+	}
+	return false;
+}
+

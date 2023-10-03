@@ -27,6 +27,7 @@ void WeaponCom::Update(float elapsedTime)
 
     onHit_ = false;
 
+    parentObject_->UpdateTransform();
     std::shared_ptr<RendererCom> rendererCom = parentObject_->GetComponent<RendererCom>();
     Model::Node* node = rendererCom->GetModel()->FindNode(nodeName_.c_str());
 

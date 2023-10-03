@@ -36,7 +36,7 @@ void PlayerCom::Start()
     weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
     weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f, 2.0f);
     weapon->SetAttackStatus(BIGSWORD_DASH, 1, 100, 0.9f, 0.1f);
-    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 50, 0.0f, 1.0f,2.0f);
+    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 25, 0.0f, 1.0f,1.5f);
 
     //UŒ‚ŠÇ—‚ğ‰Šú‰»
     attackPlayer_ = std::make_shared<AttackPlayer>(GetGameObject()->GetComponent<PlayerCom>());
@@ -102,28 +102,12 @@ void PlayerCom::Update(float elapsedTime)
 
 }
 
-int oo = 0;
 // GUI•`‰æ
 void PlayerCom::OnGUI()
 {
     int currentAnimIndex = GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
 
     ImGui::InputInt("currentAnimIndex", &currentAnimIndex);
-
-    //ImGui::InputInt("nowMoveParamType", &moveParamType_);
-    //ImGui::SliderInt("moveParamType", &oo, 0, MOVE_PARAM::MAX - 1);
-    //ImGui::DragFloat("moveMaxSpeed", &moveParam_[oo].moveMaxSpeed, 0.1f);
-    //ImGui::DragFloat("moveSpeed", &moveParam_[oo].moveSpeed, 0.1f);
-    //ImGui::DragFloat("moveAcceleration", &moveParam_[oo].moveAcceleration, 0.1f);
-
-    //ImGui::InputInt("state", &dashState_);
-    //ImGui::InputInt("comboAttackCount_", &comboAttackCount_);
-
-    //ImGui::DragFloat("jumpSpeed", &jumpSpeed_, 0.1f);
-
-    //ImGui::DragFloat3("up", &up_.x);
-
-    //ImGui::Checkbox("dash", &isDashJudge_);
 
     //“ü—Íî•ñ‚ğæ“¾
     GamePad& gamePad = Input::Instance().GetGamePad();
@@ -335,6 +319,10 @@ void PlayerCom::AnimationInitialize()
             animator->AddAnimatorTransition(JUMP_ATTACK_UPPER);
             animator->SetTriggerTransition(JUMP_ATTACK_UPPER, "triangleJump");
             animator->AddAnimatorTransition(JUMP_ATTACK_UPPER, IDEL_2, true, 3.5f);
+
+            //combo02
+            animator->AddAnimatorTransition(JUMP_ATTACK_UPPER, JUMP_ATTACK_01);
+            animator->SetTriggerTransition(JUMP_ATTACK_UPPER, JUMP_ATTACK_01, "square");
         }
 
         //ƒWƒƒƒ“ƒv’†‰º‹­UŒ‚
@@ -356,10 +344,17 @@ void PlayerCom::AnimationInitialize()
             animator->AddAnimatorTransition(JUMP_ATTACK_01);
             animator->SetTriggerTransition(JUMP_ATTACK_01, "squareJump");
             animator->AddAnimatorTransition(JUMP_ATTACK_01, IDEL_2, true);
+            animator->SetTriggerTransition(JUMP_ATTACK_01, IDEL_2, "idle");
 
             animator->AddAnimatorTransition(JUMP_ATTACK_01, JUMP_ATTACK_02);
             animator->SetTriggerTransition(JUMP_ATTACK_01, JUMP_ATTACK_02, "square");
             animator->AddAnimatorTransition(JUMP_ATTACK_02, IDEL_2, true);
+            animator->SetTriggerTransition(JUMP_ATTACK_02, IDEL_2, "idle");
+
+            animator->AddAnimatorTransition(JUMP_ATTACK_02, JUMP_ATTACK_03);
+            animator->SetTriggerTransition(JUMP_ATTACK_02, JUMP_ATTACK_03, "square");
+            animator->AddAnimatorTransition(JUMP_ATTACK_03, IDEL_2, true);
+            animator->SetTriggerTransition(JUMP_ATTACK_03, IDEL_2, "idle");
         }
 
 

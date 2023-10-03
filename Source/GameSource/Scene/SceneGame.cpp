@@ -37,7 +37,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemy
-	//for(int i=0;i<3;++i)
+	//for(int i=0;i<30;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");

@@ -33,6 +33,9 @@ private:
     //攻撃動き処理
     void AttackMoveUpdate(float elapsedTime);
 
+    //アニメインデックスで、コンボカウントリセット
+    void AttackComboCountReset();
+
 public://intでステートを返す、ステートをコードにする
     enum ATTACK_CODE
     {
@@ -71,6 +74,12 @@ public:
         if (enemyCopy_)return true;
         return false;
     }
+
+    //着地時攻撃処理
+    void AttackOnGround();
+
+    //ジャンプ時攻撃処理
+    void AttackJump();
 
     //強制的に攻撃を終わらせる（ジャンプ時等）
     void AttackFlagEnd();
@@ -121,6 +130,10 @@ private:
     ATTACK_KEY attackKey_ = ATTACK_KEY::NULL_KEY;
 
     bool isNormalAttack_ = true;     //攻撃できるか
+
+    bool isSquareAttack_ = true;
+
+    bool isJumpSquareInput_ = false;    //ジャンプ中□コンボ一回までにするため
 
     //攻撃の段階（コンボ回数ではない）
     int comboAttackCount_ = 0;

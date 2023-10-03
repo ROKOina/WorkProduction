@@ -85,8 +85,9 @@ void MovePlayer::OnGui()
 {
     ImGui::InputInt("paramType", &moveParamType_);
     ImGui::InputInt("dashState", &dashState_);
-    ImGui::Checkbox("inInputMove", &isInputMove_);
-    ImGui::Checkbox("inInputTurn", &isInputTurn_);
+    ImGui::InputInt("jumpCount", &jumpCount_);
+    ImGui::Checkbox("isInputMove", &isInputMove_);
+    ImGui::Checkbox("isInputTurn", &isInputTurn_);
 }
 
 //スティック入力値から移動ベクトルを取得
@@ -160,19 +161,12 @@ bool MovePlayer::IsMove(float elapsedTime)
         isInputMove_ = true;
         isInputTurn_ = true;
 
-        //後ろダッシュで着地した場合
-        if (player_.lock()->GetPlayerStatusOld() == PlayerCom::PLAYER_STATUS::JUMP_BACK_DASH)
-        {
-            move->ZeroVelocity();
-            DashEndFlag();
-            jumpBackDash = true;
-        }
-        else
-        {
-            //アニメーター
-            std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
-            animator->SetTriggerOn("idle");
-        }
+        //アニメーター
+        std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+        animator->SetTriggerOn("idle");
+
+        //攻撃着地処理
+        player_.lock()->GetAttackPlayer()->AttackOnGround();
     }
 
     //ジャンプ
@@ -186,6 +180,7 @@ bool MovePlayer::IsMove(float elapsedTime)
             {
                 //終了フラグ
                 player_.lock()->GetAttackPlayer()->AttackFlagEnd();
+                player_.lock()->GetAttackPlayer()->AttackJump();
                 DashEndFlag(false);
                 EndRunTurn(); 
 
@@ -312,8 +307,14 @@ void MovePlayer::Trun(float elapsedTime)
 
     //ゆっくり回転
     DirectX::XMFLOAT4 rota;
+
+    //ターンスピード
+    float turnSpeed = moveParam_[moveParamType_].turnSpeed;
+    if (player_.lock()->GetAttackPlayer()->GetComboAttackCount() > 0)   //攻撃中なら遅くする
+        turnSpeed = 5.5f;
+
     DirectX::XMStoreFloat4(&rota, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&playerQuaternion.dxFloat4),
-        DirectX::XMLoadFloat4(&inputQuaternion.dxFloat4), moveParam_[moveParamType_].turnSpeed * (elapsedTime * worldSpeed)));
+        DirectX::XMLoadFloat4(&inputQuaternion.dxFloat4), turnSpeed * (elapsedTime * worldSpeed)));
 
     player_.lock()->GetGameObject()->transform_->SetRotation(rota);
 }
@@ -362,7 +363,7 @@ void MovePlayer::DashMove(float elapsedTime)
     //ダッシュ
     GamePad& gamePad = Input::Instance().GetGamePad();
     if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_TRIGGER &&
-        dashCoolTimer_ < 0 && jumpDashCount_>0)
+        dashCoolTimer_ < 0 && jumpDashCount_ > 0)
     {
         //ターン処理終了
         EndRunTurn();
@@ -388,7 +389,7 @@ void MovePlayer::DashMove(float elapsedTime)
         {
             dashState_ = 0;
             if (!move->OnGround())
-            //if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::JUMP)
+                //if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::JUMP)
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUMP_DASH);
             else
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::DASH);
@@ -399,7 +400,7 @@ void MovePlayer::DashMove(float elapsedTime)
         {
             dashState_ = 10;
             if (!move->OnGround())
-            //if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::JUMP)
+                //if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::JUMP)
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUMP_BACK_DASH);
             else
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::BACK_DASH);
@@ -498,7 +499,7 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
 
         //空中の時は重力を0に
         if (!move->OnGround() && player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::JUMP_DASH)
-            move->SetGravity(0);
+            move->SetGravity(GRAVITY_ZERO);
 
         //最大速度に達したら次のステート
         dashStopTimer_ -= elapsedTime;
@@ -552,7 +553,7 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
         //ダッシュに変更
         move->ZeroVelocity();
         moveParamType_ = MOVE_PARAM::DASH;
-        move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed * 2);
+        move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::DASH].moveMaxSpeed);
         move->SetMoveAcceleration(moveParam_[MOVE_PARAM::DASH].moveAcceleration);
         dashStopTimer_ = dashStopTime_;
         dashState_++;
@@ -573,7 +574,7 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
 
         //空中の時は重力を0に
         if (!move->OnGround())
-            move->SetGravity(0);
+            move->SetGravity(GRAVITY_ZERO);
 
         DirectX::XMFLOAT3 front = player_.lock()->GetGameObject()->transform_->GetWorldFront();
         DirectX::XMFLOAT3 back = { -front.x,0,-front.z };
@@ -600,7 +601,7 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
 
         //加速度を下げていく
         float acce = move->GetMoveAcceleration();
-        acce -= 10 * elapsedTime;
+        acce -= 30 * elapsedTime;
         move->SetMoveAcceleration(acce);
 
         if (inputMoveVec_.x * inputMoveVec_.x + inputMoveVec_.z * inputMoveVec_.z > 0.1f)
