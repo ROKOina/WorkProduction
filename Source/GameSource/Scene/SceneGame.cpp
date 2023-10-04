@@ -288,6 +288,8 @@ void SceneGame::Render()
 	vp.MaxDepth = 1.0f;
 	dc->RSSetViewports(1, &vp);
 
+	//スカイマップ描画
+	postEff->SkymapRender();
 
 	GameObjectManager::Instance().UpdateTransform();
 
@@ -343,7 +345,7 @@ void SceneGame::Render()
 
 	postEff->Render();
 	postEff->ImGuiRender();
-
+	
 
 	//3Dエフェクト描画
 	{

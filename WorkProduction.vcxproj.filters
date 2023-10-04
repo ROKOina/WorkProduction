@@ -264,6 +264,13 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\MovePlayer.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.h" />
+    <ClInclude Include="Source\Graphics\Shaders\Skymap.h" />
+    <ClInclude Include="External\DirectXTex\DDSTextureLoader.h" />
+    <ClInclude Include="External\DirectXTex\DDS.h" />
+    <ClInclude Include="External\DirectXTex\LoaderHelpers.h" />
+    <ClInclude Include="External\DirectXTex\pch.h" />
+    <ClInclude Include="External\DirectXTex\PlatformHelpers.h" />
+    <ClInclude Include="External\DirectXTex\DirectXHelpers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -485,6 +492,18 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Graphics\Shaders\Skymap.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="External\DirectXTex\DDSTextureLoader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="External\DirectXTex\DirectXHelpers.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="External\DirectXTex\pch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Debugs\Debug.hlsli">
@@ -506,6 +525,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="HLSL\3D\UnityChanToon.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="HLSL\2D\PostEffect\FullScreen.hlsli">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>
@@ -577,6 +599,12 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\3D\UnityChanToonVS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\Skymap.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\FullScreenVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

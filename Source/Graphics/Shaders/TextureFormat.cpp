@@ -32,16 +32,16 @@ TextureFormat::TextureFormat(const char* filename)
 		// 頂点バッファを作成するための設定オプション
 		D3D11_BUFFER_DESC buffer_desc = {};
 		buffer_desc.ByteWidth = sizeof(vertices);	// バッファ（データを格納する入れ物）のサイズ
-		buffer_desc.Usage = D3D11_USAGE_DYNAMIC;	// UNIT.03
+		buffer_desc.Usage = D3D11_USAGE_DYNAMIC;	
 		buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;	// 頂点バッファとしてバッファを作成する。
-		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	// UNIT.03
+		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;	
 		buffer_desc.MiscFlags = 0;
 		buffer_desc.StructureByteStride = 0;
 		// 頂点バッファに頂点データを入れるための設定
 		D3D11_SUBRESOURCE_DATA subresource_data = {};
 		subresource_data.pSysMem = vertices;	// ここに格納したい頂点データのアドレスを渡すことでCreateBuffer()時にデータを入れることができる。
-		subresource_data.SysMemPitch = 0; //Not use for vertex buffers.
-		subresource_data.SysMemSlicePitch = 0; //Not use for vertex buffers.
+		subresource_data.SysMemPitch = 0; 
+		subresource_data.SysMemSlicePitch = 0; 
 		// 頂点バッファオブジェクトの生成
 		hr = device->CreateBuffer(&buffer_desc, &subresource_data, &vertexBuffer_);
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));

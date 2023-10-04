@@ -46,6 +46,12 @@ struct BloomData2
 	DirectX::XMFLOAT2 dummy;
 };
 
+struct SkymapData
+{
+	DirectX::XMFLOAT4X4			invMat;
+};
+
+
 //ユニティちゃんトゥーン
 struct UnityChanToonStruct
 {

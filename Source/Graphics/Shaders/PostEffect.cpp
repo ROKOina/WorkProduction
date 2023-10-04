@@ -3,6 +3,10 @@
 #include "Graphics\Graphics.h"
 #include <imgui.h>
 
+#include "Components\System\GameObject.h"
+#include "Components\CameraCom.h"
+#include "Components\TransformCom.h"
+
 //ガウスブラー
 void CalcGaussianFilter(DirectX::XMFLOAT4* array, int karnel_size, float sigma) {
     float sum = 0.0f;
@@ -31,6 +35,7 @@ PostEffect::PostEffect(UINT width, UINT height)
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::colorGradingData), colorGradingBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomData), bloomBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomData2), bloomExBuffer_.GetAddressOf());
+    dx11State->createConstantBuffer(device, sizeof(SkymapData), skymapBuffer_.GetAddressOf());
 
     //ピクセルシェーダーセット
     colorGrading_ = std::make_unique<ShaderPost>("ColorGrading");
@@ -38,8 +43,29 @@ PostEffect::PostEffect(UINT width, UINT height)
     bloomKawaseFilter_ = std::make_unique<ShaderPost>("BloomKawase");
     bloomBlur_ = std::make_unique<ShaderPost>("GaussianBlur");
 
-    postEffect_ = std::make_unique<ShaderPost>("PostEffect");
-    postRender_ = std::make_unique<ShaderPost>("RenderPost");
+    {
+        //スカイマップ
+        D3D11_TEXTURE2D_DESC texture2d_desc{};
+        texture2d_desc.Width = 1280;
+        texture2d_desc.Height = 720;
+        texture2d_desc.MipLevels = 1;
+        texture2d_desc.ArraySize = 1;
+        texture2d_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        texture2d_desc.SampleDesc.Count = 1;
+        texture2d_desc.SampleDesc.Quality = 0;
+        texture2d_desc.Usage = D3D11_USAGE_DEFAULT;
+        texture2d_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+        texture2d_desc.CPUAccessFlags = 0;
+        texture2d_desc.MiscFlags = 0;
+
+        dx11State->load_texture_from_file(device, L"Data/Sprite/sky.dds", skymapSrv_.GetAddressOf(), &texture2d_desc);
+
+        dx11State->createVsFromCso(device, "Shader\\FullScreenVS.cso", skyVertex_.ReleaseAndGetAddressOf(), nullptr, nullptr, 0);
+        dx11State->createPsFromCso(device, "Shader\\Skymap.cso", skyPixel_.ReleaseAndGetAddressOf());
+
+        postEffect_ = std::make_unique<ShaderPost>("PostEffect");
+        postRender_ = std::make_unique<ShaderPost>("RenderPost");
+    }
 
     //テクスチャ初期化
     drawTexture_ = std::make_unique<TextureFormat>();
@@ -446,6 +472,14 @@ void PostEffect::ImGuiRender()
             ImGui::TreePop();
         }
 
+        //skymap
+        if (ImGui::TreeNode("Skymap"))
+        {
+            ImGui::Checkbox("enabled", &enabledSkyMap_);
+
+            ImGui::TreePop();
+        }
+
         if (ImGui::TreeNode("RenderTargets"))
         {
             ImGui::Text("Color");
@@ -467,6 +501,67 @@ void PostEffect::ImGuiRender()
 
     }
     ImGui::End();
+}
+
+//スカイマップ描画
+void PostEffect::SkymapRender()
+{
+    if (!enabledSkyMap_)return;
+
+    Graphics& graphics = Graphics::Instance();
+    ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+    Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
+    dc->OMSetDepthStencilState(dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::SKYMAP).Get(), 0);
+    dc->RSSetState(dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::SKYMAP).Get());
+    ID3D11SamplerState* samplerStates[] =
+    {
+        dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP).Get(),
+        dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_CLAMP).Get(),
+        dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_BORDER_POINT).Get(),
+    };
+    dc->PSSetSamplers(0, ARRAYSIZE(samplerStates), samplerStates);
+
+
+    dc->IASetVertexBuffers(0, 0, nullptr, nullptr, nullptr);
+    dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    dc->IASetInputLayout(nullptr);
+
+    dc->VSSetShader(skyVertex_.Get(), 0, 0);
+    dc->PSSetShader(skyPixel_.Get(), 0, 0);
+
+    //コンスタントバッファ
+    std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+    SkymapData skymapData;
+
+    DirectX::XMStoreFloat4x4(&skymapData.invMat,
+        DirectX::XMMatrixInverse(nullptr, 
+            DirectX::XMLoadFloat4x4(&camera->GetView()) 
+            * DirectX::XMLoadFloat4x4(&camera->GetProjection())));
+
+    dc->UpdateSubresource(skymapBuffer_.Get(), 0, NULL, &skymapData, 0, 0);
+    ID3D11Buffer* constantBuffers[] =
+    {
+        skymapBuffer_.Get()
+    };
+    dc->PSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
+
+    //シェーダーリソースビュー
+    ID3D11ShaderResourceView* srvs[] =
+    {
+        skymapSrv_.Get(),
+    };
+    dc->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
+
+    dc->Draw(4, 0);
+
+    //終了処理
+    {
+        dc->VSSetShader(nullptr, nullptr, 0);
+        dc->PSSetShader(nullptr, nullptr, 0);
+        dc->IASetInputLayout(nullptr);
+    }
+
 }
 
 

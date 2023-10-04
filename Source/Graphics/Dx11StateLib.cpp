@@ -3,6 +3,10 @@
 #include <cstdio>
 #include <memory>
 
+#include <filesystem>
+#include <DDSTextureLoader.h>
+#include <WICTextureLoader.h>
+
 HRESULT Dx11StateLib::createVsFromCso(ID3D11Device* device, const char* cso_name, ID3D11VertexShader** vertex_shader,
 	ID3D11InputLayout** input_layout, D3D11_INPUT_ELEMENT_DESC* input_element_desc, UINT num_elements)
 {
@@ -49,6 +53,35 @@ HRESULT Dx11StateLib::createPsFromCso(ID3D11Device* device, const char* cso_name
 	HRESULT hr{ S_OK };
 	hr = device->CreatePixelShader(cso_data.get(), cso_sz, nullptr, pixel_shader);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	return hr;
+}
+
+HRESULT Dx11StateLib::load_texture_from_file(ID3D11Device* device, const wchar_t* filename,
+	ID3D11ShaderResourceView** shader_resource_view, D3D11_TEXTURE2D_DESC* texture2d_desc)
+{
+	HRESULT hr{ S_OK };
+	Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+
+	std::filesystem::path dds_filename(filename);
+	dds_filename.replace_extension("dds");
+	if (std::filesystem::exists(dds_filename.c_str()))
+	{
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediate_context;
+		device->GetImmediateContext(immediate_context.GetAddressOf());
+		hr = DirectX::CreateDDSTextureFromFile(device, immediate_context.Get(), dds_filename.c_str(), resource.GetAddressOf(), shader_resource_view);
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
+	else
+	{
+		hr = DirectX::CreateWICTextureFromFile(device, filename, resource.GetAddressOf(), shader_resource_view);
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
+
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
+	hr = resource.Get()->QueryInterface<ID3D11Texture2D>(texture2d.GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	texture2d->GetDesc(texture2d_desc);
 
 	return hr;
 }
@@ -180,6 +213,13 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			HRESULT hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilState_[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::PARTICLE)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
+		{ //SKYMAP
+			depthStencilDesc.DepthEnable = FALSE;
+			depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+			depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+			HRESULT hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilState_[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::SKYMAP)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
 		{ //OFF
 			depthStencilDesc.DepthEnable = FALSE;
 			depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
@@ -225,6 +265,21 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			rasterizerDesc.CullMode = D3D11_CULL_NONE;
 			rasterizerDesc.MultisampleEnable = FALSE;
 			HRESULT hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerState_[static_cast<int>(RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLNONE_WIREFRAME)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
+		{ //SKYMAP
+			rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+			rasterizerDesc.CullMode = D3D11_CULL_NONE;
+			rasterizerDesc.FrontCounterClockwise = TRUE;
+			rasterizerDesc.DepthBias = 0;
+			rasterizerDesc.DepthBiasClamp = 0;
+			rasterizerDesc.SlopeScaledDepthBias = 0;
+			rasterizerDesc.DepthClipEnable = TRUE;
+			rasterizerDesc.ScissorEnable = FALSE;
+			rasterizerDesc.MultisampleEnable = FALSE;
+			rasterizerDesc.AntialiasedLineEnable = TRUE;
+
+			HRESULT hr = device->CreateRasterizerState(&rasterizerDesc, rasterizerState_[static_cast<int>(RASTERIZER_TYPE::SKYMAP)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 		{ //PARTICLE

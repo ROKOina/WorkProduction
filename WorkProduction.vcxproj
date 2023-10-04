@@ -110,6 +110,12 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="External\DirectXTex\DDS.h" />
+    <ClInclude Include="External\DirectXTex\DDSTextureLoader.h" />
+    <ClInclude Include="External\DirectXTex\DirectXHelpers.h" />
+    <ClInclude Include="External\DirectXTex\LoaderHelpers.h" />
+    <ClInclude Include="External\DirectXTex\pch.h" />
+    <ClInclude Include="External\DirectXTex\PlatformHelpers.h" />
     <ClInclude Include="External\DirectXTex\WICTextureLoader.h" />
     <ClInclude Include="External\imgui-docking\backends\imgui_impl_dx11.h" />
     <ClInclude Include="External\imgui-docking\backends\imgui_impl_win32.h" />
@@ -171,6 +177,7 @@
     <ClInclude Include="Source\Graphics\Shaders\3D\ShaderParameter3D.h" />
     <ClInclude Include="Source\Graphics\Shaders\PostEffect.h" />
     <ClInclude Include="Source\Graphics\Shaders\Shader.h" />
+    <ClInclude Include="Source\Graphics\Shaders\Skymap.h" />
     <ClInclude Include="Source\Graphics\Shaders\TextureFormat.h" />
     <ClInclude Include="Source\Graphics\Sprite\Sprite.h" />
     <ClInclude Include="Source\HighResolutionTimer.h" />
@@ -195,6 +202,9 @@
     <ClInclude Include="Source\SystemStruct\QuaternionStruct.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="External\DirectXTex\DDSTextureLoader.cpp" />
+    <ClCompile Include="External\DirectXTex\DirectXHelpers.cpp" />
+    <ClCompile Include="External\DirectXTex\pch.cpp" />
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp" />
     <ClCompile Include="External\imgui-docking\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="External\imgui-docking\backends\imgui_impl_win32.cpp" />
@@ -249,6 +259,7 @@
     <ClCompile Include="Source\Graphics\Model\Model.cpp" />
     <ClCompile Include="Source\Graphics\Model\ModelResource.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\PostEffect.cpp" />
+    <ClCompile Include="Source\Graphics\Shaders\Skymap.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\TextureFormat.cpp" />
     <ClCompile Include="Source\Graphics\Sprite\Sprite.cpp" />
     <ClCompile Include="Source\Input\GamePad.cpp" />
@@ -270,6 +281,7 @@
     <ClCompile Include="Source\GameSource\Stage\StageManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="HLSL\2D\PostEffect\FullScreen.hlsli" />
     <None Include="HLSL\3D\Lambert.hlsli" />
     <None Include="HLSL\3D\Phong.hlsli" />
     <None Include="HLSL\3D\UnityChanToon.hlsli" />
@@ -291,6 +303,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\FullScreenVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="HLSL\2D\PostEffect\GaussianBlur.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -306,6 +322,10 @@
     <FxCompile Include="HLSL\2D\PostEffect\ShaderPostVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\Skymap.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\3D\LambertPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

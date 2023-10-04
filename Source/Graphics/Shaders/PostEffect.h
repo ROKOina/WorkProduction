@@ -18,6 +18,9 @@ public:
     //ImGui描画
     void ImGuiRender();
 
+    //スカイマップ描画
+    void SkymapRender();
+
 private:
     //ポストエフェクト用構造体
     struct ShaderPost
@@ -47,6 +50,13 @@ private:
     std::unique_ptr<ShaderPost> bloomBlur_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> bloomBuffer_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> bloomExBuffer_;
+
+    //スカイマップ
+    bool enabledSkyMap_ = true;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> skymapSrv_;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> skymapBuffer_;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>			skyVertex_;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>			skyPixel_;
 
     std::unique_ptr<ShaderPost> postEffect_;
     std::unique_ptr<ShaderPost> postRender_;

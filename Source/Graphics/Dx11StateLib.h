@@ -21,6 +21,9 @@ public:
 
     HRESULT createPsFromCso(ID3D11Device* device, const char* cso_name, ID3D11PixelShader** pixel_shader);
 
+    HRESULT load_texture_from_file(ID3D11Device* device, const wchar_t* filename, 
+        ID3D11ShaderResourceView** shader_resource_view, D3D11_TEXTURE2D_DESC* texture2d_desc);
+
     //コンスタントバッファ生成
 public:
     HRESULT createConstantBuffer(ID3D11Device* device, UINT ByteWidth, ID3D11Buffer** buffer);
@@ -47,6 +50,7 @@ public:
         DEPTH_ON_3D,   //深度テストON 3Dに設定されていた
         DEPTH_ON_2D,   //深度テストON 2Dに設定されていた
         DEPTH_OFF,   //深度テストOFF
+        SKYMAP,   //スカイマップ
         PARTICLE,  //パーティクル
         DEFALT,           //何もなし（保険）
     };
@@ -61,6 +65,7 @@ public:
         FRONTCOUNTER_FALSE_CULLNONE,  
         FRONTCOUNTER_TRUE_CULLNONE,
         FRONTCOUNTER_FALSE_CULLNONE_WIREFRAME,  //ワイヤフレーム
+        SKYMAP,   //スカイマップ
         PARTICLE,   //パーティクル
         DEFALT,           //何もなし（保険）
     };
