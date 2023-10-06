@@ -128,7 +128,7 @@ struct ShaderParameter3D
 	DirectX::XMFLOAT4		viewPosition;
 
 	//ƒ‰ƒCƒg
-	DirectX::XMFLOAT4		lightDirection = { 0.3f,-0.7f,0,0 };
+	DirectX::XMFLOAT4		lightDirection = { 0.626f,-0.55f,-0.533f,0 };
 	DirectX::XMFLOAT4		lightColor = { 1,1,1,1 };
 
 	//‰e

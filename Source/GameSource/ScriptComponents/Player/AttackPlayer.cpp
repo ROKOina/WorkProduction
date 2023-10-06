@@ -208,7 +208,7 @@ void AttackPlayer::SquareInput()
 
     if (comboAttackCount_ >= 3)return;
 
-    if (DoComboAttack())
+    if (DoComboAttack())    //コンボ受付
     {
         std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
         if (!playerObj->GetComponent<MovementCom>()->OnGround())
@@ -313,7 +313,7 @@ void AttackPlayer::DashInput()
     //ダッシュ後コンボ
     if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
     {
-        if (DoComboAttack())
+        if (DoComboAttack())    //コンボ受付
         {
             if (OnHitEnemy() && ComboReadyEnemy())
             {
@@ -351,7 +351,7 @@ void AttackPlayer::ComboProcess(float elapsedTime)
         //ダッシュアタック時の処理(ダッシュに続く)
         if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
         {
-            if (DoComboAttack())
+            if (DoComboAttack())    //コンボ受付
             {
                 //当たっていた時
                 if (OnHitEnemy() && ComboReadyEnemy())
@@ -583,7 +583,7 @@ int AttackPlayer::DashAttackUpdate(float elapsedTime)
             break;
         }
 
-        if (ApproachEnemy(enemyCopy_, 1.5f, 2))
+        if (ApproachEnemy(enemyCopy_, 1.5f, 20))
             state_ = ATTACK_CODE::EnterAttack;
         break;
     }
@@ -622,15 +622,15 @@ std::shared_ptr<GameObject> AttackPlayer::AssistGetNearEnemy()
     std::vector<HitObj> hitGameObj = assistColl->OnHitGameObject();
     for (auto& hitObj : hitGameObj)
     {
-        if (COLLIDER_TAG::Enemy == hitObj.gameObject->GetComponent<Collider>()->GetMyTag())
+        if (COLLIDER_TAG::Enemy == hitObj.gameObject.lock()->GetComponent<Collider>()->GetMyTag())
         {
             //最初はそのまま入れる
-            if (!enemyNearObj)enemyNearObj = hitObj.gameObject;
+            if (!enemyNearObj)enemyNearObj = hitObj.gameObject.lock();
             //一番近い敵を見つける
             else
             {
                 DirectX::XMVECTOR E = DirectX::XMLoadFloat3(&enemyNearObj->transform_->GetWorldPosition());
-                DirectX::XMVECTOR EN = DirectX::XMLoadFloat3(&hitObj.gameObject->transform_->GetWorldPosition());
+                DirectX::XMVECTOR EN = DirectX::XMLoadFloat3(&hitObj.gameObject.lock()->transform_->GetWorldPosition());
                 DirectX::XMVECTOR P = DirectX::XMLoadFloat3(&playerObj->transform_->GetWorldPosition());
 
                 DirectX::XMVECTOR PE = DirectX::XMVectorSubtract(E, P);
@@ -638,7 +638,7 @@ std::shared_ptr<GameObject> AttackPlayer::AssistGetNearEnemy()
 
                 float lenE = DirectX::XMVectorGetX(DirectX::XMVector3Length(PE));
                 float lenEN = DirectX::XMVectorGetX(DirectX::XMVector3Length(PEN));
-                if (lenE > lenEN)enemyNearObj = hitObj.gameObject;
+                if (lenE > lenEN)enemyNearObj = hitObj.gameObject.lock();
             }
         }
     }

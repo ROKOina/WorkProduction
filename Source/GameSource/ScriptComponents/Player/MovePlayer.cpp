@@ -48,7 +48,7 @@ void MovePlayer::Update(float elapsedTime)
         //走り切り替えし判定
         RunTurnJudge();
 
-        if (!isRunTurn_)
+        if (!isRunTurn_)    //ターン中じゃなければ入る
         {
             //回転
             if (isInputTurn_)
@@ -143,7 +143,6 @@ DirectX::XMFLOAT3 MovePlayer::GetMoveVec()
 //移動入力処理
 bool MovePlayer::IsMove(float elapsedTime)
 {
-
     std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
 
     //進行ベクトル取得

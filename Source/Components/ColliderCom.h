@@ -53,7 +53,8 @@ static bool operator== (int L, COLLIDER_TYPE R)
 
 //当たった時用の構造体
 struct HitObj {
-    std::shared_ptr<GameObject> gameObject;
+    std::weak_ptr<GameObject> gameObject;
+    //std::shared_ptr<GameObject> gameObject;
     float colliderDist; //当たり判定のサイズで当たってない距離
 };
 

@@ -70,7 +70,9 @@ void PlayerCameraCom::Update(float elapsedTime)
         oldCameraPos_.z > kabePlus.z || oldCameraPos_.z < kabeMinas.z)
     {
         range_ -= 0.01f;
-        DirectX::XMStoreFloat3(&oldCameraPos_, DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range_)));
+        DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range_)));
+        DirectX::XMStoreFloat3(&oldCameraPos_, DirectX::XMVectorLerp(XMLoadFloat3(&cameraPos), DirectX::XMLoadFloat3(&oldCameraPos_), 1.0f - 0.08f));
+
         if (range_ <= 0.1f)break;
     }
 

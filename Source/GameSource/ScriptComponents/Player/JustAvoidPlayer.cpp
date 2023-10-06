@@ -337,16 +337,16 @@ void JustAvoidPlayer::JustAvoidJudge()
     std::shared_ptr<GameObject> enemy;
     for (auto& hitObj : hitGameObj)
     {
-        if (COLLIDER_TAG::JustAvoid != hitObj.gameObject->GetComponent<Collider>()->GetMyTag())continue;
+        if (COLLIDER_TAG::JustAvoid != hitObj.gameObject.lock()->GetComponent<Collider>()->GetMyTag())continue;
 
         //ç≈èâÇæÇØÇªÇÃÇ‹Ç‹ì¸ÇÍÇÈ
         if (!enemy) {
-            enemy = hitObj.gameObject->GetParent();
+            enemy = hitObj.gameObject.lock()->GetParent();
             continue;
         }
         //àÍî‘ãﬂÇ¢ìGÇï€ë∂
         DirectX::XMFLOAT3 pPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
-        DirectX::XMFLOAT3 ePos = hitObj.gameObject->GetParent()->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 ePos = hitObj.gameObject.lock()->GetParent()->transform_->GetWorldPosition();
         DirectX::XMFLOAT3 eOldPos = enemy->transform_->GetWorldPosition();
 
         DirectX::XMVECTOR PPos = DirectX::XMLoadFloat3(&pPos);
@@ -358,7 +358,7 @@ void JustAvoidPlayer::JustAvoidJudge()
 
         //î‰är
         if (currentLength < oldLength)
-            enemy = hitObj.gameObject->GetParent();
+            enemy = hitObj.gameObject.lock()->GetParent();
     }
 
     justHitEnemy_ = enemy;

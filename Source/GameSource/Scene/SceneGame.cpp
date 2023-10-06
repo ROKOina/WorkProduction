@@ -32,9 +32,9 @@ void SceneGame::Initialize()
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("stageYuka");
 		obj->transform_->SetWorldPosition({ 0, 0, 0 });
-		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+		obj->transform_->SetScale({ 1.00f, 1.00f, 1.00f });
 
-		const char* filename = "Data/Model/stages/yuka/yuka.mdl";
+		const char* filename = "Data/Model/stages/yuka/cookie.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);

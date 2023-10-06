@@ -44,7 +44,7 @@ private:
     bool isDamage_ = false; //ダメージを受けている時にtrue
     bool isFrameDamage_ = false; //ダメージを受けた時だけtrue
     bool oneFrameJudge = false;
-    float damageInvincibleTime_ = 1; //ダメージ時の無敵時間
+    float damageInvincibleTime_ = 0.5f; //ダメージ時の無敵時間
     float damageTimer_ = 0; //ダメージ時のタイマー
 
 };

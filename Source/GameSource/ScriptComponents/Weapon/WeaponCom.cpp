@@ -53,7 +53,7 @@ void WeaponCom::Update(float elapsedTime)
         for (auto& coll : capsule->OnHitGameObject())
         {
             //状態確認
-            std::shared_ptr<CharacterStatusCom> status = coll.gameObject->GetComponent<CharacterStatusCom>();
+            std::shared_ptr<CharacterStatusCom> status = coll.gameObject.lock()->GetComponent<CharacterStatusCom>();
             if (status->GetIsInvincible())continue;
 
             //現在のアニメーションインデックス取得
