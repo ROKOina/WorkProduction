@@ -24,4 +24,6 @@ public:
 private:
     float angleX_ = 0, angleY_ = 0;
     float range_ = 4;   //ƒJƒƒ‰‹——£
+    DirectX::XMFLOAT3 oldCameraPos_;
+    DirectX::XMFLOAT3 Eye_;
 };

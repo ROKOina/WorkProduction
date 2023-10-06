@@ -21,10 +21,10 @@ struct ShadowMapData
 struct ColorGradingData
 {
 	float brightness = 0.0f;							//輝度
-	float contrast = 1.3f;								//コンストラスト
-	float saturation = 0.5f;							//彩度
+	float contrast = 1.0f;								//コンストラスト
+	float saturation = 1.5f;							//彩度
 	float dummy;
-	DirectX::XMFLOAT4 filter = { 0.9f,1.0f,1.1f,0 };	//フィルター
+	DirectX::XMFLOAT4 filter = { 1.0f,1.0f,1.0f,0 };	//フィルター
 };
 
 //ブルーム
@@ -46,9 +46,35 @@ struct BloomData2
 	DirectX::XMFLOAT2 dummy;
 };
 
+//スカイマップ
 struct SkymapData
 {
 	DirectX::XMFLOAT4X4			invMat;
+};
+
+//太陽周り
+struct SunAtmosphere
+{
+	DirectX::XMFLOAT4 mistColor = { 0.226f, 0.273f, 0.344f, 1.000f };
+	DirectX::XMFLOAT2 mistDensity = { 0.020f, 0.020f }; // x:extinction, y:inscattering
+	DirectX::XMFLOAT2 mist_heightFalloff = { 1000.000f, 1000.000f }; // x:extinction, y:inscattering
+	DirectX::XMFLOAT2 heightMistOffset = { 244.300f, 335.505f }; // x:extinction, y:inscattering
+
+	float mistCutoffDistance = -0.1f;
+
+	float mistFlowSpeed = 118.123f;
+	float mistFlowNoiseScaleFactor = 0.015f;
+	float mistFlowDensityLowerLimit = 0.330f;
+
+	float distanceToSun = 500.0f;
+	float sunHighlightExponentialFactor = 38.000f; // Affects the area of influence of the sun's highlights.
+	float sunHighlightIntensity = 1.200f;
+
+	DirectX::XMFLOAT3 dummy;
+
+	DirectX::XMFLOAT4X4 view;
+	DirectX::XMFLOAT4X4 inverseProjection;
+	DirectX::XMFLOAT4X4 inverseViewProjection;
 };
 
 
@@ -114,6 +140,9 @@ struct ShaderParameter3D
 	//ブルーム
 	BloomData bloomData;
 	BloomData2 bloomData2;
+
+	//太陽周り
+	SunAtmosphere sunAtmosphere;
 };
 
 //ポストエフェクト描画情報

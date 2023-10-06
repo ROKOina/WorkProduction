@@ -51,6 +51,21 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> bloomBuffer_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> bloomExBuffer_;
 
+    //太陽回り
+    std::unique_ptr<ShaderPost> sun_;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> sunBuffer_;
+
+    struct CbScene
+    {
+        DirectX::XMFLOAT4		viewPosition;
+        DirectX::XMFLOAT4X4     viewProjection;
+        DirectX::XMFLOAT4		ambientLightColor;
+        DirectX::XMFLOAT4		lightDirection;
+        DirectX::XMFLOAT4		lightColor;
+    };
+    Microsoft::WRL::ComPtr<ID3D11Buffer> sceneBuffer_;
+
+
     //スカイマップ
     bool enabledSkyMap_ = true;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> skymapSrv_;
@@ -63,6 +78,7 @@ private:
 
     std::unique_ptr<TextureFormat> drawTexture_;
     std::unique_ptr<PostRenderTarget> renderPost_[5];
+    std::unique_ptr<PostRenderTarget> renderPostSun_;
     std::unique_ptr<PostRenderTarget> renderPostFull_;  //フルスクリーン用のレンダーターゲット
 };
 

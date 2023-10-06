@@ -9,7 +9,6 @@ Texture2D mainTexture : register(t0);
 SamplerState samplerLiner : register(s0);
 
 Texture2D bloomTexture : register(t1);
-
 float4 main(VS_OUT pin) : SV_TARGET
 {
     float4 tex = mainTexture.Sample(samplerLiner, pin.texcoord) * pin.color;
@@ -24,7 +23,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     
     //ê^ÇÒíÜÇæÇØñæÇÈÇ¢
     //color.rgb *= 1 - pow(abs((pin.texcoord * 2 - 1) / 2).x, 2 /* Ç±Ç±Ç≈ã≠Ç≥ïœÇ¶ÇÈ */);
-    //color.rgb *= 1 - pow(abs((pin.texcoord * 2 - 1) / 2).y,2);
+    //color.rgb *= 1 - pow(abs((pin.texcoord * 2 - 1) / 2).y, 2);
 
     return color;
 }

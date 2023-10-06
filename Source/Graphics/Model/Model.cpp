@@ -1,14 +1,21 @@
 #include "Graphics/Graphics.h"
 #include "Model.h"
 #include "GameSource\Render\ResourceManager.h"
+#include "Components/System/GameObject.h"
+
 
 //コンストラクタで呼ぶイニシャライザ
-void Model::ModelInitialize(std::shared_ptr<ModelResource> resource)
+void Model::ModelInitialize( const char* filename)
 {
+	ID3D11Device* device = Graphics::Instance().GetDevice();
+	modelResource_ = std::make_shared<FbxModelResource>();
+
+	modelResource_->Load(device, filename);
+
 	//this->resource = resource;
 
 	// ノード
-	const std::vector<ModelResource::Node>& resNodes = resource->GetNodes();
+	const std::vector<ModelResource::Node>& resNodes = modelResource_->GetNodes();
 
 	nodes_.resize(resNodes.size());
 	for (size_t nodeIndex = 0; nodeIndex < nodes_.size(); ++nodeIndex)
@@ -36,10 +43,9 @@ void Model::ModelInitialize(std::shared_ptr<ModelResource> resource)
 // コンストラクタ
 Model::Model(const char* filename)
 {
-	ID3D11Device* device = Graphics::Instance().GetDevice();
-	modelResource_ = std::make_shared<FbxModelResource>();
-	modelResource_->Load(device, filename);
-	ModelInitialize(modelResource_);
+	//ModelInitialize(filename);
+
+	th = std::thread(&Model::ModelInitialize, this, filename);
 }
 
 // 変換行列計算
@@ -88,3 +94,4 @@ Model::Node* Model::FindNode(const char* name)
 	//見つからなかった
 	return nullptr;
 }
+

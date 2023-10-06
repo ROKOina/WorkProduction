@@ -3,11 +3,13 @@
 #include <imgui.h>
 #include "Components\TransformCom.h"
 #include "Input/Input.h"
+#include "GameSource/Math/Collision.h"
 
 // 開始処理
 void PlayerCameraCom::Start()
 {
     angleX_ = 30;
+    oldCameraPos_= GetGameObject()->transform_->GetWorldPosition();
 }
 
 
@@ -33,19 +35,47 @@ void PlayerCameraCom::Update(float elapsedTime)
         angleX_ = -85;
     }
 
+    //レンジを戻す
+    range_ = 4;
+
     //カメラ回転値を回転行列に変換
     DirectX::XMMATRIX Transform = DirectX::XMMatrixRotationRollPitchYaw(
         DirectX::XMConvertToRadians(angleX_), DirectX::XMConvertToRadians(angleY_), 0);
 
     //回転行列から前方向ベクトルを取り出す
     DirectX::XMVECTOR Front = Transform.r[2];
+    DirectX::XMFLOAT3 front;
+    DirectX::XMStoreFloat3(&front, Front);
     DirectX::XMVECTOR FocusPos = DirectX::XMLoadFloat3(&focusPos);
+
     DirectX::XMFLOAT3 cameraPos;
     //注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
     DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range_)));
 
+    // スムーズなカメラ移動
+    DirectX::XMStoreFloat3(&oldCameraPos_, DirectX::XMVectorLerp(XMLoadFloat3(&cameraPos), DirectX::XMLoadFloat3(&oldCameraPos_), 1.0f - 0.08f));
+
+    // 新しい目標の Target を計算
+    DirectX::XMStoreFloat3(&focusPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cameraPos), DirectX::XMLoadFloat3(&focusPos), 1.0f - 0.09f));
+
+    //カメラめり込み回避処理
+    DirectX::XMFLOAT3 kabePlus = GameObjectManager::Instance().Find("kabePlus")->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 kabeMinas = GameObjectManager::Instance().Find("kabeMinas")->transform_->GetWorldPosition();
+    //補正
+    kabePlus = { kabePlus.x + 1,0,kabePlus.z + 1 };
+    kabeMinas = { kabeMinas.x - 1,0,kabeMinas.z - 1 };
+
+    while (oldCameraPos_.y < 0 ||   //地面
+        oldCameraPos_.x > kabePlus.x || oldCameraPos_.x < kabeMinas.x ||    //壁
+        oldCameraPos_.z > kabePlus.z || oldCameraPos_.z < kabeMinas.z)
+    {
+        range_ -= 0.01f;
+        DirectX::XMStoreFloat3(&oldCameraPos_, DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range_)));
+        if (range_ <= 0.1f)break;
+    }
+
     //位置代入
-    cameraObj->transform_->SetWorldPosition(cameraPos);
+    cameraObj->transform_->SetWorldPosition(oldCameraPos_);
     cameraObj->transform_->LookAtTransform(focusPos);
 }
 

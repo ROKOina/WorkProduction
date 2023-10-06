@@ -35,6 +35,8 @@ PostEffect::PostEffect(UINT width, UINT height)
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::colorGradingData), colorGradingBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomData), bloomBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomData2), bloomExBuffer_.GetAddressOf());
+    dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::sunAtmosphere), sunBuffer_.GetAddressOf());
+    dx11State->createConstantBuffer(device, sizeof(CbScene), sceneBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(SkymapData), skymapBuffer_.GetAddressOf());
 
     //ピクセルシェーダーセット
@@ -42,6 +44,7 @@ PostEffect::PostEffect(UINT width, UINT height)
     bloomExtract_ = std::make_unique<ShaderPost>("BloomExtract");
     bloomKawaseFilter_ = std::make_unique<ShaderPost>("BloomKawase");
     bloomBlur_ = std::make_unique<ShaderPost>("GaussianBlur");
+    sun_= std::make_unique<ShaderPost>("SunAtmosphere");
 
     {
         //スカイマップ
@@ -87,6 +90,9 @@ PostEffect::PostEffect(UINT width, UINT height)
     hB /= 2;
     renderPost_[4] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
+    //太陽
+    renderPostSun_ = std::make_unique<PostRenderTarget>(device, width, height, DXGI_FORMAT_R16G16B16A16_FLOAT);
+
     //フルスクリーン用
     renderPostFull_ = std::make_unique<PostRenderTarget>(device, 
         static_cast<UINT>(Graphics::Instance().GetScreenWidth()), 
@@ -102,6 +108,72 @@ void PostEffect::Render()
     //バッファ避難
     graphics.CacheRenderTargets();
 
+
+
+#pragma region 太陽
+    if (sun_->IsEnabled())
+    {
+        //描画先を変更
+        ID3D11RenderTargetView* rtv = renderPostSun_->renderTargetView.Get();
+        FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        dc->ClearRenderTargetView(rtv, color);
+        dc->OMSetRenderTargets(1, &rtv, nullptr);
+        D3D11_VIEWPORT	viewport{};
+        viewport.Width = static_cast<float>(renderPostSun_->width);
+        viewport.Height = static_cast<float>(renderPostSun_->height);
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        dc->RSSetViewports(1, &viewport);
+
+        //シェーダーリソースビュー設定
+        PostRenderTarget* ps = graphics.GetPostEffectModelRenderTarget().get();
+        drawTexture_->SetShaderResourceView(
+            ps->diffuseMap, ps->width, ps->height);
+
+        drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+            0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
+            0,
+            1, 1, 1, 1);
+
+        //深度情報送る
+        PostDepthStencil* ds = graphics.GetPostEffectModelDepthStencilView().get();
+        dc->PSSetShaderResources(1, 1, ds->diffuseMap.GetAddressOf());
+
+
+        //座標送る
+        std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+
+        graphics.shaderParameter3D_.sunAtmosphere.view = camera->GetView();
+
+        DirectX::XMStoreFloat4x4(&graphics.shaderParameter3D_.sunAtmosphere.inverseProjection,
+            DirectX::XMMatrixInverse(nullptr,
+               DirectX::XMLoadFloat4x4(&camera->GetProjection())));
+
+        DirectX::XMStoreFloat4x4(&graphics.shaderParameter3D_.sunAtmosphere.inverseViewProjection,
+            DirectX::XMMatrixInverse(nullptr,
+                DirectX::XMLoadFloat4x4(&camera->GetView())
+                * DirectX::XMLoadFloat4x4(&camera->GetProjection())));
+
+        //シーン情報
+        CbScene cb;
+        cb.lightColor = graphics.shaderParameter3D_.lightColor;
+        cb.lightDirection = graphics.shaderParameter3D_.lightDirection;
+        DirectX::XMFLOAT3 cP = camera->GetGameObject()->transform_->GetWorldPosition();
+        cb.viewPosition = { cP.x,cP.y,cP.z,1 };
+        DirectX::XMStoreFloat4x4(&cb.viewProjection,
+                DirectX::XMLoadFloat4x4(&camera->GetView())
+                * DirectX::XMLoadFloat4x4(&camera->GetProjection()));
+
+
+        dc->UpdateSubresource(sunBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.sunAtmosphere, 0, 0);
+        dc->UpdateSubresource(sceneBuffer_.Get(), 0, NULL, &cb, 0, 0);
+        dc->PSSetConstantBuffers(0, 1, sunBuffer_.GetAddressOf());
+        dc->PSSetConstantBuffers(1, 1, sceneBuffer_.GetAddressOf());
+
+
+        sun_->Draw(drawTexture_.get());
+    }
+#pragma endregion
 
 #pragma region ブルーム
     if(bloomExtract_->IsEnabled())
@@ -315,6 +387,7 @@ void PostEffect::Render()
     {
         //描画先を変更
         ID3D11RenderTargetView* rtv = renderPostFull_->renderTargetView.Get();
+
         PostRenderTarget* ps = graphics.GetPostEffectModelRenderTarget().get();
         FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
         dc->ClearRenderTargetView(rtv, color);
@@ -328,7 +401,7 @@ void PostEffect::Render()
 
         //シェーダーリソースビュー設定
         drawTexture_->SetShaderResourceView(
-            ps->diffuseMap, ps->width, ps->height);
+            renderPostSun_->diffuseMap, ps->width, ps->height);
 
         drawTexture_->Update(0, 0, graphics.GetScreenWidth(), graphics.GetScreenHeight(),
             0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
@@ -418,17 +491,38 @@ void PostEffect::ImGuiRender()
     {
         if (ImGui::TreeNode("Sun"))
         {
-            DirectX::XMFLOAT4 lVec = Graphics::Instance().shaderParameter3D_.lightDirection;
+            DirectX::XMFLOAT4 lVec = graphics.shaderParameter3D_.lightDirection;
             if (ImGui::SliderFloat4("lightDirection", &lVec.x, -1, 1))
             {
                 lVec.w = 0;
-                DirectX::XMStoreFloat4(&Graphics::Instance().shaderParameter3D_.lightDirection, DirectX::XMVector4Normalize(DirectX::XMLoadFloat4(&lVec)));
+                DirectX::XMStoreFloat4(&graphics.shaderParameter3D_.lightDirection, DirectX::XMVector4Normalize(DirectX::XMLoadFloat4(&lVec)));
             }
-            DirectX::XMFLOAT4 lCor = Graphics::Instance().shaderParameter3D_.lightColor;
+            DirectX::XMFLOAT4 lCor = graphics.shaderParameter3D_.lightColor;
             if (ImGui::SliderFloat4("lightColor", &lCor.x, 0, 1))
             {
                 lCor.w = 0;
-                DirectX::XMStoreFloat4(&Graphics::Instance().shaderParameter3D_.lightColor, DirectX::XMLoadFloat4(&lCor));
+                DirectX::XMStoreFloat4(&graphics.shaderParameter3D_.lightColor, DirectX::XMLoadFloat4(&lCor));
+            }
+            //太陽とミスト
+            if (ImGui::TreeNode("SunAtmosphere"))
+            {
+                ImGui::SliderFloat4("mistColor", &graphics.shaderParameter3D_.sunAtmosphere.mistColor.x, 0, 1);
+                ImGui::SliderFloat2("mistDensity", &graphics.shaderParameter3D_.sunAtmosphere.mistDensity.x, -1, 1);
+                ImGui::DragFloat2("mist_heightFalloff", &graphics.shaderParameter3D_.sunAtmosphere.mist_heightFalloff.x, 1.0f);
+                ImGui::DragFloat2("heightMistOffset", &graphics.shaderParameter3D_.sunAtmosphere.heightMistOffset.x, 1.0f);
+
+                ImGui::DragFloat("mistCutoffDistance", &graphics.shaderParameter3D_.sunAtmosphere.mistCutoffDistance, 0.01f);
+
+                ImGui::DragFloat("mistFlowSpeed", &graphics.shaderParameter3D_.sunAtmosphere.mistFlowSpeed, 0.1f);
+                ImGui::DragFloat("mistFlowNoiseScaleFactor", &graphics.shaderParameter3D_.sunAtmosphere.mistFlowNoiseScaleFactor, 0.001f);
+                ImGui::DragFloat("mistFlowDensityLowerLimit", &graphics.shaderParameter3D_.sunAtmosphere.mistFlowDensityLowerLimit, 0.01f);
+
+                ImGui::DragFloat("distanceToSun", &graphics.shaderParameter3D_.sunAtmosphere.distanceToSun, 0.1f);
+                ImGui::DragFloat("sunHighlightExponentialFactor", &graphics.shaderParameter3D_.sunAtmosphere.sunHighlightExponentialFactor, 0.1f);
+                ImGui::DragFloat("sunHighlightIntensity", &graphics.shaderParameter3D_.sunAtmosphere.sunHighlightIntensity, 0.1f);
+
+
+                ImGui::TreePop();
             }
             ImGui::TreePop();
         }
@@ -443,10 +537,10 @@ void PostEffect::ImGuiRender()
                 colorGrading_->SetEnabled(enabled);
             }
             ImGui::Separator();
-            ImGui::DragFloat("brightness", &Graphics::Instance().shaderParameter3D_.colorGradingData.brightness, 0.01f);
-            ImGui::DragFloat("contrast", &Graphics::Instance().shaderParameter3D_.colorGradingData.contrast, 0.01f);
-            ImGui::DragFloat("saturation", &Graphics::Instance().shaderParameter3D_.colorGradingData.saturation, 0.01f);
-            ImGui::DragFloat4("filter", &Graphics::Instance().shaderParameter3D_.colorGradingData.filter.x, 0.01f);
+            ImGui::DragFloat("brightness", &graphics.shaderParameter3D_.colorGradingData.brightness, 0.01f);
+            ImGui::DragFloat("contrast", &graphics.shaderParameter3D_.colorGradingData.contrast, 0.01f);
+            ImGui::DragFloat("saturation", &graphics.shaderParameter3D_.colorGradingData.saturation, 0.01f);
+            ImGui::DragFloat4("filter", &graphics.shaderParameter3D_.colorGradingData.filter.x, 0.01f);
 
             ImGui::TreePop();
         }

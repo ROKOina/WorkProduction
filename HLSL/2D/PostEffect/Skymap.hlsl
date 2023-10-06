@@ -1,6 +1,6 @@
 #include "FullScreen.hlsli"
 
-cbuffer ExtractionData : register(b0)
+cbuffer Skymap : register(b0)
 {
     row_major float4x4 invMat;
 };

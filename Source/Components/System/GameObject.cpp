@@ -7,6 +7,7 @@
 #include "../CameraCom.h"
 #include "../ColliderCom.h"
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
+#include "GameSource/Math/Collision.h"
 
 //ゲームオブジェクト
 #pragma region GameObject
@@ -140,13 +141,13 @@ void GameObjectManager::Update(float elapsedTime)
 {
 	for (std::shared_ptr<GameObject>& obj : startGameObject_)
 	{
-		obj->Start();
-		updateGameObject_.emplace_back(obj);
-
 		//レンダラーコンポーネントがあればレンダーオブジェに入れる
 		std::shared_ptr<RendererCom> rendererComponent = obj->GetComponent<RendererCom>();
 		if (rendererComponent) 
 		{
+			//モデルをスレッド読み込み
+			rendererComponent->GetModel()->JoinThred();
+
 			//シェーダーID順にソートして入れる
 			int insertShaderID = rendererComponent->GetShaderID();
 			int indexSize = static_cast<int>(renderSortObject_.size());	//最初のサイズを取得
@@ -161,6 +162,10 @@ void GameObjectManager::Update(float elapsedTime)
 			if (indexSize == renderSortObject_.size())
 				renderSortObject_.emplace_back(rendererComponent);
 		}
+
+		obj->Start();
+		updateGameObject_.emplace_back(obj);
+
 
 		//当たり判定コンポーネント追加
 		std::shared_ptr<Collider> colliderComponent = obj->GetComponent<Collider>();
@@ -456,7 +461,7 @@ void GameObjectManager::Render3D()
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
 	//シェーダーIDが変更された時に呼ぶ
-	if (isChangeShaderID)
+	if (isChangeShaderID_)
 		SortRenderObject();
 
 	// 描画
@@ -490,6 +495,30 @@ void GameObjectManager::Render3D()
 
 	shader->End(dc);
 
+}
+
+//レイキャストするオブジェクトを設定
+void GameObjectManager::SetRaycastObject(std::shared_ptr<GameObject> obj)
+{
+	std::shared_ptr<RendererCom> rendererComponent = obj->GetComponent<RendererCom>();
+	if (rendererComponent)
+		raycastObject_.emplace_back(rendererComponent);
+}
+
+//レンジ返す
+float GameObjectManager::RaycastStageRange(DirectX::XMFLOAT3& start, DirectX::XMFLOAT3& end)
+{
+	float range = 10000;	//とりあえず大きい数字を入れる
+	for (auto& r : raycastObject_)
+	{
+		HitResult h;
+		if (Collision::IntersectRayVsModel(start, end, r.lock()->GetModel(), h))
+		{
+			if (h.distance < range)
+				range = h.distance;
+		}
+	}
+	return range;
 }
 
 #pragma endregion endGameObjectManager

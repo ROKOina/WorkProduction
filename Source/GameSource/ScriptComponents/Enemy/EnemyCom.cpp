@@ -4,6 +4,7 @@
 #include "Components\ColliderCom.h"
 #include "Components\MovementCom.h"
 #include "Components\AnimatorCom.h"
+#include "Components\RendererCom.h"
 
 #include "BehaviorTree/JudgmentDerived.h"
 #include "BehaviorTree/ActionDerived.h"
@@ -66,6 +67,11 @@ void EnemyCom::Start()
     aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 1, BehaviorTree::SelectRule::Priority, new AttackJudgment(this), new AttackAction(this));
 
     SetRandomTargetPosition();
+
+    //”­Œõ‚ğÁ‚·
+    std::vector<ModelResource::Material>& materials = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResourceShared()->GetMaterialsEdit();
+    materials[0].toonStruct._Emissive_Color.w = 0;
+
 }
 
 // XVˆ—

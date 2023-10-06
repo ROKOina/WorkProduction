@@ -22,19 +22,61 @@
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
 #include "GameSource\ScriptComponents\CharacterStatusCom.h"
 
+#include <thread>
+
 // 初期化
 void SceneGame::Initialize()
 {
+	//床
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-		obj->SetName("hanbai");
-		obj->transform_->SetScale({ 0.1f, 0.1f, 0.1f });
+		obj->SetName("stageYuka");
+		obj->transform_->SetWorldPosition({ 0, 0, 0 });
+		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
 
-		const char* filename = "Data/Model/stages/FloorSand.mdl";
+		const char* filename = "Data/Model/stages/yuka/yuka.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
-		r->SetShaderID(SHADER_ID::Phong);
+		r->SetShaderID(SHADER_ID::UnityChanToon);
 	}
+	//壁
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("stageKabe");
+		obj->transform_->SetWorldPosition({ 0, 0, 0 });
+		obj->transform_->SetScale({ 1.00f, 1.00f, 1.00f });
+
+		const char* filename = "Data/Model/stages/kabe/kabe.mdl";
+		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+		r->LoadModel(filename);
+		r->SetShaderID(SHADER_ID::UnityChanToon);
+	}
+
+	//壁当たり判定用+
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("kabePlus");
+		obj->transform_->SetWorldPosition({ 28.5f, 0, 23.0f });
+
+		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
+	}
+	//壁当たり判定用-
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("kabeMinas");
+		obj->transform_->SetWorldPosition({ -25.0f, 0, -30.0f });
+
+		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
+	}
+	//壁当たり判定用Z
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("kabeZ");
+		obj->transform_->SetWorldPosition({ 0, 0, 23.0f });
+
+		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
+	}
+
 
 	//enemy
 	//for(int i=0;i<30;++i)
@@ -50,9 +92,9 @@ void SceneGame::Initialize()
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);
 
-		//発光を消す
-		std::vector<ModelResource::Material>& materials = r->GetModel()->GetResourceShared()->GetMaterialsEdit();
-		materials[0].toonStruct._Emissive_Color.w = 0;
+		////発光を消す
+		//std::vector<ModelResource::Material>& materials = r->GetModel()->GetResourceShared()->GetMaterialsEdit();
+		//materials[0].toonStruct._Emissive_Color.w = 0;
 
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
@@ -91,6 +133,7 @@ void SceneGame::Initialize()
 			justAttack->transform_->SetLocalPosition({ -1.569f ,0,95.493f });
 		}
 	}
+
 
 	//プレイヤー
 	{
@@ -187,7 +230,7 @@ void SceneGame::Initialize()
 		c->SetPerspectiveFov(
 			DirectX::XMConvertToRadians(45),
 			graphics.GetScreenWidth() / graphics.GetScreenHeight(),
-			1.0f, 1000.0f
+			0.1f, 1000.0f
 		);
 		cameraObj->transform_->SetWorldPosition({ 0, 5, -10 });
 	}

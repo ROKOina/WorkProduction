@@ -75,6 +75,24 @@ void PlayerCom::Update(float elapsedTime)
         capsule->SetPosition2({ pos.x - playerPos.x,pos.y - playerPos.y,pos.z - playerPos.z });
     }
 
+    //•Ç”»’è
+    {
+        DirectX::XMFLOAT3 kabePlus = GameObjectManager::Instance().Find("kabePlus")->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 kabeMinas = GameObjectManager::Instance().Find("kabeMinas")->transform_->GetWorldPosition();
+
+        DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
+        if (pos.x > kabePlus.x)
+            pos.x = kabePlus.x;
+        if (pos.x < kabeMinas.x)
+            pos.x = kabeMinas.x;
+        if (pos.z > kabePlus.z)
+            pos.z = kabePlus.z;
+        if (pos.z < kabeMinas.z)
+            pos.z = kabeMinas.z;
+
+        GetGameObject()->transform_->SetWorldPosition(pos);
+    }
+
     ////Ž©•ª‚Æ“G‚Ì‰Ÿ‚µ•Ô‚µ
     //std::vector<HitObj> hitGameObj = GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
     //for (auto& hitObj : hitGameObj)

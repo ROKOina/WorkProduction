@@ -530,6 +530,9 @@
     <None Include="HLSL\2D\PostEffect\FullScreen.hlsli">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="HLSL\noise.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\Debugs\DebugPS.hlsl">
@@ -605,6 +608,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\2D\PostEffect\FullScreenVS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\SunAtmosphere.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

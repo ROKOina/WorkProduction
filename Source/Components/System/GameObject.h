@@ -144,7 +144,11 @@ public:
 	std::shared_ptr<GameObject> Find(const char* name);
 
 	//シェーダーIDを変えたら、ソートするために呼び出す
-	void ChangeShaderID() { isChangeShaderID = true; }
+	void ChangeShaderID() { isChangeShaderID_ = true; }
+
+	void SetRaycastObject(std::shared_ptr<GameObject> obj);
+	//レンジ返す
+	float RaycastStageRange(DirectX::XMFLOAT3& start, DirectX::XMFLOAT3& end);
 
 private:
 	void DrawLister();
@@ -174,7 +178,8 @@ private:
 
 	//描画順に格納する
 	std::vector<std::weak_ptr<RendererCom>>   renderSortObject_;
-	bool isChangeShaderID = false;
+	std::vector<std::weak_ptr<RendererCom>>   raycastObject_;
+	bool isChangeShaderID_ = false;
 
 	bool					isHiddenLister_ = false;
 	bool					isHiddenDetail_ = false;

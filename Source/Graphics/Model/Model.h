@@ -5,13 +5,16 @@
 #include <DirectXMath.h>
 #include "Graphics/Model/FbxModelResource.h"
 
+#include <thread>
+
 // モデル
 class Model
 {
 public:
 	Model(const char* filename);
 	~Model() {}
-	void ModelInitialize(std::shared_ptr<ModelResource> resource);
+
+	void ModelInitialize(const char* filename);
 
 	struct Node
 	{
@@ -44,10 +47,15 @@ public:
 	const DirectX::XMFLOAT4 GetMaterialColor() const { return materialColor_; }
 	void SetMaterialColor(DirectX::XMFLOAT4 color) { materialColor_ = color; }
 
+	void JoinThred() { th.join(); }
+
 private:
 	//std::shared_ptr<ModelResource>	resource;
 	std::shared_ptr<FbxModelResource>	modelResource_;	//fbx用
 	std::vector<Node>				nodes_;
 
 	DirectX::XMFLOAT4 materialColor_ = { 1,1,1,1 };
+
+	//モデル読み込みをスレッド化
+	std::thread th;
 };
