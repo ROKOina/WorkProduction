@@ -271,6 +271,7 @@
     <ClInclude Include="External\DirectXTex\pch.h" />
     <ClInclude Include="External\DirectXTex\PlatformHelpers.h" />
     <ClInclude Include="External\DirectXTex\DirectXHelpers.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -504,6 +505,9 @@
     <ClCompile Include="External\DirectXTex\pch.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Debugs\Debug.hlsli">
@@ -531,6 +535,9 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="HLSL\noise.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="HLSL\3D\SwordTrail.hlsli">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>
@@ -611,6 +618,12 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\2D\PostEffect\SunAtmosphere.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\SwordTrailPS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\SwordTrailVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

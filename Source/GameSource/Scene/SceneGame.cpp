@@ -20,6 +20,7 @@
 #include "GameSource\ScriptComponents\Player\PlayerCameraCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
+#include "GameSource\ScriptComponents\Weapon\SwordTrailCom.h"
 #include "GameSource\ScriptComponents\CharacterStatusCom.h"
 
 #include <thread>
@@ -65,14 +66,6 @@ void SceneGame::Initialize()
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("kabeMinas");
 		obj->transform_->SetWorldPosition({ -25.0f, 0, -30.0f });
-
-		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
-	}
-	//壁当たり判定用Z
-	{
-		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-		obj->SetName("kabeZ");
-		obj->transform_->SetWorldPosition({ 0, 0, 23.0f });
 
 		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
 	}
@@ -191,6 +184,9 @@ void SceneGame::Initialize()
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(sword->GetParent());
 			weapon->SetNodeName("RightHandMiddle2");
+
+			std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
+			//trail->SetHeadTailNodeName()
 		}
 
 		//ジャスト回避用プレイヤー

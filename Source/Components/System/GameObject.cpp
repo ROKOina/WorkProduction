@@ -7,6 +7,7 @@
 #include "../CameraCom.h"
 #include "../ColliderCom.h"
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
+#include "GameSource\ScriptComponents\Weapon\SwordTrailCom.h"
 #include "GameSource/Math/Collision.h"
 
 //ゲームオブジェクト
@@ -159,8 +160,16 @@ void GameObjectManager::Update(float elapsedTime)
 					break;
 				}
 			}
+			//ソートに引っかからないなら後ろに入れる
 			if (indexSize == renderSortObject_.size())
 				renderSortObject_.emplace_back(rendererComponent);
+		}
+
+		//トレイルオブジェクトがあれば入れる
+		std::shared_ptr<SwordTrailCom> trailComponent = obj->GetComponent<SwordTrailCom>();
+		if (trailComponent)
+		{
+			swordTrailObject_.emplace_back(trailComponent);
 		}
 
 		obj->Start();
@@ -269,6 +278,9 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 
 	//3D描画
 	Render3D();
+
+	//トレイル描画
+	SwordTrailRender();
 
 	//当たり判定用デバッグ描画
 	for (auto& col : colliderObject_)
@@ -497,28 +509,20 @@ void GameObjectManager::Render3D()
 
 }
 
-//レイキャストするオブジェクトを設定
-void GameObjectManager::SetRaycastObject(std::shared_ptr<GameObject> obj)
+//トレイル描画
+void GameObjectManager::SwordTrailRender()
 {
-	std::shared_ptr<RendererCom> rendererComponent = obj->GetComponent<RendererCom>();
-	if (rendererComponent)
-		raycastObject_.emplace_back(rendererComponent);
-}
+	if (swordTrailObject_.size() <= 0)return;
 
-//レンジ返す
-float GameObjectManager::RaycastStageRange(DirectX::XMFLOAT3& start, DirectX::XMFLOAT3& end)
-{
-	float range = 10000;	//とりあえず大きい数字を入れる
-	for (auto& r : raycastObject_)
+	for (std::weak_ptr<SwordTrailCom>& trailObj : swordTrailObject_)
 	{
-		HitResult h;
-		if (Collision::IntersectRayVsModel(start, end, r.lock()->GetModel(), h))
-		{
-			if (h.distance < range)
-				range = h.distance;
-		}
+		if (!trailObj.lock()->GetGameObject()->GetEnabled())continue;
+		if (!trailObj.lock()->GetEnabled())continue;
+
+		trailObj.lock()->Render();
+
 	}
-	return range;
+
 }
 
 #pragma endregion endGameObjectManager

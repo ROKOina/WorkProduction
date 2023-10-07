@@ -10,6 +10,7 @@
 class Component;
 class TransformCom;
 class RendererCom;
+class SwordTrailCom;
 class Collider;
 
 // ゲームオブジェクト
@@ -146,10 +147,6 @@ public:
 	//シェーダーIDを変えたら、ソートするために呼び出す
 	void ChangeShaderID() { isChangeShaderID_ = true; }
 
-	void SetRaycastObject(std::shared_ptr<GameObject> obj);
-	//レンジ返す
-	float RaycastStageRange(DirectX::XMFLOAT3& start, DirectX::XMFLOAT3& end);
-
 private:
 	void DrawLister();
 	void DrawDetail();
@@ -161,6 +158,9 @@ private:
 	void RenderShadowmap();
 	//3D描画
 	void Render3D();
+
+	//トレイル描画
+	void SwordTrailRender();
 
 private:
 	std::vector<std::shared_ptr<GameObject>>		startGameObject_;
@@ -178,8 +178,10 @@ private:
 
 	//描画順に格納する
 	std::vector<std::weak_ptr<RendererCom>>   renderSortObject_;
-	std::vector<std::weak_ptr<RendererCom>>   raycastObject_;
 	bool isChangeShaderID_ = false;
+
+	//トレイル描画用
+	std::vector<std::weak_ptr<SwordTrailCom>>   swordTrailObject_;
 
 	bool					isHiddenLister_ = false;
 	bool					isHiddenDetail_ = false;

@@ -24,6 +24,10 @@ public:
 private:
     float angleX_ = 0, angleY_ = 0;
     float range_ = 4;   //ƒJƒƒ‰‹——£
+    float angleLimit_ = 55;   //ƒJƒƒ‰Šp“x§ŒÀ
     DirectX::XMFLOAT3 oldCameraPos_;
+
+    DirectX::XMFLOAT3 lerpFocusPos_;
+    float lerpSpeed_ = 1;
     DirectX::XMFLOAT3 Eye_;
 };
