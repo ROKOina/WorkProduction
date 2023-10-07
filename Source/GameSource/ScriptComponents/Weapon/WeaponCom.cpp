@@ -34,7 +34,6 @@ void WeaponCom::Update(float elapsedTime)
     //親にする
     GetGameObject()->transform_->SetParentTransform(node->worldTransform);
 
-
     //イベントから当たり判定を付ける
     std::shared_ptr<CapsuleColliderCom> capsule = GetGameObject()->GetComponent<CapsuleColliderCom>();
     if (CollsionFromEventJudge())

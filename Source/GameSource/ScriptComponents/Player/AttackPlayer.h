@@ -64,6 +64,9 @@ public:
     //コンボ出来るか判定
     bool DoComboAttack();
 
+    //攻撃判定中か判定
+    bool InAttackJudgeNow();
+
     //直前の攻撃が当たっているか
     bool OnHitEnemy() { return onHitEnemy_; }
 
@@ -128,6 +131,7 @@ private:
         NULL_KEY,
     };
     ATTACK_KEY attackKey_ = ATTACK_KEY::NULL_KEY;
+    ATTACK_KEY attackLeadInputKey_ = ATTACK_KEY::NULL_KEY;  //先行入力キー保存
 
     bool isNormalAttack_ = true;     //攻撃できるか
 

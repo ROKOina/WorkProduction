@@ -28,11 +28,11 @@ void PlayerCameraCom::Update(float elapsedTime)
 
 
     //Šp“x§ŒÀ(c‚Ì‚Ý)
-    if (angleX_ > 85) {
-        angleX_ = 85;
+    if (angleX_ > 65) {
+        angleX_ = 65;
     }
-    if (angleX_ < -85) {
-        angleX_ = -85;
+    if (angleX_ < -65) {
+        angleX_ = -65;
     }
 
     //ƒŒƒ“ƒW‚ð–ß‚·

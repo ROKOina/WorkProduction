@@ -299,7 +299,7 @@ bool MovePlayer::IsMove(float elapsedTime)
 void MovePlayer::Trun(float elapsedTime)
 {
     //入力方向のクォータニオン生成
-    QuaternionStruct inputQuaternion = QuaternionStruct::LookRotation(inputMoveVec_);
+    QuaternionStruct inputQuaternion = QuaternionStruct::LookRotation({ inputMoveVec_.x,0,inputMoveVec_.z });
     QuaternionStruct playerQuaternion = player_.lock()->GetGameObject()->transform_->GetRotation();
 
     float worldSpeed = Graphics::Instance().GetWorldSpeed();
@@ -663,7 +663,7 @@ void MovePlayer::RunTurnJudge()
         move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::RUN].moveMaxSpeed);
         move->SetMoveAcceleration(moveParam_[MOVE_PARAM::RUN].moveAcceleration);
 
-        saveTurnVec_ = inputMoveVec_;
+        saveTurnVec_ = { inputMoveVec_.x,0,inputMoveVec_.z };
         isRunTurn_ = true;
         runTurnState_ = 0;
     }

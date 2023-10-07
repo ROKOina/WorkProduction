@@ -18,10 +18,24 @@ void AttackPlayer::Update(float elapsedTime)
 {
     //コンボ継続確認処理
     ComboJudge();
+    
+    //先行入力時はtrue
+    bool isIeadInput = false;
+    if (attackLeadInputKey_ != ATTACK_KEY::NULL_KEY)
+    {
+        if (DoComboAttack())
+            isIeadInput = true;
+    }
+
 
     //入力を見て処理をする
-    if (IsAttackInput(elapsedTime))
+    if (IsAttackInput(elapsedTime)||isIeadInput)
     {
+        if (isIeadInput)
+        {
+            attackLeadInputKey_ = ATTACK_KEY::NULL_KEY;
+        }
+
         //アニメインデックスで、コンボカウントリセット
         AttackComboCountReset();
 
@@ -44,6 +58,7 @@ void AttackPlayer::Update(float elapsedTime)
         case AttackPlayer::ATTACK_KEY::NULL_KEY:
             break;
         }
+
     }
 
     //コンボ処理
@@ -118,7 +133,11 @@ void AttackPlayer::ComboJudge()
 //入力情報を保存
 bool AttackPlayer::IsAttackInput(float elapsedTime)
 {
-    attackKey_ = ATTACK_KEY::NULL_KEY;
+    //先行入力時は上書きする
+    if (attackLeadInputKey_ == ATTACK_KEY::NULL_KEY)
+        attackKey_ = ATTACK_KEY::NULL_KEY;
+    else
+        attackKey_ = attackLeadInputKey_;
 
     if (!isNormalAttack_)return false;
 
@@ -163,12 +182,21 @@ bool AttackPlayer::IsAttackInput(float elapsedTime)
 //□入力時処理
 void AttackPlayer::SquareInput()
 {
+    //攻撃中は先行入力に保存
+    if (InAttackJudgeNow())
+    {
+        attackLeadInputKey_ = ATTACK_KEY::SQUARE;
+        return;
+    }
+
     //アニメーター
     std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 
     //今の状態で遷移を変える
     if (comboAttackCount_ == 0)
     {
+        attackLeadInputKey_ = ATTACK_KEY::NULL_KEY;
+
         std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
         if (!playerObj->GetComponent<MovementCom>()->OnGround())
         {
@@ -250,6 +278,13 @@ void AttackPlayer::SquareInput()
 //△入力時処理
 void AttackPlayer::TriangleInput()
 {
+    //攻撃中は先行入力に保存
+    if (InAttackJudgeNow())
+    {
+        attackLeadInputKey_ = ATTACK_KEY::TRIANGLE;
+        return;
+    }
+
     //アニメーター
     std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 
@@ -274,6 +309,8 @@ void AttackPlayer::TriangleInput()
 
     if (comboAttackCount_ == 0)
     {
+        attackLeadInputKey_ = ATTACK_KEY::NULL_KEY;
+
         //ダッシュ攻撃か判定
         if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH)
         {
@@ -610,6 +647,23 @@ bool AttackPlayer::DoComboAttack()
     return false;
 }
 
+//攻撃判定中か判定
+bool AttackPlayer::InAttackJudgeNow()
+{
+    std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
+
+    std::shared_ptr<AnimationCom> animCom = playerObj->GetComponent<AnimationCom>();
+    for (auto& animEvent : animCom->GetCurrentAnimationEventsData())
+    {
+        //頭がAutoCollisionなら
+        if (animEvent.name.compare(0, 13, "AutoCollision") != 0)continue;
+        //アニメーションイベント外ならfalse
+        if (!animCom->GetCurrentAnimationEvent(animEvent.name.c_str(), DirectX::XMFLOAT3()))continue;
+
+        return true;
+    }
+    return false;
+}
 
 //アシスト範囲を索敵して近い敵を返す
 std::shared_ptr<GameObject> AttackPlayer::AssistGetNearEnemy()
@@ -686,7 +740,7 @@ bool AttackPlayer::ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> en
     DirectX::XMFLOAT3 peR;
     DirectX::XMStoreFloat3(&peR, DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(E, P)));
     QuaternionStruct peQ;
-    peQ = QuaternionStruct::LookRotation(peR);
+    peQ = QuaternionStruct::LookRotation({ peR.x,0,peR.z });
 
     DirectX::XMVECTOR PEQ = DirectX::XMLoadFloat4(&peQ.dxFloat4);
     DirectX::XMVECTOR PQ = DirectX::XMLoadFloat4(&playerObj->transform_->GetRotation());
