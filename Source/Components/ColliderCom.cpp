@@ -422,7 +422,6 @@ bool Collider::BoxVsCapsule(std::shared_ptr<Collider> otherSide)
 // GUI•`‰æ
 void SphereColliderCom::OnGUI()
 {
-    ImGui::Checkbox("enabled", &isEnabled_);
     ImGui::DragFloat("radius", &radius_,0.1f);
     ImGui::DragFloat3("offsetPos", &offsetPos_.x,0.1f);
 }
@@ -444,7 +443,6 @@ void SphereColliderCom::DebugRender()
 // GUI•`‰æ
 void BoxColliderCom::OnGUI()
 {
-    ImGui::Checkbox("enabled", &isEnabled_);
     ImGui::DragFloat3("size", &size_.x, 0.1f);
     ImGui::DragFloat3("offsetPos", &offsetPos_.x, 0.1f);
 }
@@ -465,7 +463,6 @@ void BoxColliderCom::DebugRender()
 // GUI•`‰æ
 void CapsuleColliderCom::OnGUI()
 {
-    ImGui::Checkbox("enabled", &isEnabled_);
     ImGui::DragFloat3("p0", &capsule_.p0.x, 0.1f);
     ImGui::DragFloat3("p1", &capsule_.p1.x, 0.1f);
     ImGui::DragFloat("radius", &capsule_.radius, 0.01f);

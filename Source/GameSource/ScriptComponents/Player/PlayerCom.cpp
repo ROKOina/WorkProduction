@@ -29,7 +29,7 @@ void PlayerCom::Start()
     GetGameObject()->GetComponent<CapsuleColliderCom>()->SetRadius(0.17f);
 
     //武器ステータス初期化
-    std::shared_ptr<WeaponCom> weapon = GetGameObject()->GetChildFind("greatSword")->GetComponent<WeaponCom>();
+    std::shared_ptr<WeaponCom> weapon = GetGameObject()->GetChildFind("Candy")->GetComponent<WeaponCom>();
     weapon->SetAttackStatus(BIGSWORD_RIGHT, 1, 30,0.7f,0.3f);
     weapon->SetAttackStatus(BIGSWORD_UP, 1, 30, 0.2f, 0.8f);
     weapon->SetAttackStatus(BIGSWORD_COM1_01, 1, 15, 0.8f, 0.2f, 1.5f);

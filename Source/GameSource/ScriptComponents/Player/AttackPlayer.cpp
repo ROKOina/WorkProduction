@@ -495,7 +495,7 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
     std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
 
     //•Šíæ“¾
-    std::shared_ptr<WeaponCom> weapon = playerObj->GetChildFind("greatSword")->GetComponent<WeaponCom>();
+    std::shared_ptr<WeaponCom> weapon = playerObj->GetChildFind("Candy")->GetComponent<WeaponCom>();
 
     //ˆê‰ñ‚Å‚àUŒ‚‚ª“–‚½‚Á‚Ä‚¢‚é‚È‚çŸ‚ÌUŒ‚‚ª—ˆ‚é‚Ü‚ÅAtrue‚É‚·‚é
     if (weapon->GetOnHit())

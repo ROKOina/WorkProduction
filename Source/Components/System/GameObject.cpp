@@ -38,6 +38,7 @@ void GameObject::Update(float elapsedTime)
 	if (!isEnabled_)return;
 	for (std::shared_ptr<Component>& component : components_)
 	{
+		if (!component->GetEnabled())continue;
 		component->Update(elapsedTime);
 	}
 }
@@ -91,6 +92,11 @@ void GameObject::OnGUI()
 		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		if(ImGui::TreeNode(component->GetName(), nodeFlags))
 		{
+			bool enabled = component->GetEnabled();
+			if (ImGui::Checkbox(" ", &enabled))
+			{
+				component->SetEnabled(enabled);
+			}
 			component->OnGUI();
 			ImGui::TreePop();
 		}

@@ -36,6 +36,9 @@ public:
         nodeName_[1] = head;
     }
 
+    //トレイルの位置をリセットする
+    void ResetNodePos();
+
 private:
     //剣の位置を保存する構造体
     struct PosBuffer
@@ -73,6 +76,11 @@ private:
 
     std::vector<PosBuffer> posArray_;             //剣の位置を保存するバッファ
     std::vector<SwordTrailVertex> vertex_;        //頂点バッファ
+    //曲線の滑らかさ
+    int split_ = 10;
+    //線の長さ
+    int index_ = 20;
+
 
     //トレイルの先端と末端ノードの名前
     std::string nodeName_[2];   //0:末端　、1:先端

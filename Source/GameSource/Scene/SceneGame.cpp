@@ -170,9 +170,9 @@ void SceneGame::Initialize()
 		//剣("RightHandMiddle2")
 		{
 			std::shared_ptr<GameObject> sword = obj->AddChildObject();
-			sword->SetName("greatSword");
+			sword->SetName("Candy");
 
-			const char* filename = "Data/Model/Swords/GreatSword/GreatSword.mdl";
+			const char* filename = "Data/Model/Swords/Candy/Candy.mdl";
 			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
 			r->LoadModel(filename);
 			r->SetShaderID(SHADER_ID::UnityChanToon);
@@ -186,7 +186,7 @@ void SceneGame::Initialize()
 			weapon->SetNodeName("RightHandMiddle2");
 
 			std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
-			//trail->SetHeadTailNodeName()
+			trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
 		}
 
 		//ジャスト回避用プレイヤー
