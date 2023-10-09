@@ -119,6 +119,10 @@ NodeBase* NodeBase::Inference(EnemyCom* enemy, BehaviorData* data)
 		}
 	}
 
+	if (result)
+		if (result->HasAction())
+			result->action_->StartActionStep();
+
 	return result;
 }
 

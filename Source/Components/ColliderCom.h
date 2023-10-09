@@ -11,10 +11,12 @@ enum COLLIDER_TAG : uint64_t
     Player          = 1 << 1,
     PlayerAttack    = 1 << 2,
     PlayerAttackAssist      = 1 << 3,
-    JustAvoid       = 1 << 4,
+    PlayerPushBack      = 1 << 4,
+    JustAvoid       = 1 << 5,
 
     Enemy           = 1 << 10,
     EnemyAttack     = 1 << 11,
+    EnemyPushBack = 1 << 12,
 
     Wall            = 1 << 30,
 };
@@ -54,8 +56,6 @@ static bool operator== (int L, COLLIDER_TYPE R)
 //当たった時用の構造体
 struct HitObj {
     std::weak_ptr<GameObject> gameObject;
-    //std::shared_ptr<GameObject> gameObject;
-    float colliderDist; //当たり判定のサイズで当たってない距離
 };
 
 //継承して一つの配列に落とし込む
@@ -84,9 +84,6 @@ public:
     std::vector<HitObj> OnHitGameObject() { return hitObj_; }
 
     int GetColliderType() const { return colliderType_; }
-
-    void SetWeight(float weight) { weight_ = weight; }
-    float GetWeight() const { return weight_; }
 
     //自分のタグを決める
     void SetMyTag(COLLIDER_TAG tag) { myTag_ = tag; }
@@ -123,19 +120,15 @@ private:
 
 private:
     //当たり判定タグ
-    COLLIDER_TAG myTag_= NONE;    //自分のタグ
-    COLLIDER_TAG judgeTag_ = NONE; //当たり判定をするタグ
+    COLLIDER_TAG myTag_= COLLIDER_TAG::NONE;    //自分のタグ
+    COLLIDER_TAG judgeTag_ = COLLIDER_TAG::NONE; //当たり判定をするタグ
 
     //今のフレームで当たっているものを保存
     std::vector<HitObj> hitObj_;
 
-    float colliderSizeDist_; //当たり判定のサイズで当たってない距離を保存
-
 protected:
     //形を保存
     int colliderType_;
-    //重さ（判定で重い方を動かないようにする
-    float weight_ = 1;
     //オフセット位置
     DirectX::XMFLOAT3 offsetPos_ = { 0,0,0 };
 
@@ -169,8 +162,24 @@ public:
     void SetRadius(float r) { radius_ = r; }
     float GetRadius() { return radius_; }
 
+    void SetPushBack(bool flag) { isPushBack_ = flag; }
+    bool GetPushBack() const { return isPushBack_; }
+
+    void SetWeight(float weight) { weight_ = weight; }
+    float GetWeight() const { return weight_; }
+
+    void SetPushBackObj(std::shared_ptr<GameObject> obj) { pushBackObj_ = obj; }
+    std::weak_ptr<GameObject> GetPushBackObj() const { return pushBackObj_; }
+
 private:
     float radius_ = 0.5f;
+
+    //押し返しするか
+    bool isPushBack_ = false;
+    //重さ
+    float weight_ = 1;
+    //押し返しするオブジェクトを指定
+    std::weak_ptr<GameObject> pushBackObj_;
 };
 
 class BoxColliderCom : public Collider

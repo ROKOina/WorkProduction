@@ -5,6 +5,37 @@
 #include "SystemStruct\QuaternionStruct.h"
 #include <map>
 
+//攻撃の種類タグ
+enum ATTACK_SPECIAL_TYPE : uint64_t
+{
+    NORMAL = 1 << 0,
+
+    UNSTOP = 1 << 1,
+    JUMP_START = 1 << 2,
+    JUMP_NOW = 1 << 3,
+};
+static ATTACK_SPECIAL_TYPE operator| (ATTACK_SPECIAL_TYPE L, ATTACK_SPECIAL_TYPE R)
+{
+    return static_cast<ATTACK_SPECIAL_TYPE>(static_cast<uint64_t>(L) | static_cast<uint64_t>(R));
+}
+static ATTACK_SPECIAL_TYPE operator& (ATTACK_SPECIAL_TYPE L, ATTACK_SPECIAL_TYPE R)
+{
+    return static_cast<ATTACK_SPECIAL_TYPE>(static_cast<uint64_t>(L) & static_cast<uint64_t>(R));
+}
+static bool operator== (ATTACK_SPECIAL_TYPE L, ATTACK_SPECIAL_TYPE R)
+{
+    if (static_cast<uint64_t>((static_cast<ATTACK_SPECIAL_TYPE>(L) & static_cast<ATTACK_SPECIAL_TYPE>(R))) == 0)
+        return false;
+    return true;
+}
+static bool operator!= (ATTACK_SPECIAL_TYPE L, ATTACK_SPECIAL_TYPE R)
+{
+    if (static_cast<uint64_t>((static_cast<ATTACK_SPECIAL_TYPE>(L) & static_cast<ATTACK_SPECIAL_TYPE>(R))) == 0)
+        return true;
+    return false;
+}
+
+
 class WeaponCom : public Component
 {
     //コンポーネントオーバーライド
@@ -42,12 +73,18 @@ public:
 
         //攻撃時のアニメーションスピード
         float animSpeed = 1;
+
+        //特殊な攻撃か（ジャンプなど）
+        ATTACK_SPECIAL_TYPE specialType = ATTACK_SPECIAL_TYPE::NORMAL;
     };
     //アニメーションとステータスを紐づける
-    void SetAttackStatus(int animIndex, int damage, float impactPower, float front = 1, float up = 0, float animSpeed = 1);
+    void SetAttackStatus(int animIndex, int damage, float impactPower, float front = 1, float up = 0, float animSpeed = 1, ATTACK_SPECIAL_TYPE specialAttack = ATTACK_SPECIAL_TYPE::NORMAL);
 
     //ヒット確認
     bool GetOnHit() { return onHit_; }
+
+    //攻撃アニメーション中
+    bool GetIsAttackAnim() { return isAttackAnim_; }
 
 private:
     //アニメイベント名から当たり判定を付けるか判断("AutoCollision"から始まるイベントを自動で取得)
@@ -60,10 +97,14 @@ private:
     //アニメーション速度を変更したフラグ
     bool isAnimSetting = false;
 
+    //攻撃アニメーション中trueに
+    bool isAttackAnim_ = false;
+    int attackAnimIndex_ = -1;
+
     //武器の親になるオブジェクト
     std::shared_ptr<GameObject> parentObject_;
     //武器の子にさせたいノードの名前
-    std::string nodeName_;
+    std::string nodeName_;    
 
     //攻撃時のステータス（int:アニメーションIndex）
     std::map<int, AttackStatus> attackStatus_;

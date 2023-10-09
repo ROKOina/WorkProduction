@@ -36,11 +36,3 @@ public:
 private:
 	float timer_ = 0;
 };
-
-// É_ÉÅÅ[ÉW
-class DamageAction : public ActionBase
-{
-public:
-	DamageAction(EnemyCom* enemy) :ActionBase(enemy) {}
-	ActionBase::State Run(float elapsedTime);
-};

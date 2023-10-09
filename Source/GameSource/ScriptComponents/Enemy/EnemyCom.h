@@ -19,6 +19,36 @@ enum ANIMATION_ENEMY
     DAMAGE,
     RIGHT_STRAIGHT01,
     LEFT_UPPER01,
+    DAMAGE_FALL,
+    DAMAGE_IN_AIR,
+    DAMAGE_GO_FLY,
+    FALL_STAND_UP,
+    DAMAGE_FALL_END,
+};
+
+//AI遷移
+enum class AI_TREE
+{
+    NONE,
+    ROOT,
+
+    //2層
+    //ROOT 
+    BATTLE,
+    SCOUT,
+
+    //3層
+    //SCOUT 
+    WANDER,
+    IDLE,
+
+    //BATTLE
+    ATTACK,
+    PURSUIT,
+
+    //4層
+    //ATTACK
+    NORMAL,
 };
 
 class EnemyCom : public Component
@@ -60,6 +90,15 @@ public:
     void SetIsJustAvoid(bool flag) { isJustAvoid_ = flag; }
     bool GetIsJustAvoid() { return isJustAvoid_; }
 
+
+    //被弾時にアニメーションする時のAITREEを決める
+    template<typename... Args>
+    void OnDamageAnimAI_TREE(Args... args);
+
+    //被弾ー＞立ち上がりモーション
+    void SetStandUpMotion();
+    void StandUpUpdate();
+
 private:
     //アニメーション初期化設定
     void AnimationInitialize();
@@ -69,6 +108,10 @@ private:
     std::unique_ptr<BehaviorData> behaviorData_;
     std::unique_ptr<NodeBase> activeNode_;
 
+    //ダメージAITREE番号
+    std::vector<int> damageAnimAiTreeId_;
+    bool isAnimDamage_ = false; //ダメージアニメーションするときはtrue
+        
     DirectX::XMFLOAT3 targetPosition_;
     //攻撃範囲
     float attackRange_ = 2;
@@ -78,4 +121,9 @@ private:
     //ジャスト回避をActionDerivedと繋ぐため
     bool isJustAvoid_ = false;
 
+    //ジャンプ被弾時
+    bool isJumpDamage_ = false;
+    //起き上がりモーション中
+    bool isStandUpMotion_ = false;
+    bool playStandUp_ = false;
 };

@@ -125,6 +125,18 @@ void SceneGame::Initialize()
 
 			justAttack->transform_->SetLocalPosition({ -1.569f ,0,95.493f });
 		}
+
+		//押し出し用当たり判定
+		{
+			std::shared_ptr<GameObject> pushBack = obj->AddChildObject();
+			pushBack->SetName("PushBackObj");
+			std::shared_ptr<SphereColliderCom> col = pushBack->AddComponent<SphereColliderCom>();
+			col->SetMyTag(COLLIDER_TAG::EnemyPushBack);
+			col->SetJudgeTag(COLLIDER_TAG::PlayerPushBack | COLLIDER_TAG::EnemyPushBack);
+			col->SetPushBack(true);
+			col->SetPushBackObj(obj);
+		}
+
 	}
 
 
@@ -171,6 +183,7 @@ void SceneGame::Initialize()
 		{
 			std::shared_ptr<GameObject> sword = obj->AddChildObject();
 			sword->SetName("Candy");
+			sword->transform_->SetScale(DirectX::XMFLOAT3(2, 2, 2));
 
 			const char* filename = "Data/Model/Swords/Candy/Candy.mdl";
 			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
@@ -213,6 +226,17 @@ void SceneGame::Initialize()
 			std::shared_ptr<GameObject> look = obj->AddChildObject();
 			look->SetName("look");
 			look->AddComponent<SphereColliderCom>();
+		}
+
+		//押し出し用当たり判定
+		{
+			std::shared_ptr<GameObject> pushBack = obj->AddChildObject();
+			pushBack->SetName("PushBackObj");
+			std::shared_ptr<SphereColliderCom> col = pushBack->AddComponent<SphereColliderCom>();
+			col->SetMyTag(COLLIDER_TAG::PlayerPushBack);
+			col->SetJudgeTag(COLLIDER_TAG::EnemyPushBack);
+			col->SetPushBack(true);
+			col->SetPushBackObj(obj);
 		}
 	}
 

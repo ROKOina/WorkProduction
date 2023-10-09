@@ -90,23 +90,26 @@ void PlayerCameraCom::Update(float elapsedTime)
     }
 
     //プレイヤーより前にカメラが行かない処理
-    while(1)
+    if (angleX_ < -30)
     {
-        //ラープなしのカメラの位置
-        DirectX::XMVECTOR C = DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range));
+        while (1)
+        {
+            //ラープなしのカメラの位置
+            DirectX::XMVECTOR C = DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range));
 
-        //ラープなしのカメラとプレイヤーのベクトル
-        DirectX::XMVECTOR NonLVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(C, FocusPos));
-        //ラープありのカメラとプレイヤーのベクトル
-        DirectX::XMVECTOR LVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&cameraPos), FocusPos));
+            //ラープなしのカメラとプレイヤーのベクトル
+            DirectX::XMVECTOR NonLVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(C, FocusPos));
+            //ラープありのカメラとプレイヤーのベクトル
+            DirectX::XMVECTOR LVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&cameraPos), FocusPos));
 
-        float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(NonLVec, LVec));
-        if (dot > 0.9f) //前に行っていないのでOK
-            break;
+            float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(NonLVec, LVec));
+            if (dot > 0.9f) //前に行っていないのでOK
+                break;
 
-        //補正
-        DirectX::XMStoreFloat3(&lerpFocusPos_, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&lerpFocusPos_), FocusPos, 0.1f * lerpSpeed_));
-        DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&lerpFocusPos_), DirectX::XMVectorScale(Front, range)));
+            //補正
+            DirectX::XMStoreFloat3(&lerpFocusPos_, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&lerpFocusPos_), FocusPos, 0.1f * lerpSpeed_));
+            DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&lerpFocusPos_), DirectX::XMVectorScale(Front, range)));
+        }
     }
     oldCameraPos_ = cameraPos;
 

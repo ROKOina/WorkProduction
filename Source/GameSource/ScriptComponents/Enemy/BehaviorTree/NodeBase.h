@@ -53,6 +53,10 @@ public:
 	void SetSibling(NodeBase* sibling) { this->sibling_ = sibling; }
 	// 行動データを持っているか
 	bool HasAction() { return action_ != nullptr ? true : false; }
+
+	//行動を強制で終了するステップに
+	void EndActionSetStep() { action_->EndActionStep(); }
+
 	// 実行可否判定
 	bool Judgment(EnemyCom* enemy);
 	// 優先順位選択

@@ -67,14 +67,12 @@ void Collider::ColliderVSOther(std::shared_ptr<Collider> otherSide)
         if (judgeTag_ == otherSide->myTag_) {
             HitObj h;
             h.gameObject = otherSide->GetGameObject();
-            h.colliderDist = colliderSizeDist_;
             hitObj_.emplace_back(h);
         }
 
         if (otherSide->judgeTag_ == myTag_) {
             HitObj h;
             h.gameObject = GetGameObject();
-            h.colliderDist = colliderSizeDist_;
             otherSide->hitObj_.emplace_back(h);
         }
     }
@@ -104,8 +102,42 @@ bool Collider::SphereVsSphere(std::shared_ptr<Collider> otherSide)
     //判定
     if (dist < radius)
     {
-        //当たり判定のサイズで当たってない距離を保存        
-        colliderSizeDist_ = radius;
+        //押し返し判定があるなら押し返す
+        if (mySphere->GetPushBack() && otherSphere->GetPushBack())
+        {
+            assert(mySphere->GetPushBackObj().lock());
+            assert(otherSphere->GetPushBackObj().lock());
+
+            //座標取得
+            std::shared_ptr<TransformCom> myTransform = mySphere->GetPushBackObj().lock()->transform_;
+            std::shared_ptr<TransformCom> otherTransform = otherSphere->GetPushBackObj().lock()->transform_;
+
+            //重さ取得
+            float myWeight = mySphere->GetWeight();
+            float otherWeight = otherSphere->GetWeight();
+
+            //押し返し処理
+            float inSphere = radius - dist; //めり込み量
+            //比率算出
+            float allRatio = myWeight + otherWeight;
+            float myRatio = otherWeight / allRatio;
+            float otherRatio = myWeight / allRatio;
+
+            //押し出し
+            DirectX::XMVECTOR OtherFromMyNormVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(MyPos, OtherPos));
+            DirectX::XMFLOAT3 myPlus;
+            DirectX::XMStoreFloat3(&myPlus, DirectX::XMVectorScale(OtherFromMyNormVec, inSphere * myRatio));
+            DirectX::XMFLOAT3 otherPlus;
+            DirectX::XMStoreFloat3(&otherPlus, DirectX::XMVectorScale(OtherFromMyNormVec, -inSphere * otherRatio));
+
+            DirectX::XMFLOAT3 myPos = myTransform->GetWorldPosition();
+            myPos = { myPos.x + myPlus.x,myPos.y + myPlus.y,myPos.z + myPlus.z };
+            myTransform->SetWorldPosition(myPos);
+            DirectX::XMFLOAT3 otherPos = otherTransform->GetWorldPosition();
+            otherPos = { otherPos.x + otherPlus.x,otherPos.y + otherPlus.y,otherPos.z + otherPlus.z };
+            otherTransform->SetWorldPosition(otherPos);
+        }
+
         return true;
     }
 
@@ -424,6 +456,10 @@ void SphereColliderCom::OnGUI()
 {
     ImGui::DragFloat("radius", &radius_,0.1f);
     ImGui::DragFloat3("offsetPos", &offsetPos_.x,0.1f);
+    if (isPushBack_)
+    {
+        ImGui::DragFloat("weight", &weight_, 0.1f, 0, 10);
+    }
 }
 
 // debug描画
@@ -452,7 +488,7 @@ void BoxColliderCom::DebugRender()
 {
     DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
     pos = { pos.x + offsetPos_.x,pos.y + offsetPos_.y,pos.z + offsetPos_.z };
-    Graphics::Instance().GetDebugRenderer()->DrawBox(pos, size_, { 1,0,0,1 });
+    Graphics::Instance().GetDebugRenderer()->DrawBox(pos, size_, { 0,1,0,1 });
 }
 
 #pragma endregion
@@ -474,15 +510,15 @@ void CapsuleColliderCom::DebugRender()
     //p0
     DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
     DirectX::XMFLOAT3 pos0 = { capsule_.p0.x + pos.x,capsule_.p0.y + pos.y,capsule_.p0.z + pos.z };
-    Graphics::Instance().GetDebugRenderer()->DrawSphere(pos0, capsule_.radius, { 1,0,0,1 });
+    Graphics::Instance().GetDebugRenderer()->DrawSphere(pos0, capsule_.radius, { 0,0,1,1 });
     //p1
     DirectX::XMFLOAT3 pos1 = { capsule_.p1.x + pos.x,capsule_.p1.y + pos.y,capsule_.p1.z + pos.z };
-    Graphics::Instance().GetDebugRenderer()->DrawSphere(pos1, capsule_.radius, { 1,0,0,1 });
+    Graphics::Instance().GetDebugRenderer()->DrawSphere(pos1, capsule_.radius, { 0,0,1,1 });
     //円柱部分
     DirectX::XMVECTOR P0 = DirectX::XMLoadFloat3(&pos0);
     DirectX::XMVECTOR P1 = DirectX::XMLoadFloat3(&pos1);
     float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(P0, P1)));
-    Graphics::Instance().GetDebugRenderer()->DrawCylinder(pos0, pos1, capsule_.radius, length, { 1,0,0,1 });
+    Graphics::Instance().GetDebugRenderer()->DrawCylinder(pos0, pos1, capsule_.radius, length, { 0,0,1,1 });
 }
 
 #pragma endregion

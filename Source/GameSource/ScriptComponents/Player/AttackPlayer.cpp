@@ -242,6 +242,7 @@ void AttackPlayer::SquareInput()
         if (!playerObj->GetComponent<MovementCom>()->OnGround())
         {
             animator->SetTriggerOn("square");
+            NormalAttack();
             comboAttackCount_++;
 
             player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_JUMP);
@@ -331,6 +332,7 @@ void AttackPlayer::TriangleInput()
         {
             animator->SetTriggerOn("triangleJump");
             player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_JUMP);
+            NormalAttack();
 
             //ジャンプカウント減らす
             player_.lock()->GetMovePlayer()->SetJumpCount(player_.lock()->GetMovePlayer()->GetJumpCount() - 1);

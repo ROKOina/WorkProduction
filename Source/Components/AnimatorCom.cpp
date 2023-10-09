@@ -177,6 +177,10 @@ void AnimatorCom::Update(float elapsedTime)
 // GUI描画
 void AnimatorCom::OnGUI()
 {
+    //現在のアニメーション
+    int animIndex = GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
+    ImGui::InputInt("animIndex", &animIndex);
+
     //アニメーション速度
     float animSpeed = GetAnimationSpeed();
     if (ImGui::DragFloat("animSpeed", &animSpeed, 0.01f))

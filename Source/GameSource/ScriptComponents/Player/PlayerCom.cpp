@@ -36,7 +36,13 @@ void PlayerCom::Start()
     weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
     weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f, 2.0f);
     weapon->SetAttackStatus(BIGSWORD_DASH, 1, 100, 0.9f, 0.1f);
-    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 25, 0.0f, 1.0f,1.5f);
+    //‹ó’†UŒ‚
+    {
+        weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 25, 0.0f, 1.0f, 1.5f, ATTACK_SPECIAL_TYPE::JUMP_START | ATTACK_SPECIAL_TYPE::UNSTOP);
+        weapon->SetAttackStatus(JUMP_ATTACK_01, 1, 0, 0.0f, 0, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+        weapon->SetAttackStatus(JUMP_ATTACK_02, 1, 0, 0.0f, 0, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+        weapon->SetAttackStatus(JUMP_ATTACK_03, 1, 0, 0.0f, 0, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    }
 
     //UŒ‚ŠÇ—‚ğ‰Šú‰»
     attackPlayer_ = std::make_shared<AttackPlayer>(GetGameObject()->GetComponent<PlayerCom>());

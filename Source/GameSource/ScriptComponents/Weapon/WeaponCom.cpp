@@ -25,14 +25,15 @@ void WeaponCom::Update(float elapsedTime)
     assert(parentObject_);
     assert(nodeName_.size() > 0);
 
+    //ヒット確認リセット
     onHit_ = false;
 
     parentObject_->UpdateTransform();
-    std::shared_ptr<RendererCom> rendererCom = parentObject_->GetComponent<RendererCom>();
-    Model::Node* node = rendererCom->GetModel()->FindNode(nodeName_.c_str());
+    std::shared_ptr<RendererCom> parentRendererCom = parentObject_->GetComponent<RendererCom>();
+    Model::Node* parentNode = parentRendererCom->GetModel()->FindNode(nodeName_.c_str());
 
     //親にする
-    GetGameObject()->transform_->SetParentTransform(node->worldTransform);
+    GetGameObject()->transform_->SetParentTransform(parentNode->worldTransform);
 
     //イベントから当たり判定を付ける
     std::shared_ptr<CapsuleColliderCom> capsule = GetGameObject()->GetComponent<CapsuleColliderCom>();
@@ -44,10 +45,10 @@ void WeaponCom::Update(float elapsedTime)
     //カプセル当たり判定設定
     if (capsule->GetEnabled())
     {
-        //剣先から剣元を設定
+        //剣先から剣元を設定    
         capsule->SetPosition1({ 0,0,0 });
         DirectX::XMFLOAT3 up = GetGameObject()->transform_->GetWorldUp();
-        capsule->SetPosition2({ up.x,up.y,up.z });
+        capsule->SetPosition2({ up.x * 2,up.y * 2,up.z * 2 });
 
         for (auto& coll : capsule->OnHitGameObject())
         {
@@ -72,11 +73,29 @@ void WeaponCom::Update(float elapsedTime)
 
             //吹っ飛ばし
             float power = attackStatus_[animIndex].impactPower;
-            status->OnDamage(DirectX::XMFLOAT3(dir.x * power, dir.y * power, dir.z * power ));
+            status->OnDamage(DirectX::XMFLOAT3(dir.x * power, dir.y * power, dir.z * power )
+                , attackStatus_[animIndex].specialType);
 
             onHit_ = true;
         }
     }
+
+    //攻撃アニメーション処理
+    {
+        //攻撃の終わりにisAttackAnim_をfalseに
+        static int oldAnim = attackAnimIndex_;
+        static bool oldAttack = false;
+        if (isAttackAnim_)
+        {
+            if (oldAttack)
+                if (attackAnimIndex_ != oldAnim)
+                    isAttackAnim_ = false;  //攻撃コンボの場合、１フレームだけfalseに
+
+            oldAnim = parentObject_->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
+        }
+        oldAttack = isAttackAnim_;
+    }
+
 }
 
 // GUI描画
@@ -86,12 +105,13 @@ void WeaponCom::OnGUI()
 }
 
 
-void WeaponCom::SetAttackStatus(int animIndex, int damage, float impactPower, float front, float up, float animSpeed)
+void WeaponCom::SetAttackStatus(int animIndex, int damage, float impactPower, float front, float up, float animSpeed, ATTACK_SPECIAL_TYPE specialAttack)
 {
     attackStatus_[animIndex].damage = damage;
     attackStatus_[animIndex].impactPower = impactPower;
     attackStatus_[animIndex].front = front;
     attackStatus_[animIndex].up = up;
+    attackStatus_[animIndex].specialType = specialAttack;
 
     //アニメーションスピード
     attackStatus_[animIndex].animSpeed = animSpeed;
@@ -117,6 +137,11 @@ bool WeaponCom::CollsionFromEventJudge()
     {
         //頭がAutoCollisionなら当たり判定をする
         if (animEvent.name.compare(0, 13, "AutoCollision") != 0)continue;
+
+        //攻撃アニメーション時はtrue
+        isAttackAnim_ = true;
+        //現在のアニメーション保存
+        attackAnimIndex_ = parentObject_->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
 
         //エンドフレーム前なら
         if (!animCom->GetCurrentAnimationEventIsEnd(animEvent.name.c_str()))
