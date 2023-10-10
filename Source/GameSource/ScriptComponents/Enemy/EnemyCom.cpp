@@ -49,35 +49,11 @@ void EnemyCom::Start()
     //発光を消す
     std::vector<ModelResource::Material>& materials = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResourceShared()->GetMaterialsEdit();
     materials[0].toonStruct._Emissive_Color.w = 0;
-
-    GetGameObject()->GetComponent<CharacterStatusCom>()->SetInvincibleTime(0);
 }
 
 // 更新処理
 void EnemyCom::Update(float elapsedTime)
 {
-    //ダメージアニメーション処理
-    {
-        if (isAnimDamage_)
-        {
-            isAnimDamage_ = GetGameObject()->GetComponent<CharacterStatusCom>()->GetDamageAnimation();
-        }
-    }
-
-    //ジャンプ被弾時の着地判定
-    if (isJumpDamage_)
-    {
-        if (!isAnimDamage_)
-        {
-            if (GetGameObject()->GetComponent<MovementCom>()->OnGround())
-            {
-                isJumpDamage_ = false;
-                //立ち上がりモーション起動
-                SetStandUpMotion();
-            }
-        }
-    }
-
     //立ち上がりモーション処理
     StandUpUpdate();
 
@@ -105,121 +81,14 @@ void EnemyCom::Update(float elapsedTime)
     }
 
     //重力設定
-    {
-        std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
-
-        static bool isSetGravity = false;
-        //アニメーションイベントを見て重力をなくす
-        if(animation->GetCurrentAnimationEvent("ZeroGravity", DirectX::XMFLOAT3()))
-        {
-            isSetGravity = true;
-            GetGameObject()->GetComponent<MovementCom>()->SetGravity(GRAVITY_ZERO);
-        }
-        else
-        {
-            if (isSetGravity)   //重力設定をした時だけ入る
-            {
-                isSetGravity = false;
-                GetGameObject()->GetComponent<MovementCom>()->SetGravity(GRAVITY_NORMAL);
-                GetGameObject()->GetComponent<MovementCom>()->ZeroVelocityY();
-            }
-        }
-    }
+    GravityProcess(elapsedTime);
 
     //ダメージ処理
-    if (OnDamageEnemy())
-    {
-        bool endTree = false;   //今の遷移を終わらせるか
+    DamageProcess(elapsedTime);
 
-        //アンストッパブル被弾ならそのままアニメーション
-        ATTACK_SPECIAL_TYPE attackType = GetGameObject()->GetComponent<CharacterStatusCom>()->GetDamageType();
-        if (attackType == ATTACK_SPECIAL_TYPE::UNSTOP)
-            endTree = true;
-        //ジャンプ中は無防備
-        if (attackType == ATTACK_SPECIAL_TYPE::JUMP_NOW)
-            endTree = true;
+    //ジャスト回避用判定出す
+    justColliderProcess();
 
-        //アクションノードがない場合被弾アニメーションする
-        if (!activeNode_)endTree = true;
-
-        for (int& i : damageAnimAiTreeId_)
-        {
-            if (endTree)break;
-
-            NodeBase* node = activeNode_.get();
-            //被弾時にアニメーションするか確認
-            while (1)
-            {
-                //おなじIDならendTreeをtrueに
-                if (node->GetId() == i)
-                {
-                    endTree = true;
-                    break;
-                }
-
-                //親も確認する
-                node = node->GetParent();
-                if (!node)break;
-            }
-
-            //遷移を終わらせてアニメーションする
-            if (endTree)
-            {
-                activeNode_->EndActionSetStep();
-                activeNode_->Run(this, elapsedTime);
-                //放棄
-                activeNode_.release();
-            }
-        }
-
-        //ダメージ処理
-        if (endTree)
-        {
-            isAnimDamage_ = true;
-            std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-
-            //アニメーションの種類を判定
-            if (isStandUpMotion_)   //立ち上がりモーション中を優先
-            {
-                SetStandUpMotion();
-            }
-            else if (attackType == ATTACK_SPECIAL_TYPE::JUMP_START)  //切り上げ被弾時
-            {
-                animator->SetTriggerOn("damageGoFly");
-                isJumpDamage_ = true;
-            }
-            else if (attackType == ATTACK_SPECIAL_TYPE::JUMP_NOW && isJumpDamage_)    //空中被弾時
-            {
-                animator->SetTriggerOn("damageInAir");
-            }
-            else
-            {
-                animator->SetTriggerOn("damage");
-            }
-        }
-    }
-
-    //仮でジャスト回避当たり判定を切り、アタック当たり判定をしている
-    DirectX::XMFLOAT3 pos;
-    //ジャスト
-    std::shared_ptr<GameObject> justChild = GetGameObject()->GetChildFind("picolaboAttackJust");
-
-    //ジャスト当たり判定を切っておく
-    justChild->GetComponent<Collider>()->SetEnabled(false);
-
-    std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
-    for (auto& animEvent : animation->GetCurrentAnimationEventsData())
-    {
-        //justが入っているならなら
-        if (animEvent.name.find("just") == std::string::npos)continue;
-        if(isJustAvoid_)justChild->GetComponent<Collider>()->SetEnabled(true);
-        //イベント中なら当たり判定を出す
-        if (animation->GetCurrentAnimationEvent(animEvent.name.c_str(), pos))
-        {
-            isJustAvoid_ = false;
-            justChild->GetComponent<Collider>()->SetEnabled(true);
-        }
-    }
 }
 
 // GUI描画
@@ -302,6 +171,167 @@ void EnemyCom::StandUpUpdate()
     }
 }
 
+//ダメージ処理
+void EnemyCom::DamageProcess(float elapsedTime)
+{
+    //空中ダメージ時重力を少しの間0にする
+    {
+        if (!isAnimDamage_ && oldAnimDamage_)
+        {
+            if (!GetGameObject()->GetComponent<MovementCom>()->OnGround())
+            {
+                skyGravityZeroTimer_ = 0.5f;
+            }
+        }
+        oldAnimDamage_ = isAnimDamage_;
+    }
+
+    //ダメージアニメーション処理
+    if (isAnimDamage_)
+    {
+        isAnimDamage_ = GetGameObject()->GetComponent<CharacterStatusCom>()->GetDamageAnimation();
+    }
+
+    //ジャンプ被弾時の着地判定
+    if (isJumpDamage_)
+    {
+        if (!isAnimDamage_)
+        {
+            if (GetGameObject()->GetComponent<MovementCom>()->OnGround())
+            {
+                isJumpDamage_ = false;
+                //立ち上がりモーション起動
+                SetStandUpMotion();
+            }
+        }
+    }
+
+    //ダメージ処理
+    if (OnDamageEnemy())
+    {
+        bool endTree = false;   //今の遷移を終わらせるか
+
+        //アンストッパブル被弾ならそのままアニメーション
+        ATTACK_SPECIAL_TYPE attackType = GetGameObject()->GetComponent<CharacterStatusCom>()->GetDamageType();
+        if (attackType == ATTACK_SPECIAL_TYPE::UNSTOP)
+            endTree = true;
+        //ジャンプ中は無防備
+        if (attackType == ATTACK_SPECIAL_TYPE::JUMP_NOW)
+            endTree = true;
+
+        //アクションノードがない場合被弾アニメーションする
+        if (!activeNode_)endTree = true;
+
+        for (int& id : damageAnimAiTreeId_)
+        {
+            if (endTree)break;
+
+            NodeBase* node = activeNode_.get();
+            //被弾時にアニメーションするか確認
+            while (1)
+            {
+                //おなじIDならendTreeをtrueに
+                if (node->GetId() == id)
+                {
+                    endTree = true;
+                    break;
+                }
+
+                //親も確認する
+                node = node->GetParent();
+                if (!node)break;
+            }
+
+            //遷移を終わらせてアニメーションする
+            if (endTree)
+            {
+                activeNode_->EndActionSetStep();
+                activeNode_->Run(this, elapsedTime);
+                //放棄
+                activeNode_.release();
+            }
+        }
+
+        //ダメージ処理
+        if (endTree)
+        {
+            isAnimDamage_ = true;
+            std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+            animator->ResetParameterList();
+
+            //アニメーションの種類を判定
+            if (isStandUpMotion_)   //立ち上がりモーション中を優先
+            {
+                SetStandUpMotion();
+            }
+            else if (attackType == ATTACK_SPECIAL_TYPE::JUMP_START)  //切り上げ被弾時
+            {
+                animator->SetTriggerOn("damageGoFly");
+                isJumpDamage_ = true;
+
+            }
+            else if (isJumpDamage_)    //空中被弾時
+            {
+                animator->SetTriggerOn("damageInAir");
+            }
+            else
+            {
+                animator->SetTriggerOn("damage");
+            }
+        }
+    }
+}
+
+//ジャスト回避用判定出す
+void EnemyCom::justColliderProcess()
+{
+    //ジャスト回避当たり判定を切り、アタック当たり判定をしている
+    DirectX::XMFLOAT3 pos;
+    //ジャスト
+    std::shared_ptr<GameObject> justChild = GetGameObject()->GetChildFind("picolaboAttackJust");
+
+    //ジャスト当たり判定を切っておく
+    justChild->GetComponent<Collider>()->SetEnabled(false);
+
+    std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
+    for (auto& animEvent : animation->GetCurrentAnimationEventsData())
+    {
+        //justが入っているならなら
+        if (animEvent.name.find("just") == std::string::npos)continue;
+        if (isJustAvoid_)justChild->GetComponent<Collider>()->SetEnabled(true);
+        //イベント中なら当たり判定を出す
+        if (animation->GetCurrentAnimationEvent(animEvent.name.c_str(), pos))
+        {
+            isJustAvoid_ = false;
+            justChild->GetComponent<Collider>()->SetEnabled(true);
+        }
+    }
+}
+
+//重力設定
+void EnemyCom::GravityProcess(float elapsedTime)
+{
+    std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
+
+    //アニメーションイベントを見て重力をなくす
+    if (animation->GetCurrentAnimationEvent("ZeroGravity", DirectX::XMFLOAT3()) || skyGravityZeroTimer_ > 0)
+    {
+        skyGravityZeroTimer_ -= elapsedTime;
+        isSetGravity_ = true;
+        GetGameObject()->GetComponent<MovementCom>()->SetGravity(GRAVITY_ZERO);
+        GetGameObject()->GetComponent<MovementCom>()->ZeroVelocityY();
+    }
+    else
+    {
+        if (isSetGravity_)   //重力設定をした時だけ入る
+        {
+            isSetGravity_ = false;
+            GetGameObject()->GetComponent<MovementCom>()->SetGravity(GRAVITY_NORMAL);
+            GetGameObject()->GetComponent<MovementCom>()->ZeroVelocityY();
+        }
+    }
+}
+
 //アニメーション初期化設定
 void EnemyCom::AnimationInitialize()
 {
@@ -313,7 +343,7 @@ void EnemyCom::AnimationInitialize()
 
     //アニメーションパラメーター追加
     animator->AddTriggerParameter("kick");
-    animator->AddTriggerParameter("rightPunch01");
+    animator->AddTriggerParameter("attack");
     animator->AddTriggerParameter("leftUpper01");
     animator->AddTriggerParameter("idle");
     animator->AddTriggerParameter("walk");
@@ -323,22 +353,22 @@ void EnemyCom::AnimationInitialize()
     animator->AddTriggerParameter("damageGoFly");
     animator->AddTriggerParameter("damageFallEnd");
 
-    animator->AddAnimatorTransition(IDEL);
-    animator->SetTriggerTransition(IDEL, "idle");
+    animator->AddAnimatorTransition(IDLE_SWORD);
+    animator->SetTriggerTransition(IDLE_SWORD, "idle");
 
-    animator->AddAnimatorTransition(RUN);
-    animator->SetLoopAnimation(RUN, true);
-    animator->SetTriggerTransition(RUN, "run");
+    animator->AddAnimatorTransition(RUN_SWORD);
+    animator->SetLoopAnimation(RUN_SWORD, true);
+    animator->SetTriggerTransition(RUN_SWORD, "run");
 
-    animator->AddAnimatorTransition(WALK);
-    animator->SetLoopAnimation(WALK, true);
-    animator->SetTriggerTransition(WALK, "walk");
+    animator->AddAnimatorTransition(WALK_SWORD);
+    animator->SetLoopAnimation(WALK_SWORD, true);
+    animator->SetTriggerTransition(WALK_SWORD, "walk");
 
     animator->AddAnimatorTransition(KICK);
     animator->SetTriggerTransition(KICK, "kick");
 
-    animator->AddAnimatorTransition(RIGHT_STRAIGHT01, false, 0);
-    animator->SetTriggerTransition(RIGHT_STRAIGHT01, "rightPunch01");
+    animator->AddAnimatorTransition(ATTACK01_SWORD, false, 0);
+    animator->SetTriggerTransition(ATTACK01_SWORD, "attack");
 
     animator->AddAnimatorTransition(LEFT_UPPER01);
     animator->SetTriggerTransition(LEFT_UPPER01, "leftUpper01");
@@ -350,14 +380,13 @@ void EnemyCom::AnimationInitialize()
         animator->SetTriggerTransition(DAMAGE, "damage");
 
         //空中
-        animator->AddAnimatorTransition(DAMAGE_IN_AIR);
+        animator->AddAnimatorTransition(DAMAGE_IN_AIR, false, 0.0f);
         animator->SetTriggerTransition(DAMAGE_IN_AIR, "damageInAir");
 
         animator->AddAnimatorTransition(DAMAGE_IN_AIR, DAMAGE_FALL, true);
-        //animator->SetTriggerTransition(DAMAGE_FALL, DAMAGE_IN_AIR, "damageInAir");
 
         //地上ー＞空中
-        animator->AddAnimatorTransition(DAMAGE_GO_FLY);
+        animator->AddAnimatorTransition(DAMAGE_GO_FLY, false, 0.0f);
         animator->SetTriggerTransition(DAMAGE_GO_FLY, "damageGoFly");
 
 

@@ -272,6 +272,7 @@
     <ClInclude Include="External\DirectXTex\PlatformHelpers.h" />
     <ClInclude Include="External\DirectXTex\DirectXHelpers.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyNear.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -506,6 +507,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyNear.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

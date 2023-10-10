@@ -72,7 +72,7 @@ void SceneGame::Initialize()
 
 
 	//enemy
-	//for(int i=0;i<30;++i)
+	for(int i=0;i<1;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -137,6 +137,35 @@ void SceneGame::Initialize()
 			col->SetPushBackObj(obj);
 		}
 
+		//剣("RightHand")
+		{
+			std::shared_ptr<GameObject> sword = obj->AddChildObject();
+			sword->SetName("Banana");
+			sword->transform_->SetScale(DirectX::XMFLOAT3(3, 3, 3));
+			sword->transform_->SetEulerRotation(DirectX::XMFLOAT3(7, -85, 108));
+			sword->transform_->SetLocalPosition(DirectX::XMFLOAT3(11, -6, -15));
+
+			const char* filename = "Data/Model/Swords/banana/banana.mdl";
+			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
+			r->LoadModel(filename);
+			r->SetShaderID(SHADER_ID::UnityChanToon);
+
+			std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Player);
+			attackCol->SetRadius(0.19f);
+
+			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
+			weapon->SetObject(sword->GetParent());
+			weapon->SetNodeName("RightHand");
+			weapon->SetColliderUpDown({ 1.36f,0 });
+
+			//std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();
+			//trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
+		}
+
+
+
 	}
 
 
@@ -184,6 +213,8 @@ void SceneGame::Initialize()
 			std::shared_ptr<GameObject> sword = obj->AddChildObject();
 			sword->SetName("Candy");
 			sword->transform_->SetScale(DirectX::XMFLOAT3(2, 2, 2));
+			sword->transform_->SetEulerRotation(DirectX::XMFLOAT3(-154, -85, 82));
+
 
 			const char* filename = "Data/Model/Swords/Candy/Candy.mdl";
 			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
@@ -193,10 +224,12 @@ void SceneGame::Initialize()
 			std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
 			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
 			attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+			attackCol->SetRadius(0.19f);
 
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(sword->GetParent());
 			weapon->SetNodeName("RightHandMiddle2");
+			weapon->SetColliderUpDown({ 2,0 });
 
 			std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
 			trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定

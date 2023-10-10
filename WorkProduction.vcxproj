@@ -148,6 +148,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\NodeBase.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyNear.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\MovePlayer.h" />
@@ -234,6 +235,7 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\NodeBase.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyNear.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\MovePlayer.cpp" />

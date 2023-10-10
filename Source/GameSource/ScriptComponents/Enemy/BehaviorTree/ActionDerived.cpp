@@ -193,7 +193,7 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 	{
 		//アニメーター
 		std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
-		animator->SetTriggerOn("rightPunch01");
+		animator->SetTriggerOn("attack");
 		step_++;
 		break;
 	}
@@ -209,6 +209,7 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 			return ActionBase::State::Failed;
 		}
 
+		//DoAttackを超えた時
 		if (animation->GetCurrentAnimationSecoonds() > animEvent.endFrame)
 		{
 			//アニメーター
@@ -250,19 +251,6 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 	}
 	case 3:
 	{
-		//アタックアニメーションイベント取得
-		//イベント中は子のアタックオブジェクトをオンに
-		std::shared_ptr<GameObject> attackChild = owner_->GetGameObject()->GetChildFind("picolaboAttack");
-		DirectX::XMFLOAT3 pos;
-		if (owner_->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationEvent("AttackEnemy", pos)) {
-			attackChild->GetComponent<Collider>()->SetEnabled(true);
-			attackChild->transform_->SetWorldPosition(pos);
-		}
-		else
-		{
-			attackChild->GetComponent<Collider>()->SetEnabled(false);
-		}
-
 		// アニメーションが終了しているとき
 		if (!owner_->GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
 		{

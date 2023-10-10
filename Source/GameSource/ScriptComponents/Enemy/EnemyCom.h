@@ -24,6 +24,10 @@ enum ANIMATION_ENEMY
     DAMAGE_GO_FLY,
     FALL_STAND_UP,
     DAMAGE_FALL_END,
+    ATTACK01_SWORD,
+    WALK_SWORD,
+    IDLE_SWORD,
+    RUN_SWORD,
 };
 
 //AI遷移
@@ -103,6 +107,15 @@ private:
     //アニメーション初期化設定
     void AnimationInitialize();
 
+    //ダメージ処理
+    void DamageProcess(float elapsedTime);
+
+    //ジャスト回避用判定出す
+    void justColliderProcess();
+
+    //重力設定
+    void GravityProcess(float elapsedTime);
+
     //AI
     std::unique_ptr<BehaviorTree> aiTree_;
     std::unique_ptr<BehaviorData> behaviorData_;
@@ -111,7 +124,8 @@ private:
     //ダメージAITREE番号
     std::vector<int> damageAnimAiTreeId_;
     bool isAnimDamage_ = false; //ダメージアニメーションするときはtrue
-        
+    bool oldAnimDamage_ = false;
+
     DirectX::XMFLOAT3 targetPosition_;
     //攻撃範囲
     float attackRange_ = 2;
@@ -123,6 +137,11 @@ private:
 
     //ジャンプ被弾時
     bool isJumpDamage_ = false;
+    //ジャンプ被弾後の重力なくすタイマー
+    float skyGravityZeroTimer_ = 0;
+    //重力設定用
+    bool isSetGravity_ = false;
+
     //起き上がりモーション中
     bool isStandUpMotion_ = false;
     bool playStandUp_ = false;

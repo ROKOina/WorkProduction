@@ -86,6 +86,12 @@ public:
     //攻撃アニメーション中
     bool GetIsAttackAnim() { return isAttackAnim_; }
 
+    //当たり判定調整セット
+    void SetColliderUpDown(DirectX::XMFLOAT2 upDown) {
+        colliderUpDown_.x = upDown.x;
+        colliderUpDown_.y = upDown.y;
+    }
+
 private:
     //アニメイベント名から当たり判定を付けるか判断("AutoCollision"から始まるイベントを自動で取得)
     bool CollsionFromEventJudge();
@@ -100,11 +106,17 @@ private:
     //攻撃アニメーション中trueに
     bool isAttackAnim_ = false;
     int attackAnimIndex_ = -1;
+    //攻撃終了タイミング用
+    bool oldIsAnim_ = false;
+    int oldAnimIndex = -1;
+
+    //武器の当たり判定調整({up,down})
+    DirectX::XMFLOAT2 colliderUpDown_ = { 0,0 };
 
     //武器の親になるオブジェクト
     std::shared_ptr<GameObject> parentObject_;
     //武器の子にさせたいノードの名前
-    std::string nodeName_;    
+    std::string nodeName_;
 
     //攻撃時のステータス（int:アニメーションIndex）
     std::map<int, AttackStatus> attackStatus_;

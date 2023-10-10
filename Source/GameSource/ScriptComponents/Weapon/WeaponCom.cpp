@@ -13,10 +13,10 @@
 // 開始処理
 void WeaponCom::Start()
 {
-    //回転
-    GetGameObject()->transform_->SetEulerRotation(DirectX::XMFLOAT3(-154, -85, 82));
-    //当たり大きさ
-    GetGameObject()->GetComponent<CapsuleColliderCom>()->SetRadius(0.19f);
+    ////回転
+    //GetGameObject()->transform_->SetEulerRotation(DirectX::XMFLOAT3(-154, -85, 82));
+    ////当たり大きさ
+    //GetGameObject()->GetComponent<CapsuleColliderCom>()->SetRadius(0.19f);
 }
 
 // 更新処理
@@ -35,8 +35,8 @@ void WeaponCom::Update(float elapsedTime)
     //親にする
     GetGameObject()->transform_->SetParentTransform(parentNode->worldTransform);
 
-    //イベントから当たり判定を付ける
     std::shared_ptr<CapsuleColliderCom> capsule = GetGameObject()->GetComponent<CapsuleColliderCom>();
+    //イベントから当たり判定を付ける
     if (CollsionFromEventJudge())
         capsule->SetEnabled(true);
     else
@@ -46,9 +46,17 @@ void WeaponCom::Update(float elapsedTime)
     if (capsule->GetEnabled())
     {
         //剣先から剣元を設定    
-        capsule->SetPosition1({ 0,0,0 });
         DirectX::XMFLOAT3 up = GetGameObject()->transform_->GetWorldUp();
-        capsule->SetPosition2({ up.x * 2,up.y * 2,up.z * 2 });
+        capsule->SetPosition1({
+             up.x * colliderUpDown_.y
+            ,up.y * colliderUpDown_.y
+            ,up.z * colliderUpDown_.y
+            });
+        capsule->SetPosition2({
+             up.x * colliderUpDown_.x
+            ,up.y * colliderUpDown_.x
+            ,up.z * colliderUpDown_.x
+            });
 
         for (auto& coll : capsule->OnHitGameObject())
         {
@@ -73,7 +81,7 @@ void WeaponCom::Update(float elapsedTime)
 
             //吹っ飛ばし
             float power = attackStatus_[animIndex].impactPower;
-            status->OnDamage(DirectX::XMFLOAT3(dir.x * power, dir.y * power, dir.z * power )
+            status->OnDamage(DirectX::XMFLOAT3(dir.x * power, dir.y * power, dir.z * power)
                 , attackStatus_[animIndex].specialType);
 
             onHit_ = true;
@@ -81,27 +89,22 @@ void WeaponCom::Update(float elapsedTime)
     }
 
     //攻撃アニメーション処理
+    if (isAttackAnim_)
     {
-        //攻撃の終わりにisAttackAnim_をfalseに
-        static int oldAnim = attackAnimIndex_;
-        static bool oldAttack = false;
-        if (isAttackAnim_)
-        {
-            if (oldAttack)
-                if (attackAnimIndex_ != oldAnim)
-                    isAttackAnim_ = false;  //攻撃コンボの場合、１フレームだけfalseに
+        if (oldIsAnim_)
+            if (attackAnimIndex_ != oldAnimIndex)
+                isAttackAnim_ = false;  //攻撃コンボの場合、１フレームだけfalseに
 
-            oldAnim = parentObject_->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
-        }
-        oldAttack = isAttackAnim_;
+        oldAnimIndex = parentObject_->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
     }
+    oldIsAnim_ = isAttackAnim_;
 
 }
 
 // GUI描画
 void WeaponCom::OnGUI()
 {
-
+    ImGui::DragFloat2("colliderUpDown", &colliderUpDown_.x, 0.01f);
 }
 
 

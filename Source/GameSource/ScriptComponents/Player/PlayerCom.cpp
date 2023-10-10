@@ -232,7 +232,7 @@ void PlayerCom::AnimationInitialize()
         animator->SetLoopAnimation(RUN_HARD_2, true);
 
         //runØ‚è‘Ö‚¦‚µ
-        animator->AddAnimatorTransition(RUN_HARD_2, RUN_TURN_FORWARD);
+        animator->AddAnimatorTransition(RUN_HARD_2, RUN_TURN_FORWARD, false, 0.0f);
         animator->SetTriggerTransition(RUN_HARD_2, RUN_TURN_FORWARD, "runTurn");
         animator->AddAnimatorTransition(RUN_TURN_FORWARD, RUN_HARD_2, true);
 
