@@ -25,9 +25,9 @@ enum ANIMATION_ENEMY
     FALL_STAND_UP,
     DAMAGE_FALL_END,
     ATTACK01_SWORD,
-    WALK_SWORD,
-    IDLE_SWORD,
     RUN_SWORD,
+    IDLE_SWORD,
+    WALK_SWORD,
 };
 
 //AI遷移
@@ -66,13 +66,13 @@ public:
     const char* GetName() const override { return "Enemy"; }
 
     // 開始処理
-    void Start() override;
+    virtual void Start();
 
     // 更新処理
-    void Update(float elapsedTime) override;
+    virtual void Update(float elapsedTime);
 
     // GUI描画
-    void OnGUI() override;
+    virtual void OnGUI();
 
     //EnemyComクラス
 public:
@@ -95,17 +95,19 @@ public:
     bool GetIsJustAvoid() { return isJustAvoid_; }
 
 
-    //被弾時にアニメーションする時のAITREEを決める
-    template<typename... Args>
-    void OnDamageAnimAI_TREE(Args... args);
 
     //被弾ー＞立ち上がりモーション
     void SetStandUpMotion();
     void StandUpUpdate();
 
-private:
+private:    //これだけ何故か派生クラスで使えないので、派生クラスでも作成する
+    //被弾時にアニメーションする時のAITREEを決める
+    template<typename... Args>
+    void OnDamageAnimAI_TREE(Args... args);
+
+protected:
     //アニメーション初期化設定
-    void AnimationInitialize();
+    virtual void AnimationInitialize();
 
     //ダメージ処理
     void DamageProcess(float elapsedTime);
