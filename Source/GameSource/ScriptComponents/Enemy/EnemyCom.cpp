@@ -170,7 +170,7 @@ void EnemyCom::DamageProcess(float elapsedTime)
     //ダメージ処理
     if (OnDamageEnemy())
     {
-        bool endTree = false;   //今の遷移を終わらせるか
+        bool endTree = false;   //今の遷移を終わらせて被弾アニメーションするならtrue
 
         //アンストッパブル被弾ならそのままアニメーション
         ATTACK_SPECIAL_TYPE attackType = GetGameObject()->GetComponent<CharacterStatusCom>()->GetDamageType();
@@ -180,9 +180,11 @@ void EnemyCom::DamageProcess(float elapsedTime)
         if (attackType == ATTACK_SPECIAL_TYPE::JUMP_NOW)
             endTree = true;
 
-        //アクションノードがない場合被弾アニメーションする
-        if (!activeNode_)endTree = true;
+        //アクションノードがない場合
+        if (!activeNode_)
+            endTree = true;
 
+        //被弾する行動か判断
         for (int& id : damageAnimAiTreeId_)
         {
             if (endTree)break;
@@ -291,79 +293,6 @@ void EnemyCom::GravityProcess(float elapsedTime)
             GetGameObject()->GetComponent<MovementCom>()->ZeroVelocityY();
         }
     }
-}
-
-//アニメーション初期化設定
-void EnemyCom::AnimationInitialize()
-{
-    ////アニメーター
-    //std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
-    ////初期のアニメーション
-    //animator->SetFirstTransition(IDEL);
-    //animator->SetLoopAnimation(IDEL, true);
-
-    ////アニメーションパラメーター追加
-    //animator->AddTriggerParameter("kick");
-    //animator->AddTriggerParameter("attack");
-    //animator->AddTriggerParameter("leftUpper01");
-    //animator->AddTriggerParameter("idle");
-    //animator->AddTriggerParameter("walk");
-    //animator->AddTriggerParameter("run");
-    //animator->AddTriggerParameter("damage");
-    //animator->AddTriggerParameter("damageInAir");
-    //animator->AddTriggerParameter("damageGoFly");
-    //animator->AddTriggerParameter("damageFallEnd");
-
-    //animator->AddAnimatorTransition(IDLE_SWORD);
-    //animator->SetTriggerTransition(IDLE_SWORD, "idle");
-
-    //animator->AddAnimatorTransition(RUN_SWORD);
-    //animator->SetLoopAnimation(RUN_SWORD, true);
-    //animator->SetTriggerTransition(RUN_SWORD, "run");
-
-    //animator->AddAnimatorTransition(WALK_SWORD);
-    //animator->SetLoopAnimation(WALK_SWORD, true);
-    //animator->SetTriggerTransition(WALK_SWORD, "walk");
-
-    //animator->AddAnimatorTransition(KICK);
-    //animator->SetTriggerTransition(KICK, "kick");
-
-    //animator->AddAnimatorTransition(ATTACK01_SWORD, false, 0);
-    //animator->SetTriggerTransition(ATTACK01_SWORD, "attack");
-
-    //animator->AddAnimatorTransition(LEFT_UPPER01);
-    //animator->SetTriggerTransition(LEFT_UPPER01, "leftUpper01");
-
-    ////被弾
-    //{
-    //    //ノーマル
-    //    animator->AddAnimatorTransition(DAMAGE);
-    //    animator->SetTriggerTransition(DAMAGE, "damage");
-
-    //    //空中
-    //    animator->AddAnimatorTransition(DAMAGE_IN_AIR, false, 0.0f);
-    //    animator->SetTriggerTransition(DAMAGE_IN_AIR, "damageInAir");
-
-    //    animator->AddAnimatorTransition(DAMAGE_IN_AIR, DAMAGE_FALL, true);
-
-    //    //地上ー＞空中
-    //    animator->AddAnimatorTransition(DAMAGE_GO_FLY, false, 0.0f);
-    //    animator->SetTriggerTransition(DAMAGE_GO_FLY, "damageGoFly");
-
-
-    //    animator->AddAnimatorTransition(DAMAGE_GO_FLY, DAMAGE_FALL, true);
-
-    //    animator->SetLoopAnimation(DAMAGE_FALL, true);
-
-    //    //被弾ー＞着地
-    //    animator->AddAnimatorTransition(DAMAGE_FALL_END);
-    //    animator->SetTriggerTransition(DAMAGE_FALL_END, "damageFallEnd");
-
-    //    //起き上がり
-    //    animator->AddAnimatorTransition(DAMAGE_FALL_END, FALL_STAND_UP, true);
-    //}
-
-
 }
 
 

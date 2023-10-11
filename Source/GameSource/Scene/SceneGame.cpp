@@ -49,7 +49,7 @@ void SceneGame::Initialize()
 		obj->transform_->SetWorldPosition({ 0, 0, 0 });
 		obj->transform_->SetScale({ 1.00f, 1.00f, 1.00f });
 
-		const char* filename = "Data/Model/stages/kabe/kabe.mdl";
+		const char* filename = "Data/Model/stages/kabe/kabeSara.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);
@@ -74,7 +74,7 @@ void SceneGame::Initialize()
 
 
 	//enemyNear
-	for(int i=0;i<1;++i)
+	for(int i=0;i<5;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -170,7 +170,8 @@ void SceneGame::Initialize()
 
 	}
 
-	for(int i=0;i<1;++i)
+	//enemyFar
+	for(int i=0;i<0;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");

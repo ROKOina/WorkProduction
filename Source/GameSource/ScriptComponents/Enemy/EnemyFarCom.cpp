@@ -103,9 +103,6 @@ void EnemyFarCom::AnimationInitialize()
     animator->AddAnimatorTransition(ATTACK01_SWORD, false, 0);
     animator->SetTriggerTransition(ATTACK01_SWORD, "attack");
 
-    animator->AddAnimatorTransition(LEFT_UPPER01);
-    animator->SetTriggerTransition(LEFT_UPPER01, "leftUpper01");
-
     //”í’e
     {
         //ƒm[ƒ}ƒ‹

@@ -63,7 +63,7 @@ public:
     ~EnemyCom() { activeNode_.release(); }
 
     // 名前取得
-    const char* GetName() const override { return "Enemy"; }
+    virtual const char* GetName() const = 0;
 
     // 開始処理
     virtual void Start();
@@ -107,7 +107,7 @@ private:    //これだけ何故か派生クラスで使えないので、派生クラスでも作成する
 
 protected:
     //アニメーション初期化設定
-    virtual void AnimationInitialize();
+    virtual void AnimationInitialize(){}
 
     //ダメージ処理
     void DamageProcess(float elapsedTime);
