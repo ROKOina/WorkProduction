@@ -36,6 +36,11 @@ private:
         DirectX::XMFLOAT4 materialColor;
     };
 
+    struct CbShape
+    {
+        float shapeLerp[16];
+    };
+
     struct CbShadowMap
     {
         DirectX::XMFLOAT4X4	lightViewProjection;	//	ライトビュープロジェクション行列
@@ -48,6 +53,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> subsetConstantBuffer_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> shadowMapConstantBuffer_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> unityChanToonConstantBuffer_;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> shapeConstantBuffer_;
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Emissive;
 

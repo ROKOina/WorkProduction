@@ -199,7 +199,7 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 	}
 	//攻撃前行動
 	case 1:
-	{		
+	{
 		//アニメーション
 		std::shared_ptr<AnimationCom> animation = owner_->GetGameObject()->GetComponent<AnimationCom>();
 		//アニメーションイベントの中から攻撃前（DoAttack）を名前検索する
@@ -260,15 +260,6 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 		}
 		break;
 	}
-	case 5:
-		// アニメーションが終了しているとき
-		if (!owner_->GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
-		{
-			step_ = 0;
-			// 攻撃失敗を返す
-			return ActionBase::State::Failed;
-		}
-		break;
 
 		//強制終了
 	case  Action::End_STEP:
@@ -285,22 +276,6 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 			step_ = 0;
 	}
 	}
-
-	////ダメージを受けた時
-	//if (owner_->OnDamageEnemy())
-	//{
-	//	//アニメーター
-	//	step_ = 5;
-	//	std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
-	//	animator->SetIsStop(false);
-	//	animator->SetTriggerOn("damage");
-
-	//	std::shared_ptr<RendererCom> renderer = owner_->GetGameObject()->GetComponent<RendererCom>();
-	//	std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
-	//	materials[0].toonStruct._Emissive_Color.w = 0;
-
-	//	owner_->GetGameObject()->GetChildFind("picolaboAttack")->GetComponent<Collider>()->SetEnabled(false);
-	//}
 
 	// スキル中を返す
 	return ActionBase::State::Run;

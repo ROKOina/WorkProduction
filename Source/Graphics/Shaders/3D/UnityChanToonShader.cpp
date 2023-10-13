@@ -36,6 +36,7 @@ UnityChanToonShader::UnityChanToonShader(ID3D11Device* device)
         dx11State->createConstantBuffer(device, sizeof(CbSubset), subsetConstantBuffer_.GetAddressOf());
         dx11State->createConstantBuffer(device, sizeof(CbShadowMap), shadowMapConstantBuffer_.GetAddressOf());
         dx11State->createConstantBuffer(device, sizeof(UnityChanToonStruct), unityChanToonConstantBuffer_.GetAddressOf());
+        dx11State->createConstantBuffer(device, sizeof(CbShape), shapeConstantBuffer_.GetAddressOf());
     }
 
 }
@@ -52,7 +53,8 @@ void UnityChanToonShader::Begin(ID3D11DeviceContext* dc, const ShaderParameter3D
         meshConstantBuffer_.Get(),
         subsetConstantBuffer_.Get(),
         shadowMapConstantBuffer_.Get(),
-        unityChanToonConstantBuffer_.Get()
+        unityChanToonConstantBuffer_.Get(),
+        shapeConstantBuffer_.Get()
     };
     dc->VSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
     dc->PSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
@@ -131,6 +133,17 @@ void UnityChanToonShader::Draw(ID3D11DeviceContext* dc, const Model* model)
                 cbMesh.boneTransforms[0] = nodes.at(mesh.nodeIndex).worldTransform;
             }
             dc->UpdateSubresource(meshConstantBuffer_.Get(), 0, 0, &cbMesh, 0, 0);
+
+            //シェイプ情報
+            CbShape cbShape;
+            ::memset(&cbShape, 0, sizeof(cbShape));
+            for (int srvCount = 0; srvCount < mesh.shapeData.size(); ++srvCount)
+            {
+                dc->VSSetShaderResources(10 + srvCount, 1, mesh.shapeData[srvCount].srvBuffer.GetAddressOf());
+                cbShape.shapeLerp[srvCount] = mesh.shapeData[srvCount].rate;
+            }
+            dc->UpdateSubresource(shapeConstantBuffer_.Get(), 0, 0, &cbShape, 0, 0);
+
 
             UINT stride = sizeof(ModelResource::Vertex);
             UINT offset = 0;

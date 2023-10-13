@@ -20,6 +20,7 @@ CEREAL_CLASS_VERSION(UnityChanToonStruct, 1)
 CEREAL_CLASS_VERSION(ModelResource::Node, 1)
 CEREAL_CLASS_VERSION(ModelResource::Material, 1)
 CEREAL_CLASS_VERSION(ModelResource::Subset, 1)
+CEREAL_CLASS_VERSION(ModelResource::ShapeData, 1)
 CEREAL_CLASS_VERSION(ModelResource::Vertex, 1)
 CEREAL_CLASS_VERSION(ModelResource::Mesh, 1)
 CEREAL_CLASS_VERSION(ModelResource::NodeKeyData, 1)
@@ -156,6 +157,16 @@ void ModelResource::Vertex::serialize(Archive& archive, int version)
 }
 
 template<class Archive>
+void ModelResource::ShapeData::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(name),
+		CEREAL_NVP(rate),
+		CEREAL_NVP(shapeVertex)
+	);
+}
+
+template<class Archive>
 void ModelResource::Mesh::serialize(Archive& archive, int version)
 {
 	archive(
@@ -166,7 +177,8 @@ void ModelResource::Mesh::serialize(Archive& archive, int version)
 		CEREAL_NVP(nodeIndices),
 		CEREAL_NVP(offsetTransforms),
 		CEREAL_NVP(boundsMin),
-		CEREAL_NVP(boundsMax)
+		CEREAL_NVP(boundsMax),
+		CEREAL_NVP(shapeData)
 	);
 }
 
@@ -300,6 +312,35 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname)
 			subresourceData.SysMemSlicePitch = 0; //Not use for index buffers.
 			HRESULT hr = device->CreateBuffer(&bufferDesc, &subresourceData, mesh.indexBuffer.GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
+
+		//シェイプデータ
+		{
+			for (int i = 0; i < mesh.shapeData.size(); ++i)
+			{
+				D3D11_BUFFER_DESC buffer_desc{};
+				buffer_desc.ByteWidth = static_cast<UINT>(sizeof(DirectX::XMFLOAT3) * mesh.vertices.size());
+				buffer_desc.StructureByteStride = sizeof(DirectX::XMFLOAT3);
+				buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+				buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+				buffer_desc.CPUAccessFlags = 0;
+				buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+				D3D11_SUBRESOURCE_DATA subresource_data{};
+
+				subresource_data.pSysMem = mesh.shapeData[i].shapeVertex.data();
+				subresource_data.SysMemPitch = sizeof(DirectX::XMFLOAT3) * mesh.vertices.size();		//配列のサイズ
+				subresource_data.SysMemSlicePitch = sizeof(DirectX::XMFLOAT3);	//１要素
+				HRESULT hr = device->CreateBuffer(&buffer_desc, &subresource_data, mesh.shapeData[i].sBuffer.GetAddressOf());
+				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+				D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+				srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+				srvDesc.Buffer.FirstElement = 0;
+				srvDesc.Buffer.NumElements = mesh.shapeData[i].shapeVertex.size();
+				device->CreateShaderResourceView(mesh.shapeData[i].sBuffer.Get(), &srvDesc, mesh.shapeData[i].srvBuffer.GetAddressOf());
+			}
 		}
 	}
 }

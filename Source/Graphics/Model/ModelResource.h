@@ -73,6 +73,20 @@ public:
 		void serialize(Archive& archive, int version);
 	};
 
+	//シェイプデータ
+	struct ShapeData
+	{
+		std::string name;
+		float rate = 0;
+		std::vector<DirectX::XMFLOAT3> shapeVertex;
+
+		Microsoft::WRL::ComPtr<ID3D11Buffer>			sBuffer;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>			srvBuffer;
+
+		template<class Archive>
+		void serialize(Archive& archive, int version);
+	};
+
 	struct Mesh
 	{
 		std::vector<Vertex>						vertices;
@@ -88,6 +102,8 @@ public:
 
 		Microsoft::WRL::ComPtr<ID3D11Buffer>	vertexBuffer;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>	indexBuffer;
+
+		std::vector<ShapeData> shapeData;	//シェイプデータ
 
 		template<class Archive>
 		void serialize(Archive& archive, int version);

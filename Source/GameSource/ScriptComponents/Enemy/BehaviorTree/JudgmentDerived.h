@@ -28,12 +28,3 @@ public:
 	// ”»’è
 	bool Judgment();
 };
-
-// DamageNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-class DamageJudgment : public JudgmentBase
-{
-public:
-	DamageJudgment(EnemyCom* enemy) :JudgmentBase(enemy) {};
-	// ”»’è
-	bool Judgment();
-};

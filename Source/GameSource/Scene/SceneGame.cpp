@@ -27,6 +27,8 @@
 
 #include <thread>
 
+#include "GameSource\ScriptComponents\Enemy\EnemyManager.h"
+
 // 初期化
 void SceneGame::Initialize()
 {
@@ -71,7 +73,6 @@ void SceneGame::Initialize()
 
 		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
 	}
-
 
 	//enemyNear
 	for(int i=0;i<5;++i)
@@ -165,9 +166,6 @@ void SceneGame::Initialize()
 			//std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();
 			//trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
 		}
-
-
-
 	}
 
 	//enemyFar

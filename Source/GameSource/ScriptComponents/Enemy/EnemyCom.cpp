@@ -9,6 +9,7 @@
 #include "BehaviorTree/JudgmentDerived.h"
 #include "BehaviorTree/ActionDerived.h"
 #include "GameSource/Math/Mathf.h"
+#include "EnemyManager.h"
 
 #include "../Player/PlayerCom.h"
 #include "../CharacterStatusCom.h"
@@ -19,6 +20,7 @@
 // 開始処理
 void EnemyCom::Start()
 {
+    EnemyManager::Instance().Register(GetGameObject());
 }
 
 // 更新処理

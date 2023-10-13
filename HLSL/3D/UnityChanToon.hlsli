@@ -28,6 +28,7 @@ cbuffer CbMesh : register(b1)
 cbuffer CbSubset : register(b2)
 {
     float4 materialColor;
+
 };
 
 cbuffer CbShadowmap : register(b3)
@@ -70,4 +71,24 @@ cbuffer UnityChanToon : register(b4)
     
     //エミッシブカラー
     float4 _Emissive_Color;
+}
+
+cbuffer CbShape : register(b5)
+{
+    float shapeLerp0;
+    float shapeLerp1;
+    float shapeLerp2;
+    float shapeLerp3;
+    float shapeLerp4;
+    float shapeLerp5;
+    float shapeLerp6;
+    float shapeLerp7;
+    float shapeLerp8;
+    float shapeLerp9;
+    float shapeLerp10;
+    float shapeLerp11;
+    float shapeLerp12;
+    float shapeLerp13;
+    float shapeLerp14;
+    float shapeLerp15;
 }

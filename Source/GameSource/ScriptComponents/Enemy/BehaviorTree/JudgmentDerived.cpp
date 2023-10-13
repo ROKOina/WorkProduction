@@ -63,9 +63,3 @@ bool WanderJudgment::Judgment()
 
 	return false;
 }
-
-// DamageNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-bool DamageJudgment::Judgment()
-{
-	return owner_->OnDamageEnemy();
-}

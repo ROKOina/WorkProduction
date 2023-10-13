@@ -13,6 +13,8 @@
 // 開始処理
 void EnemyFarCom::Start()
 {
+    EnemyCom::Start();
+
     //ダメージアニメーションをするノードを登録
     OnDamageAnimAI_TREE(AI_TREE::WANDER, AI_TREE::PURSUIT/*, AI_TREE::NORMAL*/);
 
