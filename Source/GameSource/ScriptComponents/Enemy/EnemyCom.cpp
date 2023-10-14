@@ -32,22 +32,22 @@ void EnemyCom::Update(float elapsedTime)
     if (activeNode_ == nullptr&& !isAnimDamage_&& !isJumpDamage_&& !isStandUpMotion_)
     {
         // 次に実行するノードを推論する。
-        activeNode_.reset(aiTree_->ActiveNodeInference(behaviorData_.get()));
+        activeNode_ = aiTree_->ActiveNodeInference(behaviorData_);
     }
     // 現在実行するノードがあれば
     if (activeNode_ != nullptr)
     {
          //ビヘイビアツリーからノードを実行。
-        NodeBase* n = aiTree_->Run(activeNode_.get(), behaviorData_.get(), elapsedTime);
+        std::shared_ptr<NodeBase> n = aiTree_->Run(activeNode_, behaviorData_, elapsedTime);
         if (!n)
         {
             //放棄
-            activeNode_.release();
+            activeNode_.reset();
         }
         else
         {
             if (n->GetId() != activeNode_->GetId())
-                activeNode_.reset(n);
+                activeNode_.swap(n);
         }
     }
 
@@ -202,7 +202,7 @@ void EnemyCom::DamageProcess(float elapsedTime)
                 }
 
                 //親も確認する
-                node = node->GetParent();
+                node = node->GetParent().get();
                 if (!node)break;
             }
 
@@ -210,9 +210,9 @@ void EnemyCom::DamageProcess(float elapsedTime)
             if (endTree)
             {
                 activeNode_->EndActionSetStep();
-                activeNode_->Run(this, elapsedTime);
+                activeNode_->Run(GetGameObject()->GetComponent<EnemyCom>(), elapsedTime);
                 //放棄
-                activeNode_.release();
+                activeNode_.reset();
             }
         }
 

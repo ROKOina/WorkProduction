@@ -20,7 +20,7 @@ ActionBase::State IdleAction::Run(float elapsedTime)
 	case 0:
 	{
 		//アニメーター
-		std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 		animator->SetTriggerOn("idle");
 
 		runTimer_ = 2;
@@ -34,13 +34,13 @@ ActionBase::State IdleAction::Run(float elapsedTime)
 		// 待機時間が過ぎた時
 		if (runTimer_ <= 0.0f)
 		{
-			owner_->SetRandomTargetPosition();
+			owner_.lock()->SetRandomTargetPosition();
 			step_ = 0;
 			return ActionBase::State::Complete;
 		}
 
 		// プレイヤー索敵成功したら
-		if (owner_->SearchPlayer())
+		if (owner_.lock()->SearchPlayer())
 		{
 			step_ = 0;
 			// 徘徊成功を返す
@@ -61,7 +61,7 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 		// 徘徊モーション設定
 	{
 		//アニメーター
-		std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 		animator->SetTriggerOn("walk");
 
 		step_++;
@@ -69,11 +69,11 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 	}
 	case 1:
 	{
-		std::shared_ptr<TransformCom> myTransform = owner_->GetGameObject()->transform_;
+		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
 
 		// 目的地点までのXZ平面での距離判定
 		DirectX::XMFLOAT3 position = myTransform->GetWorldPosition();
-		DirectX::XMFLOAT3 targetPosition = owner_->GetTargetPosition();
+		DirectX::XMFLOAT3 targetPosition = owner_.lock()->GetTargetPosition();
 		float vx = targetPosition.x - position.x;
 		float vz = targetPosition.z - position.z;
 		float distSq = vx * vx + vz * vz;
@@ -93,7 +93,7 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 		DirectX::XMFLOAT3 force;
 		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 30.0f * elapsedTime));
 
-		std::shared_ptr<MovementCom> move = owner_->GetGameObject()->GetComponent<MovementCom>();
+		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
 		move->AddForce(force);
 		
 		//回転する
@@ -104,7 +104,7 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 		myTransform->SetRotation(myQ.dxFloat4);
 
 		// プレイヤー索敵成功したら
-		if (owner_->SearchPlayer())
+		if (owner_.lock()->SearchPlayer())
 		{
 			step_ = 0;
 			// 徘徊成功を返す
@@ -126,11 +126,11 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 	case 0:
 	{
 		// 目標地点をプレイヤー位置に設定
-		owner_->SetTargetPosition(GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
+		owner_.lock()->SetTargetPosition(GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
 		runTimer_ = 2;
 
 		//アニメーター
-		std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 		animator->SetTriggerOn("run");
 
 		step_++;
@@ -138,15 +138,15 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 	}
 	case 1:
 	{
-		std::shared_ptr<TransformCom> myTransform = owner_->GetGameObject()->transform_;
+		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
 
 		runTimer_ -= elapsedTime;
 		// 目標地点をプレイヤー位置に設定
-		owner_->SetTargetPosition(GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
+		owner_.lock()->SetTargetPosition(GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
 
 		// 目的地点までのXZ平面での距離判定
 		DirectX::XMFLOAT3 position = myTransform->GetWorldPosition();
-		DirectX::XMFLOAT3 targetPosition = owner_->GetTargetPosition();
+		DirectX::XMFLOAT3 targetPosition = owner_.lock()->GetTargetPosition();
 
 		// 目的地点へ移動
 		DirectX::XMVECTOR Pos = { position.x,0,position.z };
@@ -154,7 +154,7 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		DirectX::XMFLOAT3 force;
 		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 40.0f * elapsedTime));
 
-		std::shared_ptr<MovementCom> move = owner_->GetGameObject()->GetComponent<MovementCom>();
+		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
 		move->AddForce(force);
 
 		//回転する
@@ -169,21 +169,25 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		float vz = targetPosition.z - position.z;
 		float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 
-		////接近エリアに入ったら
-		//if (dist < EnemyManager::Instance().GetNearEnemyLevel().radius)
-		//{
-		//	std::shared_ptr<EnemyNearCom> nearEnemy = std::static_pointer_cast<EnemyNearCom>(std::shared_ptr<EnemyCom>(owner_));
-		//	if (!nearEnemy->GetIsNearFlag())
-		//	{
-		//		EnemyManager::Instance().SendMessaging(owner_->GetID(), EnemyManager::AI_ID::AI_INDEX, MESSAGE_TYPE::MsgAskNearRight);
-		//		step_ = 0;
-		//		// 追跡失敗を返す
-		//		return ActionBase::State::Failed;
-		//	}
-		//}
+		
+
+		//接近エリアに入ったら
+		if (dist < EnemyManager::Instance().GetNearEnemyLevel().radius)
+		{
+			if (!owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsNearFlag())
+			{
+				EnemyManager::Instance().SendMessaging(owner_.lock()->GetID(), EnemyManager::AI_ID::AI_INDEX, MESSAGE_TYPE::MsgAskNearRight);
+				step_ = 0;
+
+				//一旦加速停止
+				move->ZeroVelocity();
+				// 追跡失敗を返す
+				return ActionBase::State::Failed;
+			}
+		}
 
 		// 攻撃範囲にいるとき
-		if (dist < owner_->GetAttackRange())
+		if (dist < owner_.lock()->GetAttackRange())
 		{
 			step_ = 0;
 			// 追跡成功を返す
@@ -210,7 +214,7 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 	case 0:
 	{
 		//アニメーター
-		std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 		animator->SetTriggerOn("attack");
 		step_++;
 		break;
@@ -219,7 +223,7 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 	case 1:
 	{
 		//アニメーション
-		std::shared_ptr<AnimationCom> animation = owner_->GetGameObject()->GetComponent<AnimationCom>();
+		std::shared_ptr<AnimationCom> animation = owner_.lock()->GetGameObject()->GetComponent<AnimationCom>();
 		//アニメーションイベントの中から攻撃前（DoAttack）を名前検索する
 		ModelResource::AnimationEvent animEvent = animation->GetAnimationEvent("DoAttack").resourceEventData;
 		if (animEvent.name.size() <= 0)
@@ -231,12 +235,12 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 		if (animation->GetCurrentAnimationSecoonds() > animEvent.endFrame)
 		{
 			//アニメーター
-			std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+			std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 			animator->SetIsStop(true);
 			timer_ = 0.3f;
 
 			//発光準備
-			std::shared_ptr<RendererCom> renderer = owner_->GetGameObject()->GetComponent<RendererCom>();
+			std::shared_ptr<RendererCom> renderer = owner_.lock()->GetGameObject()->GetComponent<RendererCom>();
 			std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
 			materials[0].toonStruct._Emissive_Color.w = 0.3f;
 
@@ -249,19 +253,19 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 		timer_ -= elapsedTime;
 
 		//発光
-		std::shared_ptr<RendererCom> renderer = owner_->GetGameObject()->GetComponent<RendererCom>();
+		std::shared_ptr<RendererCom> renderer = owner_.lock()->GetGameObject()->GetComponent<RendererCom>();
 		std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
 		materials[0].toonStruct._Emissive_Color.w += 2.5f * elapsedTime;
 
 		if (timer_ < 0)
 		{
 			//アニメーター
-			std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+			std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 			animator->SetIsStop(false);
 
 			materials[0].toonStruct._Emissive_Color.w = 0;
 			
-			owner_->SetIsJustAvoid(true);
+			owner_.lock()->SetIsJustAvoid(true);
 
 			step_++;
 		}
@@ -270,7 +274,7 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 	case 3:
 	{
 		// アニメーションが終了しているとき
-		if (!owner_->GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
+		if (!owner_.lock()->GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
 		{
 			step_ = 0;
 			// 攻撃成功を返す
@@ -282,14 +286,14 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 		//強制終了
 	case  Action::End_STEP:
 	{
-			std::shared_ptr<AnimatorCom> animator = owner_->GetGameObject()->GetComponent<AnimatorCom>();
+			std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 			animator->SetIsStop(false);
 
-			std::shared_ptr<RendererCom> renderer = owner_->GetGameObject()->GetComponent<RendererCom>();
+			std::shared_ptr<RendererCom> renderer = owner_.lock()->GetGameObject()->GetComponent<RendererCom>();
 			std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
 			materials[0].toonStruct._Emissive_Color.w = 0;
 
-			owner_->GetGameObject()->GetChildFind("picolaboAttack")->GetComponent<Collider>()->SetEnabled(false);
+			owner_.lock()->GetGameObject()->GetChildFind("picolaboAttack")->GetComponent<Collider>()->SetEnabled(false);
 
 			step_ = 0;
 	}

@@ -6,7 +6,7 @@
 class BattleJudgment : public JudgmentBase
 {
 public:
-	BattleJudgment(EnemyCom* enemy) :JudgmentBase(enemy) {};
+	BattleJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
 	// ”»’è
 	bool Judgment();
 };
@@ -15,7 +15,7 @@ public:
 class AttackJudgment : public JudgmentBase
 {
 public:
-	AttackJudgment(EnemyCom* enemy) :JudgmentBase(enemy) {};
+	AttackJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
 	// ”»’è
 	bool Judgment();
 };
@@ -24,7 +24,7 @@ public:
 class WanderJudgment : public JudgmentBase
 {
 public:
-	WanderJudgment(EnemyCom* enemy) :JudgmentBase(enemy) {};
+	WanderJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
 	// ”»’è
 	bool Judgment();
 };

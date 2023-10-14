@@ -9,19 +9,18 @@
 // デストラクタ
 BehaviorTree::~BehaviorTree()
 {
-	NodeAllClear(root_);
 }
 
-void BehaviorTree::AddNode(AI_TREE parentId, AI_TREE entryId, int priority, SelectRule selectRule, JudgmentBase* judgment, ActionBase* action)
+void BehaviorTree::AddNode(AI_TREE parentId, AI_TREE entryId, int priority, SelectRule selectRule, std::shared_ptr<JudgmentBase> judgment, std::shared_ptr<ActionBase> action)
 {
 	if (static_cast<int>(parentId) != 0)
 	{
-		NodeBase* parentNode = root_->SearchNode(static_cast<int>(parentId));
+		std::shared_ptr<NodeBase> parentNode = root_->SearchNode(static_cast<int>(parentId));
 
 		if (parentNode != nullptr)
 		{
-			NodeBase* sibling = parentNode->GetLastChild();
-			NodeBase* addNode = new NodeBase(static_cast<int>(entryId), parentNode, sibling, priority, selectRule, judgment, action, parentNode->GetHirerchyNo() + 1);
+			std::shared_ptr<NodeBase> sibling = parentNode->GetLastChild();
+			std::shared_ptr<NodeBase> addNode = std::make_shared<NodeBase>(static_cast<int>(entryId), parentNode, sibling, priority, selectRule, judgment, action, parentNode->GetHirerchyNo() + 1);
 
 			parentNode->AddChild(addNode);
 		}
@@ -29,36 +28,36 @@ void BehaviorTree::AddNode(AI_TREE parentId, AI_TREE entryId, int priority, Sele
 	else {
 		if (root_ == nullptr)
 		{
-			root_ = new NodeBase(static_cast<int>(entryId), nullptr, nullptr, priority, selectRule, judgment, action, 1);
+			root_ = std::make_shared<NodeBase>(static_cast<int>(entryId), nullptr, nullptr, priority, selectRule, judgment, action, 1);
 		}
 	}
 }
 
 // 推論
-NodeBase* BehaviorTree::ActiveNodeInference(BehaviorData* data)
+std::shared_ptr<NodeBase> BehaviorTree::ActiveNodeInference(std::shared_ptr<BehaviorData> data)
 {
 	// データをリセットして開始
 	data->Init();
-	return root_->Inference(owner_, data);
+	return root_->Inference(owner_.lock(), data);
 }
 
 // シーケンスノードからの推論開始
-NodeBase* BehaviorTree::SequenceBack(NodeBase* sequenceNode, BehaviorData* data)
+std::shared_ptr<NodeBase> BehaviorTree::SequenceBack(std::shared_ptr<NodeBase> sequenceNode, std::shared_ptr<BehaviorData> data)
 {
-	return sequenceNode->Inference(owner_, data);
+	return sequenceNode->Inference(owner_.lock(), data);
 }
 
 // ノード実行
-NodeBase* BehaviorTree::Run(NodeBase* actionNode, BehaviorData* data, float elapsedTime)
+std::shared_ptr<NodeBase> BehaviorTree::Run(std::shared_ptr<NodeBase> actionNode, std::shared_ptr<BehaviorData> data, float elapsedTime)
 {
 	// ノード実行
-	ActionBase::State state = actionNode->Run(owner_, elapsedTime);
+	ActionBase::State state = actionNode->Run(owner_.lock(), elapsedTime);
 
 	// 正常終了
 	if (state == ActionBase::State::Complete)
 	{
 		// シーケンスの途中かを判断
-		NodeBase* sequenceNode = data->PopSequenceNode();
+		std::shared_ptr<NodeBase> sequenceNode = data->PopSequenceNode();
 
 		// 途中じゃないなら終了
 		if (sequenceNode == nullptr)
@@ -77,23 +76,5 @@ NodeBase* BehaviorTree::Run(NodeBase* actionNode, BehaviorData* data, float elap
 
 	// 現状維持
 	return actionNode;
-}
-
-// 登録されたノードを全て削除する
-void BehaviorTree::NodeAllClear(NodeBase* delNode)
-{
-	size_t count = delNode->children_.size();
-	if (count > 0)
-	{
-		for (NodeBase* node : delNode->children_)
-		{
-			NodeAllClear(node);
-		}
-		delete delNode;
-	}
-	else
-	{
-		delete delNode;
-	}
 }
 

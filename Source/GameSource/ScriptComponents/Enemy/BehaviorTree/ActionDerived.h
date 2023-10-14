@@ -6,7 +6,7 @@
 class IdleAction : public ActionBase
 {
 public:
-	IdleAction(EnemyCom* enemy) :ActionBase(enemy) {}
+	IdleAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
 	ActionBase::State Run(float elapsedTime);
 };
 
@@ -14,7 +14,7 @@ public:
 class WanderAction : public ActionBase
 {
 public:
-	WanderAction(EnemyCom* enemy) :ActionBase(enemy) {}
+	WanderAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
 	ActionBase::State Run(float elapsedTime);
 };
 
@@ -22,7 +22,7 @@ public:
 class PursuitAction : public ActionBase
 {
 public:
-	PursuitAction(EnemyCom* enemy) :ActionBase(enemy) {}
+	PursuitAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
 	ActionBase::State Run(float elapsedTime);
 };
 
@@ -30,7 +30,7 @@ public:
 class AttackAction : public ActionBase
 {
 public:
-	AttackAction(EnemyCom* enemy) :ActionBase(enemy) {}
+	AttackAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
 	ActionBase::State Run(float elapsedTime);
 
 private:

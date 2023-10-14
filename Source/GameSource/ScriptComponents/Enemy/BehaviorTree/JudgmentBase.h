@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 class EnemyCom;
 
@@ -6,8 +7,8 @@ class EnemyCom;
 class JudgmentBase
 {
 public:
-	JudgmentBase(EnemyCom* enemy) :owner_(enemy) {}
+	JudgmentBase(std::shared_ptr<EnemyCom> enemy) :owner_(enemy) {}
 	virtual bool Judgment() = 0;
 protected:
-	EnemyCom* owner_;
+	std::weak_ptr<EnemyCom> owner_;
 };

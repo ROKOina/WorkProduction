@@ -24,6 +24,7 @@ VertexOutput main(
     pos += lerp(float3(0, 0, 0), shapePos[6][id], shapeLerp6);
     pos += lerp(float3(0, 0, 0), shapePos[7][id], shapeLerp7);
     pos += lerp(float3(0, 0, 0), shapePos[8][id], shapeLerp8);
+    pos += lerp(float3(0, 0, 0), shapePos[9][id], shapeLerp9);
     
     float3 p = { 0, 0, 0 };
     float3 n = { 0, 0, 0 };

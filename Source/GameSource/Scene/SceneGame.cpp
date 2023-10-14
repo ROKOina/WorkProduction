@@ -80,7 +80,7 @@ void SceneGame::Initialize()
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		obj->transform_->SetWorldPosition({ 3, 0, 5 });
+		obj->transform_->SetWorldPosition({ -10.0f+i*2, 0, 5 });
 		obj->transform_->SetEulerRotation({ 0,180,0 });
 
 		const char* filename = "Data/Model/picolabo/picolabo.mdl";

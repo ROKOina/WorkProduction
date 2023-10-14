@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 class EnemyCom;
 
 enum Action
@@ -11,7 +13,7 @@ enum Action
 class ActionBase
 {
 public:
-	ActionBase(EnemyCom* enemy) :owner_(enemy) {}
+	ActionBase(std::shared_ptr<EnemyCom> enemy) :owner_(enemy) {}
 	// Àsî•ñ
 	enum class State
 	{
@@ -35,7 +37,8 @@ public:
 	}
 
 protected:
-	EnemyCom* owner_;
+	std::weak_ptr<EnemyCom> owner_;
+	//EnemyCom* owner_;
 	int step_ = 0;
 	float runTimer_ = 0;
 };

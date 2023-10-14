@@ -7,7 +7,7 @@ class EnemyNearCom :public EnemyCom
 {
 public:
     EnemyNearCom() {}
-    ~EnemyNearCom() { activeNode_.release(); }
+    ~EnemyNearCom() {  }
 
     // –¼‘OŽæ“¾
     const char* GetName() const override { return "EnemyNear"; }

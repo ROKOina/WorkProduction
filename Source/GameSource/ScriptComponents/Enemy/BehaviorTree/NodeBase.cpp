@@ -9,11 +9,9 @@
 // デストラクタ
 NodeBase::~NodeBase()
 {
-	delete judgment_;
-	delete action_;
 }
 // 子ノードゲッター
-NodeBase* NodeBase::GetChild(int index)
+std::shared_ptr<NodeBase> NodeBase::GetChild(int index)
 {
 	if (children_.size() <= index)
 	{
@@ -23,7 +21,7 @@ NodeBase* NodeBase::GetChild(int index)
 }
 
 // 子ノードゲッター(末尾)
-NodeBase* NodeBase::GetLastChild()
+std::shared_ptr<NodeBase> NodeBase::GetLastChild()
 {
 	if (children_.size() == 0)
 	{
@@ -34,7 +32,7 @@ NodeBase* NodeBase::GetLastChild()
 }
 
 // 子ノードゲッター(先頭)
-NodeBase* NodeBase::GetTopChild()
+std::shared_ptr<NodeBase> NodeBase::GetTopChild()
 {
 	if (children_.size() == 0)
 	{
@@ -46,22 +44,19 @@ NodeBase* NodeBase::GetTopChild()
 
 
 // ノード検索
-NodeBase* NodeBase::SearchNode(int searchId)
+std::shared_ptr<NodeBase> NodeBase::SearchNode(int searchId)
 {
 	if (id_ == searchId)
 	{
-		return this;
+		return shared_from_this();
 	}
 	else {
 		// 子ノードで検索
-		for (auto itr = children_.begin(); itr != children_.end(); itr++)
+		for (auto& child : children_)
 		{
-			NodeBase* ret = (*itr)->SearchNode(searchId);
-
-			if (ret != nullptr)
-			{
-				return ret;
-			}
+			std::shared_ptr<NodeBase> node = child->SearchNode(searchId);
+			if (node)
+				return node;
 		}
 	}
 
@@ -69,22 +64,23 @@ NodeBase* NodeBase::SearchNode(int searchId)
 }
 
 // ノード推論
-NodeBase* NodeBase::Inference(EnemyCom* enemy, BehaviorData* data)
+std::shared_ptr<NodeBase> NodeBase::Inference(std::shared_ptr<EnemyCom> enemy, std::shared_ptr<BehaviorData> data)
 {
-	std::vector<NodeBase*> list;
-	NodeBase* result = nullptr;
+	std::vector<std::shared_ptr<NodeBase>> list;
+	std::shared_ptr<NodeBase> result = nullptr;
 
 	// childrenの数だけループを行う。
-	for (int i = 0; i < children_.size(); i++)
+	for (auto& child : children_)
 	{
-		if (children_.at(i)->judgment_ != nullptr)
+		if (child->judgment_ != nullptr)
 		{
-			// listにchildren.at(i)を追加していく
-			if (children_.at(i)->judgment_->Judgment())list.emplace_back(children_.at(i));
+			// listにchildを追加していく
+			if(child->judgment_->Judgment())list.emplace_back(child);
 		}
-		else {
+		else
+		{
 			//判定クラスがなければ無条件に追加
-			list.emplace_back(children_.at(i));
+			list.emplace_back(child);
 		}
 	}
 
@@ -93,16 +89,16 @@ NodeBase* NodeBase::Inference(EnemyCom* enemy, BehaviorData* data)
 	{
 		// 優先順位
 	case BehaviorTree::SelectRule::Priority:
-		result = SelectPriority(&list);
+		result = SelectPriority(list);
 		break;
 		// ランダム
 	case BehaviorTree::SelectRule::Random:
-		result = SelectRandom(&list);
+		result = SelectRandom(list);
 		break;
 		// シーケンス
 	case BehaviorTree::SelectRule::Sequence:
 	case BehaviorTree::SelectRule::SequentialLooping:
-		result = SelectSequence(&list, data);
+		result = SelectSequence(list, data);
 		break;
 	}
 
@@ -127,13 +123,13 @@ NodeBase* NodeBase::Inference(EnemyCom* enemy, BehaviorData* data)
 }
 
 // 優先順位でノード選択
-NodeBase* NodeBase::SelectPriority(std::vector<NodeBase*>* list)
+std::shared_ptr<NodeBase> NodeBase::SelectPriority(std::vector< std::shared_ptr<NodeBase>> list)
 {
-	NodeBase* selectNode = nullptr;
+	std::shared_ptr<NodeBase> selectNode = nullptr;
 	int priority = INT_MAX;
 
 	//一番優先順位が高いノードを探してselectNodeに格納
-	for (auto& l : *list)
+	for (auto& l : list)
 	{
 		if (priority > l->GetPriority()) {
 			selectNode = l;
@@ -146,18 +142,18 @@ NodeBase* NodeBase::SelectPriority(std::vector<NodeBase*>* list)
 
 
 // ランダムでノード選択
-NodeBase* NodeBase::SelectRandom(std::vector<NodeBase*>* list)
+std::shared_ptr<NodeBase> NodeBase::SelectRandom(std::vector<std::shared_ptr<NodeBase>> list)
 {
 	int selectNo = 0;
 	//listのサイズで乱数を取得してselectNoに格納
-	selectNo = rand() % list->size();
+	selectNo = rand() % list.size();
 
 	// listのselectNo番目の実態をリターン
-	return (*list).at(selectNo);
+	return list[selectNo];
 }
 
 // シーケンス・シーケンシャルルーピングでノード選択
-NodeBase* NodeBase::SelectSequence(std::vector<NodeBase*>* list, BehaviorData* data)
+std::shared_ptr<NodeBase> NodeBase::SelectSequence(std::vector<std::shared_ptr<NodeBase>> list, std::shared_ptr<BehaviorData> data)
 {
 	int step = 0;
 
@@ -173,14 +169,14 @@ NodeBase* NodeBase::SelectSequence(std::vector<NodeBase*>* list, BehaviorData* d
 		if (selectRule_ == BehaviorTree::SelectRule::Sequence)return nullptr;
 	}
 	// 実行可能リストに登録されているデータの数だけループを行う
-	for (auto itr = list->begin(); itr != list->end(); itr++)
+	for (auto& l : list)
 	{
 		// 子ノードが実行可能リストに含まれているか
-		if (children_.at(step)->GetId() == (*itr)->GetId())
+		if (children_.at(step)->GetId() == l->GetId())
 		{
-			data->PushSequenceNode(this);
+			data->PushSequenceNode(shared_from_this());
 			data->SetSequenceStep(id_, step + 1);
-			return *itr;
+			return l;
 		}
 	}
 	// 指定された中間ノードに実行可能ノードがないのでnullptrをリターンする
@@ -188,7 +184,7 @@ NodeBase* NodeBase::SelectSequence(std::vector<NodeBase*>* list, BehaviorData* d
 }
 
 // 判定
-bool NodeBase::Judgment(EnemyCom* enemy)
+bool NodeBase::Judgment(std::shared_ptr<EnemyCom> enemy)
 {
 	if (judgment_ != nullptr)
 	{
@@ -198,7 +194,7 @@ bool NodeBase::Judgment(EnemyCom* enemy)
 }
 
 // ノード実行
-ActionBase::State NodeBase::Run(EnemyCom* enemy, float elapsedTime)
+ActionBase::State NodeBase::Run(std::shared_ptr<EnemyCom> enemy, float elapsedTime)
 {
 	if (action_ != nullptr)
 	{

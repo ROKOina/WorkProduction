@@ -3,14 +3,14 @@
 
 
 // シーケンスノードのポップ
-NodeBase* BehaviorData::PopSequenceNode()
+std::shared_ptr<NodeBase> BehaviorData::PopSequenceNode()
 {
 	// 空ならNULL
 	if (sequenceStack_.empty() != 0)
 	{
 		return nullptr;
 	}
-	NodeBase* node = sequenceStack_.top();
+	std::shared_ptr<NodeBase> node = sequenceStack_.top().lock();
 	if (node != nullptr)
 	{
 		// 取り出したデータを削除

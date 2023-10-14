@@ -54,19 +54,10 @@ bool EnemyManager::OnMessage(const Telegram& telegram)
                 break;
 
             //近接敵にキャスト
-            std::shared_ptr<EnemyNearCom> nearEnemy = std::static_pointer_cast<EnemyNearCom>(e.enemy.lock()->GetComponent<EnemyCom>());
+            std::shared_ptr<EnemyNearCom> nearEnemy = e.enemy.lock()->GetComponent<EnemyNearCom>();
 
             if(nearEnemy->GetIsNearFlag())
                 nearCount++;
-
-            //DirectX::XMFLOAT3 enemyPos = nearEnemy.enemy.lock()->transform_->GetWorldPosition();
-            ////プレイヤーとの距離を算出
-            //float length = DirectX::XMVectorGetX(
-            //    DirectX::XMVector3Length(
-            //        DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&playerPos), DirectX::XMLoadFloat3(&enemyPos))));
-            ////接近しているなら
-            //if (length <= nearEnemyLevel.radius)
-            //    nearCount++;
         }
         //近くにいる敵が決められている数より小さい時
         if (nearCount < nearEnemyLevel.inRadiusCount)

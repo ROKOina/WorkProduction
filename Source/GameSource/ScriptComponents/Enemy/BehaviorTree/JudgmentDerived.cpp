@@ -6,7 +6,7 @@
 bool BattleJudgment::Judgment()
 {
 	// プレイヤーが見つかるか
-	if (owner_->SearchPlayer())
+	if (owner_.lock()->SearchPlayer())
 	{
 		return true;
 	}
@@ -16,7 +16,7 @@ bool BattleJudgment::Judgment()
 // AttackNodeに遷移できるか判定
 bool AttackJudgment::Judgment()
 {
-	std::shared_ptr<TransformCom> myTransform = owner_->GetGameObject()->transform_;
+	std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
 
 	// 対象との距離を算出
 	DirectX::XMFLOAT3 pos = myTransform->GetWorldPosition();
@@ -28,7 +28,7 @@ bool AttackJudgment::Judgment()
 	float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 
 	//距離を見る
-	if (dist < owner_->GetAttackRange())
+	if (dist < owner_.lock()->GetAttackRange())
 	{
 		//角度を見る
 		QuaternionStruct myQ = myTransform->GetRotation();
@@ -47,9 +47,9 @@ bool AttackJudgment::Judgment()
 bool WanderJudgment::Judgment()
 {
 	// 目的地点までのXZ平面での距離判定
-	std::shared_ptr<GameObject> ownerObj = owner_->GetGameObject();
+	std::shared_ptr<GameObject> ownerObj = owner_.lock()->GetGameObject();
 	DirectX::XMFLOAT3 position = ownerObj->transform_->GetWorldPosition();
-	DirectX::XMFLOAT3 targetPosition = owner_->GetTargetPosition();
+	DirectX::XMFLOAT3 targetPosition = owner_.lock()->GetTargetPosition();
 	float vx = targetPosition.x - position.x;
 	float vz = targetPosition.z - position.z;
 	float distSq = vx * vx + vz * vz;

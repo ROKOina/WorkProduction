@@ -62,7 +62,7 @@ class EnemyCom : public Component
     //コンポーネントオーバーライド
 public:
     EnemyCom() {}
-    ~EnemyCom() { activeNode_.release(); }
+    ~EnemyCom() { }
 
     // 名前取得
     virtual const char* GetName() const = 0;
@@ -129,9 +129,9 @@ protected:
     void GravityProcess(float elapsedTime);
 
     //AI
-    std::unique_ptr<BehaviorTree> aiTree_;
-    std::unique_ptr<BehaviorData> behaviorData_;
-    std::unique_ptr<NodeBase> activeNode_;
+    std::shared_ptr<BehaviorTree> aiTree_;
+    std::shared_ptr<BehaviorData> behaviorData_;
+    std::shared_ptr<NodeBase> activeNode_;
 
     //ダメージAITREE番号
     std::vector<int> damageAnimAiTreeId_;

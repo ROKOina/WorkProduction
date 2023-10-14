@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <memory>
 
 class ActionBase;
 class JudgmentBase;
@@ -24,26 +25,23 @@ public:
 	};
 
 public:
-	BehaviorTree() :root_(nullptr), owner_(nullptr) {}
-	BehaviorTree(EnemyCom* enemy) :root_(nullptr), owner_(enemy) {}
+	BehaviorTree() :root_(std::shared_ptr<NodeBase>()), owner_(std::shared_ptr<EnemyCom>()) {}
+	BehaviorTree(std::shared_ptr<EnemyCom> enemy) :root_(std::shared_ptr<NodeBase>()), owner_(enemy) {}
 	~BehaviorTree();
 
 	// 実行ノードを推論する
-	NodeBase* ActiveNodeInference(BehaviorData* data);
+	std::shared_ptr<NodeBase> ActiveNodeInference(std::shared_ptr<BehaviorData> data);
 
 	// シーケンスノードから推論開始
-	NodeBase* SequenceBack(NodeBase* sequenceNode, BehaviorData* data);
+	std::shared_ptr<NodeBase> SequenceBack(std::shared_ptr<NodeBase> sequenceNode, std::shared_ptr<BehaviorData> data);
 
 	// ノード追加
-	void AddNode(AI_TREE parentId, AI_TREE entryId, int priority, SelectRule selectRule, JudgmentBase* judgment, ActionBase* action);
+	void AddNode(AI_TREE parentId, AI_TREE entryId, int priority, SelectRule selectRule, std::shared_ptr<JudgmentBase> judgment, std::shared_ptr<ActionBase> action);
 
 	// 実行
-	NodeBase* Run(NodeBase* actionNode, BehaviorData* data, float elapsedTime);
-private:
-	// ノード全削除
-	void NodeAllClear(NodeBase* delNode);
+	std::shared_ptr<NodeBase> Run(std::shared_ptr<NodeBase> actionNode, std::shared_ptr<BehaviorData> data, float elapsedTime);
 private:
 	// ルートノード
-	NodeBase* root_;
-	EnemyCom* owner_;
+	std::shared_ptr<NodeBase> root_;
+	std::weak_ptr<EnemyCom> owner_;
 };

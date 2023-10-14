@@ -14,9 +14,9 @@ public:
 	// コンストラクタ
 	BehaviorData() { Init(); }
 	// シーケンスノードのプッシュ
-	void PushSequenceNode(NodeBase* node) { sequenceStack_.push(node); }
+	void PushSequenceNode(std::shared_ptr<NodeBase> node) { sequenceStack_.push(node); }
 	// シーケンスノードのポップ
-	NodeBase* PopSequenceNode();
+	std::shared_ptr<NodeBase> PopSequenceNode();
 	// シーケンスステップのゲッター
 	int GetSequenceStep(int id);
 	// シーケンスステップのセッター
@@ -24,6 +24,6 @@ public:
 	// 初期化
 	void Init();
 private:
-	std::stack<NodeBase*> sequenceStack_;				// 実行する中間ノードをスタック
+	std::stack<std::weak_ptr<NodeBase>> sequenceStack_;				// 実行する中間ノードをスタック
 	std::map<int, int> runSequenceStepMap_;		// 実行中の中間ノードのステップを記録
 };
