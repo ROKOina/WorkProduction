@@ -7,6 +7,10 @@
 #include "Components/RendererCom.h"
 #include "Components/ColliderCom.h"
 
+#include "../EnemyManager.h"
+#include "../EnemyNearCom.h"
+#include "../EnemyFarCom.h"
+
 
 // 待機行動
 ActionBase::State IdleAction::Run(float elapsedTime)
@@ -145,8 +149,8 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		DirectX::XMFLOAT3 targetPosition = owner_->GetTargetPosition();
 
 		// 目的地点へ移動
-		DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&position);
-		DirectX::XMVECTOR TPos = DirectX::XMLoadFloat3(&targetPosition);
+		DirectX::XMVECTOR Pos = { position.x,0,position.z };
+		DirectX::XMVECTOR TPos = { targetPosition.x,0,targetPosition.z };
 		DirectX::XMFLOAT3 force;
 		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 40.0f * elapsedTime));
 
@@ -164,6 +168,20 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		float vy = targetPosition.y - position.y;
 		float vz = targetPosition.z - position.z;
 		float dist = sqrtf(vx * vx + vy * vy + vz * vz);
+
+		////接近エリアに入ったら
+		//if (dist < EnemyManager::Instance().GetNearEnemyLevel().radius)
+		//{
+		//	std::shared_ptr<EnemyNearCom> nearEnemy = std::static_pointer_cast<EnemyNearCom>(std::shared_ptr<EnemyCom>(owner_));
+		//	if (!nearEnemy->GetIsNearFlag())
+		//	{
+		//		EnemyManager::Instance().SendMessaging(owner_->GetID(), EnemyManager::AI_ID::AI_INDEX, MESSAGE_TYPE::MsgAskNearRight);
+		//		step_ = 0;
+		//		// 追跡失敗を返す
+		//		return ActionBase::State::Failed;
+		//	}
+		//}
+
 		// 攻撃範囲にいるとき
 		if (dist < owner_->GetAttackRange())
 		{

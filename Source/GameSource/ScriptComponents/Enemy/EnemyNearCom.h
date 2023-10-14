@@ -21,6 +21,13 @@ public:
     // GUI描画
     void OnGUI()override;
 
+    // メッセージ受信したときの処理
+    bool OnMessage(const Telegram& msg)override;
+
+public:
+    //接近フラグ取得
+    bool GetIsNearFlag() { return isNearFlag_; }
+
 private:
     //被弾時にアニメーションする時のAITREEを決める
     template<typename... Args>
@@ -28,4 +35,11 @@ private:
 
     //アニメーション初期化設定
     void AnimationInitialize()override;
+
+    //接近フラグ管理
+    void NearFlagProcess();
+
+private:
+    //接近フラグ
+    bool isNearFlag_ = false;
 };

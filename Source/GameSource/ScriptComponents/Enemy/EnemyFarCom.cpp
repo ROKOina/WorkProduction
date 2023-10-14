@@ -1,4 +1,5 @@
 #include "EnemyFarCom.h"
+#include "EnemyManager.h"
 
 #include "Components\TransformCom.h"
 #include "Components\AnimatorCom.h"
@@ -13,7 +14,7 @@
 // 開始処理
 void EnemyFarCom::Start()
 {
-    EnemyCom::Start();
+    EnemyManager::Instance().Register(GetGameObject(), EnemyManager::EnemyKind::FAR_ENEMY);
 
     //ダメージアニメーションをするノードを登録
     OnDamageAnimAI_TREE(AI_TREE::WANDER, AI_TREE::PURSUIT/*, AI_TREE::NORMAL*/);

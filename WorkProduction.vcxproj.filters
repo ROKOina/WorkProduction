@@ -275,6 +275,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyNearCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyFarCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyManager.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\TelegramEnemy.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">

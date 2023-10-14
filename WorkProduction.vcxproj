@@ -151,6 +151,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyManager.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyNearCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\TelegramEnemy.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\MovePlayer.h" />

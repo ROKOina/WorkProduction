@@ -7,6 +7,8 @@
 #include "BehaviorTree/BehaviorData.h"
 #include "BehaviorTree/NodeBase.h"
 
+#include "TelegramEnemy.h"
+
 //アニメーションリスト
 enum ANIMATION_ENEMY
 {
@@ -100,6 +102,14 @@ public:
     void SetStandUpMotion();
     void StandUpUpdate();
 
+    //AI関係
+
+    // メッセージ受信したときの処理
+    virtual bool OnMessage(const Telegram& msg);
+
+    int GetID() { return enemyId_; }
+    void SetID(int id) { enemyId_ = id; }
+
 private:    //これだけ何故か派生クラスで使えないので、派生クラスでも作成する
     //被弾時にアニメーションする時のAITREEを決める
     template<typename... Args>
@@ -132,7 +142,7 @@ protected:
     //攻撃範囲
     float attackRange_ = 2;
     //索敵範囲
-    float searchRange_ = 5;
+    float searchRange_ = 7;
 
     //ジャスト回避をActionDerivedと繋ぐため
     bool isJustAvoid_ = false;
@@ -147,4 +157,7 @@ protected:
     //起き上がりモーション中
     bool isStandUpMotion_ = false;
     bool playStandUp_ = false;
+
+    //識別番号
+    int enemyId_ = -1;
 };

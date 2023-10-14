@@ -407,6 +407,9 @@ void SceneGame::Initialize()
 
 	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
 	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->transform_->GetWorldPosition().x, player->transform_->GetWorldPosition().y, player->transform_->GetWorldPosition().z,0 });
+
+	//EnemyManagerにプレイヤー登録
+	EnemyManager::Instance().RegisterPlayer(GameObjectManager::Instance().Find("pico"));
 }
 
 // 終了化

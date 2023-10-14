@@ -1,4 +1,5 @@
 #include "EnemyNearCom.h"
+#include "EnemyManager.h"
 
 #include "Components\TransformCom.h"
 #include "Components\AnimatorCom.h"
@@ -13,7 +14,7 @@
 // 開始処理
 void EnemyNearCom::Start()
 {
-    EnemyCom::Start();
+    EnemyManager::Instance().Register(GetGameObject(), EnemyManager::EnemyKind::NEAR_ENEMY);
 
     //ダメージアニメーションをするノードを登録
     OnDamageAnimAI_TREE(AI_TREE::WANDER, AI_TREE::PURSUIT/*, AI_TREE::NORMAL*/);
@@ -51,6 +52,10 @@ void EnemyNearCom::Start()
 void EnemyNearCom::Update(float elapsedTime)
 {
     EnemyCom::Update(elapsedTime);
+
+    //接近フラグ管理
+    NearFlagProcess();
+
 }
 
 // GUI描画
@@ -133,4 +138,35 @@ void EnemyNearCom::AnimationInitialize()
         //起き上がり
         animator->AddAnimatorTransition(DAMAGE_FALL_END, FALL_STAND_UP, true);
     }
+}
+
+//接近フラグ管理
+void EnemyNearCom::NearFlagProcess()
+{
+    //接近フラグがonの時離れたらoffにする
+    if (!isNearFlag_)return;
+
+    DirectX::XMVECTOR playerPos = DirectX::XMLoadFloat3(&GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
+    DirectX::XMVECTOR enemyPos = DirectX::XMLoadFloat3(&GetGameObject()->transform_->GetWorldPosition());
+    float nearRadius = EnemyManager::Instance().GetNearEnemyLevel().radius;
+
+    float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(playerPos, enemyPos)));
+
+    //接近して無かったら
+    if (length > nearRadius)
+        isNearFlag_ = false;
+}
+
+
+// メッセージ受信したときの処理
+bool EnemyNearCom::OnMessage(const Telegram& msg)
+{
+    switch (msg.msg)
+    {
+    case MESSAGE_TYPE::MsgGiveNearRight:
+        isNearFlag_ = true;
+        return true;
+    }
+
+    return false;
 }

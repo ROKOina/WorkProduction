@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include "TelegramEnemy.h"
 
 class GameObject;
 
@@ -24,18 +25,74 @@ public:
 	// XVˆ—
 	void Update(float elapsedTime);
 
-	// “G“o˜^
-	void Register(std::shared_ptr<GameObject> enemy);
+	//“Gî•ñ
+	enum class EnemyKind
+	{
+		NEAR_ENEMY,	//‹ßÚ
+		FAR_ENEMY,	//‰“Šu
+	};
 
+	// “G“o˜^
+	void Register(std::shared_ptr<GameObject> enemy, EnemyKind enemyKind);
+
+	//ƒvƒŒƒCƒ„[“o˜^
+	void RegisterPlayer(std::shared_ptr<GameObject> player)
+	{
+		player_ = player;
+	}
+
+	//ID‚©‚ç“G‚ğƒQƒbƒg
+	std::shared_ptr<GameObject> GetEnemyFromId(int id);
+
+	//AIŠÖŒW
+
+private:
+	// ƒƒbƒZ[ƒWóM‚µ‚½‚Æ‚«‚Ìˆ—
+	bool OnMessage(const Telegram& telegram);
+public:
+	// ƒƒbƒZ[ƒW‘—MŠÖ”
+	void SendMessaging(int sender, int receiver, MESSAGE_TYPE msg);
+
+	enum AI_ID
+	{
+		AI_INDEX,
+		ENEMY_INDEX,
+	};
+
+private:
+
+struct NearEnemyLevel	//‹ßÚ“G‚ÌW‚Ü‚è•û‚ÌƒfƒUƒCƒ“
+{
+	float radius = 3;	//ƒvƒŒƒCƒ„[‚Ì”¼Œa
+	int inRadiusCount = 3;	//”¼Œa‚É‰½l“ü‚ê‚é‚©
+
+	int togetherAttackCount = 2;	//“¯‚ÉUŒ‚‚Å‚«‚é‰ñ”
+};
+
+struct FarEnemyLevel	//‰“Šu“G‚ÌW‚Ü‚è•û‚ÌƒfƒUƒCƒ“
+{
+
+};
+
+public:
+	const NearEnemyLevel& GetNearEnemyLevel()const { return nearEnemyLevel; }
+	const FarEnemyLevel& GetFarEnemyLevel()const { return farEnemyLevel; }
 
 private:
 	struct EnemyData	//“Gî•ñ
 	{
-		int index;	//¯•Ê”Ô†
 		std::weak_ptr<GameObject> enemy;	//“G
 	};
-	//“G‚ğ‚Ü‚Æ‚ß‚é
-	std::vector<EnemyData> enemies;
 
-	int currentIndex = 0;
+	//“G‚ğ‚Ü‚Æ‚ß‚é
+	std::vector<EnemyData> nearEnemies_;	//‹ßÚ
+	const NearEnemyLevel nearEnemyLevel;
+
+	std::vector<EnemyData> farEnemies_;	//‰“Šu
+	FarEnemyLevel farEnemyLevel;
+
+	//ƒvƒŒƒCƒ„[î•ñ‚ğ‘½—p‚Ég‚¤‚½‚ß“o˜^
+	std::weak_ptr<GameObject> player_;
+
+	int currentIndex_ = 0;
 };
