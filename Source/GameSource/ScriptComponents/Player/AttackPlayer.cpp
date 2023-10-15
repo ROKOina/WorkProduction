@@ -552,12 +552,18 @@ void AttackPlayer::NormalAttack()
 
 int AttackPlayer::NormalAttackUpdate(float elapsedTime)
 {
+    if (enemyCopy_.expired() && state_ > 0)
+    {
+        state_ = ATTACK_CODE::EnterAttack;
+        return state_;
+    }
+
     switch (state_)
     {
     case 0:
         //îÕàÕì‡Ç…ìGÇÕÇ¢ÇÈÇ©
         enemyCopy_ = AssistGetNearEnemy();
-        if (!enemyCopy_)
+        if (!enemyCopy_.lock())
         {
             state_ = ATTACK_CODE::EnterAttack;
             break;
@@ -567,13 +573,13 @@ int AttackPlayer::NormalAttackUpdate(float elapsedTime)
 
     case 1:
         //âÒì]
-        if (ForcusEnemy(elapsedTime, enemyCopy_, 10))
+        if (ForcusEnemy(elapsedTime, enemyCopy_.lock(), 10))
             state_++;
        break;
 
     case 2:
         //ê⁄ãﬂ
-        if (ApproachEnemy(enemyCopy_, 1.5f))
+        if (ApproachEnemy(enemyCopy_.lock(), 1.5f))
             state_ = ATTACK_CODE::EnterAttack;
         break;
     }
@@ -593,13 +599,19 @@ void AttackPlayer::DashAttack(int comboNum)
 
 int AttackPlayer::DashAttackUpdate(float elapsedTime)
 {
+    if (enemyCopy_.expired() && state_ > 0)
+    {
+        state_ = ATTACK_CODE::EnterAttack;
+        return state_;
+    }
+
     switch (state_)
     {
         //ÉRÉìÉ{ÇP
     case 0:
         //îÕàÕì‡Ç…ìGÇÕÇ¢ÇÈÇ©
         enemyCopy_ = AssistGetNearEnemy();
-        if (!enemyCopy_)
+        if (!enemyCopy_.lock())
         {
             state_ = ATTACK_CODE::EnterAttack;
             break;
@@ -609,20 +621,20 @@ int AttackPlayer::DashAttackUpdate(float elapsedTime)
 
     case 1:
         //âÒì]
-        if (ForcusEnemy(elapsedTime, enemyCopy_, 10))
+        if (ForcusEnemy(elapsedTime, enemyCopy_.lock(), 10))
             state_ = ATTACK_CODE::EnterAttack;
         break;
 
         //ÉRÉìÉ{ÇQ
     case 10:
         //ê⁄ãﬂ
-        if (!enemyCopy_)
+        if (!enemyCopy_.lock())
         {
             state_ = ATTACK_CODE::EnterAttack;
             break;
         }
 
-        if (ApproachEnemy(enemyCopy_, 1.5f, 20))
+        if (ApproachEnemy(enemyCopy_.lock(), 1.5f, 20))
             state_ = ATTACK_CODE::EnterAttack;
         break;
     }

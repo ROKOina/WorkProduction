@@ -77,6 +77,15 @@ public:
     virtual void OnGUI();
 
     //EnemyComクラス
+private:
+    struct MoveDataEnemy
+    {
+        float walkSpeed = 1.0f;
+        float walkMaxSpeed = 2.0f;
+        float runSpeed = 1.0f;
+        float runMaxSpeed = 5.0f;
+    };
+
 public:
     // ターゲット位置をランダム設定
     void SetRandomTargetPosition();
@@ -96,11 +105,15 @@ public:
     void SetIsJustAvoid(bool flag) { isJustAvoid_ = flag; }
     bool GetIsJustAvoid() { return isJustAvoid_; }
 
-
+    //攻撃フラグ
+    void SetIsAttackFlag(bool falg) { isAttackFlag_ = falg; }
+    bool GetIsAttackFlag() { return isAttackFlag_; }
 
     //被弾ー＞立ち上がりモーション
     void SetStandUpMotion();
     void StandUpUpdate();
+
+    const MoveDataEnemy& GetMoveDataEnemy() const { return moveDataEnemy; }
 
     //AI関係
 
@@ -157,6 +170,12 @@ protected:
     //起き上がりモーション中
     bool isStandUpMotion_ = false;
     bool playStandUp_ = false;
+
+    //攻撃フラグ
+    bool isAttackFlag_ = false;
+
+    //移動
+    MoveDataEnemy moveDataEnemy;
 
     //識別番号
     int enemyId_ = -1;

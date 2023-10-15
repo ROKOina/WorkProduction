@@ -11,11 +11,11 @@ public:
 	bool Judgment();
 };
 
-// AttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-class AttackJudgment : public JudgmentBase
+// NearAttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class NearAttackJudgment : public JudgmentBase
 {
 public:
-	AttackJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
+	NearAttackJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
 	// ”»’è
 	bool Judgment();
 };

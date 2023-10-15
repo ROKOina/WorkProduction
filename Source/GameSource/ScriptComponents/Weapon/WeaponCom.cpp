@@ -22,14 +22,14 @@ void WeaponCom::Start()
 // 更新処理
 void WeaponCom::Update(float elapsedTime)
 {
-    assert(parentObject_);
+    assert(parentObject_.lock());
     assert(nodeName_.size() > 0);
 
     //ヒット確認リセット
     onHit_ = false;
 
-    parentObject_->UpdateTransform();
-    std::shared_ptr<RendererCom> parentRendererCom = parentObject_->GetComponent<RendererCom>();
+    parentObject_.lock()->UpdateTransform();
+    std::shared_ptr<RendererCom> parentRendererCom = parentObject_.lock()->GetComponent<RendererCom>();
     Model::Node* parentNode = parentRendererCom->GetModel()->FindNode(nodeName_.c_str());
 
     //親にする
@@ -95,7 +95,7 @@ void WeaponCom::Update(float elapsedTime)
             if (attackAnimIndex_ != oldAnimIndex)
                 isAttackAnim_ = false;  //攻撃コンボの場合、１フレームだけfalseに
 
-        oldAnimIndex = parentObject_->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
+        oldAnimIndex = parentObject_.lock()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
     }
     oldIsAnim_ = isAttackAnim_;
 
@@ -144,7 +144,7 @@ bool WeaponCom::CollsionFromEventJudge()
         //攻撃アニメーション時はtrue
         isAttackAnim_ = true;
         //現在のアニメーション保存
-        attackAnimIndex_ = parentObject_->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
+        attackAnimIndex_ = parentObject_.lock()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
 
         //エンドフレーム前なら
         if (!animCom->GetCurrentAnimationEventIsEnd(animEvent.name.c_str()))

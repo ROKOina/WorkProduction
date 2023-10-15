@@ -21,31 +21,35 @@ void EnemyNearCom::Start()
 
     //アニメーション初期化
     AnimationInitialize();
+    std::shared_ptr<EnemyCom> myShared = GetGameObject()->GetComponent<EnemyCom>();
     // ビヘイビアツリー設定
     behaviorData_ = std::make_unique<BehaviorData>();
-    aiTree_ = std::make_unique<BehaviorTree>(GetGameObject()->GetComponent<EnemyCom>());
+    aiTree_ = std::make_unique<BehaviorTree>(myShared);
     // BehaviorTree図を基にBehaviorTreeを構築
     aiTree_->AddNode(AI_TREE::NONE, AI_TREE::ROOT, 0, BehaviorTree::SelectRule::Priority, nullptr, nullptr);
 
     //2層
-    aiTree_->AddNode(AI_TREE::ROOT, AI_TREE::BATTLE, 1, BehaviorTree::SelectRule::Priority, std::make_shared<BattleJudgment>(GetGameObject()->GetComponent<EnemyCom>()), nullptr);
-    //aiTree_->AddNode(AI_TREE::ROOT, AI_TREE::SCOUT, 2, BehaviorTree::SelectRule::Priority, nullptr, nullptr);
+    aiTree_->AddNode(AI_TREE::ROOT, AI_TREE::BATTLE, 1, BehaviorTree::SelectRule::Priority, std::make_shared<BattleJudgment>(myShared), nullptr);
+    aiTree_->AddNode(AI_TREE::ROOT, AI_TREE::SCOUT, 2, BehaviorTree::SelectRule::Priority, nullptr, nullptr);
 
-    ////3層
-    //aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::WANDER, 1, BehaviorTree::SelectRule::Non, new WanderJudgment(this), new WanderAction(this));
-    //aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::IDLE, 2, BehaviorTree::SelectRule::Non, nullptr, new IdleAction(this));
+    //3層
+    aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::WANDER, 1, BehaviorTree::SelectRule::Non, std::make_shared<WanderJudgment>(myShared), std::make_shared<WanderAction>(myShared));
+    aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::IDLE, 2, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<IdleAction>(myShared));
 
-    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ATTACK, 1, BehaviorTree::SelectRule::Random, std::make_shared<AttackJudgment>(GetGameObject()->GetComponent<EnemyCom>()), nullptr);
-    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::PURSUIT, 2, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<PursuitAction>(GetGameObject()->GetComponent<EnemyCom>()));
+    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ATTACK, 1, BehaviorTree::SelectRule::Random, std::make_shared<NearAttackJudgment>(myShared), nullptr);
+    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::PURSUIT, 2, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<PursuitAction>(myShared));
 
     //4層
-    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 1, BehaviorTree::SelectRule::Priority, std::make_shared<AttackJudgment>(GetGameObject()->GetComponent<EnemyCom>()), std::make_shared<AttackAction>(GetGameObject()->GetComponent<EnemyCom>()));
+    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 1, BehaviorTree::SelectRule::Priority, std::make_shared<NearAttackJudgment>(myShared), std::make_shared<NearAttackAction>(myShared));
 
     SetRandomTargetPosition();
 
-    //発光を消す
-    std::vector<ModelResource::Material>& materials = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResourceShared()->GetMaterialsEdit();
-    materials[0].toonStruct._Emissive_Color.w = 0;
+    //移動パラメーター設定
+    //moveDataEnemy.
+
+    ////発光を消す
+    //std::vector<ModelResource::Material>& materials = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResourceShared()->GetMaterialsEdit();
+    //materials[0].toonStruct._Emissive_Color.w = 0;
 }
 
 // 更新処理
@@ -61,7 +65,7 @@ void EnemyNearCom::Update(float elapsedTime)
 // GUI描画
 void EnemyNearCom::OnGUI()
 {
-
+    EnemyCom::OnGUI();
 }
 
 //被弾時にアニメーションする時のAITREEを決める
@@ -165,6 +169,9 @@ bool EnemyNearCom::OnMessage(const Telegram& msg)
     {
     case MESSAGE_TYPE::MsgGiveNearRight:
         isNearFlag_ = true;
+        return true;
+    case MESSAGE_TYPE::MsgGiveAttackRight:
+        isAttackFlag_ = true;
         return true;
     }
 

@@ -65,6 +65,15 @@ void EnemyCom::Update(float elapsedTime)
 // GUI描画
 void EnemyCom::OnGUI()
 {
+    if (ImGui::Button("delete"))
+    {
+        GameObjectManager::Instance().Remove(GetGameObject());
+    }
+
+    ImGui::DragFloat("walkSpeed", &moveDataEnemy.walkSpeed);
+    ImGui::DragFloat("walkMaxSpeed", &moveDataEnemy.walkMaxSpeed);
+    ImGui::DragFloat("runSpeed", &moveDataEnemy.runSpeed);
+    ImGui::DragFloat("runMaxSpeed", &moveDataEnemy.runMaxSpeed);
 }
 
 // ターゲット位置をランダム設定

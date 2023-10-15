@@ -26,11 +26,11 @@ public:
 	ActionBase::State Run(float elapsedTime);
 };
 
-// ’ÊíUŒ‚
-class AttackAction : public ActionBase
+// ‹ßÚ’ÊíUŒ‚
+class NearAttackAction : public ActionBase
 {
 public:
-	AttackAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
+	NearAttackAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
 	ActionBase::State Run(float elapsedTime);
 
 private:

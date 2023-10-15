@@ -59,6 +59,10 @@ void MovementCom::HorizonUpdate(float elapsedTime)
         DirectX::XMStoreFloat3(&newMaxVelocity, MaxSpeed);
         velocity_.x = newMaxVelocity.x;
         velocity_.z = newMaxVelocity.z;
+
+        horizonVelocity = { velocity_.x,0,velocity_.z };
+        HorizonVelocity = DirectX::XMLoadFloat3(&horizonVelocity);
+        horiLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(HorizonVelocity));
     }
 
     //世界のスピード

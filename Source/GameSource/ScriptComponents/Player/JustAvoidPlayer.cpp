@@ -116,7 +116,8 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         }
 
         //敵の方を向く
-        player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_.lock()->transform_->GetWorldPosition());
+        if (!justHitEnemy_.expired())
+            player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_.lock()->transform_->GetWorldPosition());
 
         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUST);
 
@@ -300,7 +301,9 @@ void JustAvoidPlayer::JustAvoidanceSquare(float elapsedTime)
         std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
 
         DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldPosition());
-        DirectX::XMVECTOR EnemyPos = DirectX::XMLoadFloat3(&justHitEnemy_.lock()->transform_->GetWorldPosition());
+        DirectX::XMVECTOR EnemyPos = Pos;
+        if (!justHitEnemy_.expired())
+            EnemyPos = DirectX::XMLoadFloat3(&justHitEnemy_.lock()->transform_->GetWorldPosition());
         DirectX::XMVECTOR PE = DirectX::XMVectorSubtract(EnemyPos, Pos);
         float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(PE));
         //敵の近くまで移動する
@@ -334,20 +337,20 @@ void JustAvoidPlayer::JustAvoidJudge()
     //ジャスト回避の当たり判定
     std::vector<HitObj> hitGameObj = player_.lock()->GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
     //ジャスト回避したエネミーを保存
-    std::shared_ptr<GameObject> enemy;
+    std::weak_ptr<GameObject> enemy;
     for (auto& hitObj : hitGameObj)
     {
         if (COLLIDER_TAG::JustAvoid != hitObj.gameObject.lock()->GetComponent<Collider>()->GetMyTag())continue;
 
         //最初だけそのまま入れる
-        if (!enemy) {
+        if (!enemy.lock()) {
             enemy = hitObj.gameObject.lock()->GetParent();
             continue;
         }
         //一番近い敵を保存
         DirectX::XMFLOAT3 pPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
         DirectX::XMFLOAT3 ePos = hitObj.gameObject.lock()->GetParent()->transform_->GetWorldPosition();
-        DirectX::XMFLOAT3 eOldPos = enemy->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 eOldPos = enemy.lock()->transform_->GetWorldPosition();
 
         DirectX::XMVECTOR PPos = DirectX::XMLoadFloat3(&pPos);
         DirectX::XMVECTOR EPos = DirectX::XMLoadFloat3(&ePos);

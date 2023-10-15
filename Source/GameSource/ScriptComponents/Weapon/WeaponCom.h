@@ -114,7 +114,7 @@ private:
     DirectX::XMFLOAT2 colliderUpDown_ = { 0,0 };
 
     //武器の親になるオブジェクト
-    std::shared_ptr<GameObject> parentObject_;
+    std::weak_ptr<GameObject> parentObject_;
     //武器の子にさせたいノードの名前
     std::string nodeName_;
 

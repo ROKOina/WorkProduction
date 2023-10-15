@@ -25,6 +25,9 @@ public:
 	// XVˆ—
 	void Update(float elapsedTime);
 
+	//GUI
+	void OnGui();
+
 	//“Gî•ñ
 	enum class EnemyKind
 	{

@@ -57,7 +57,7 @@ void EnemyFarCom::Update(float elapsedTime)
 // GUI描画
 void EnemyFarCom::OnGUI()
 {
-
+    EnemyCom::OnGUI();
 }
 
 //被弾時にアニメーションする時のAITREEを決める

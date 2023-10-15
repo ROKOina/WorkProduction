@@ -1,4 +1,5 @@
 #include "JudgmentDerived.h"
+#include "../EnemyManager.h"
 
 #include "Components/TransformCom.h"
 
@@ -14,7 +15,7 @@ bool BattleJudgment::Judgment()
 }
 
 // AttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-bool AttackJudgment::Judgment()
+bool NearAttackJudgment::Judgment()
 {
 	std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
 
@@ -30,15 +31,23 @@ bool AttackJudgment::Judgment()
 	//‹——£‚ðŒ©‚é
 	if (dist < owner_.lock()->GetAttackRange())
 	{
-		//Šp“x‚ðŒ©‚é
-		QuaternionStruct myQ = myTransform->GetRotation();
-		QuaternionStruct focusQ = QuaternionStruct::LookRotation(DirectX::XMFLOAT3(vx, 0, vz));
+		if (owner_.lock()->GetIsAttackFlag())
+		{
+			//Šp“x‚ðŒ©‚é
+			QuaternionStruct myQ = myTransform->GetRotation();
+			QuaternionStruct focusQ = QuaternionStruct::LookRotation(DirectX::XMFLOAT3(vx, 0, vz));
 
-		float dot = DirectX::XMVectorGetX(DirectX::XMQuaternionDot(DirectX::XMLoadFloat4(&myQ.dxFloat4), DirectX::XMVectorScale(DirectX::XMLoadFloat4(&focusQ.dxFloat4), -1)));
+			float dot = DirectX::XMVectorGetX(DirectX::XMQuaternionDot(DirectX::XMLoadFloat4(&myQ.dxFloat4), DirectX::XMVectorScale(DirectX::XMLoadFloat4(&focusQ.dxFloat4), -1)));
 
-		if (dot * dot > 0.99f)
-			// AttackNode‚Ö‘JˆÚ‚Å‚«‚é
-			return true;
+			if (dot * dot > 0.99f)
+				// AttackNode‚Ö‘JˆÚ‚Å‚«‚é
+				return true;
+		}
+		else
+		{
+			//UŒ‚Œ ‚ð\¿
+			EnemyManager::Instance().SendMessaging(owner_.lock()->GetID(), EnemyManager::AI_ID::AI_INDEX, MESSAGE_TYPE::MsgAskAttackRight);
+		}
 	}
 	return false;
 }

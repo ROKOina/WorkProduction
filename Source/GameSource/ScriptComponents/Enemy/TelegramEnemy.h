@@ -8,7 +8,6 @@ enum class MESSAGE_TYPE : int
 	MsgGiveNearRight,			// Ú‹ßŒ ‚ğ—^‚¦‚é
 
 	//Enemy->AI
-	MsgChangeAttackRight,		// UŒ‚Œ ‚ÌˆÚ÷
 	MsgAskAttackRight,			// UŒ‚Œ ‚ğ—v‹
 	MsgAskNearRight,			// Ú‹ß‚ğ—v‹
 };

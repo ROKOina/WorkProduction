@@ -201,25 +201,6 @@ void GameObjectManager::Update(float elapsedTime)
 			col.lock()->ColliderStartClear();
 		}
 
-		//collider解放
-		for (int col = 0; col < colliderObject_.size(); ++col)
-		{
-			if (colliderObject_[col].expired())
-			{
-				colliderObject_.erase(colliderObject_.begin() + col);
-				--col;
-			}
-		}
-		//renderObject解放
-		for (int ren = 0; ren < renderSortObject_.size(); ++ren)
-		{
-			if (renderSortObject_[ren].expired())
-			{
-				renderSortObject_.erase(renderSortObject_.begin() + ren);
-				--ren;
-			}
-		}
-
 		//判定
 		for (int col1 = 0; col1 < colliderObject_.size(); ++col1)
 		{
@@ -245,17 +226,8 @@ void GameObjectManager::Update(float elapsedTime)
 
 	for (const std::shared_ptr<GameObject>& obj : removeGameObject_)
 	{
-		std::vector<std::shared_ptr<GameObject>>::iterator itStart = std::find(startGameObject_.begin(), startGameObject_.end(), obj);
-		if (itStart != startGameObject_.end())
-		{
-			startGameObject_.erase(itStart);
-		}
-
-		std::vector<std::shared_ptr<GameObject>>::iterator itUpdate = std::find(updateGameObject_.begin(), updateGameObject_.end(), obj);
-		if (itUpdate != updateGameObject_.end())
-		{
-			updateGameObject_.erase(itUpdate);
-		}
+		EraseObject(startGameObject_, obj);
+		EraseObject(updateGameObject_, obj);
 
 		std::set<std::shared_ptr<GameObject>>::iterator itSelection = selectionGameObject_.find(obj);
 		if (itSelection != selectionGameObject_.end())
@@ -264,6 +236,27 @@ void GameObjectManager::Update(float elapsedTime)
 		}
 	}
 	removeGameObject_.clear();
+
+	{
+		//collider解放
+		for (int col = 0; col < colliderObject_.size(); ++col)
+		{
+			if (colliderObject_[col].expired())
+			{
+				colliderObject_.erase(colliderObject_.begin() + col);
+				--col;
+			}
+		}
+		//renderObject解放
+		for (int ren = 0; ren < renderSortObject_.size(); ++ren)
+		{
+			if (renderSortObject_[ren].expired())
+			{
+				renderSortObject_.erase(renderSortObject_.begin() + ren);
+				--ren;
+			}
+		}
+	}
 
 }
 
@@ -529,6 +522,22 @@ void GameObjectManager::SwordTrailRender()
 
 	}
 
+}
+
+//オブジェクト解放
+void GameObjectManager::EraseObject(std::vector<std::shared_ptr<GameObject>>& objs, std::shared_ptr<GameObject> removeObj)
+{
+	//子から解放
+	for (auto& childObj : removeObj->GetChildren())
+	{
+		EraseObject(objs, childObj.lock());
+	}
+
+	std::vector<std::shared_ptr<GameObject>>::iterator it = std::find(objs.begin(), objs.end(), removeObj);
+	if (it != objs.end())
+	{
+		objs.erase(it);
+	}
 }
 
 #pragma endregion endGameObjectManager

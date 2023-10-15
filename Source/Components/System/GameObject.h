@@ -162,6 +162,9 @@ private:
 	//トレイル描画
 	void SwordTrailRender();
 
+	//オブジェクト解放
+	void EraseObject(std::vector<std::shared_ptr<GameObject>>& objs, std::shared_ptr<GameObject> removeObj);
+
 private:
 	std::vector<std::shared_ptr<GameObject>>		startGameObject_;
 	std::vector<std::shared_ptr<GameObject>>		updateGameObject_;

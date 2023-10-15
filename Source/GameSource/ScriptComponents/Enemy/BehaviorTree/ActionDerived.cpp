@@ -64,6 +64,10 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 		animator->SetTriggerOn("walk");
 
+		//移動
+		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
+		move->SetMoveMaxSpeed(owner_.lock()->GetMoveDataEnemy().walkMaxSpeed);
+
 		step_++;
 		break;
 	}
@@ -91,7 +95,7 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 		DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&position);
 		DirectX::XMVECTOR TPos = DirectX::XMLoadFloat3(&targetPosition);
 		DirectX::XMFLOAT3 force;
-		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 30.0f * elapsedTime));
+		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), owner_.lock()->GetMoveDataEnemy().walkSpeed));
 
 		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
 		move->AddForce(force);
@@ -133,6 +137,10 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 		animator->SetTriggerOn("run");
 
+		//移動
+		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
+		move->SetMoveMaxSpeed(owner_.lock()->GetMoveDataEnemy().runMaxSpeed);
+
 		step_++;
 		break;
 	}
@@ -152,7 +160,7 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		DirectX::XMVECTOR Pos = { position.x,0,position.z };
 		DirectX::XMVECTOR TPos = { targetPosition.x,0,targetPosition.z };
 		DirectX::XMFLOAT3 force;
-		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), 40.0f * elapsedTime));
+		DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), owner_.lock()->GetMoveDataEnemy().runSpeed));
 
 		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
 		move->AddForce(force);
@@ -176,13 +184,15 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		{
 			if (!owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsNearFlag())
 			{
+				//接近申請
 				EnemyManager::Instance().SendMessaging(owner_.lock()->GetID(), EnemyManager::AI_ID::AI_INDEX, MESSAGE_TYPE::MsgAskNearRight);
-				step_ = 0;
 
 				//一旦加速停止
 				move->ZeroVelocity();
-				// 追跡失敗を返す
-				return ActionBase::State::Failed;
+
+				// 待機する
+				step_ = 1;
+				return ActionBase::State::Run;
 			}
 		}
 
@@ -193,6 +203,7 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 			// 追跡成功を返す
 			return ActionBase::State::Complete;
 		}
+
 		// 行動時間が過ぎた時
 		if (runTimer_ <= 0.0f)
 		{
@@ -206,8 +217,8 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 	return ActionBase::State::Run;
 }
 
-// 攻撃行動
-ActionBase::State AttackAction::Run(float elapsedTime)
+// 近接通常攻撃行動
+ActionBase::State NearAttackAction::Run(float elapsedTime)
 {
 	switch (step_)
 	{
@@ -276,6 +287,8 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 		// アニメーションが終了しているとき
 		if (!owner_.lock()->GetGameObject()->GetComponent<AnimationCom>()->IsPlayAnimation())
 		{
+			//攻撃フラグを切る
+			owner_.lock()->SetIsAttackFlag(false);
 			step_ = 0;
 			// 攻撃成功を返す
 			return ActionBase::State::Complete;
@@ -286,16 +299,19 @@ ActionBase::State AttackAction::Run(float elapsedTime)
 		//強制終了
 	case  Action::End_STEP:
 	{
-			std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
-			animator->SetIsStop(false);
+		//攻撃フラグを切る
+		owner_.lock()->SetIsAttackFlag(false);
 
-			std::shared_ptr<RendererCom> renderer = owner_.lock()->GetGameObject()->GetComponent<RendererCom>();
-			std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
-			materials[0].toonStruct._Emissive_Color.w = 0;
+		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+		animator->SetIsStop(false);
 
-			owner_.lock()->GetGameObject()->GetChildFind("picolaboAttack")->GetComponent<Collider>()->SetEnabled(false);
+		std::shared_ptr<RendererCom> renderer = owner_.lock()->GetGameObject()->GetComponent<RendererCom>();
+		std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
+		materials[0].toonStruct._Emissive_Color.w = 0;
 
-			step_ = 0;
+		owner_.lock()->GetGameObject()->GetChildFind("picolaboAttack")->GetComponent<Collider>()->SetEnabled(false);
+
+		step_ = 0;
 	}
 	}
 

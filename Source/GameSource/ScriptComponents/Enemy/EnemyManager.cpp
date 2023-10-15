@@ -1,5 +1,7 @@
 #include "EnemyManager.h"
 
+#include <imgui.h>
+
 #include "Components/System/GameObject.h"
 #include "Components/TransformCom.h"
 #include "EnemyCom.h"
@@ -10,6 +12,15 @@
 void EnemyManager::Update(float elapsedTime)
 {
     
+}
+
+//GUI
+void EnemyManager::OnGui()
+{
+    //if (ImGui::Button("Add"))
+    //{
+
+    //}
 }
 
 // “G“o˜^
@@ -47,6 +58,7 @@ bool EnemyManager::OnMessage(const Telegram& telegram)
         int nearCount = 0;  //‹ß‚­‚É‚¢‚é“G‚Ì”
         for (EnemyData& e : nearEnemies_)
         {
+            if (e.enemy.expired())continue;
             //‘—MÒ‚Ìê‡‚Í”ò‚Î‚·
             if (telegram.sender == e.enemy.lock()->GetComponent<EnemyCom>()->GetID())continue;
 
@@ -68,6 +80,39 @@ bool EnemyManager::OnMessage(const Telegram& telegram)
         }
         break;
     }
+    case MESSAGE_TYPE::MsgAskAttackRight: //ƒvƒŒƒCƒ„[‚Ö‚ÌUŒ‚‚ğ—v‹
+    {
+        std::shared_ptr<GameObject> enemy = GetEnemyFromId(telegram.sender);
+        int attackCount = 0;  //UŒ‚’†‚Ì“GƒJƒEƒ“ƒg
+        //‹ßÚ‚©‰“Šu‚©”»’f
+        //‹ßÚ“G‚ÉƒLƒƒƒXƒg
+        std::shared_ptr<EnemyNearCom> nearEnemy = enemy->GetComponent<EnemyNearCom>();
+        if (nearEnemy)
+        {
+            //‹ßÚ“G‚Ìˆ—
+            for (EnemyData& e : nearEnemies_)
+            {
+                if (e.enemy.expired())continue;
+                if (attackCount >= nearEnemyLevel.togetherAttackCount)
+                    break;
+
+                //‘—MÒ‚Ìê‡‚Í”ò‚Î‚·
+                if (telegram.sender == e.enemy.lock()->GetComponent<EnemyCom>()->GetID())continue;
+
+                if (e.enemy.lock()->GetComponent<EnemyNearCom>()->GetIsAttackFlag())
+                    attackCount++;
+            }
+            //“¯UŒ‚‰Â”\”
+            if (attackCount < nearEnemyLevel.togetherAttackCount)
+            {
+                //UŒ‚‹–‰Â‚ğ‘—‚é
+                SendMessaging(static_cast<int>(AI_ID::AI_INDEX), telegram.sender, MESSAGE_TYPE::MsgGiveAttackRight);
+                return true;
+            }
+            break;
+        }
+
+    }
     }
     return false;
 }
@@ -77,6 +122,7 @@ std::shared_ptr<GameObject> EnemyManager::GetEnemyFromId(int id)
 {
     for (EnemyData& e : nearEnemies_)
     {
+        if (e.enemy.expired())continue;
         if (e.enemy.lock()->GetComponent<EnemyCom>()->GetID() == id)
             return e.enemy.lock();
     }

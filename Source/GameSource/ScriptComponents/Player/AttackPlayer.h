@@ -74,7 +74,8 @@ public:
 
     //“G‚ğ‘¨‚¦‚Ä‚¢‚é‚©
     bool ComboReadyEnemy() { 
-        if (enemyCopy_)return true;
+        if (enemyCopy_.expired())return false;
+        if (enemyCopy_.lock())return true;
         return false;
     }
 
@@ -109,7 +110,7 @@ public:
 
 
 private:
-    std::shared_ptr<GameObject> enemyCopy_;  //“G•Û‘¶
+    std::weak_ptr<GameObject> enemyCopy_;  //“G•Û‘¶
 
     //Œ»İ‚ÌUŒ‚‚Ìí—Ş
     enum class ATTACK_FLAG

@@ -52,7 +52,6 @@ private:
     float justAvoidTime_ = 1;   //ジャスト回避時間
     float justAvoidTimer_ = 0;
     std::weak_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
-    //std::shared_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
 
     //ジャスト回避反撃
     enum class JUST_AVOID_KEY   //入力を判定
