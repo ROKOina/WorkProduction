@@ -80,7 +80,7 @@ void EnemyFarCom::AnimationInitialize()
     animator->SetLoopAnimation(IDLE_SWORD, true);
 
     //アニメーションパラメーター追加
-    //enemy共通トリガー
+    //enemy共通パラメーター
     {
         animator->AddTriggerParameter("attack");
         animator->AddTriggerParameter("idle");

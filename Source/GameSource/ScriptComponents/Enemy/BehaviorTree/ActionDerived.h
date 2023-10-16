@@ -26,6 +26,18 @@ public:
 	ActionBase::State Run(float elapsedTime);
 };
 
+// 攻撃出来ないときはプレイヤーを囲むように移動
+class RouteAction : public ActionBase
+{
+public:
+	RouteAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
+	ActionBase::State Run(float elapsedTime);
+
+private:		
+	//四方のどこに近くの敵がいるか見る
+	bool quad_[4];	//0:左上 1:左下 2:右上 3:右下
+};
+
 // 近接通常攻撃
 class NearAttackAction : public ActionBase
 {

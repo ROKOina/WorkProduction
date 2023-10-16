@@ -44,6 +44,9 @@ public:
 		player_ = player;
 	}
 
+	//‹ßÚ“G‚ÌUŒ‚ƒJƒEƒ“ƒgæ“¾
+	int GetCurrentNearAttackCount();
+
 	//ID‚©‚ç“G‚ğƒQƒbƒg
 	std::shared_ptr<GameObject> GetEnemyFromId(int id);
 
@@ -62,7 +65,7 @@ public:
 		ENEMY_INDEX,
 	};
 
-private:
+public:
 
 struct NearEnemyLevel	//‹ßÚ“G‚ÌW‚Ü‚è•û‚ÌƒfƒUƒCƒ“
 {
@@ -77,22 +80,25 @@ struct FarEnemyLevel	//‰“Šu“G‚ÌW‚Ü‚è•û‚ÌƒfƒUƒCƒ“
 
 };
 
-public:
-	const NearEnemyLevel& GetNearEnemyLevel()const { return nearEnemyLevel; }
-	const FarEnemyLevel& GetFarEnemyLevel()const { return farEnemyLevel; }
+	const NearEnemyLevel& GetNearEnemyLevel()const { return nearEnemyLevel_; }
+	const FarEnemyLevel& GetFarEnemyLevel()const { return farEnemyLevel_; }
 
-private:
+
 	struct EnemyData	//“Gî•ñ
 	{
 		std::weak_ptr<GameObject> enemy;	//“G
 	};
+	std::vector<EnemyData>& GetNearEnemies() { return nearEnemies_; }
+	std::vector<EnemyData>& GetFarEnemies() { return farEnemies_; }
+
+private:
 
 	//“G‚ğ‚Ü‚Æ‚ß‚é
 	std::vector<EnemyData> nearEnemies_;	//‹ßÚ
-	const NearEnemyLevel nearEnemyLevel;
+	const NearEnemyLevel nearEnemyLevel_;
 
 	std::vector<EnemyData> farEnemies_;	//‰“Šu
-	FarEnemyLevel farEnemyLevel;
+	FarEnemyLevel farEnemyLevel_;
 
 	//ƒvƒŒƒCƒ„[î•ñ‚ğ‘½—p‚Ég‚¤‚½‚ß“o˜^
 	std::weak_ptr<GameObject> player_;

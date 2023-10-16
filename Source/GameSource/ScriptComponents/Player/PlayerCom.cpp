@@ -213,22 +213,22 @@ void PlayerCom::AnimationInitialize()
         //idle
         animator->AddAnimatorTransition(IDEL_2, WALK_RUNRUN_2, false, 0.5f);
         animator->SetFloatTransition(IDEL_2, WALK_RUNRUN_2,
-            "moveSpeed", 0.1f, PATAMETER_JUDGE::GREATER);
+            "moveSpeed", 0.1f, PARAMETER_JUDGE::GREATER);
 
         //walk
         animator->AddAnimatorTransition(WALK_RUNRUN_2, IDEL_2);
         animator->SetFloatTransition(WALK_RUNRUN_2, IDEL_2,
-            "moveSpeed", 0.1f, PATAMETER_JUDGE::LESS);
+            "moveSpeed", 0.1f, PARAMETER_JUDGE::LESS);
         animator->SetLoopAnimation(WALK_RUNRUN_2, true);
 
         animator->AddAnimatorTransition(WALK_RUNRUN_2, RUN_HARD_2);
         animator->SetFloatTransition(WALK_RUNRUN_2, RUN_HARD_2,
-            "moveSpeed", movePlayer_->GetMoveParam(MovePlayer::MOVE_PARAM::WALK).moveMaxSpeed + 1, PATAMETER_JUDGE::GREATER);
+            "moveSpeed", movePlayer_->GetMoveParam(MovePlayer::MOVE_PARAM::WALK).moveMaxSpeed + 1, PARAMETER_JUDGE::GREATER);
 
         //run
         animator->AddAnimatorTransition(RUN_HARD_2, WALK_RUNRUN_2);
         animator->SetFloatTransition(RUN_HARD_2, WALK_RUNRUN_2,
-            "moveSpeed", movePlayer_->GetMoveParam(MovePlayer::MOVE_PARAM::WALK).moveMaxSpeed + 1, PATAMETER_JUDGE::LESS);
+            "moveSpeed", movePlayer_->GetMoveParam(MovePlayer::MOVE_PARAM::WALK).moveMaxSpeed + 1, PARAMETER_JUDGE::LESS);
         animator->SetLoopAnimation(RUN_HARD_2, true);
 
         //runØ‚è‘Ö‚¦‚µ

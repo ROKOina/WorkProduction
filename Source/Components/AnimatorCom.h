@@ -5,7 +5,7 @@
 
 #include "System\Component.h"
 
-enum PATAMETER_JUDGE
+enum PARAMETER_JUDGE
 {
     GREATER,    //大きい
     LESS,       //小さい
@@ -48,7 +48,7 @@ private:
     {
         std::shared_ptr<AnimTransitionParameterFloat> floatParameter;
         float setFloat;
-        PATAMETER_JUDGE judgeValue = PATAMETER_JUDGE::GREATER;
+        PARAMETER_JUDGE judgeValue = PARAMETER_JUDGE::GREATER;
     };
 
     //遷移用構造体
@@ -87,9 +87,9 @@ public:
     //floatパラメーターを追加
     void AddFloatParameter(std::string name);
     //遷移パラメーターに設定
-    void SetFloatTransition(int sorce, int destination, std::string name, float judgeValue, PATAMETER_JUDGE paramJudge);
+    void SetFloatTransition(int sorce, int destination, std::string name, float judgeValue, PARAMETER_JUDGE paramJudge);
     //どこからでも遷移パラメーター設定
-    void SetFloatTransition(int destination, std::string name, float judgeValue, PATAMETER_JUDGE paramJudge);
+    void SetFloatTransition(int destination, std::string name, float judgeValue, PARAMETER_JUDGE paramJudge);
     //floatをセットにする
     void SetFloatValue(std::string name, float value);
 

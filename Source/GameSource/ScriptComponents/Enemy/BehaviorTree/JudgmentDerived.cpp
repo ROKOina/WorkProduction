@@ -72,3 +72,34 @@ bool WanderJudgment::Judgment()
 
 	return false;
 }
+
+// RouteNodeに遷移できるか判定
+bool RouteJudgment::Judgment()
+{
+	if (owner_.lock()->GetIsAttackFlag())return false;
+
+	//敵マネージャー取得
+	EnemyManager& enemyManager = EnemyManager::Instance();
+	//攻撃カウントがいっぱいの時
+	if (enemyManager.GetCurrentNearAttackCount() >= enemyManager.GetNearEnemyLevel().togetherAttackCount)
+	{
+		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
+
+		// 目的地点までのXZ平面での距離判定
+		DirectX::XMFLOAT3 position = myTransform->GetWorldPosition();
+		DirectX::XMFLOAT3 targetPosition = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
+
+		float vx = targetPosition.x - position.x;
+		float vy = targetPosition.y - position.y;
+		float vz = targetPosition.z - position.z;
+		float dist = sqrtf(vx * vx + vy * vy + vz * vz);
+
+		//接近エリアに入っていたら
+		if (dist < EnemyManager::Instance().GetNearEnemyLevel().radius)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}

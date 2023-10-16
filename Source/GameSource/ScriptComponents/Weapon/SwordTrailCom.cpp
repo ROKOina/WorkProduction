@@ -177,7 +177,7 @@ void SwordTrailCom::Render()
 	UINT offset = 0;
 	dc->IASetVertexBuffers(0, 1, vBuffer_.GetAddressOf(), &strides, &offset);
 
-	dc->Draw(vertex_.size(), 0);
+	dc->Draw(static_cast<UINT>(vertex_.size()), 0);
 
 	dc->VSSetShader(nullptr, nullptr, 0);
 	dc->PSSetShader(nullptr, nullptr, 0);

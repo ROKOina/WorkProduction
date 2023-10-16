@@ -37,7 +37,8 @@ void EnemyNearCom::Start()
     aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::IDLE, 2, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<IdleAction>(myShared));
 
     aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ATTACK, 1, BehaviorTree::SelectRule::Random, std::make_shared<NearAttackJudgment>(myShared), nullptr);
-    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::PURSUIT, 2, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<PursuitAction>(myShared));
+    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ROUTE, 2, BehaviorTree::SelectRule::Non, std::make_shared<RouteJudgment>(myShared), std::make_shared<RouteAction>(myShared));
+    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::PURSUIT, 3, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<PursuitAction>(myShared));
 
     //4層
     aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 1, BehaviorTree::SelectRule::Priority, std::make_shared<NearAttackJudgment>(myShared), std::make_shared<NearAttackAction>(myShared));
@@ -88,37 +89,51 @@ void EnemyNearCom::AnimationInitialize()
     animator->SetLoopAnimation(IDLE_SWORD, true);
 
     //アニメーションパラメーター追加
-    //enemy共通トリガー
+    //enemy共通パラメーター
     {
         animator->AddTriggerParameter("attack");
-        animator->AddTriggerParameter("idle");
-        animator->AddTriggerParameter("walk");
-        animator->AddTriggerParameter("run");
         animator->AddTriggerParameter("damage");
         animator->AddTriggerParameter("damageInAir");
         animator->AddTriggerParameter("damageGoFly");
         animator->AddTriggerParameter("damageFallEnd");
+
+        animator->AddFloatParameter("moveSpeed");
     }
 
-    animator->AddAnimatorTransition(IDLE_SWORD);
-    animator->SetTriggerTransition(IDLE_SWORD, "idle");
+    //idle -> walk
+    animator->AddAnimatorTransition(IDLE_SWORD, WALK_SWORD);
+    animator->SetLoopAnimation(IDLE_SWORD, true);
+    animator->SetFloatTransition(IDLE_SWORD, WALK_SWORD,
+        "moveSpeed", 0.1f, PARAMETER_JUDGE::GREATER);
 
-    animator->AddAnimatorTransition(RUN_SWORD);
-    animator->SetLoopAnimation(RUN_SWORD, true);
-    animator->SetTriggerTransition(RUN_SWORD, "run");
-
-    animator->AddAnimatorTransition(WALK_SWORD);
+    //walk -> idle
+    animator->AddAnimatorTransition(WALK_SWORD, IDLE_SWORD);
     animator->SetLoopAnimation(WALK_SWORD, true);
-    animator->SetTriggerTransition(WALK_SWORD, "walk");
+    animator->SetFloatTransition(WALK_SWORD, IDLE_SWORD,
+        "moveSpeed", 0.1f, PARAMETER_JUDGE::LESS);
+
+    //walk -> run
+    animator->AddAnimatorTransition(WALK_SWORD, RUN_SWORD);
+    animator->SetFloatTransition(WALK_SWORD, RUN_SWORD,
+        "moveSpeed", moveDataEnemy_.walkMaxSpeed + 1, PARAMETER_JUDGE::GREATER);
+
+    //run -> walk
+    animator->AddAnimatorTransition(RUN_SWORD, WALK_SWORD);
+    animator->SetLoopAnimation(RUN_SWORD, true);
+    animator->SetFloatTransition(RUN_SWORD, WALK_SWORD,
+        "moveSpeed", moveDataEnemy_.walkMaxSpeed + 1, PARAMETER_JUDGE::LESS);
+
 
     animator->AddAnimatorTransition(ATTACK01_SWORD, false, 0);
     animator->SetTriggerTransition(ATTACK01_SWORD, "attack");
+    animator->AddAnimatorTransition(ATTACK01_SWORD, IDLE_SWORD, true);
 
     //被弾
     {
         //ノーマル
-        animator->AddAnimatorTransition(DAMAGE);
+        animator->AddAnimatorTransition(DAMAGE, false, 0.0f);
         animator->SetTriggerTransition(DAMAGE, "damage");
+        animator->AddAnimatorTransition(DAMAGE, IDLE_SWORD, true);
 
         //空中
         animator->AddAnimatorTransition(DAMAGE_IN_AIR, false, 0.0f);
@@ -141,6 +156,8 @@ void EnemyNearCom::AnimationInitialize()
 
         //起き上がり
         animator->AddAnimatorTransition(DAMAGE_FALL_END, FALL_STAND_UP, true);
+
+        animator->AddAnimatorTransition(FALL_STAND_UP, IDLE_SWORD, true);
     }
 }
 

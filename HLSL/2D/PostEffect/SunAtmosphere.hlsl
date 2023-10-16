@@ -198,7 +198,7 @@ float4 main(VS_OUT pin) : SV_TARGET
 {
     //return float4(pin.texcoord.x, pin.texcoord.y, 0, 1);
     
-    float3 fragment_color = mainTex.Sample(samplerLiner, pin.texcoord);
+    float3 fragment_color = mainTex.Sample(samplerLiner, pin.texcoord).rgb;
     float alpha = pin.color.a;
     
     uint2 dimensions;

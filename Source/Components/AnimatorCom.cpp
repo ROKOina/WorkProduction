@@ -52,7 +52,7 @@ void AnimatorCom::Update(float elapsedTime)
         //フロート
         for (auto& floatParam : anyTransition.floatParameters)
         {
-            if (floatParam.judgeValue == PATAMETER_JUDGE::GREATER)
+            if (floatParam.judgeValue == PARAMETER_JUDGE::GREATER)
             {
                 if (floatParam.floatParameter.get()->value < floatParam.setFloat)continue;
                 //アニメーション遷移
@@ -62,7 +62,7 @@ void AnimatorCom::Update(float elapsedTime)
                     anyTransition.blendTime);
                 return;
             }
-            if (floatParam.judgeValue == PATAMETER_JUDGE::LESS)
+            if (floatParam.judgeValue == PARAMETER_JUDGE::LESS)
             {
                 if (floatParam.floatParameter.get()->value >= floatParam.setFloat)continue;
                 //アニメーション遷移
@@ -115,7 +115,7 @@ void AnimatorCom::Update(float elapsedTime)
             //フロート
             for (auto& floatParam : transition.floatParameters)
             {
-                if (floatParam.judgeValue == PATAMETER_JUDGE::GREATER)
+                if (floatParam.judgeValue == PARAMETER_JUDGE::GREATER)
                 {
                     if (floatParam.floatParameter.get()->value < floatParam.setFloat)continue;
                     //アニメーション遷移
@@ -125,7 +125,7 @@ void AnimatorCom::Update(float elapsedTime)
                         transition.blendTime);
                     return;
                 }
-                if (floatParam.judgeValue == PATAMETER_JUDGE::LESS)
+                if (floatParam.judgeValue == PARAMETER_JUDGE::LESS)
                     if (floatParam.floatParameter.get()->value >= floatParam.setFloat)continue;
                 {
                     //アニメーション遷移
@@ -282,7 +282,7 @@ void AnimatorCom::AddFloatParameter(std::string name)
 }
 
 //遷移パラメーターに設定
-void AnimatorCom::SetFloatTransition(int sorce, int destination, std::string name, float judgeValue, PATAMETER_JUDGE paramJudge)
+void AnimatorCom::SetFloatTransition(int sorce, int destination, std::string name, float judgeValue, PARAMETER_JUDGE paramJudge)
 {
     for (AnimTransition& transition : animatorData_[sorce].transitions)
     {
@@ -302,7 +302,7 @@ void AnimatorCom::SetFloatTransition(int sorce, int destination, std::string nam
 }
 
 //どこからでも遷移パラメーター設定
-void AnimatorCom::SetFloatTransition(int destination, std::string name, float judgeValue, PATAMETER_JUDGE paramJudge)
+void AnimatorCom::SetFloatTransition(int destination, std::string name, float judgeValue, PARAMETER_JUDGE paramJudge)
 {
     for (AnimTransition& anyTransition : animatorAnyTransition_)
     {

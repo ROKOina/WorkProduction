@@ -25,6 +25,7 @@ void EnemyCom::Start()
 // 更新処理
 void EnemyCom::Update(float elapsedTime)
 {
+
     //立ち上がりモーション処理
     StandUpUpdate();
 
@@ -60,6 +61,9 @@ void EnemyCom::Update(float elapsedTime)
     //ジャスト回避用判定出す
     justColliderProcess();
 
+    //アニメーション設定
+    AnimationSetting();
+
 }
 
 // GUI描画
@@ -70,10 +74,16 @@ void EnemyCom::OnGUI()
         GameObjectManager::Instance().Remove(GetGameObject());
     }
 
-    ImGui::DragFloat("walkSpeed", &moveDataEnemy.walkSpeed);
-    ImGui::DragFloat("walkMaxSpeed", &moveDataEnemy.walkMaxSpeed);
-    ImGui::DragFloat("runSpeed", &moveDataEnemy.runSpeed);
-    ImGui::DragFloat("runMaxSpeed", &moveDataEnemy.runMaxSpeed);
+    ImGui::DragFloat("walkSpeed", &moveDataEnemy_.walkSpeed);
+    ImGui::DragFloat("walkMaxSpeed", &moveDataEnemy_.walkMaxSpeed);
+    ImGui::DragFloat("runSpeed", &moveDataEnemy_.runSpeed);
+    ImGui::DragFloat("runMaxSpeed", &moveDataEnemy_.runMaxSpeed);
+
+    std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+    DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
+    float speed= DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
+    ImGui::DragFloat("moveSpeed", &speed);
+
 }
 
 // ターゲット位置をランダム設定
@@ -310,6 +320,19 @@ bool EnemyCom::OnMessage(const Telegram& msg)
     return false;
 }
 
+//アニメーションの更新
+void EnemyCom::AnimationSetting()
+{
+    //移動アニメーション設定
+    {
+        //移動スピード代入
+        std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+        DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
+        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+        animator->SetFloatValue("moveSpeed", DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity)));
+    }
+
+}
 
 
 

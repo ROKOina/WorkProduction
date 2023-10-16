@@ -75,7 +75,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for(int i=0;i<5;++i)
+	for(int i=0;i<0;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -364,6 +364,7 @@ void SceneGame::Initialize()
 			col->SetJudgeTag(COLLIDER_TAG::EnemyPushBack);
 			col->SetPushBack(true);
 			col->SetPushBackObj(obj);
+			col->SetWeight(10.0f);
 		}
 	}
 

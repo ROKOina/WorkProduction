@@ -19,9 +19,9 @@ ActionBase::State IdleAction::Run(float elapsedTime)
 	{
 	case 0:
 	{
-		//アニメーター
-		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
-		animator->SetTriggerOn("idle");
+		////アニメーター
+		//std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+		//animator->SetTriggerOn("idle");
 
 		runTimer_ = 2;
 
@@ -60,9 +60,9 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 	case 0:
 		// 徘徊モーション設定
 	{
-		//アニメーター
-		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
-		animator->SetTriggerOn("walk");
+		////アニメーター
+		//std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+		//animator->SetTriggerOn("walk");
 
 		//移動
 		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
@@ -133,17 +133,17 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		owner_.lock()->SetTargetPosition(GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
 		runTimer_ = 2;
 
-		//アニメーター
-		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
-		animator->SetTriggerOn("run");
+		////アニメーター
+		//std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+		//animator->SetTriggerOn("run");
 
 		//移動
 		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
 		move->SetMoveMaxSpeed(owner_.lock()->GetMoveDataEnemy().runMaxSpeed);
 
 		step_++;
-		break;
 	}
+	break;
 	case 1:
 	{
 		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
@@ -177,7 +177,7 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		float vz = targetPosition.z - position.z;
 		float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 
-		
+
 
 		//接近エリアに入ったら
 		if (dist < EnemyManager::Instance().GetNearEnemyLevel().radius)
@@ -211,9 +211,113 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 			// 追跡失敗を返す
 			return ActionBase::State::Failed;
 		}
+	}
+	break;
+	}
+	return ActionBase::State::Run;
+}
+
+// 攻撃出来ないときはプレイヤーを囲むように移動
+ActionBase::State RouteAction::Run(float elapsedTime)
+{
+	switch (step_)
+	{
+	case 0:
+	{
+		//移動
+		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
+		move->SetMoveMaxSpeed(owner_.lock()->GetMoveDataEnemy().runMaxSpeed);
+
+		for (int i = 0; i < 4; ++i)
+			quad_[i] = false;	//0:左上 1:左下 2:右上 3:右下
+
+		runTimer_ = 2;
+		step_++;
+	}
+	break;
+	case 1:
+	{
+		//プレイヤーの周りの敵の配置を確認
+		DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
+		playerPos.y = 0;
+		DirectX::XMFLOAT3 playerUpPos = playerPos;
+		playerUpPos.z += 1;
+		DirectX::XMVECTOR PlayerUp = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&playerUpPos), DirectX::XMLoadFloat3(&playerPos)));
+		
+		for (auto& nearEnemy : EnemyManager::Instance().GetNearEnemies())
+		{
+			if (nearEnemy.enemy.expired())continue;
+
+			if (nearEnemy.enemy.lock()->GetComponent<EnemyCom>()->GetID() == owner_.lock()->GetID())
+				continue;
+
+			DirectX::XMFLOAT3 enemyPos = nearEnemy.enemy.lock()->transform_->GetWorldPosition();
+			enemyPos.y = 0;
+			DirectX::XMVECTOR PE = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&enemyPos), DirectX::XMLoadFloat3(&playerPos));
+			//範囲外ならcontinue
+			if (DirectX::XMVectorGetX(DirectX::XMVector3Length(PE)) > EnemyManager::Instance().GetNearEnemyLevel().radius)
+			{
+				continue;
+			}
+			PE = DirectX::XMVector3Normalize(PE);
+			float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(PlayerUp, PE));
+			float cross = DirectX::XMVectorGetY(DirectX::XMVector3Cross(PlayerUp, PE));
+			if (dot > 0)
+			{
+				if (cross > 0)	//右上
+				{
+					quad_[2] = true;
+				}
+				else	//左上
+				{
+					quad_[0] = true;
+				}
+			}
+			else
+			{
+				if (cross > 0)	//右下
+				{
+					quad_[3] = true;
+				}
+				else	//左下
+				{
+					quad_[1] = true;
+				}
+			}
+		}
+		step_++;
+	}
+	break;
+	case 2:
+	{
+		DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
+		playerPos.y = 0;
+
+		for (int i = 0; i < 4; ++i)
+		{
+			if (quad_[i])continue;
+
+			//Z軸
+			if (i % 2 == 0)
+				playerPos.z += 0.5f;
+			else
+				playerPos.z -= 0.5f;
+
+			//X軸
+			if (i > 1)
+				playerPos.x += 0.5f;
+			else
+				playerPos.x -= 0.5f;
+
+		}
+
+		//あとは上のポスに移動するのをここに作る
+
+		return ActionBase::State::Failed;
+	}
 		break;
 	}
-	}
+
 	return ActionBase::State::Run;
 }
 

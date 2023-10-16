@@ -329,7 +329,7 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname)
 				D3D11_SUBRESOURCE_DATA subresource_data{};
 
 				subresource_data.pSysMem = mesh.shapeData[i].shapeVertex.data();
-				subresource_data.SysMemPitch = sizeof(DirectX::XMFLOAT3) * mesh.vertices.size();		//配列のサイズ
+				subresource_data.SysMemPitch = static_cast<UINT>(sizeof(DirectX::XMFLOAT3) * mesh.vertices.size());		//配列のサイズ
 				subresource_data.SysMemSlicePitch = sizeof(DirectX::XMFLOAT3);	//１要素
 				HRESULT hr = device->CreateBuffer(&buffer_desc, &subresource_data, mesh.shapeData[i].sBuffer.GetAddressOf());
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
@@ -338,7 +338,7 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname)
 				srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 				srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 				srvDesc.Buffer.FirstElement = 0;
-				srvDesc.Buffer.NumElements = mesh.shapeData[i].shapeVertex.size();
+				srvDesc.Buffer.NumElements = static_cast<UINT>(mesh.shapeData[i].shapeVertex.size());
 				device->CreateShaderResourceView(mesh.shapeData[i].sBuffer.Get(), &srvDesc, mesh.shapeData[i].srvBuffer.GetAddressOf());
 			}
 		}

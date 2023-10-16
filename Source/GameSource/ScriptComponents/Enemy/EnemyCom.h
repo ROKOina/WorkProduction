@@ -50,6 +50,7 @@ enum class AI_TREE
 
     //BATTLE
     ATTACK,
+    ROUTE,
     PURSUIT,
 
     //4層
@@ -113,7 +114,7 @@ public:
     void SetStandUpMotion();
     void StandUpUpdate();
 
-    const MoveDataEnemy& GetMoveDataEnemy() const { return moveDataEnemy; }
+    const MoveDataEnemy& GetMoveDataEnemy() const { return moveDataEnemy_; }
 
     //AI関係
 
@@ -122,6 +123,10 @@ public:
 
     int GetID() { return enemyId_; }
     void SetID(int id) { enemyId_ = id; }
+
+private:
+    //アニメーションの更新
+    void AnimationSetting();
 
 private:    //これだけ何故か派生クラスで使えないので、派生クラスでも作成する
     //被弾時にアニメーションする時のAITREEを決める
@@ -175,7 +180,7 @@ protected:
     bool isAttackFlag_ = false;
 
     //移動
-    MoveDataEnemy moveDataEnemy;
+    MoveDataEnemy moveDataEnemy_;
 
     //識別番号
     int enemyId_ = -1;

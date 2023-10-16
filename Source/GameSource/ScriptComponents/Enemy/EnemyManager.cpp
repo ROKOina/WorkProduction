@@ -47,6 +47,23 @@ void EnemyManager::Register(std::shared_ptr<GameObject> enemy, EnemyKind enemyKi
     currentIndex_++;
 }
 
+//‹ßÚ“G‚ÌUŒ‚ƒJƒEƒ“ƒgæ“¾
+int EnemyManager::GetCurrentNearAttackCount()
+{
+    int attackCount = 0;
+    for (auto& e : nearEnemies_)
+    {
+        if (e.enemy.expired())continue;
+        if (e.enemy.lock()->GetComponent<EnemyCom>()->GetIsAttackFlag())
+            attackCount++;
+    }
+
+    return attackCount;
+}
+
+
+/////   AIŠÖŒW   /////
+
 // ƒƒbƒZ[ƒWóM‚µ‚½‚Æ‚«‚Ìˆ—
 bool EnemyManager::OnMessage(const Telegram& telegram)
 {
@@ -62,7 +79,7 @@ bool EnemyManager::OnMessage(const Telegram& telegram)
             //‘—MÒ‚Ìê‡‚Í”ò‚Î‚·
             if (telegram.sender == e.enemy.lock()->GetComponent<EnemyCom>()->GetID())continue;
 
-            if (nearCount >= nearEnemyLevel.inRadiusCount)
+            if (nearCount >= nearEnemyLevel_.inRadiusCount)
                 break;
 
             //‹ßÚ“G‚ÉƒLƒƒƒXƒg
@@ -72,7 +89,7 @@ bool EnemyManager::OnMessage(const Telegram& telegram)
                 nearCount++;
         }
         //‹ß‚­‚É‚¢‚é“G‚ªŒˆ‚ß‚ç‚ê‚Ä‚¢‚é”‚æ‚è¬‚³‚¢
-        if (nearCount < nearEnemyLevel.inRadiusCount)
+        if (nearCount < nearEnemyLevel_.inRadiusCount)
         {
             //Ú‹ß‹–‰Â‚ğ‘—‚é
             SendMessaging(static_cast<int>(AI_ID::AI_INDEX), telegram.sender, MESSAGE_TYPE::MsgGiveNearRight);
@@ -87,29 +104,24 @@ bool EnemyManager::OnMessage(const Telegram& telegram)
         //‹ßÚ‚©‰“Šu‚©”»’f
         //‹ßÚ“G‚ÉƒLƒƒƒXƒg
         std::shared_ptr<EnemyNearCom> nearEnemy = enemy->GetComponent<EnemyNearCom>();
+        //‹ßÚ“Gˆ—
         if (nearEnemy)
         {
-            //‹ßÚ“G‚Ìˆ—
-            for (EnemyData& e : nearEnemies_)
-            {
-                if (e.enemy.expired())continue;
-                if (attackCount >= nearEnemyLevel.togetherAttackCount)
-                    break;
+            attackCount = GetCurrentNearAttackCount();
 
-                //‘—MÒ‚Ìê‡‚Í”ò‚Î‚·
-                if (telegram.sender == e.enemy.lock()->GetComponent<EnemyCom>()->GetID())continue;
-
-                if (e.enemy.lock()->GetComponent<EnemyNearCom>()->GetIsAttackFlag())
-                    attackCount++;
-            }
             //“¯UŒ‚‰Â”\”
-            if (attackCount < nearEnemyLevel.togetherAttackCount)
+            if (attackCount < nearEnemyLevel_.togetherAttackCount)
             {
                 //UŒ‚‹–‰Â‚ğ‘—‚é
                 SendMessaging(static_cast<int>(AI_ID::AI_INDEX), telegram.sender, MESSAGE_TYPE::MsgGiveAttackRight);
                 return true;
             }
             break;
+        }
+        //‰“Šu“Iˆ—
+        else
+        {
+
         }
 
     }

@@ -573,13 +573,13 @@ int AttackPlayer::NormalAttackUpdate(float elapsedTime)
 
     case 1:
         //âÒì]
-        if (ForcusEnemy(elapsedTime, enemyCopy_.lock(), 10))
+        if (ForcusEnemy(elapsedTime, enemyCopy_.lock(), 50))
             state_++;
        break;
 
     case 2:
         //ê⁄ãﬂ
-        if (ApproachEnemy(enemyCopy_.lock(), 1.5f))
+        if (ApproachEnemy(enemyCopy_.lock(), 1.5f,3))
             state_ = ATTACK_CODE::EnterAttack;
         break;
     }

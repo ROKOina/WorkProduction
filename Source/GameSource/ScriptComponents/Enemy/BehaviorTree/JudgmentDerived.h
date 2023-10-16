@@ -28,3 +28,12 @@ public:
 	// ”»’è
 	bool Judgment();
 };
+
+// RouteNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class RouteJudgment : public JudgmentBase
+{
+public:
+	RouteJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
+	// ”»’è
+	bool Judgment();
+};

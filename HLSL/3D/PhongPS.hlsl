@@ -10,7 +10,7 @@ SamplerState shadowMapSamplerState : register(s1);
 //”w–Ê–¾‚é‚¢
 float3 ClacHalfLambert(float3 normal, float3 lightVector, float3 lightColor, float3 kd)
 {
-    float d = clamp(
+    float3 d = clamp(
 		(dot(-lightVector, normal) * 0.5f + 0.5f), 0.0f, 1.0f)
 		* lightColor * kd;
 
