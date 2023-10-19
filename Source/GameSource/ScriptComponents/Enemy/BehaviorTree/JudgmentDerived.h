@@ -29,11 +29,11 @@ public:
 	bool Judgment();
 };
 
-// RouteNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-class RouteJudgment : public JudgmentBase
+// RoutePathNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class RoutePathJudgment : public JudgmentBase
 {
 public:
-	RouteJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
+	RoutePathJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
 	// ”»’è
 	bool Judgment();
 };

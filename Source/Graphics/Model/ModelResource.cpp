@@ -319,7 +319,7 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname)
 			for (int i = 0; i < mesh.shapeData.size(); ++i)
 			{
 				D3D11_BUFFER_DESC buffer_desc{};
-				buffer_desc.ByteWidth = static_cast<UINT>(sizeof(DirectX::XMFLOAT3) * mesh.vertices.size());
+				buffer_desc.ByteWidth = static_cast<UINT>(sizeof(DirectX::XMFLOAT3) * mesh.shapeData[i].shapeVertex.size());
 				buffer_desc.StructureByteStride = sizeof(DirectX::XMFLOAT3);
 				buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 				buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;

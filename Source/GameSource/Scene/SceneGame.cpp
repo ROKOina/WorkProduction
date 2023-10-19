@@ -29,6 +29,9 @@
 
 #include "GameSource\ScriptComponents\Enemy\EnemyManager.h"
 
+//経路探査
+#include "GameSource/Stage/PathSearch.h"
+
 // 初期化
 void SceneGame::Initialize()
 {
@@ -75,7 +78,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for(int i=0;i<0;++i)
+	for(int i = 0;i < 5;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -406,6 +409,10 @@ void SceneGame::Initialize()
 	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
 	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->transform_->GetWorldPosition().x, player->transform_->GetWorldPosition().y, player->transform_->GetWorldPosition().z,0 });
 
+	//経路探査
+	SeachGraph::Instance().InitSub(54, 53, 2, -4,
+		1.0f, 0.08f, GameObjectManager::Instance().Find("pico"));
+
 	//EnemyManagerにプレイヤー登録
 	EnemyManager::Instance().RegisterPlayer(GameObjectManager::Instance().Find("pico"));
 }
@@ -423,6 +430,10 @@ void SceneGame::Update(float elapsedTime)
 
 	////ステージ更新処理
 	//StageManager::Instance().Update(elapsedTime);
+	
+	//経路探査
+	SeachGraph::Instance().UpdatePath();
+
 	//エフェクト更新処理
 	EffectManager::Instance().Update(elapsedTime);
 
@@ -548,6 +559,9 @@ void SceneGame::Render()
 
 	// 3Dデバッグ描画
 	{
+		//経路探査
+		SeachGraph::Instance().RenderPath();
+
 		// ラインレンダラ描画実行
 		graphics.GetLineRenderer()->Render(dc, mainCamera_->GetView(), mainCamera_->GetProjection());
 
@@ -565,7 +579,6 @@ void SceneGame::Render()
 
 			//敵マネージャー
 			EnemyManager::Instance().OnGui();
-
 
 			if (ImGui::Button("Add"))
 			{

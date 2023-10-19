@@ -28,7 +28,7 @@ float4 main(VS_OUT pin) : SV_TARGET
         float weight = Weight[i].z;
         color.rgb +=
 			blurTexture.Sample(
-				samplers[1], pin.texcoord + offset).rgb * weight;
+				samplers[0], pin.texcoord + offset).rgb * weight;
     }
     return color;
 }

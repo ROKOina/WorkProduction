@@ -264,7 +264,6 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\MovePlayer.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.h" />
-    <ClInclude Include="Source\Graphics\Shaders\Skymap.h" />
     <ClInclude Include="External\DirectXTex\DDSTextureLoader.h" />
     <ClInclude Include="External\DirectXTex\DDS.h" />
     <ClInclude Include="External\DirectXTex\LoaderHelpers.h" />
@@ -276,6 +275,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyFarCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyManager.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\TelegramEnemy.h" />
+    <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -497,9 +497,6 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\JustAvoidPlayer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Shaders\Skymap.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="External\DirectXTex\DDSTextureLoader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -519,6 +516,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\Stage\PathSearch.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

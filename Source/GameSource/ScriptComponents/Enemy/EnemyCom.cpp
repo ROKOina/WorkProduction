@@ -95,6 +95,36 @@ void EnemyCom::SetRandomTargetPosition()
     targetPosition_ = pos;
 }
 
+//ターゲット位置に移動、回転
+void EnemyCom::GoTargetMove(bool isMove, bool isTurn)
+{
+    // 目的地点までのXZ平面での距離判定
+    DirectX::XMFLOAT3 position = GetGameObject()->transform_->GetWorldPosition();
+
+    // 目的地点へ移動
+    DirectX::XMVECTOR Pos = { position.x,0,position.z };
+    DirectX::XMVECTOR TPos = { targetPosition_.x,0,targetPosition_.z };
+    DirectX::XMFLOAT3 force;
+    DirectX::XMStoreFloat3(&force, DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(TPos, Pos)), moveDataEnemy_.runSpeed));
+
+    if (isMove)
+    {
+        std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+        move->AddForce(force);
+    }
+
+    if (isTurn)
+    {
+        //回転する
+        QuaternionStruct myQ = GetGameObject()->transform_->GetRotation();
+        QuaternionStruct focusQ = QuaternionStruct::LookRotation(force);
+        //補完する
+        DirectX::XMStoreFloat4(&myQ.dxFloat4, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&myQ.dxFloat4), DirectX::XMLoadFloat4(&focusQ.dxFloat4), 0.1f));
+        GetGameObject()->transform_->SetRotation(myQ.dxFloat4);
+    }
+}
+
+
 //プレイヤーが近いとtrue
 bool EnemyCom::SearchPlayer()
 {

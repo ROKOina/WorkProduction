@@ -94,6 +94,9 @@ public:
     void SetTargetPosition(DirectX::XMFLOAT3 pos) { targetPosition_ = pos; }
     DirectX::XMFLOAT3 GetTargetPosition() { return targetPosition_; }
 
+    //ターゲット位置に移動、回転
+    void GoTargetMove(bool isMove = true, bool isTurn = true);
+
     //プレイヤーが近いとtrue
     bool SearchPlayer();
 

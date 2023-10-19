@@ -27,15 +27,19 @@ public:
 };
 
 // 攻撃出来ないときはプレイヤーを囲むように移動
-class RouteAction : public ActionBase
+class RoutePathAction : public ActionBase
 {
 public:
-	RouteAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
+	RoutePathAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
 	ActionBase::State Run(float elapsedTime);
 
 private:		
 	//四方のどこに近くの敵がいるか見る
 	bool quad_[4];	//0:左上 1:左下 2:右上 3:右下
+
+	//経路探査用変数
+	float pathTimer_ = 1;
+	std::vector<DirectX::XMFLOAT3> routePos_;
 };
 
 // 近接通常攻撃

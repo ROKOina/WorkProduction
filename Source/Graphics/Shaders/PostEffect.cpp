@@ -176,7 +176,7 @@ void PostEffect::Render()
 #pragma endregion
 
 #pragma region ブルーム
-    if(bloomExtract_->IsEnabled())
+    if(bloomExtract_->IsEnabled()&& !bloomKawaseFilter_->IsEnabled())
     {
         //高輝度抽出用バッファ
         {
@@ -296,7 +296,7 @@ void PostEffect::Render()
             }
 
             //ダウンサンプリングして、暈しを複数回する
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < 3; ++i)
             {
                 int index = i + 1;
                 //暈しバッファ更新
@@ -356,14 +356,14 @@ void PostEffect::Render()
 
                 //シェーダーリソースビュー設定
                 drawTexture_->SetShaderResourceView(
-                    renderPost_[1]->diffuseMap,
+                    renderPost_[2]->diffuseMap,
                     static_cast<int>(viewport.Width), static_cast<int>(viewport.Height));
 
                 ID3D11ShaderResourceView* srvs[] =
                 {
                     renderPost_[2]->diffuseMap.Get(),
                     renderPost_[3]->diffuseMap.Get(),
-                    renderPost_[4]->diffuseMap.Get(),
+                    //renderPost_[4]->diffuseMap.Get(),
                 };
                 dc->PSSetShaderResources(
                     1, ARRAYSIZE(srvs),
@@ -506,6 +506,12 @@ void PostEffect::ImGuiRender()
             //太陽とミスト
             if (ImGui::TreeNode("SunAtmosphere"))
             {
+                bool enabled = sun_->IsEnabled();
+                if (ImGui::Checkbox("enabled", &enabled))
+                {
+                    sun_->SetEnabled(enabled);
+                }
+
                 ImGui::SliderFloat4("mistColor", &graphics.shaderParameter3D_.sunAtmosphere.mistColor.x, 0, 1);
                 ImGui::SliderFloat2("mistDensity", &graphics.shaderParameter3D_.sunAtmosphere.mistDensity.x, -1, 1);
                 ImGui::DragFloat2("mist_heightFalloff", &graphics.shaderParameter3D_.sunAtmosphere.mist_heightFalloff.x, 1.0f);

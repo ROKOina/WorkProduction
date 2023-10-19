@@ -1,5 +1,7 @@
 #include "JudgmentDerived.h"
 #include "../EnemyManager.h"
+#include "../EnemyNearCom.h"
+#include "../EnemyFarCom.h"
 
 #include "Components/TransformCom.h"
 
@@ -74,9 +76,10 @@ bool WanderJudgment::Judgment()
 }
 
 // RouteNodeに遷移できるか判定
-bool RouteJudgment::Judgment()
+bool RoutePathJudgment::Judgment()
 {
 	if (owner_.lock()->GetIsAttackFlag())return false;
+	if (!owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsNearFlag())return false;
 
 	//敵マネージャー取得
 	EnemyManager& enemyManager = EnemyManager::Instance();

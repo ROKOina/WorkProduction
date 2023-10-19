@@ -167,6 +167,7 @@
     <ClInclude Include="Source\Components\CameraCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
+    <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\UnityChanToonShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\compute\particle.h" />
@@ -182,7 +183,6 @@
     <ClInclude Include="Source\Graphics\Shaders\3D\ShaderParameter3D.h" />
     <ClInclude Include="Source\Graphics\Shaders\PostEffect.h" />
     <ClInclude Include="Source\Graphics\Shaders\Shader.h" />
-    <ClInclude Include="Source\Graphics\Shaders\Skymap.h" />
     <ClInclude Include="Source\Graphics\Shaders\TextureFormat.h" />
     <ClInclude Include="Source\Graphics\Sprite\Sprite.h" />
     <ClInclude Include="Source\HighResolutionTimer.h" />
@@ -255,6 +255,7 @@
     <ClCompile Include="Source\Components\CameraCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.cpp" />
+    <ClCompile Include="Source\GameSource\Stage\PathSearch.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\UnityChanToonShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\compute\particle.cpp" />
@@ -268,7 +269,6 @@
     <ClCompile Include="Source\Graphics\Model\Model.cpp" />
     <ClCompile Include="Source\Graphics\Model\ModelResource.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\PostEffect.cpp" />
-    <ClCompile Include="Source\Graphics\Shaders\Skymap.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\TextureFormat.cpp" />
     <ClCompile Include="Source\Graphics\Sprite\Sprite.cpp" />
     <ClCompile Include="Source\Input\GamePad.cpp" />
