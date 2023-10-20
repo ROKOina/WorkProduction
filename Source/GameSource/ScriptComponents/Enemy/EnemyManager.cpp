@@ -21,6 +21,10 @@ void EnemyManager::OnGui()
     //{
 
     //}
+
+    //近接的に接近フラグカウント
+    int nearFlagCount = GetCurrentNearFlagCount();
+    ImGui::InputInt("nearFlagCount", &nearFlagCount);
 }
 
 // 敵登録
@@ -59,6 +63,20 @@ int EnemyManager::GetCurrentNearAttackCount()
     }
 
     return attackCount;
+}
+
+//近接敵の接近カウント取得
+int EnemyManager::GetCurrentNearFlagCount()
+{
+    int nearFlagCount = 0;
+    for (auto& e : nearEnemies_)
+    {
+        if (e.enemy.expired())continue;
+        if (e.enemy.lock()->GetComponent<EnemyNearCom>()->GetIsNearFlag())
+            nearFlagCount++;
+    }
+
+    return nearFlagCount;
 }
 
 

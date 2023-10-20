@@ -27,6 +27,10 @@ public:
 public:
     //接近フラグ取得
     bool GetIsNearFlag() { return isNearFlag_; }
+    void SetIsNearFlag(bool flag) { isNearFlag_ = flag; }
+    //経路探索フラグ
+    bool GetIsPathFlag() { return isPathFlag_; }
+    void SetIsPathFlag(bool flag) { isPathFlag_ = flag; }
 
 private:
     //被弾時にアニメーションする時のAITREEを決める
@@ -42,4 +46,7 @@ private:
 private:
     //接近フラグ
     bool isNearFlag_ = false;
+
+    //経路探索フラグ
+    bool isPathFlag_ = false;
 };

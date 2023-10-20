@@ -35,6 +35,8 @@ MovePlayer::MovePlayer(std::shared_ptr<PlayerCom> player) : player_(player)
     std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
     move->SetMoveAcceleration(moveParam_[MOVE_PARAM::WALK].moveAcceleration);
     move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::WALK].moveMaxSpeed);
+
+    dashCoolTimer_ = 1;
 }
 
 void MovePlayer::Update(float elapsedTime)

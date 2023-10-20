@@ -1,8 +1,7 @@
 #include "Graphics/Graphics.h"
 #include "Model.h"
-#include "GameSource\Render\ResourceManager.h"
+#include "ResourceManager.h"
 #include "Components/System/GameObject.h"
-
 
 //コンストラクタで呼ぶイニシャライザ
 void Model::ModelInitialize( const char* filename)
@@ -12,7 +11,9 @@ void Model::ModelInitialize( const char* filename)
 
 	modelResource_->Load(device, filename);
 
-	//this->resource = resource;
+
+	//ResourceManager::Instance().LoadModelResource(filename);
+
 
 	// ノード
 	const std::vector<ModelResource::Node>& resNodes = modelResource_->GetNodes();

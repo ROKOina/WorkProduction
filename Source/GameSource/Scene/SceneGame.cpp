@@ -78,7 +78,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for(int i = 0;i < 5;++i)
+	for(int i = 0;i < 15;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -420,7 +420,7 @@ void SceneGame::Initialize()
 // 終了化
 void SceneGame::Finalize()
 {
-	//StageManager::Instance().Clear();
+
 }
 
 // 更新処理
@@ -503,20 +503,6 @@ void SceneGame::Render()
 	// デバッグレンダラ描画実行
 	graphics.GetDebugRenderer()->Render(dc, mainCamera_->GetView(), mainCamera_->GetProjection());
 
-
-
-	//// 3Dモデル描画
-	//{
-	//	Shader* shader = graphics.GetShader(SHADER_ID::Phong);
-	//	shader->Begin(dc, rc);	//シェーダーにカメラの情報を渡す
-
-	//	////ステージ描画
-	//	//StageManager::Instance().Render(dc, shader);
-	//	////プレイヤー描画
-	//	//player->Render(dc, shader_);
-
-	//	shader->End(dc);
-	//}
 
 	//	//パーティクル
 	//{

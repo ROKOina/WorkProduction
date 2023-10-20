@@ -195,7 +195,7 @@
     <ClInclude Include="Source\GameSource\Math\Mathf.h" />
     <ClInclude Include="Source\Misc.h" />
     <ClInclude Include="Source\ModelAnimation\ModelWatch.h" />
-    <ClInclude Include="Source\GameSource\Render\ResourceManager.h" />
+    <ClInclude Include="Source\Graphics\Model\ResourceManager.h" />
     <ClInclude Include="Source\GameSource\Scene\Scene.h" />
     <ClInclude Include="Source\GameSource\Scene\SceneGame.h" />
     <ClInclude Include="Source\GameSource\Scene\SceneLoading.h" />
@@ -280,7 +280,7 @@
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\GameSource\Math\Mathf.cpp" />
     <ClCompile Include="Source\ModelAnimation\ModelWatch.cpp" />
-    <ClCompile Include="Source\GameSource\Render\ResourceManager.cpp" />
+    <ClCompile Include="Source\Graphics\Model\ResourceManager.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneGame.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneLoading.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneManager.cpp" />

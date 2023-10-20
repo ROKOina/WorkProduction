@@ -47,6 +47,9 @@ public:
 	//‹ßÚ“G‚ÌUŒ‚ƒJƒEƒ“ƒgæ“¾
 	int GetCurrentNearAttackCount();
 
+	//‹ßÚ“G‚ÌÚ‹ßƒJƒEƒ“ƒgæ“¾
+	int GetCurrentNearFlagCount();
+
 	//ID‚©‚ç“G‚ğƒQƒbƒg
 	std::shared_ptr<GameObject> GetEnemyFromId(int id);
 
@@ -104,4 +107,5 @@ private:
 	std::weak_ptr<GameObject> player_;
 
 	int currentIndex_ = 0;
+
 };

@@ -21,10 +21,10 @@ public:
     }
 
     //モデルリソース読み込み
-    std::shared_ptr<ModelResource> LoadModelResource(const char* filename);
+    std::shared_ptr<FbxModelResource> LoadModelResource(const char* filename);
 
 private:
-    using ModelMap = std::map<std::string, std::weak_ptr<ModelResource>>;
+    using ModelMap = std::map<std::string, std::weak_ptr<FbxModelResource>>;
 
     ModelMap models_;
 };

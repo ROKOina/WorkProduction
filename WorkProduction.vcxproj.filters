@@ -147,7 +147,7 @@
     <ClInclude Include="Source\GameSource\Scene\SceneTitle.h">
       <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GameSource\Render\ResourceManager.h">
+    <ClInclude Include="Source\Graphics\Model\ResourceManager.h">
       <Filter>Source\GameSource\Render</Filter>
     </ClInclude>
     <ClInclude Include="Source\GameSource\Stage\Stage.h">
@@ -344,7 +344,7 @@
     <ClCompile Include="Source\GameSource\Scene\SceneTitle.cpp">
       <Filter>Source\GameSource\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameSource\Render\ResourceManager.cpp">
+    <ClCompile Include="Source\Graphics\Model\ResourceManager.cpp">
       <Filter>Source\GameSource\Render</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\Stage\Stage.cpp">

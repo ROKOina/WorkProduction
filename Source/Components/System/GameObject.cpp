@@ -22,16 +22,6 @@ void GameObject::Start()
 	}
 }
 
-// 更新前
-void GameObject::UpdateStart()
-{
-	if (!isEnabled_)return;
-	for (std::shared_ptr<Component>& component : components_)
-	{
-		component->UpdateStart();
-	}
-}
-
 // 更新
 void GameObject::Update(float elapsedTime)
 {
@@ -213,17 +203,13 @@ void GameObjectManager::Update(float elapsedTime)
 		}
 	}
 
-	//アップデート前に呼ぶ関数
-	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
-	{
-		obj->UpdateStart();
-	}
-
+	//更新
 	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 	{
 		obj->Update(elapsedTime);
 	}
 
+	//削除
 	for (const std::shared_ptr<GameObject>& obj : removeGameObject_)
 	{
 		EraseObject(startGameObject_, obj);
@@ -237,6 +223,7 @@ void GameObjectManager::Update(float elapsedTime)
 	}
 	removeGameObject_.clear();
 
+	//各オブジェクト解放(削除)
 	{
 		//collider解放
 		for (int col = 0; col < colliderObject_.size(); ++col)

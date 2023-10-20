@@ -166,6 +166,11 @@ void EnemyNearCom::NearFlagProcess()
 {
     //接近フラグがonの時離れたらoffにする
     if (!isNearFlag_)return;
+    if (activeNode_) 
+    {
+        //経路探査中は接近フラグを切らない
+        if (activeNode_->GetId() == static_cast<int>(AI_TREE::ROUTE))return;
+    }
 
     DirectX::XMVECTOR playerPos = DirectX::XMLoadFloat3(&GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
     DirectX::XMVECTOR enemyPos = DirectX::XMLoadFloat3(&GetGameObject()->transform_->GetWorldPosition());

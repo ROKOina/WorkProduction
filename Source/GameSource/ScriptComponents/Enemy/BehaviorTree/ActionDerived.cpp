@@ -20,10 +20,6 @@ ActionBase::State IdleAction::Run(float elapsedTime)
 	{
 	case 0:
 	{
-		////アニメーター
-		//std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
-		//animator->SetTriggerOn("idle");
-
 		runTimer_ = 2;
 
 		step_++;
@@ -61,10 +57,6 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 	case 0:
 		// 徘徊モーション設定
 	{
-		////アニメーター
-		//std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
-		//animator->SetTriggerOn("walk");
-
 		//移動
 		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
 		move->SetMoveMaxSpeed(owner_.lock()->GetMoveDataEnemy().walkMaxSpeed);
@@ -164,8 +156,14 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		//接近エリアに入ったら
 		if (dist < EnemyManager::Instance().GetNearEnemyLevel().radius)
 		{
-			if (!owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsNearFlag())
+			std::shared_ptr<EnemyNearCom> enemyNear = owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>();
+			//接近フラグを持っていない場合
+			if (!enemyNear->GetIsNearFlag())
 			{
+				//フラグ関係なく接近しすぎた場合
+				if (dist < 3)
+					enemyNear->SetIsNearFlag(true);
+
 				//接近申請
 				EnemyManager::Instance().SendMessaging(owner_.lock()->GetID(), EnemyManager::AI_ID::AI_INDEX, MESSAGE_TYPE::MsgAskNearRight);
 
@@ -220,7 +218,7 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 		for (int i = 0; i < 4; ++i)
 			quad_[i] = false;	//0:左上 1:左下 2:右上 3:右下
 
-		runTimer_ = 2;
+		runTimer_ = 5;
 		step_++;
 	}
 	break;
@@ -254,24 +252,16 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 			if (dot > 0)
 			{
 				if (cross > 0)	//右上
-				{
 					quad_[2] = true;
-				}
 				else	//左上
-				{
 					quad_[0] = true;
-				}
 			}
 			else
 			{
 				if (cross > 0)	//右下
-				{
 					quad_[3] = true;
-				}
 				else	//左下
-				{
 					quad_[1] = true;
-				}
 			}
 		}
 
@@ -320,7 +310,11 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 	break;
 	case 2:
 	{
+		//経路探索フラグON
+		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsPathFlag(true);
+
 		//移動経路を探索
+		//方向を見る
 		DIRECTION dir= DIRECTION::NONE_DIR;
 		int count = 0;	//敵の塊かたをみる
 		int quadSave = -1;	//塊
@@ -328,10 +322,12 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 		{
 			if (quad_[i])
 			{
+				//敵がいる方向を保存してカウントする
 				quadSave = i;
+				count++;
 				continue;
 			}
-
+			//敵がいない方に配置
 			if(i==0)
 				dir = DIRECTION::DOWN_L;
 			if(i==1)
@@ -340,18 +336,26 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 				dir = DIRECTION::DOWN_R;
 			if(i==3)
 				dir = DIRECTION::UP_R;
-			count++;
 		}
-		if (count == 1)
+		if (count == 1)	//１塊だった場合
 		{
-
+			//反対側に配置する
+			if(quadSave==0)
+				dir = DIRECTION::UP_R;
+			if(quadSave==1)
+				dir = DIRECTION::DOWN_R;
+			if(quadSave==2)
+				dir = DIRECTION::UP_L;
+			if(quadSave==3)
+				dir = DIRECTION::DOWN_L;
 		}
 
 		DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
 		playerPos.y = 0;
 
+		//経路を保存
 		routePos_ = SeachGraph::Instance().SearchEnemySetPos(owner_.lock()->GetGameObject()->transform_->GetWorldPosition(), playerPos, dir);
-
+		//経路制限時間
 		pathTimer_ = 1;
 
 		step_++;
@@ -361,38 +365,20 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 	{
 		//経路移動
 		runTimer_ -= elapsedTime;
+		pathTimer_ -= elapsedTime;
 
-		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
-		DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
-		playerPos.y = 0;
+		if (routePos_.size() <= 0)return ActionBase::State::Complete;
 
-		for (int i = 0; i < 4; ++i)
-		{
-			if (quad_[i])continue;
-
-			//Z軸
-			if (i % 2 == 0)
-				playerPos.z += 0.5f;
-			else
-				playerPos.z -= 0.5f;
-
-			//X軸
-			if (i > 1)
-				playerPos.x += 0.5f;
-			else
-				playerPos.x -= 0.5f;
-		}
-
-		//あとは上のポスに移動するのをここに作る
 		// 目標地点を設定
-		owner_.lock()->SetTargetPosition(playerPos);
+		owner_.lock()->SetTargetPosition(routePos_[0]);
 
 		//ターゲットポジションに移動
 		owner_.lock()->GoTargetMove();
 
 		// 目的地点までのXZ平面での距離判定
+		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
 		DirectX::XMFLOAT3 position = myTransform->GetWorldPosition();
-		DirectX::XMFLOAT3 targetPosition = owner_.lock()->GetTargetPosition();
+		DirectX::XMFLOAT3 targetPosition = routePos_[0];
 
 		float vx = targetPosition.x - position.x;
 		float vy = targetPosition.y - position.y;
@@ -408,12 +394,21 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 		//目標地点に着いたら終わる
 		if (dist < 0.5f)
 		{
-			return ActionBase::State::Complete;
+			if (routePos_.size() < 2)
+			{
+				//経路探索フラグOFF
+				owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsPathFlag(false);
+				return ActionBase::State::Complete;
+			}
+			else
+				routePos_.erase(routePos_.begin());
 		}
 
 		//時間で終わる
 		if (runTimer_ < 0)
-		{
+		{				
+			//経路探索フラグOFF
+			owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsPathFlag(false);
 			return ActionBase::State::Complete;
 		}
 
@@ -422,6 +417,8 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 	//強制終了
 	case  Action::End_STEP:
 	{
+		//経路探索フラグOFF
+		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsPathFlag(false);
 		step_ = 0;
 	}
 	break;

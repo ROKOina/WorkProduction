@@ -81,7 +81,7 @@ void FbxModelResource::Load(ID3D11Device* device, const char* filename, const ch
 
 	//保存データあればそれでロード
 	std::filesystem::path cereal_filename(filename);
-	cereal_filename.replace_extension("cereal");
+	cereal_filename.replace_extension("mdl");
 	std::string cereal_filenameString = cereal_filename.string<char>();
 	if (std::filesystem::exists(cereal_filename.c_str()))
 	{

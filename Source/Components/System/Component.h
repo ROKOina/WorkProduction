@@ -21,9 +21,6 @@ public:
 	// GUI描画
 	virtual void OnGUI() {}
 
-	//Updateの前に呼ぶ
-	virtual void UpdateStart() {}
-
 	// ゲームオブジェクト設定
 	void SetGameObject(std::shared_ptr<GameObject> obj) { this->gameObject_ = obj; }
 

@@ -90,6 +90,7 @@ public:
 		Player = 10,
 		PlayerMawari,
 		Enemy,
+		EnemyMawari,
 	};
 
 	//更新
@@ -111,19 +112,19 @@ public:
 	//ワールド位置からnodeVecゲット
 	std::shared_ptr<NodePath> GetNodeVecFromWorldPos(DirectX::XMFLOAT3 pos);
 
-	std::vector<std::shared_ptr<NodePath>> nodeVec;//全ノードを保持するベクター
-	int startId = 0;//サーチのスタート位置
-	int goalId = 0;//サーチの終了位置
-	float thresholdY = 0;//高さの閾値
-	int   cellNo = 0;
-	int cellSizeX = 0;  /*ダイクストラの升目*/
-	int cellSizeZ = 0;  /*マス目数*/
+	std::vector<std::shared_ptr<NodePath>> nodeVec_;//全ノードを保持するベクター
+	int startId_ = 0;//サーチのスタート位置
+	int goalId_ = 0;//サーチの終了位置
+	float thresholdY_ = 0;//高さの閾値
+	int   cellNo_ = 0;
+	int cellSizeX_ = 0;  /*ダイクストラの升目*/
+	int cellSizeZ_ = 0;  /*マス目数*/
 
-	float meshSize = 0;  /*升目の幅*/
-	float meshOffsetX = 0;  /*オフセット*/
-	float meshOffsetZ = 0;  /*オフセット*/
-	float meshCenterX = 0;
-	float meshCenterZ = 0;
+	float meshSize_ = 0;  /*升目の幅*/
+	float meshOffsetX_ = 0;  /*オフセット*/
+	float meshOffsetZ_ = 0;  /*オフセット*/
+	float meshCenterX_ = 0;
+	float meshCenterZ_ = 0;
 
 
 

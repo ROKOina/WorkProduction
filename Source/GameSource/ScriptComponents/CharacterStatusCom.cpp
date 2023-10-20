@@ -12,11 +12,6 @@ void CharacterStatusCom::Start()
 
 }
 
-//更新前
-void CharacterStatusCom::UpdateStart()
-{
-}
-
 // 更新処理
 void CharacterStatusCom::Update(float elapsedTime)
 {
