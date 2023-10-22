@@ -9,6 +9,8 @@
 #include "Graphics\Dx11StateLib.h"
 #include "Shaders\3D\ShaderParameter3D.h"
 
+#include "ThreadPool/ThreadPool.h"
+
 #include <mutex>
 
 enum SHADER_ID
@@ -81,6 +83,9 @@ public:
 	//ミューテックス取得
 	std::mutex& GetMutex() { return mutex_; }
 
+	//スレッドプール取得
+	ThreadPool* GetThreadPool() { return threadPool_.get(); }
+
 	//public:	//サブウィンドウ
 	//	// スワップチェイン作成
 	//	void CreateSubWindowSwapChain(HWND hWnd_, int width, int height);
@@ -133,6 +138,9 @@ private:
 
 	float fps_;
 	std::mutex	mutex_;
+
+	//スレッドプール
+	std::unique_ptr<ThreadPool> threadPool_;
 
 	//世界の速度
 public:

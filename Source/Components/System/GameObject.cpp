@@ -8,6 +8,7 @@
 #include "../ColliderCom.h"
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
 #include "GameSource\ScriptComponents\Weapon\SwordTrailCom.h"
+#include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
 #include "GameSource/Math/Collision.h"
 
 //ゲームオブジェクト
@@ -133,6 +134,22 @@ void GameObjectManager::Remove(std::shared_ptr<GameObject> obj)
 	removeGameObject_.insert(obj);
 }
 
+bool GameObjectManager::EnemyObjFind(std::shared_ptr<GameObject> obj)
+{
+	if (obj->GetComponent<EnemyCom>())return true;
+
+	if (obj->GetParent())
+		return EnemyObjFind(obj->GetParent());
+
+	return false;
+}
+
+void GameObjectManager::ThreadEnemyUpdate(int i, float elapsedTime)
+{
+	enemyGameObject_[i].lock()->Update(elapsedTime);
+}
+
+
 // 更新
 void GameObjectManager::Update(float elapsedTime)
 {
@@ -203,11 +220,29 @@ void GameObjectManager::Update(float elapsedTime)
 		}
 	}
 
+	enemyGameObject_.clear();
 	//更新
 	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 	{
-		obj->Update(elapsedTime);
+		if (EnemyObjFind(obj))
+			enemyGameObject_.emplace_back(obj);
+		else
+			obj->Update(elapsedTime);
 	}
+
+	int enemyCount = enemyGameObject_.size();
+	for (int enemyC = 0; enemyC < enemyCount; ++enemyC)
+	{
+		future.emplace_back(Graphics::Instance().GetThreadPool()->submit([&](auto id, auto elapsedTime) { return ThreadEnemyUpdate(id, elapsedTime); }, enemyC, elapsedTime));
+	}
+
+	for (auto& f : future)
+	{
+		f.get();
+	}
+	future.clear();
+
+
 
 	//削除
 	for (const std::shared_ptr<GameObject>& obj : removeGameObject_)

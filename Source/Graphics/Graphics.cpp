@@ -201,6 +201,11 @@ Graphics::Graphics(HWND hWnd)
 		dx11State_ = std::make_unique<Dx11StateLib>();
 		dx11State_->Dx11StateInit(device_.Get());
 	}
+
+	//スレッドプール
+	{
+		threadPool_ = std::make_unique<ThreadPool>(8);
+	}
 }
 
 // デストラクタ

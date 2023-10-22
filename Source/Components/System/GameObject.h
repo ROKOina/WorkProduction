@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <DirectXMath.h>
+#include <future>
 
 // 前方宣言
 class Component;
@@ -164,18 +165,19 @@ private:
 	//オブジェクト解放
 	void EraseObject(std::vector<std::shared_ptr<GameObject>>& objs, std::shared_ptr<GameObject> removeObj);
 
+	void ThreadEnemyUpdate(int i, float elapsedTime);
+
 private:
 	std::vector<std::shared_ptr<GameObject>>		startGameObject_;
 	std::vector<std::shared_ptr<GameObject>>		updateGameObject_;
 	std::set<std::shared_ptr<GameObject>>		selectionGameObject_;
 	std::set<std::shared_ptr<GameObject>>		removeGameObject_;
 
-	//当たり判定を格納
-	//struct HitJudge
-	//{
-	//	std::shared_ptr<Collider> collider;
-	//	int type;
-	//};
+	std::vector<std::weak_ptr<GameObject>>		enemyGameObject_;
+	bool EnemyObjFind(std::shared_ptr<GameObject> obj);
+
+
+
 	std::vector<std::weak_ptr<Collider>>	colliderObject_;
 
 	//描画順に格納する
@@ -187,4 +189,7 @@ private:
 
 	bool					isHiddenLister_ = false;
 	bool					isHiddenDetail_ = false;
+
+	//スレッド用
+	std::vector<std::future<void>> future;
 };

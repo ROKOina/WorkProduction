@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <DirectXMath.h>
+#include <mutex>
 
 class GameObject;
 
@@ -140,4 +141,6 @@ public:
 
 	//デバッグ表示
 	bool debugEnabled_ = true;
+
+	std::mutex mutex_;
 };

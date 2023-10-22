@@ -205,6 +205,7 @@
     <ClInclude Include="Source\GameSource\Stage\StageMain.h" />
     <ClInclude Include="Source\GameSource\Stage\StageManager.h" />
     <ClInclude Include="Source\SystemStruct\QuaternionStruct.h" />
+    <ClInclude Include="Source\ThreadPool\ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\DDSTextureLoader.cpp" />
@@ -288,6 +289,7 @@
     <ClCompile Include="Source\GameSource\Stage\Stage.cpp" />
     <ClCompile Include="Source\GameSource\Stage\StageMain.cpp" />
     <ClCompile Include="Source\GameSource\Stage\StageManager.cpp" />
+    <ClCompile Include="Source\ThreadPool\ThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\2D\PostEffect\FullScreen.hlsli" />

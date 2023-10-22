@@ -260,9 +260,6 @@ void SceneGame::Initialize()
 			//std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();
 			//trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
 		}
-
-
-
 	}
 
 
@@ -427,9 +424,6 @@ void SceneGame::Finalize()
 void SceneGame::Update(float elapsedTime)
 {
 	GameObjectManager::Instance().Update(elapsedTime);
-
-	////ステージ更新処理
-	//StageManager::Instance().Update(elapsedTime);
 	
 	//経路探査
 	SeachGraph::Instance().UpdatePath();

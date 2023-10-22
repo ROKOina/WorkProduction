@@ -276,6 +276,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyManager.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\TelegramEnemy.h" />
     <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
+    <ClInclude Include="Source\ThreadPool\ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -519,6 +520,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\Stage\PathSearch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ThreadPool\ThreadPool.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

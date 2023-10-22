@@ -423,6 +423,8 @@ std::shared_ptr<EdgePath>  SeachGraph::seachMinCostEdge(std::vector<std::shared_
 //プレイヤーの周りに配置するための道順を返す
 std::vector<DirectX::XMFLOAT3> SeachGraph::SearchEnemySetPos(DirectX::XMFLOAT3 enemyPos, DirectX::XMFLOAT3 goalPos, DIRECTION dirSet)
 {
+	std::lock_guard<std::mutex> lock(mutex_);
+
 	goalId_ = GetNodeVecFromWorldPos(goalPos)->NodeID;
 	if (dirSet != NONE_DIR)	//ポジションから少しずらしたい場合につかう
 		goalId_ = nodeVec_[goalId_]->edge[dirSet]->distnationNode;
