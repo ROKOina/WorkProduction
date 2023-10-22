@@ -165,7 +165,8 @@ private:
 	//オブジェクト解放
 	void EraseObject(std::vector<std::shared_ptr<GameObject>>& objs, std::shared_ptr<GameObject> removeObj);
 
-	void ThreadEnemyUpdate(int i, float elapsedTime);
+	//スレッドで敵更新
+	void ThreadEnemyUpdate(int id, float elapsedTime);
 
 private:
 	std::vector<std::shared_ptr<GameObject>>		startGameObject_;

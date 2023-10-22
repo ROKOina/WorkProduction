@@ -9,6 +9,7 @@
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
 #include "GameSource\ScriptComponents\Weapon\SwordTrailCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
+#include "GameSource\ScriptComponents\Enemy\EnemyManager.h"
 #include "GameSource/Math/Collision.h"
 
 //ゲームオブジェクト
@@ -144,9 +145,9 @@ bool GameObjectManager::EnemyObjFind(std::shared_ptr<GameObject> obj)
 	return false;
 }
 
-void GameObjectManager::ThreadEnemyUpdate(int i, float elapsedTime)
+void GameObjectManager::ThreadEnemyUpdate(int id, float elapsedTime)
 {
-	enemyGameObject_[i].lock()->Update(elapsedTime);
+	enemyGameObject_[id].lock()->Update(elapsedTime);
 }
 
 
@@ -278,6 +279,9 @@ void GameObjectManager::Update(float elapsedTime)
 				--ren;
 			}
 		}
+
+		//EnemyManagerの配列からEnemy解放
+		EnemyManager::Instance().EraseExpiredEnemy();
 	}
 
 }
@@ -303,20 +307,23 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 	//トレイル描画
 	SwordTrailRender();
 
-	//当たり判定用デバッグ描画
-	for (auto& col : colliderObject_)
+	//debug
+	if(1)
 	{
-		if (!col.lock()->GetEnabled())continue;
-		if (!col.lock()->GetGameObject()->GetEnabled())continue;
-		col.lock()->DebugRender();
+		//当たり判定用デバッグ描画
+		for (auto& col : colliderObject_)
+		{
+			if (!col.lock()->GetEnabled())continue;
+			if (!col.lock()->GetGameObject()->GetEnabled())continue;
+			col.lock()->DebugRender();
+		}
+
+		// リスター描画
+		DrawLister();
+
+		// 詳細描画
+		DrawDetail();
 	}
-
-	// リスター描画
-	DrawLister();
-
-	// 詳細描画
-	DrawDetail();
-
 }
 
 //ゲームオブジェクトを探す

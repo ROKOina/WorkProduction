@@ -5,7 +5,7 @@
 #include <DirectXMath.h>
 #include "Graphics/Model/FbxModelResource.h"
 
-#include <thread>
+#include <future>
 
 // モデル
 class Model
@@ -47,7 +47,7 @@ public:
 	const DirectX::XMFLOAT4 GetMaterialColor() const { return materialColor_; }
 	void SetMaterialColor(DirectX::XMFLOAT4 color) { materialColor_ = color; }
 
-	void JoinThred() { th.join(); }
+	void JoinThred() { future.get(); }
 
 private:
 	//std::shared_ptr<ModelResource>	resource;
@@ -57,5 +57,5 @@ private:
 	DirectX::XMFLOAT4 materialColor_ = { 1,1,1,1 };
 
 	//モデル読み込みをスレッド化
-	std::thread th;
+	std::future<void> future;
 };

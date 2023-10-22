@@ -14,9 +14,6 @@
 #include "backends\imgui_impl_dx11.h"
 #include "backends\imgui_impl_win32.h"
 
-//#include "ModelAnimation\ModelWatch.h"
-//ModelWatch mw;
-
 // 垂直同期間隔設定
 static const int syncInterval = 1;
 
@@ -128,10 +125,6 @@ void Framework::CalculateFrameStats()
 int Framework::Run()
 {
 	MSG msg = {};
-
-	////サブウィンドウ追加
-	//AddSubWindow();
-	//AddSubWindow(1080,720);
 	
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -176,10 +169,6 @@ int Framework::Run()
 				;
 			Update(elapsedTime, fps_);
 			Render(elapsedTime);
-
-			////サブウィンドウ更新
-			//SubWindowManager::Instance().SetSyncInterval(syncInterval);
-			//SubWindowManager::Instance().Run(elapsedTime);
 		}
 	}
 
@@ -187,8 +176,6 @@ int Framework::Run()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-
-	//SubWindowManager::Instance().Clear();	//サブウィンドウクリア
 
 	//// ComPtr用リーク型名表示　作成
 	//typedef HRESULT(__stdcall* fPtr)(const IID&, void**);
@@ -246,21 +233,4 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 	return 0;
-}
-
-//サブウィンドウ
-void Framework::AddSubWindow(int width, int height)
-{
-	RECT rc = { 0, 0, width, height };
-	HWND hWnd2 = CreateWindow(_T("Game"), _T(""), 
-		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX | WS_VISIBLE | BS_PUSHBUTTON,
-		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
-		NULL, NULL, ::GetModuleHandle(NULL), NULL);
-	ShowWindow(hWnd2, __argc);
-
-	Inspector* i = new Inspector(hWnd2, countSubWindow_, width, height);
-	SetWindowLongPtr(hWnd2, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&i));
-
-	SubWindowManager::Instance().AddSubWindow(i);
-	countSubWindow_++;
 }

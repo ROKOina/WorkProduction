@@ -6,10 +6,6 @@
 #include "Graphics/Graphics.h"
 #include "Input/input.h"
 
-//サブウィンドウ
-#include "Inspector\Inspector.h"
-#include "Inspector\SubWindowManager.h"
-
 #include "dxgidebug.h"
 
 class Framework
@@ -40,9 +36,5 @@ private:
 
 	Microsoft::WRL::ComPtr<IDXGIDebug>				debugGI_;
 	Microsoft::WRL::ComPtr<ID3D11Debug>				debugID_;
-
-private:	//サブウィンドウ
-	void AddSubWindow(int width = 100, int height = 100);
-	int countSubWindow_;
 };
 

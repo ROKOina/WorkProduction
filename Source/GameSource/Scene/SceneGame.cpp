@@ -25,8 +25,6 @@
 #include "GameSource\ScriptComponents\Weapon\SwordTrailCom.h"
 #include "GameSource\ScriptComponents\CharacterStatusCom.h"
 
-#include <thread>
-
 #include "GameSource\ScriptComponents\Enemy\EnemyManager.h"
 
 //経路探査
@@ -112,14 +110,6 @@ void SceneGame::Initialize()
 
 		std::shared_ptr<EnemyNearCom> e = obj->AddComponent<EnemyNearCom>();
 
-		//攻撃当たり判定用
-		{
-			std::shared_ptr<GameObject> attack = obj->AddChildObject();
-			attack->SetName("picolaboAttack");
-			std::shared_ptr<SphereColliderCom> attackCol = attack->AddComponent<SphereColliderCom>();
-			attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
-			attackCol->SetJudgeTag(COLLIDER_TAG::Player);
-		}
 		//ジャスト回避用
 		{
 			std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
@@ -182,10 +172,6 @@ void SceneGame::Initialize()
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);
 
-		////発光を消す
-		//std::vector<ModelResource::Material>& materials = r->GetModel()->GetResourceShared()->GetMaterialsEdit();
-		//materials[0].toonStruct._Emissive_Color.w = 0;
-
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
 		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
@@ -203,14 +189,6 @@ void SceneGame::Initialize()
 
 		std::shared_ptr<EnemyFarCom> e = obj->AddComponent<EnemyFarCom>();
 
-		//攻撃当たり判定用
-		{
-			std::shared_ptr<GameObject> attack = obj->AddChildObject();
-			attack->SetName("picolaboAttack");
-			std::shared_ptr<SphereColliderCom> attackCol = attack->AddComponent<SphereColliderCom>();
-			attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
-			attackCol->SetJudgeTag(COLLIDER_TAG::Player);
-		}
 		//ジャスト回避用
 		{
 			std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
@@ -348,12 +326,12 @@ void SceneGame::Initialize()
 			picoJust->transform_->SetWorldPosition({ 0,0,100 });
 		}
 
-		//見る
-		{
-			std::shared_ptr<GameObject> look = obj->AddChildObject();
-			look->SetName("look");
-			look->AddComponent<SphereColliderCom>();
-		}
+		////見る
+		//{
+		//	std::shared_ptr<GameObject> look = obj->AddChildObject();
+		//	look->SetName("look");
+		//	look->AddComponent<SphereColliderCom>();
+		//}
 
 		//押し出し用当たり判定
 		{
@@ -594,14 +572,6 @@ void SceneGame::Render()
 
 				std::shared_ptr<EnemyNearCom> e = obj->AddComponent<EnemyNearCom>();
 
-				//攻撃当たり判定用
-				{
-					std::shared_ptr<GameObject> attack = obj->AddChildObject();
-					attack->SetName("picolaboAttack");
-					std::shared_ptr<SphereColliderCom> attackCol = attack->AddComponent<SphereColliderCom>();
-					attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
-					attackCol->SetJudgeTag(COLLIDER_TAG::Player);
-				}
 				//ジャスト回避用
 				{
 					std::shared_ptr<GameObject> justAttack = obj->AddChildObject();

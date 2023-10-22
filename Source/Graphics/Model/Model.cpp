@@ -46,7 +46,9 @@ Model::Model(const char* filename)
 {
 	//ModelInitialize(filename);
 
-	th = std::thread(&Model::ModelInitialize, this, filename);
+	//th = std::thread(&Model::ModelInitialize, this, filename);
+
+	future = Graphics::Instance().GetThreadPool()->submit([&](auto filename) { return ModelInitialize(filename); }, filename);
 }
 
 // •ÏŠ·s—ñŒvZ

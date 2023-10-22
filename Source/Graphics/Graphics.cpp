@@ -204,7 +204,7 @@ Graphics::Graphics(HWND hWnd)
 
 	//スレッドプール
 	{
-		threadPool_ = std::make_unique<ThreadPool>(8);
+		threadPool_ = std::make_unique<ThreadPool>();
 	}
 }
 

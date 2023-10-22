@@ -57,6 +57,8 @@ bool NearAttackJudgment::Judgment()
 // WanderNodeに遷移できるか判定
 bool WanderJudgment::Judgment()
 {
+	if (owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsPathFlag())return false;
+
 	// 目的地点までのXZ平面での距離判定
 	std::shared_ptr<GameObject> ownerObj = owner_.lock()->GetGameObject();
 	DirectX::XMFLOAT3 position = ownerObj->transform_->GetWorldPosition();
@@ -83,6 +85,11 @@ bool RoutePathJudgment::Judgment()
 
 	//敵マネージャー取得
 	EnemyManager& enemyManager = EnemyManager::Instance();
+
+	//経路探査の数で判定
+	if (enemyManager.GetCurrentNearPathCount() >= enemyManager.GetNearEnemyLevel().togetherPathCount)
+		return false;
+
 	//攻撃カウントがいっぱいの時
 	if (enemyManager.GetCurrentNearAttackCount() >= enemyManager.GetNearEnemyLevel().togetherAttackCount)
 	{

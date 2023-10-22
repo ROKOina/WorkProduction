@@ -189,12 +189,9 @@
     <ClInclude Include="Source\Input\GamePad.h" />
     <ClInclude Include="Source\Input\Input.h" />
     <ClInclude Include="Source\Input\Mouse.h" />
-    <ClInclude Include="Source\Inspector\Inspector.h" />
-    <ClInclude Include="Source\Inspector\SubWindowManager.h" />
     <ClInclude Include="Source\Logger.h" />
     <ClInclude Include="Source\GameSource\Math\Mathf.h" />
     <ClInclude Include="Source\Misc.h" />
-    <ClInclude Include="Source\ModelAnimation\ModelWatch.h" />
     <ClInclude Include="Source\Graphics\Model\ResourceManager.h" />
     <ClInclude Include="Source\GameSource\Scene\Scene.h" />
     <ClInclude Include="Source\GameSource\Scene\SceneGame.h" />
@@ -275,12 +272,9 @@
     <ClCompile Include="Source\Input\GamePad.cpp" />
     <ClCompile Include="Source\Input\Input.cpp" />
     <ClCompile Include="Source\Input\Mouse.cpp" />
-    <ClCompile Include="Source\Inspector\Inspector.cpp" />
-    <ClCompile Include="Source\Inspector\SubWindowManager.cpp" />
     <ClCompile Include="Source\Logger.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\GameSource\Math\Mathf.cpp" />
-    <ClCompile Include="Source\ModelAnimation\ModelWatch.cpp" />
     <ClCompile Include="Source\Graphics\Model\ResourceManager.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneGame.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneLoading.cpp" />
@@ -289,7 +283,6 @@
     <ClCompile Include="Source\GameSource\Stage\Stage.cpp" />
     <ClCompile Include="Source\GameSource\Stage\StageMain.cpp" />
     <ClCompile Include="Source\GameSource\Stage\StageManager.cpp" />
-    <ClCompile Include="Source\ThreadPool\ThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\2D\PostEffect\FullScreen.hlsli" />

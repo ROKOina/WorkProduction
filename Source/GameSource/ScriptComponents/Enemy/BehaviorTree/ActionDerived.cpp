@@ -297,7 +297,22 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 				}
 			}
 
-			//位置がかぶっていないなら何もせずに終わる
+			//敵に囲まれていたら何もしない
+			if(!endAction)
+			{
+				bool isNotRun = true;
+				for (int i = 0; i < 4; ++i)	//敵がいるか確認
+				{
+					if (!quad_[i])	//いない場所があればfalseにする
+					{
+						isNotRun = false;
+						break;
+					}
+				}
+				endAction = isNotRun;
+			}
+
+			//何もせず終わる
 			if (endAction)
 			{
 				step_ = 0;
@@ -309,7 +324,18 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 	}
 	break;
 	case 2:
-	{
+	{	
+		//敵マネージャー取得
+		EnemyManager& enemyManager = EnemyManager::Instance();
+
+		//探索フラグの数で判定
+		if (enemyManager.GetCurrentNearPathCount() >= enemyManager.GetNearEnemyLevel().togetherPathCount
+			&& !owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsPathFlag())
+		{
+			step_ = 0;
+			return ActionBase::State::Complete;
+		}
+
 		//経路探索フラグON
 		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsPathFlag(true);
 
@@ -519,8 +545,6 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 		std::shared_ptr<RendererCom> renderer = owner_.lock()->GetGameObject()->GetComponent<RendererCom>();
 		std::vector<ModelResource::Material>& materials = renderer->GetModel()->GetResourceShared()->GetMaterialsEdit();
 		materials[0].toonStruct._Emissive_Color.w = 0;
-
-		owner_.lock()->GetGameObject()->GetChildFind("picolaboAttack")->GetComponent<Collider>()->SetEnabled(false);
 
 		step_ = 0;
 	}

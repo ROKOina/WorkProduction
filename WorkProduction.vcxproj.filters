@@ -123,12 +123,6 @@
     <ClInclude Include="Source\Graphics\Encoding.h">
       <Filter>Source\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Inspector\Inspector.h">
-      <Filter>Source\Inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Inspector\SubWindowManager.h">
-      <Filter>Source\Inspector</Filter>
-    </ClInclude>
     <ClInclude Include="Source\GameSource\Math\Collision.h">
       <Filter>Source\GameSource\Math</Filter>
     </ClInclude>
@@ -200,9 +194,6 @@
     </ClInclude>
     <ClInclude Include="External\imgui\ImGuizmo\ImZoomSlider.h">
       <Filter>External\imgui\ImGuizmo</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ModelAnimation\ModelWatch.h">
-      <Filter>Source\ModelAnimation</Filter>
     </ClInclude>
     <ClInclude Include="External\imgui-docking\imconfig.h">
       <Filter>External\imguiDocking</Filter>
@@ -321,12 +312,6 @@
     <ClCompile Include="Source\Graphics\Encoding.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Inspector\Inspector.cpp">
-      <Filter>Source\Inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Inspector\SubWindowManager.cpp">
-      <Filter>Source\Inspector</Filter>
-    </ClCompile>
     <ClCompile Include="Source\GameSource\Math\Collision.cpp">
       <Filter>Source\GameSource\Math</Filter>
     </ClCompile>
@@ -389,9 +374,6 @@
     </ClCompile>
     <ClCompile Include="External\imgui\ImGuizmo\ImSequencer.cpp">
       <Filter>External\imgui\ImGuizmo</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ModelAnimation\ModelWatch.cpp">
-      <Filter>Source\ModelAnimation</Filter>
     </ClCompile>
     <ClCompile Include="External\imgui-docking\imgui.cpp">
       <Filter>External\imguiDocking</Filter>
@@ -520,9 +502,6 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\Stage\PathSearch.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\ThreadPool\ThreadPool.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

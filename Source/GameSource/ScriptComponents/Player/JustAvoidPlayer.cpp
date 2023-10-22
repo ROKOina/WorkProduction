@@ -109,10 +109,10 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
 
             //o‚·
             justPico[i]->SetEnabled(true);
-            if (inputFlag)
-                justAnim->PlayAnimation(25, false);
-            else
-                justAnim->PlayAnimation(24, false);
+            //if (inputFlag)
+            //    justAnim->PlayAnimation(25, false);
+            //else
+            //    justAnim->PlayAnimation(24, false);
         }
 
         //“G‚Ì•û‚ðŒü‚­

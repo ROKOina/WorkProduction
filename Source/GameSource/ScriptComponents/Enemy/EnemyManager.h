@@ -50,8 +50,14 @@ public:
 	//近接敵の接近カウント取得
 	int GetCurrentNearFlagCount();
 
+	//近接敵の経路探査カウント取得
+	int GetCurrentNearPathCount();
+
 	//IDから敵をゲット
 	std::shared_ptr<GameObject> GetEnemyFromId(int id);
+
+	//空の敵を削除
+	void EraseExpiredEnemy();
 
 	//AI関係
 
@@ -76,6 +82,8 @@ struct NearEnemyLevel	//近接敵の集まり方のデザイン
 	int inRadiusCount = 3;	//半径に何人入れるか
 
 	int togetherAttackCount = 2;	//同時に攻撃できる回数
+
+	int togetherPathCount = 2;	//同時に経路探査できる回数
 };
 
 struct FarEnemyLevel	//遠隔敵の集まり方のデザイン

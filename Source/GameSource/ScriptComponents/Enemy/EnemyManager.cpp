@@ -25,6 +25,10 @@ void EnemyManager::OnGui()
     //‹ßÚ“I‚ÉÚ‹ßƒtƒ‰ƒOƒJƒEƒ“ƒg
     int nearFlagCount = GetCurrentNearFlagCount();
     ImGui::InputInt("nearFlagCount", &nearFlagCount);
+
+    //‹ßÚ“I‚ÉŒo˜H’T¸ƒtƒ‰ƒOƒJƒEƒ“ƒg
+    int nearPathCount = GetCurrentNearPathCount();
+    ImGui::InputInt("nearPathCount", &nearPathCount);
 }
 
 // “G“o˜^
@@ -77,6 +81,20 @@ int EnemyManager::GetCurrentNearFlagCount()
     }
 
     return nearFlagCount;
+}
+
+//‹ßÚ“G‚ÌŒo˜H’T¸ƒJƒEƒ“ƒgæ“¾
+int EnemyManager::GetCurrentNearPathCount()
+{
+    int nearPathCount = 0;
+    for (auto& e : nearEnemies_)
+    {
+        if (e.enemy.expired())continue;
+        if (e.enemy.lock()->GetComponent<EnemyNearCom>()->GetIsPathFlag())
+            nearPathCount++;
+    }
+
+    return nearPathCount;
 }
 
 
@@ -163,6 +181,18 @@ std::shared_ptr<GameObject> EnemyManager::GetEnemyFromId(int id)
     }
 
     return nullptr;
+}
+
+//‹ó‚Ì“G‚ğíœ
+void EnemyManager::EraseExpiredEnemy()
+{
+    for (int i = 0; i < nearEnemies_.size();)
+    {
+        if (nearEnemies_[i].enemy.expired())
+            nearEnemies_.erase(nearEnemies_.begin() + i);
+        else
+            i++;
+    }
 }
 
 

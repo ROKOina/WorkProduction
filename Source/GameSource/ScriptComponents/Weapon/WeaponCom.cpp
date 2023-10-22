@@ -124,20 +124,22 @@ void WeaponCom::SetAttackStatus(int animIndex, int damage, float impactPower, fl
 //アニメイベント名から当たり判定を付けるか判断("AutoCollision"から始まるイベントを自動で取得)
 bool WeaponCom::CollsionFromEventJudge()
 {
+    //return false;
     std::shared_ptr<AnimationCom> animCom = GetGameObject()->GetParent()->GetComponent<AnimationCom>();
 
-    //攻撃速度をいじる
-    std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetParent()->GetComponent<AnimatorCom>();
 
     //アニメーション速度変更していたら戻す
     if (isAnimSetting)
     {
+        //攻撃速度をいじる
+        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetParent()->GetComponent<AnimatorCom>();
         animator->SetAnimationSpeedOffset(1);
         isAnimSetting = false;
     }
 
     for (auto& animEvent : animCom->GetCurrentAnimationEventsData())
     {
+
         //頭がAutoCollisionなら当たり判定をする
         if (animEvent.name.compare(0, 13, "AutoCollision") != 0)continue;
 
@@ -145,6 +147,9 @@ bool WeaponCom::CollsionFromEventJudge()
         isAttackAnim_ = true;
         //現在のアニメーション保存
         attackAnimIndex_ = parentObject_.lock()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
+
+        //攻撃速度をいじる
+        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetParent()->GetComponent<AnimatorCom>();
 
         //エンドフレーム前なら
         if (!animCom->GetCurrentAnimationEventIsEnd(animEvent.name.c_str()))
