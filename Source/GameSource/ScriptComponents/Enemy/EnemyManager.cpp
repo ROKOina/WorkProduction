@@ -17,11 +17,6 @@ void EnemyManager::Update(float elapsedTime)
 //GUI
 void EnemyManager::OnGui()
 {
-    //if (ImGui::Button("Add"))
-    //{
-
-    //}
-
     //近接的に接近フラグカウント
     int nearFlagCount = GetCurrentNearFlagCount();
     ImGui::InputInt("nearFlagCount", &nearFlagCount);

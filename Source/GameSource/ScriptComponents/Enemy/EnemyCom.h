@@ -35,7 +35,7 @@ enum ANIMATION_ENEMY
 //AI遷移
 enum class AI_TREE
 {
-    NONE,
+    NONE_AI,
     ROOT,
 
     //2層
@@ -92,7 +92,7 @@ public:
     void SetRandomTargetPosition();
 
     void SetTargetPosition(DirectX::XMFLOAT3 pos) { targetPosition_ = pos; }
-    DirectX::XMFLOAT3 GetTargetPosition() { return targetPosition_; }
+    const DirectX::XMFLOAT3& GetTargetPosition() const { return targetPosition_; }
 
     //ターゲット位置に移動、回転
     void GoTargetMove(bool isMove = true, bool isTurn = true);

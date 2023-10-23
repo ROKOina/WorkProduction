@@ -243,26 +243,18 @@ void PlayerCom::AnimationInitialize()
         //animator->SetTriggerTransition(RUN_HARD_2, RUN_STOP, "runStop");
         animator->AddAnimatorTransition(RUN_STOP, IDEL_2, true);
 
-
-
         {   //dashコンボ
-            //dash切り
+            //dash１
+
+            //コンボ2
             animator->AddAnimatorTransition(BIGSWORD_DASH);
             animator->SetTriggerTransition(BIGSWORD_DASH, "triangleDash");
             animator->AddAnimatorTransition(BIGSWORD_DASH, IDEL_2, true, 3.5f);
 
-            //コンボ2(攻撃待機
-            animator->AddAnimatorTransition(BIGSWORD_DASH_3);
-            animator->SetTriggerTransition(BIGSWORD_DASH_3, "dashComboWait");
-            animator->AddAnimatorTransition(BIGSWORD_DASH_3, IDEL_2, true);
-
-
             //コンボ3
-            animator->AddAnimatorTransition(BIGSWORD_DASH_3, BIGSWORD_COM1_01);
-            animator->SetTriggerTransition(BIGSWORD_DASH_3, BIGSWORD_COM1_01, "square");
-            animator->AddAnimatorTransition(BIGSWORD_COM1_01, IDEL_2, true, 3.5f);
-
-
+            animator->AddAnimatorTransition(BIGSWORD_DASH, BIGSWORD_COM2_02);
+            animator->SetTriggerTransition(BIGSWORD_DASH, BIGSWORD_COM2_02, "square");
+            animator->AddAnimatorTransition(BIGSWORD_COM2_02, IDEL_2, true, 3.5f);
         }
 
         //どこからでも遷移する
@@ -380,8 +372,5 @@ void PlayerCom::AnimationInitialize()
             animator->AddAnimatorTransition(JUMP_ATTACK_03, IDEL_2, true);
             animator->SetTriggerTransition(JUMP_ATTACK_03, IDEL_2, "idle");
         }
-
-
     }
-
 }

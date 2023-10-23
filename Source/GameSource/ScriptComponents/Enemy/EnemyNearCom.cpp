@@ -26,7 +26,7 @@ void EnemyNearCom::Start()
     behaviorData_ = std::make_unique<BehaviorData>();
     aiTree_ = std::make_unique<BehaviorTree>(myShared);
     // BehaviorTree}‚ðŠî‚ÉBehaviorTree‚ð\’z
-    aiTree_->AddNode(AI_TREE::NONE, AI_TREE::ROOT, 0, BehaviorTree::SelectRule::Priority, nullptr, nullptr);
+    aiTree_->AddNode(AI_TREE::NONE_AI, AI_TREE::ROOT, 0, BehaviorTree::SelectRule::Priority, nullptr, nullptr);
 
     //2‘w
     aiTree_->AddNode(AI_TREE::ROOT, AI_TREE::BATTLE, 1, BehaviorTree::SelectRule::Priority, std::make_shared<BattleJudgment>(myShared), nullptr);

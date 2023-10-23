@@ -75,6 +75,7 @@ public:
 	//eæ“¾
 	std::shared_ptr<GameObject> GetParent() { return parentObject_.lock(); }
 
+
 	//q‹Ÿ’Bæ“¾ (weak_ptr‚È‚Ì‚Å’ˆÓ)
 	std::vector<std::weak_ptr<GameObject>> GetChildren() { return childrenObject_; }
 	std::shared_ptr<GameObject> GetChildFind(const char* name) {

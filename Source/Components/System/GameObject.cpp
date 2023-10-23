@@ -225,13 +225,13 @@ void GameObjectManager::Update(float elapsedTime)
 	//更新
 	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
 	{
-		if (EnemyObjFind(obj))
+		if (EnemyObjFind(obj))	//スレッド用
 			enemyGameObject_.emplace_back(obj);
 		else
 			obj->Update(elapsedTime);
 	}
 
-	int enemyCount = enemyGameObject_.size();
+	int enemyCount = static_cast<int>(enemyGameObject_.size());
 	for (int enemyC = 0; enemyC < enemyCount; ++enemyC)
 	{
 		future.emplace_back(Graphics::Instance().GetThreadPool()->submit([&](auto id, auto elapsedTime) { return ThreadEnemyUpdate(id, elapsedTime); }, enemyC, elapsedTime));

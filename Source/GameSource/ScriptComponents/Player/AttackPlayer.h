@@ -92,6 +92,9 @@ private:
     //アシスト範囲を索敵して近い敵を返す
     std::shared_ptr<GameObject> AssistGetNearEnemy();
 
+    //アシスト範囲を索敵して中距離敵を返す
+    std::shared_ptr<GameObject> AssistGetMediumEnemy();
+
     //敵に接近する( true:接近完了　false:接近中 )
     bool ApproachEnemy(std::shared_ptr<GameObject> enemy, float dist, float speed = 1);
 
@@ -139,6 +142,9 @@ private:
     bool isSquareAttack_ = true;
 
     bool isJumpSquareInput_ = false;    //ジャンプ中□コンボ一回までにするため
+
+    //コンボ継続処理判定をするか
+    bool isComboJudge_ = true;
 
     //攻撃の段階（コンボ回数ではない）
     int comboAttackCount_ = 0;

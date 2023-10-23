@@ -195,7 +195,7 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 	}
 	break;
 	//強制終了
-	case  Action::End_STEP:
+	case  Action::END_STEP:
 	{
 		step_ = 0;
 	}
@@ -393,7 +393,11 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 		runTimer_ -= elapsedTime;
 		pathTimer_ -= elapsedTime;
 
-		if (routePos_.size() <= 0)return ActionBase::State::Complete;
+		if (routePos_.size() <= 0)
+		{
+			owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsPathFlag(false);
+			return ActionBase::State::Complete;
+		}
 
 		// 目標地点を設定
 		owner_.lock()->SetTargetPosition(routePos_[0]);
@@ -441,7 +445,7 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 	}
 		break;
 	//強制終了
-	case  Action::End_STEP:
+	case  Action::END_STEP:
 	{
 		//経路探索フラグOFF
 		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsPathFlag(false);
@@ -534,7 +538,7 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 	}
 
 		//強制終了
-	case  Action::End_STEP:
+	case  Action::END_STEP:
 	{
 		//攻撃フラグを切る
 		owner_.lock()->SetIsAttackFlag(false);

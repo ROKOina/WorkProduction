@@ -2,8 +2,6 @@
 #include "GameSource\Render\Effect\EffectManager.h"
 #include "Input\Input.h"
 
-#include "GameSource\Stage\StageManager.h"
-#include "GameSource\Stage\StageMain.h"
 #include "SceneGame.h"
 #include "imgui.h"
 
@@ -30,9 +28,14 @@
 //経路探査
 #include "GameSource/Stage/PathSearch.h"
 
+//レベルデザイン時に起動
+//メモ帳に保存する
+//#define StageEdit
+
 // 初期化
 void SceneGame::Initialize()
 {
+
 	//床
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
@@ -58,6 +61,10 @@ void SceneGame::Initialize()
 		r->SetShaderID(SHADER_ID::UnityChanToon);
 	}
 
+#if defined(StageEdit)
+
+#else
+
 	//壁当たり判定用+
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
@@ -76,7 +83,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for(int i = 0;i < 15;++i)
+	for(int i = 0;i < 10;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -246,6 +253,7 @@ void SceneGame::Initialize()
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("pico");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+		obj->transform_->SetWorldPosition({ 0, 0, -10 });
 
 		const char* filename = "Data/Model/pico/picoAnim.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
@@ -270,14 +278,24 @@ void SceneGame::Initialize()
 		std::shared_ptr<PlayerCom> p = obj->AddComponent<PlayerCom>();
 		std::shared_ptr<PlayerCameraCom> playerCamera = obj->AddComponent<PlayerCameraCom>();
 
-		//攻撃補正距離当たり判定
+		//攻撃補正近距離当たり判定
 		{
 			std::shared_ptr<GameObject> attackAssist = obj->AddChildObject();
-			attackAssist->SetName("attackAssist");
+			attackAssist->SetName("attackAssistNear");
 			std::shared_ptr<SphereColliderCom> attackAssistCol = attackAssist->AddComponent<SphereColliderCom>();
 			attackAssistCol->SetMyTag(COLLIDER_TAG::PlayerAttackAssist);
 			attackAssistCol->SetJudgeTag(COLLIDER_TAG::Enemy);
 			attackAssistCol->SetRadius(3);
+		}
+
+		//攻撃補正中距離当たり判定
+		{
+			std::shared_ptr<GameObject> attackAssist = obj->AddChildObject();
+			attackAssist->SetName("attackAssistMedium");
+			std::shared_ptr<SphereColliderCom> attackAssistCol = attackAssist->AddComponent<SphereColliderCom>();
+			attackAssistCol->SetMyTag(COLLIDER_TAG::PlayerAttackAssist);
+			attackAssistCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+			attackAssistCol->SetRadius(10);
 		}
 
 		//剣("RightHandMiddle2")
@@ -346,6 +364,8 @@ void SceneGame::Initialize()
 		}
 	}
 
+#endif
+
 	//カメラを生成
 	{
 		std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Create();
@@ -365,11 +385,6 @@ void SceneGame::Initialize()
 	std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
 	mainCamera_ = camera;
 
-	////ステージ初期化
-	//StageManager& stageManager = StageManager::Instance();
-	//StageMain* stageMain = new StageMain();	//メイン（マップ）
-	//stageManager.Register(stageMain);
-
 	//ポストエフェクト
 	{
 		Graphics& graphics = Graphics::Instance();
@@ -384,12 +399,18 @@ void SceneGame::Initialize()
 	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
 	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->transform_->GetWorldPosition().x, player->transform_->GetWorldPosition().y, player->transform_->GetWorldPosition().z,0 });
 
+#if defined(StageEdit)
+
+#else
+
 	//経路探査
 	SeachGraph::Instance().InitSub(54, 53, 2, -4,
 		1.0f, 0.08f, GameObjectManager::Instance().Find("pico"));
 
 	//EnemyManagerにプレイヤー登録
 	EnemyManager::Instance().RegisterPlayer(GameObjectManager::Instance().Find("pico"));
+#endif
+
 }
 
 // 終了化
@@ -403,8 +424,12 @@ void SceneGame::Update(float elapsedTime)
 {
 	GameObjectManager::Instance().Update(elapsedTime);
 	
+#if defined(StageEdit)
+	
+#else
 	//経路探査
 	SeachGraph::Instance().UpdatePath();
+#endif
 
 	//エフェクト更新処理
 	EffectManager::Instance().Update(elapsedTime);

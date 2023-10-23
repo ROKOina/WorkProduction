@@ -5,6 +5,7 @@
 #include "SystemStruct\QuaternionStruct.h"
 #include <map>
 
+
 //UŒ‚‚Ìí—Şƒ^ƒO
 enum ATTACK_SPECIAL_TYPE : uint64_t
 {

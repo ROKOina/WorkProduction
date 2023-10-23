@@ -198,9 +198,6 @@
     <ClInclude Include="Source\GameSource\Scene\SceneLoading.h" />
     <ClInclude Include="Source\GameSource\Scene\SceneManager.h" />
     <ClInclude Include="Source\GameSource\Scene\SceneTitle.h" />
-    <ClInclude Include="Source\GameSource\Stage\Stage.h" />
-    <ClInclude Include="Source\GameSource\Stage\StageMain.h" />
-    <ClInclude Include="Source\GameSource\Stage\StageManager.h" />
     <ClInclude Include="Source\SystemStruct\QuaternionStruct.h" />
     <ClInclude Include="Source\ThreadPool\ThreadPool.h" />
   </ItemGroup>
@@ -280,9 +277,6 @@
     <ClCompile Include="Source\GameSource\Scene\SceneLoading.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneManager.cpp" />
     <ClCompile Include="Source\GameSource\Scene\SceneTitle.cpp" />
-    <ClCompile Include="Source\GameSource\Stage\Stage.cpp" />
-    <ClCompile Include="Source\GameSource\Stage\StageMain.cpp" />
-    <ClCompile Include="Source\GameSource\Stage\StageManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\2D\PostEffect\FullScreen.hlsli" />

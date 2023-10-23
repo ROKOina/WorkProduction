@@ -6,7 +6,7 @@
 //当たり判定のタグ
 enum COLLIDER_TAG : uint64_t
 {
-    NONE            = 1 << 0,
+    NONE_COL            = 1 << 0,
 
     Player          = 1 << 1,
     PlayerAttack    = 1 << 2,
@@ -120,8 +120,8 @@ private:
 
 private:
     //当たり判定タグ
-    COLLIDER_TAG myTag_= COLLIDER_TAG::NONE;    //自分のタグ
-    COLLIDER_TAG judgeTag_ = COLLIDER_TAG::NONE; //当たり判定をするタグ
+    COLLIDER_TAG myTag_= COLLIDER_TAG::NONE_COL;    //自分のタグ
+    COLLIDER_TAG judgeTag_ = COLLIDER_TAG::NONE_COL; //当たり判定をするタグ
 
     //今のフレームで当たっているものを保存
     std::vector<HitObj> hitObj_;

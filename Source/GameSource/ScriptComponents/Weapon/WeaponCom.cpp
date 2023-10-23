@@ -84,6 +84,7 @@ void WeaponCom::Update(float elapsedTime)
             status->OnDamage(DirectX::XMFLOAT3(dir.x * power, dir.y * power, dir.z * power)
                 , attackStatus_[animIndex].specialType);
 
+
             onHit_ = true;
         }
     }
@@ -124,15 +125,14 @@ void WeaponCom::SetAttackStatus(int animIndex, int damage, float impactPower, fl
 //アニメイベント名から当たり判定を付けるか判断("AutoCollision"から始まるイベントを自動で取得)
 bool WeaponCom::CollsionFromEventJudge()
 {
-    //return false;
-    std::shared_ptr<AnimationCom> animCom = GetGameObject()->GetParent()->GetComponent<AnimationCom>();
+    std::shared_ptr<AnimationCom> animCom = parentObject_.lock()->GetComponent<AnimationCom>();
 
 
     //アニメーション速度変更していたら戻す
     if (isAnimSetting)
     {
         //攻撃速度をいじる
-        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetParent()->GetComponent<AnimatorCom>();
+        std::shared_ptr<AnimatorCom> animator = parentObject_.lock()->GetComponent<AnimatorCom>();
         animator->SetAnimationSpeedOffset(1);
         isAnimSetting = false;
     }
@@ -149,7 +149,7 @@ bool WeaponCom::CollsionFromEventJudge()
         attackAnimIndex_ = parentObject_.lock()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
 
         //攻撃速度をいじる
-        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetParent()->GetComponent<AnimatorCom>();
+        std::shared_ptr<AnimatorCom> animator = parentObject_.lock()->GetComponent<AnimatorCom>();
 
         //エンドフレーム前なら
         if (!animCom->GetCurrentAnimationEventIsEnd(animEvent.name.c_str()))
@@ -159,7 +159,7 @@ bool WeaponCom::CollsionFromEventJudge()
             isAnimSetting = true;
         }
 
-        if (!animCom->GetCurrentAnimationEvent(animEvent.name.c_str(), DirectX::XMFLOAT3()))continue;
+        if (!animCom->GetCurrentAnimationEvent(animEvent.name.c_str(), DirectX::XMFLOAT3(0, 0, 0)))continue;
 
         return true;
     }

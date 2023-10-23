@@ -25,12 +25,11 @@ void EnemyCom::Start()
 // 更新処理
 void EnemyCom::Update(float elapsedTime)
 {
-
     //立ち上がりモーション処理
     StandUpUpdate();
 
     // 現在実行されているノードが無ければ
-    if (activeNode_ == nullptr&& !isAnimDamage_&& !isJumpDamage_&& !isStandUpMotion_)
+    if (activeNode_ == nullptr && !isAnimDamage_ && !isJumpDamage_ && !isStandUpMotion_)
     {
         // 次に実行するノードを推論する。
         activeNode_ = aiTree_->ActiveNodeInference(behaviorData_);
@@ -191,7 +190,7 @@ void EnemyCom::DamageProcess(float elapsedTime)
         {
             if (!GetGameObject()->GetComponent<MovementCom>()->OnGround())
             {
-                skyGravityZeroTimer_ = 0.5f;
+                skyGravityZeroTimer_ = 0.3f;
             }
         }
         oldAnimDamage_ = isAnimDamage_;

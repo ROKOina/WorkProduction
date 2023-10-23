@@ -482,6 +482,8 @@ std::vector<DirectX::XMFLOAT3> SeachGraph::SearchEnemySetPos(DirectX::XMFLOAT3 e
 					//•ûŒü‚ğŒ©‚é
 					for (int e = 0; e < NodePath::EDGE_NO; ++e)
 					{
+						if (nodeVec_[startNo]->edge[e]->distnationNode < 0)continue;
+
 						if (nodeVec_[nodeVec_[startNo]->edge[e]->distnationNode]->NodeID == endNo)	//Ÿ‚Ìƒm[ƒh‚Ìê‡
 						{
 							//•ûŒü‚ğ•Û‘¶

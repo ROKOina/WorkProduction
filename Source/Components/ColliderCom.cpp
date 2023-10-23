@@ -20,7 +20,7 @@ void Collider::ColliderVSOther(std::shared_ptr<Collider> otherSide)
     if (!otherSide->isEnabled_)return;
 
     //ƒ^ƒO‚Å”»’è‚·‚é‚©Œˆ‚ß‚é
-    if ((myTag_ == NONE) || (otherSide->myTag_ == NONE))return;
+    if ((myTag_ == NONE_COL) || (otherSide->myTag_ == NONE_COL))return;
     if ((judgeTag_ != otherSide->myTag_) && (myTag_ != otherSide->judgeTag_))return;
 
     //Œ`ó–ˆ‚É“–‚½‚è”»’è‚ğ•Ï‚¦‚é

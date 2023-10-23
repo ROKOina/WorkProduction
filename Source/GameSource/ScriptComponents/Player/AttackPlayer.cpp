@@ -20,40 +20,38 @@ void AttackPlayer::Update(float elapsedTime)
     ComboJudge();
     
     //先行入力時はtrue
-    bool isIeadInput = false;
+    bool isLeadInput = false;
     if (attackLeadInputKey_ != ATTACK_KEY::NULL_KEY)
     {
         if (DoComboAttack())
-            isIeadInput = true;
+            isLeadInput = true;
     }
 
 
     //入力を見て処理をする
-    if (IsAttackInput(elapsedTime)||isIeadInput)
+    if (IsAttackInput(elapsedTime)||isLeadInput)
     {
-        if (isIeadInput)
+        if (isLeadInput)
         {
             attackLeadInputKey_ = ATTACK_KEY::NULL_KEY;
         }
 
-        //アニメインデックスで、コンボカウントリセット
-        AttackComboCountReset();
+        ////アニメインデックスで、コンボカウントリセット
+        //AttackComboCountReset();
 
         switch (attackKey_)
         {
         case AttackPlayer::ATTACK_KEY::SQUARE:
-            //ブレイク処理
             if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_JUMP_FALL)break;
             if (!isSquareAttack_)break;
             SquareInput();
             break;
         case AttackPlayer::ATTACK_KEY::TRIANGLE:
-            //ブレイク処理
             if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_JUMP_FALL)break;
             TriangleInput();
             break;
-        case AttackPlayer::ATTACK_KEY::DASH:
-            DashInput();
+        //case AttackPlayer::ATTACK_KEY::DASH:
+        //    DashInput();
             break;
         case AttackPlayer::ATTACK_KEY::NULL_KEY:
             break;
@@ -81,6 +79,7 @@ void AttackPlayer::ComboJudge()
     int currentAnimIndex = player_.lock()->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
 
     //コンボ継続判定処理
+    if(isComboJudge_)
     {
         static int oldCount = 0;
         static int oldAnim = 0;
@@ -189,27 +188,27 @@ void AttackPlayer::SquareInput()
         return;
     }
 
+    //アニメインデックスで、コンボカウントリセット
+    AttackComboCountReset();
+
     //アニメーター
     std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 
-    //今の状態で遷移を変える
-    if (comboAttackCount_ == 0)
+    //今のコンボ状態で遷移を変える
+    if (comboAttackCount_ == 0) //コンボ0
     {
         attackLeadInputKey_ = ATTACK_KEY::NULL_KEY;
 
         std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
+        //空中攻撃
         if (!playerObj->GetComponent<MovementCom>()->OnGround())
         {
-            ////ジャンプ中の時
-            //if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::JUMP)
-            //{
             animator->SetTriggerOn("squareJump");
             player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_JUMP);
 
             isJumpSquareInput_ = true;
-                //return;
-            //}
         }
+        //地上攻撃
         else
         {
             //ダッシュ攻撃か判定
@@ -234,11 +233,13 @@ void AttackPlayer::SquareInput()
         return;
     }
 
+    //コンボ1～
     if (comboAttackCount_ >= 3)return;
 
-    if (DoComboAttack())    //コンボ受付
+    if (DoComboAttack())    //コンボ受付判定
     {
         std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
+        //空中攻撃
         if (!playerObj->GetComponent<MovementCom>()->OnGround())
         {
             animator->SetTriggerOn("square");
@@ -248,15 +249,25 @@ void AttackPlayer::SquareInput()
             player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_JUMP);
             return;
         }
+        //地上攻撃
         else
         {
-            if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK)
+            if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK)  //通常攻撃時のコンボ
             {
                 animator->SetTriggerOn("square");
                 NormalAttack();
                 comboAttackCount_++;
 
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
+                return;
+            }
+            //ダッシュ攻撃
+            else if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
+            {
+                animator->SetTriggerOn("square");
+                DashAttack(2);
+                comboAttackCount_++;
+
                 return;
             }
         }
@@ -286,6 +297,9 @@ void AttackPlayer::TriangleInput()
         return;
     }
 
+    //アニメインデックスで、コンボカウントリセット
+    AttackComboCountReset();
+
     //アニメーター
     std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 
@@ -307,27 +321,28 @@ void AttackPlayer::TriangleInput()
         isJumpFall_ = true;
     }
 
-
-    if (comboAttackCount_ == 0)
+    //コンボカウントを見て攻撃を変える
+    if (comboAttackCount_ == 0) //コンボ0
     {
         attackLeadInputKey_ = ATTACK_KEY::NULL_KEY;
 
-        //ダッシュ攻撃か判定
-        if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH)
-        {
-            //ダッシュ後コンボのためダッシュを出来なくする
-            player_.lock()->GetMovePlayer()->SetIsDash(false);
-            animator->SetTriggerOn("triangleDash");
-            player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_DASH);
-            DashAttack(1);
+        ////ダッシュ攻撃か判定
+        //if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH)
+        //{
+        //    //ダッシュ後コンボのためダッシュを出来なくする
+        //    player_.lock()->GetMovePlayer()->SetIsDash(false);
+        //    animator->SetTriggerOn("triangleDash");
+        //    player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_DASH);
+        //    DashAttack(1);
 
-            comboAttackCount_++;
+        //    comboAttackCount_++;
 
-            //ダッシュ終了フラグ
-            player_.lock()->GetMovePlayer()->DashEndFlag();
-        }
+        //    //ダッシュ終了フラグ
+        //    player_.lock()->GetMovePlayer()->DashEndFlag();
+        //}
+
         //ジャンプ攻撃
-        else if(player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::IDLE
+        if(player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::IDLE
             || player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::MOVE)
         {
             animator->SetTriggerOn("triangleJump");
@@ -349,33 +364,33 @@ void AttackPlayer::TriangleInput()
 //Dash入力時処理
 void AttackPlayer::DashInput()
 {
-    //ダッシュ後コンボ
-    if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
-    {
-        if (DoComboAttack())    //コンボ受付
-        {
-            if (OnHitEnemy() && ComboReadyEnemy())
-            {
-                Graphics::Instance().SetWorldSpeed(1.0f);
-                player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::DASH);
+    ////ダッシュ後コンボ
+    //if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
+    //{
+    //    if (DoComboAttack())    //コンボ受付
+    //    {
+    //        if (OnHitEnemy() && ComboReadyEnemy())
+    //        {
+    //            Graphics::Instance().SetWorldSpeed(1.0f);
+    //            player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::DASH);
 
-                //アニメーター
-                std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+    //            //アニメーター
+    //            std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 
-                //次の攻撃アニメーションフラグを渡す
-                animFlagName_ = "dashComboWait";
-                animator->ResetParameterList();
+    //            //次の攻撃アニメーションフラグを渡す
+    //            animFlagName_ = "dashComboWait";
+    //            animator->ResetParameterList();
 
-                DashAttack(2);
-                animator->SetIsStop(true);
+    //            DashAttack(2);
+    //            animator->SetIsStop(true);
 
-                //一度透明に
-                player_.lock()->GetGameObject()->GetComponent<RendererCom>()->SetEnabled(false);
+    //            //一度透明に
+    //            player_.lock()->GetGameObject()->GetComponent<RendererCom>()->SetEnabled(false);
 
-                return;
-            }
-        }
-    }
+    //            return;
+    //        }
+    //    }
+    //}
 }
 
 //コンボ処理
@@ -385,35 +400,35 @@ void AttackPlayer::ComboProcess(float elapsedTime)
     std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 
 
-    //ダッシュコンボ処理
-    {
-        //ダッシュアタック時の処理(ダッシュに続く)
-        if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
-        {
-            if (DoComboAttack())    //コンボ受付
-            {
-                //当たっていた時
-                if (OnHitEnemy() && ComboReadyEnemy())
-                {
-                    Graphics::Instance().SetWorldSpeed(0.3f);
-                }
-            }
-        }
+    ////ダッシュコンボ処理
+    //{
+    //    //ダッシュアタック時の処理(ダッシュに続く)
+    //    if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
+    //    {
+    //        if (DoComboAttack())    //コンボ受付
+    //        {
+    //            //当たっていた時
+    //            if (OnHitEnemy() && ComboReadyEnemy())
+    //            {
+    //                Graphics::Instance().SetWorldSpeed(0.3f);
+    //            }
+    //        }
+    //    }
 
-        //ダッシュコンボ入力にする
-        if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH && comboAttackCount_ == 2)
-        {
-            if (EndAttackState())
-            {
-                //透明解除
-                player_.lock()->GetGameObject()->GetComponent<RendererCom>()->SetEnabled(true);
+    //    //ダッシュコンボ入力にする
+    //    if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::DASH && comboAttackCount_ == 2)
+    //    {
+    //        if (EndAttackState())
+    //        {
+    //            //透明解除
+    //            player_.lock()->GetGameObject()->GetComponent<RendererCom>()->SetEnabled(true);
 
-                animator->SetIsStop(false);
-                Graphics::Instance().SetWorldSpeed(0.3f);
-                player_.lock()->GetMovePlayer()->SetIsDash(true);
-            }
-        }
-    }
+    //            animator->SetIsStop(false);
+    //            Graphics::Instance().SetWorldSpeed(0.3f);
+    //            player_.lock()->GetMovePlayer()->SetIsDash(true);
+    //        }
+    //    }
+    //}
 
     //ジャンプ攻撃更新処理
     {
@@ -536,9 +551,18 @@ void AttackPlayer::AttackComboCountReset()
     //現在のアニメインデックス
     int currentAnimIndex = player_.lock()->GetGameObject()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
 
+    //ジャンプ攻撃初段時
     if (currentAnimIndex == ANIMATION_PLAYER::JUMP_ATTACK_01)
     {
         comboAttackCount_ = 1;
+    }
+
+    //ダッシュ攻撃終了時
+    if (currentAnimIndex == ANIMATION_PLAYER::BIGSWORD_COM2_02)
+    {
+        //ここにダッシュ切り終わってからにする
+        if (DoComboAttack())
+            comboAttackCount_ = 0;
     }
 }
 
@@ -563,14 +587,27 @@ int AttackPlayer::NormalAttackUpdate(float elapsedTime)
     case 0:
         //範囲内に敵はいるか
         enemyCopy_ = AssistGetNearEnemy();
-        if (!enemyCopy_.lock())
+        if (!enemyCopy_.lock()) //敵がいない場合
         {
+            //ノーマル攻撃の時
+            if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK)
+            {
+                //中距離でも敵を探す
+                enemyCopy_ = AssistGetMediumEnemy();
+                if (enemyCopy_.lock()) //敵がいない場合
+                {
+                    state_ = 5;
+                    break;
+                }
+            }
+
             state_ = ATTACK_CODE::EnterAttack;
             break;
         }
         state_++;
         break;
 
+        //近距離アシスト
     case 1:
         //回転
         if (ForcusEnemy(elapsedTime, enemyCopy_.lock(), 50))
@@ -582,6 +619,46 @@ int AttackPlayer::NormalAttackUpdate(float elapsedTime)
         if (ApproachEnemy(enemyCopy_.lock(), 1.5f,3))
             state_ = ATTACK_CODE::EnterAttack;
         break;
+
+        //中距離アシスト
+    case 5:
+    {
+        //アニメーター
+        std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+
+        //ダッシュアニメーション再生
+        animator->ResetParameterList();
+        animator->SetTriggerOn("dash");
+        player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_DASH);
+        isComboJudge_ = false;
+
+        state_++;
+    }
+    break;
+    case 6:
+        //回転
+        if (ForcusEnemy(elapsedTime, enemyCopy_.lock(), 50))
+            state_++;
+        break;
+
+    case 7:
+        //接近
+        if (ApproachEnemy(enemyCopy_.lock(), 1.5f, 10))
+        {
+            isComboJudge_ = true;
+            comboAttackCount_++;
+
+            //アニメーター
+            std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+
+            //ダッシュアニメーション再生
+            animator->ResetParameterList();
+            animator->SetTriggerOn("triangleDash");
+
+            state_ = ATTACK_CODE::EnterAttack;
+        }
+        break;
+
     }
 
     return state_;
@@ -593,6 +670,7 @@ void AttackPlayer::DashAttack(int comboNum)
         state_ = 0;
     if (comboNum == 2)
         state_ = 10;
+
     onHitEnemy_ = false;    //攻撃が入力されたらfalseに
     attackFlagState_ = ATTACK_FLAG::Dash;
 }
@@ -607,25 +685,25 @@ int AttackPlayer::DashAttackUpdate(float elapsedTime)
 
     switch (state_)
     {
-        //コンボ１
-    case 0:
-        //範囲内に敵はいるか
-        enemyCopy_ = AssistGetNearEnemy();
-        if (!enemyCopy_.lock())
-        {
-            state_ = ATTACK_CODE::EnterAttack;
-            break;
-        }
-        state_++;
-        break;
+    //    //コンボ１
+    //case 0:
+    //    //範囲内に敵はいるか
+    //    enemyCopy_ = AssistGetNearEnemy();
+    //    if (!enemyCopy_.lock())
+    //    {
+    //        state_ = ATTACK_CODE::EnterAttack;
+    //        break;
+    //    }
+    //    state_++;
+    //    break;
 
-    case 1:
-        //回転
-        if (ForcusEnemy(elapsedTime, enemyCopy_.lock(), 10))
-            state_ = ATTACK_CODE::EnterAttack;
-        break;
+    //case 1:
+    //    //回転
+    //    if (ForcusEnemy(elapsedTime, enemyCopy_.lock(), 10))
+    //        state_ = ATTACK_CODE::EnterAttack;
+    //    break;
 
-        //コンボ２
+        //コンボ2
     case 10:
         //接近
         if (!enemyCopy_.lock())
@@ -634,7 +712,7 @@ int AttackPlayer::DashAttackUpdate(float elapsedTime)
             break;
         }
 
-        if (ApproachEnemy(enemyCopy_.lock(), 1.5f, 20))
+        if (ApproachEnemy(enemyCopy_.lock(), 1.5f, 10))
             state_ = ATTACK_CODE::EnterAttack;
         break;
     }
@@ -686,7 +764,42 @@ std::shared_ptr<GameObject> AttackPlayer::AssistGetNearEnemy()
     std::shared_ptr<GameObject> enemyNearObj;   //一番近い敵を入れる
 
     //アシスト判定取得
-    std::shared_ptr<Collider> assistColl = playerObj->GetChildFind("attackAssist")->GetComponent<Collider>();
+    std::shared_ptr<Collider> assistColl = playerObj->GetChildFind("attackAssistNear")->GetComponent<Collider>();
+    std::vector<HitObj> hitGameObj = assistColl->OnHitGameObject();
+    for (auto& hitObj : hitGameObj)
+    {
+        if (COLLIDER_TAG::Enemy == hitObj.gameObject.lock()->GetComponent<Collider>()->GetMyTag())
+        {
+            //最初はそのまま入れる
+            if (!enemyNearObj)enemyNearObj = hitObj.gameObject.lock();
+            //一番近い敵を見つける
+            else
+            {
+                DirectX::XMVECTOR E = DirectX::XMLoadFloat3(&enemyNearObj->transform_->GetWorldPosition());
+                DirectX::XMVECTOR EN = DirectX::XMLoadFloat3(&hitObj.gameObject.lock()->transform_->GetWorldPosition());
+                DirectX::XMVECTOR P = DirectX::XMLoadFloat3(&playerObj->transform_->GetWorldPosition());
+
+                DirectX::XMVECTOR PE = DirectX::XMVectorSubtract(E, P);
+                DirectX::XMVECTOR PEN = DirectX::XMVectorSubtract(EN, P);
+
+                float lenE = DirectX::XMVectorGetX(DirectX::XMVector3Length(PE));
+                float lenEN = DirectX::XMVectorGetX(DirectX::XMVector3Length(PEN));
+                if (lenE > lenEN)enemyNearObj = hitObj.gameObject.lock();
+            }
+        }
+    }
+
+    //敵がいない場合return
+    return enemyNearObj;
+}
+
+std::shared_ptr<GameObject> AttackPlayer::AssistGetMediumEnemy()
+{
+    std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
+    std::shared_ptr<GameObject> enemyNearObj;   //一番近い敵を入れる
+
+    //アシスト判定取得
+    std::shared_ptr<Collider> assistColl = playerObj->GetChildFind("attackAssistMedium")->GetComponent<Collider>();
     std::vector<HitObj> hitGameObj = assistColl->OnHitGameObject();
     for (auto& hitObj : hitGameObj)
     {
@@ -734,6 +847,7 @@ bool AttackPlayer::ApproachEnemy(std::shared_ptr<GameObject> enemy, float dist, 
     //距離を詰める
     PE = DirectX::XMVector3Normalize(PE);
     DirectX::XMFLOAT3 vec;
+    vec.y = 0;
     DirectX::XMStoreFloat3(&vec, DirectX::XMVectorScale(PE, speed));
     
     //プレイヤー移動
@@ -790,6 +904,7 @@ void AttackPlayer::AttackJump()
 void AttackPlayer::AttackFlagEnd()
 {
     comboAttackCount_ = 0;
+    isComboJudge_ = true;
     player_.lock()->GetMovePlayer()->SetIsInputMove(true);
     player_.lock()->GetMovePlayer()->SetIsInputTurn(true);
     player_.lock()->GetMovePlayer()->SetIsDash(true);

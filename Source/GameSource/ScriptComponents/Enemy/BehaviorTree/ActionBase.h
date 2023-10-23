@@ -6,7 +6,7 @@ class EnemyCom;
 
 enum Action
 {
-	End_STEP = 99,	//強制終了
+	END_STEP = 99,	//強制終了
 };
 
 // 行動処理基底クラス
@@ -28,7 +28,7 @@ public:
 	//途中で実行を終了する時
 	void EndActionStep()
 	{
-		step_ = static_cast<int>(Action::End_STEP);
+		step_ = static_cast<int>(Action::END_STEP);
 	}
 
 	void StartActionStep()

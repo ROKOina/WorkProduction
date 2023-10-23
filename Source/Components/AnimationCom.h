@@ -87,7 +87,7 @@ public:
     }
 
     //現在のアニメーションイベント取得
-    const std::vector<AnimEvent> GetCurrentAnimationEventsData()const {
+    const std::vector<AnimEvent>& GetCurrentAnimationEventsData()const {
         return currentAnimationEvents_;
     }
 

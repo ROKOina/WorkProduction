@@ -144,15 +144,6 @@
     <ClInclude Include="Source\Graphics\Model\ResourceManager.h">
       <Filter>Source\GameSource\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Source\GameSource\Stage\Stage.h">
-      <Filter>Source\GameSource\Stage</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameSource\Stage\StageMain.h">
-      <Filter>Source\GameSource\Stage</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\GameSource\Stage\StageManager.h">
-      <Filter>Source\GameSource\Stage</Filter>
-    </ClInclude>
     <ClInclude Include="Source\GameSource\Scene\Scene.h">
       <Filter>Source\GameSource\Scene</Filter>
     </ClInclude>
@@ -332,15 +323,6 @@
     </ClCompile>
     <ClCompile Include="Source\Graphics\Model\ResourceManager.cpp">
       <Filter>Source\GameSource\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameSource\Stage\Stage.cpp">
-      <Filter>Source\GameSource\Stage</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameSource\Stage\StageMain.cpp">
-      <Filter>Source\GameSource\Stage</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\GameSource\Stage\StageManager.cpp">
-      <Filter>Source\GameSource\Stage</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\Render\Effect\Effect.cpp">
       <Filter>Source\GameSource\Render\Effect</Filter>

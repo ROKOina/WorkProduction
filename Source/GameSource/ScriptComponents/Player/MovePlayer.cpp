@@ -709,7 +709,7 @@ void MovePlayer::RunTurnMove()
         QuaternionStruct inputRotato = QuaternionStruct::LookRotation(saveTurnVec_);
         QuaternionStruct playerRotato = player_.lock()->GetGameObject()->transform_->GetRotation();
 
-        DirectX::XMStoreFloat4(&playerRotato.dxFloat4, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&playerRotato.dxFloat4), DirectX::XMLoadFloat4(&inputRotato.dxFloat4), 0.1f));
+        DirectX::XMStoreFloat4(&playerRotato.dxFloat4, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&playerRotato.dxFloat4), DirectX::XMLoadFloat4(&inputRotato.dxFloat4), 0.2f));
 
         player_.lock()->GetGameObject()->transform_->SetRotation(playerRotato);
 
