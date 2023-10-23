@@ -140,7 +140,7 @@ public:
 	std::weak_ptr<GameObject> player_;
 
 	//デバッグ表示
-	bool debugEnabled_ = true;
+	bool debugEnabled_ = false;
 
 	std::mutex mutex_;
 };

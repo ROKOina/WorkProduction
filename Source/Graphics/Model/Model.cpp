@@ -9,11 +9,16 @@ void Model::ModelInitialize( const char* filename)
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 	modelResource_ = std::make_shared<FbxModelResource>();
 
-	modelResource_->Load(device, filename);
-
-
-	//ResourceManager::Instance().LoadModelResource(filename);
-
+	//リソースマネージャーに登録されているか
+	if (!ResourceManager::Instance().JudgeModelFilename(filename))
+	{
+		modelResource_->Load(device, filename);
+		ResourceManager::Instance().RegisterModel(filename, modelResource_);	//リソースマネージャーに追加する
+	}
+	else
+	{
+		modelResource_ = ResourceManager::Instance().LoadModelResource(filename);	//ロードする
+	}
 
 	// ノード
 	const std::vector<ModelResource::Node>& resNodes = modelResource_->GetNodes();
@@ -47,8 +52,7 @@ Model::Model(const char* filename)
 	//ModelInitialize(filename);
 
 	//th = std::thread(&Model::ModelInitialize, this, filename);
-
-	future = Graphics::Instance().GetThreadPool()->submit([&](auto filename) { return ModelInitialize(filename); }, filename);
+		future = Graphics::Instance().GetThreadPool()->submit([&](auto filename) { return ModelInitialize(filename); }, filename);
 }
 
 // 変換行列計算

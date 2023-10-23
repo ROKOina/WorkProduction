@@ -847,8 +847,8 @@ bool AttackPlayer::ApproachEnemy(std::shared_ptr<GameObject> enemy, float dist, 
     //‹——£‚ð‹l‚ß‚é
     PE = DirectX::XMVector3Normalize(PE);
     DirectX::XMFLOAT3 vec;
-    vec.y = 0;
     DirectX::XMStoreFloat3(&vec, DirectX::XMVectorScale(PE, speed));
+    vec.y = 0;
     
     //ƒvƒŒƒCƒ„[ˆÚ“®
     playerObj->GetComponent<MovementCom>()->AddNonMaxSpeedForce(vec);

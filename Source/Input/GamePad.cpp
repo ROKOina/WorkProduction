@@ -60,7 +60,7 @@ void GamePad::Update()
 	}
 	else
 	{
-#if 1
+#if 0
 		// XInput‚Å“ü—Íî•ñ‚ªŽæ“¾o—ˆ‚È‚©‚Á‚½ê‡‚ÍWindowsAPI‚ÅŽæ“¾‚·‚é
 		JOYINFOEX joyInfo;
 		joyInfo.dwSize = sizeof(JOYINFOEX);

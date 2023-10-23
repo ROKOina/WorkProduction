@@ -78,6 +78,9 @@
       <AssemblerOutput>AssemblyCode</AssemblerOutput>
       <AssemblerOutputFile>Shader\%(Filename).cod</AssemblerOutputFile>
     </FxCompile>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -108,6 +111,13 @@
       <AssemblerOutput>AssemblyCode</AssemblerOutput>
       <AssemblerOutputFile>Shader\%(Filename).cod</AssemblerOutputFile>
     </FxCompile>
+    <Manifest>
+      <OutputManifestFile>$(IntDir)$(TargetName)$(TargetExt).embed.manifest</OutputManifestFile>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
+    <ManifestResourceCompile>
+      <ResourceOutputFileName>$(IntDir)$(TargetName)$(TargetExt).embed.manifest.res</ResourceOutputFileName>
+    </ManifestResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="External\DirectXTex\DDS.h" />

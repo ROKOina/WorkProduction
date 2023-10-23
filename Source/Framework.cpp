@@ -15,7 +15,7 @@
 #include "backends\imgui_impl_win32.h"
 
 // 垂直同期間隔設定
-static const int syncInterval = 0;
+static const int syncInterval = 1;
 
 // コンストラクタ
 Framework::Framework(HWND hWnd)
@@ -41,6 +41,10 @@ Framework::~Framework()
 	EffectManager::Instance().Finalize();
 }
 
+#include "Logger.h"
+clock_t startTime1 = 0, endTime1 = 0;
+
+
 // 更新処理
 void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/,float fps_)
 {
@@ -48,10 +52,7 @@ void Framework::Update(float elapsedTime/*Elapsed seconds from last frame*/,floa
 	input_.Update();
 
 	// シーン更新処理
-	//sceneGame.Update(elapsedTime);
 	SceneManager::Instance().Update(elapsedTime);
-
-	//mw.Update(elapsedTime);
 }
 
 // 描画処理
@@ -69,13 +70,11 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 
 	// シーン描画処理
-	//sceneGame.Render();
 	SceneManager::Instance().Render();
 
 	// IMGUIデモウインドウ描画（IMGUI機能テスト用）
 	//ImGui::ShowDemoWindow();
 
-	//mw.Render(elapsedTime);
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -121,6 +120,7 @@ void Framework::CalculateFrameStats()
 	}
 }
 
+
 // アプリケーションループ
 int Framework::Run()
 {
@@ -159,6 +159,7 @@ int Framework::Run()
 		}
 		else
 		{
+
 			timer_.Tick();
 			CalculateFrameStats();
 
@@ -167,8 +168,14 @@ int Framework::Run()
 				: syncInterval / 60.0f
 				//: syncInterval / fps_
 				;
+
+			startTime1 = clock();
+
 			Update(elapsedTime, fps_);
 			Render(elapsedTime);
+
+			endTime1 = clock();
+			Logger::Print((std::string("Frame Time : ") + std::to_string(endTime1 - startTime1) + "\n\n").c_str());
 		}
 	}
 
