@@ -30,7 +30,7 @@ public:
     bool JudgeModelFilename(const char* filename);
 
 private:
-    using ModelMap = std::map<std::string, std::weak_ptr<FbxModelResource>>;
+    using ModelMap = std::map<std::string, std::shared_ptr<FbxModelResource>>;
 
     ModelMap models_;
     std::mutex mutex_;

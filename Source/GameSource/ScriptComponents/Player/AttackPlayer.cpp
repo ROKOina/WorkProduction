@@ -156,13 +156,13 @@ bool AttackPlayer::IsAttackInput(float elapsedTime)
     else
     {
         GamePad& gamePad = Input::Instance().GetGamePad();
-        if (gamePad.GetButtonDown() & GamePad::BTN_Y)   //Å†
+        if (gamePad.GetButtonDown() & GamePad::BTN_X)   //Å†
         {
             attackKey_ = ATTACK_KEY::SQUARE;
             return true;
         }
 
-        if (gamePad.GetButtonDown() & GamePad::BTN_X)   //Å¢
+        if (gamePad.GetButtonDown() & GamePad::BTN_Y)   //Å¢
         {
             attackKey_ = ATTACK_KEY::TRIANGLE;
             return true;

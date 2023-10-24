@@ -52,6 +52,10 @@ enum ANIMATION_PLAYER
     JUMP_ATTACK_03,
     JUMP_ATTACK_02,
     JUMP_ATTACK_01,
+    DAMAGE_RIGHT,
+    DAMAGE_LEFT,
+    DAMAGE_FRONT,
+    DAMAGE_BACK,
 };
 
 class PlayerCom : public Component

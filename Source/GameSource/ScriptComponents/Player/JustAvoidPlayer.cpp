@@ -8,6 +8,8 @@
 #include "Components\RendererCom.h"
 #include "Components\ColliderCom.h"
 #include "Components\CameraCom.h"
+#include "../CharacterStatusCom.h"
+
 #include "Input/Input.h"
 
 void JustAvoidPlayer::Update(float elapsedTime)
@@ -45,6 +47,8 @@ void JustAvoidPlayer::JustInisialize()
 {
     justAvoidState_ = -1;
     isJustJudge_ = false;
+    //–³“GŽžŠÔ‚È‚­‚·
+    player_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetInvincibleNonDamage(0);
 
     for (int i = 0; i < 4; ++i)
     {
@@ -110,9 +114,9 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             //o‚·
             justPico[i]->SetEnabled(true);
             if (inputFlag)
-                justAnim->PlayAnimation(25, false);
+                justAnim->PlayAnimation(ANIMATION_PLAYER::DODGE_FRONT, false);
             else
-                justAnim->PlayAnimation(24, false);
+                justAnim->PlayAnimation(ANIMATION_PLAYER::DODGE_BACK, false);
         }
 
         //“G‚Ì•û‚ðŒü‚­
@@ -277,7 +281,7 @@ void JustAvoidPlayer::JustAvoidanceAttackInput()
     GamePad& gamePad = Input::Instance().GetGamePad();
 
     // ‚Ìê‡
-    if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+    if (gamePad.GetButtonDown() & GamePad::BTN_X)
     {
         JustInisialize();
         player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::DASH);
@@ -365,4 +369,13 @@ void JustAvoidPlayer::JustAvoidJudge()
     }
 
     justHitEnemy_ = enemy;
+}
+
+//ƒWƒƒƒXƒg‰ñ”ð‚ðŠJŽn‚·‚é
+void JustAvoidPlayer::StartJustAvoid()
+{
+    //–³“GŽžŠÔ
+    player_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetInvincibleNonDamage(100);
+    isJustJudge_ = true;
+    justAvoidState_ = 0;
 }

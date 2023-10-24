@@ -44,7 +44,7 @@ PostEffect::PostEffect(UINT width, UINT height)
     bloomExtract_ = std::make_unique<ShaderPost>("BloomExtract");
     bloomKawaseFilter_ = std::make_unique<ShaderPost>("BloomKawase");
     bloomBlur_ = std::make_unique<ShaderPost>("GaussianBlur");
-    sun_= std::make_unique<ShaderPost>("SunAtmosphere");
+    sun_ = std::make_unique<ShaderPost>("SunAtmosphere");
 
     {
         //スカイマップ
@@ -77,25 +77,22 @@ PostEffect::PostEffect(UINT width, UINT height)
     //輝度抽出用
     renderPost_[0] = std::make_unique<PostRenderTarget>(device, width, height, DXGI_FORMAT_R16G16B16A16_FLOAT);
     //ブラー用
-    UINT wB = width/2;
-    UINT hB = height/2;
-    renderPost_[1] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
-    wB /= 2;
-    hB /= 2;
-    renderPost_[2] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
-    wB /= 2;
-    hB /= 2;
-    renderPost_[3] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
-    wB /= 2;
-    hB /= 2;
-    renderPost_[4] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
+    float string = 0.7f;
+    UINT wB = width;
+    UINT hB = height;
+    for (int i = 0; i < BlurCount; ++i)
+    {
+        renderPost_[i + 1] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
+        wB *= string;
+        hB *= string;
+    }
 
     //太陽
     renderPostSun_ = std::make_unique<PostRenderTarget>(device, width, height, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
     //フルスクリーン用
-    renderPostFull_ = std::make_unique<PostRenderTarget>(device, 
-        static_cast<UINT>(Graphics::Instance().GetScreenWidth()), 
+    renderPostFull_ = std::make_unique<PostRenderTarget>(device,
+        static_cast<UINT>(Graphics::Instance().GetScreenWidth()),
         static_cast<UINT>(Graphics::Instance().GetScreenHeight()), DXGI_FORMAT_R16G16B16A16_FLOAT);
 }
 
@@ -296,7 +293,7 @@ void PostEffect::Render()
             }
 
             //ダウンサンプリングして、暈しを複数回する
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < BlurCount; ++i)
             {
                 int index = i + 1;
                 //暈しバッファ更新
@@ -356,19 +353,17 @@ void PostEffect::Render()
 
                 //シェーダーリソースビュー設定
                 drawTexture_->SetShaderResourceView(
-                    renderPost_[2]->diffuseMap,
+                    renderPost_[1]->diffuseMap,
                     static_cast<int>(viewport.Width), static_cast<int>(viewport.Height));
 
-                ID3D11ShaderResourceView* srvs[] =
+                for (int i = 0; i < BlurCount-1; ++i)
                 {
-                    renderPost_[2]->diffuseMap.Get(),
-                    renderPost_[3]->diffuseMap.Get(),
-                    //renderPost_[4]->diffuseMap.Get(),
-                };
-                dc->PSSetShaderResources(
-                    1, ARRAYSIZE(srvs),
-                    srvs
-                );
+                    dc->PSSetShaderResources(
+                        i + 1, 1,
+                        renderPost_[i+2]->diffuseMap.GetAddressOf()
+                    );
+
+                }
 
                 drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
                     0, 0, static_cast<float>(renderPost_[0]->width), static_cast<float>(renderPost_[0]->height),
@@ -722,6 +717,8 @@ void PostEffect::ShaderPost::Draw(TextureFormat* renderTexture)
             dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP).Get(),
             dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_CLAMP).Get(),
             dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_BORDER_POINT).Get(),
+            dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP_ANISO).Get(),
+            dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_BORDER_LINER).Get(),
         };
         dc->PSSetSamplers(0, ARRAYSIZE(samplerStates), samplerStates);
     }

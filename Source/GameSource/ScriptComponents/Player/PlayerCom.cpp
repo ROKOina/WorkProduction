@@ -39,34 +39,52 @@ void PlayerCom::Start()
     //空中攻撃
     {
         weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 25, 0.0f, 1.0f, 1.5f, ATTACK_SPECIAL_TYPE::JUMP_START | ATTACK_SPECIAL_TYPE::UNSTOP);
-        weapon->SetAttackStatus(JUMP_ATTACK_01, 1, 0, 0.0f, 0, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
-        weapon->SetAttackStatus(JUMP_ATTACK_02, 1, 0, 0.0f, 0, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
-        weapon->SetAttackStatus(JUMP_ATTACK_03, 1, 0, 0.0f, 0, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+        weapon->SetAttackStatus(JUMP_ATTACK_01, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+        weapon->SetAttackStatus(JUMP_ATTACK_02, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+        weapon->SetAttackStatus(JUMP_ATTACK_03, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
     }
 
+    std::shared_ptr<PlayerCom> myCom = GetGameObject()->GetComponent<PlayerCom>();
     //攻撃管理を初期化
-    attackPlayer_ = std::make_shared<AttackPlayer>(GetGameObject()->GetComponent<PlayerCom>());
+    attackPlayer_ = std::make_shared<AttackPlayer>(myCom);
     //移動管理を初期化
-    movePlayer_ = std::make_shared<MovePlayer>(GetGameObject()->GetComponent<PlayerCom>());
+    movePlayer_ = std::make_shared<MovePlayer>(myCom);
     //ジャスト回避管理を初期化
-    justAvoidPlayer_ = std::make_shared<JustAvoidPlayer>(GetGameObject()->GetComponent<PlayerCom>());
+    justAvoidPlayer_ = std::make_shared<JustAvoidPlayer>(myCom);
 
     //アニメーション初期化
     AnimationInitialize();
 
+    //ステータス設定
+    std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
+    status->SetHP(10);
 }
 
 // 更新処理
 void PlayerCom::Update(float elapsedTime)
 {
-    //移動
-    movePlayer_->Update(elapsedTime);
+    std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
+    //ダメージ時以外
+    if (!status->GetDamageAnimation())
+    {
+        //移動
+        movePlayer_->Update(elapsedTime);
 
-    //ジャスト回避
-    justAvoidPlayer_->Update(elapsedTime);
+        //ジャスト回避
+        justAvoidPlayer_->Update(elapsedTime);
 
-    //攻撃
-    attackPlayer_->Update(elapsedTime);
+        //攻撃
+        attackPlayer_->Update(elapsedTime);
+    }
+
+    //初期化
+    if (status->GetFrameDamage())
+    {
+        //アニメーター
+        std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
+        animator->ResetParameterList();
+        animator->SetTriggerOn("damageFront");
+    }
 
     //カプセル当たり判定設定
     {
@@ -154,6 +172,8 @@ void PlayerCom::AnimationInitialize()
     animator->AddTriggerParameter("dashBack");
     animator->AddTriggerParameter("runTurn");
     animator->AddTriggerParameter("runStop");
+
+    animator->AddTriggerParameter("damageFront");
 
     animator->AddTriggerParameter("square");    //□
     animator->AddTriggerParameter("triangle");  //△
@@ -346,6 +366,13 @@ void PlayerCom::AnimationInitialize()
             animator->SetTriggerTransition(JUMP_ATTACK_02, JUMP_ATTACK_03, "square");
             animator->AddAnimatorTransition(JUMP_ATTACK_03, IDEL_2, true);
             animator->SetTriggerTransition(JUMP_ATTACK_03, IDEL_2, "idle");
+        }
+
+        //ダメージ
+        {
+            animator->AddAnimatorTransition(DAMAGE_FRONT);
+            animator->SetTriggerTransition(DAMAGE_FRONT, "damageFront");
+            animator->AddAnimatorTransition(DAMAGE_FRONT, IDEL_2, true);
         }
     }
 }

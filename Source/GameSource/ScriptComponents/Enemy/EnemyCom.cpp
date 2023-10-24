@@ -25,6 +25,16 @@ void EnemyCom::Start()
 // 更新処理
 void EnemyCom::Update(float elapsedTime)
 {
+    //死亡確認
+    {
+        //ステータス設定
+        std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
+        if (0 >= status->GetHP())
+        {
+            GameObjectManager::Instance().Remove(GetGameObject());
+        }
+    }
+
     //立ち上がりモーション処理
     StandUpUpdate();
 
@@ -63,6 +73,23 @@ void EnemyCom::Update(float elapsedTime)
     //アニメーション設定
     AnimationSetting();
 
+    //壁判定
+    {
+        DirectX::XMFLOAT3 kabePlus = GameObjectManager::Instance().Find("kabePlus")->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 kabeMinas = GameObjectManager::Instance().Find("kabeMinas")->transform_->GetWorldPosition();
+
+        DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
+        if (pos.x > kabePlus.x)
+            pos.x = kabePlus.x;
+        if (pos.x < kabeMinas.x)
+            pos.x = kabeMinas.x;
+        if (pos.z > kabePlus.z)
+            pos.z = kabePlus.z;
+        if (pos.z < kabeMinas.z)
+            pos.z = kabeMinas.z;
+
+        GetGameObject()->transform_->SetWorldPosition(pos);
+    }
 }
 
 // GUI描画

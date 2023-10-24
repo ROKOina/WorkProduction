@@ -11,8 +11,9 @@ std::shared_ptr<FbxModelResource> ResourceManager::LoadModelResource(const char*
     //ÉÇÉfÉãåüçı
     for (auto& modelmap : models_){
         if (modelmap.first == filename){
-            if (modelmap.second.expired() == false) {
-                model = static_cast<std::shared_ptr<FbxModelResource>>(modelmap.second);
+            if (modelmap.second) {
+                model = std::make_shared<FbxModelResource>(*modelmap.second.get());
+                //model = static_cast<std::shared_ptr<FbxModelResource>>(modelmap.second);
             }
         }
     }
@@ -44,9 +45,9 @@ bool ResourceManager::JudgeModelFilename(const char* filename)
         return false;
     else
     {
-        if (models_[filename].expired())
-            return false;
-        else
+        if (models_[filename])
             return true;
+        else
+            return false;
     }
 }

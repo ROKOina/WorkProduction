@@ -27,7 +27,7 @@ Framework::Framework(HWND hWnd)
 	EffectManager::Instance().Initialize();
 
 	//sceneGame.Initialize();
-	SceneManager::Instance().ChangeScene(new SceneGame);
+	SceneManager::Instance().ChangeScene(new SceneTitle);
 
 }
 
@@ -175,7 +175,7 @@ int Framework::Run()
 			Render(elapsedTime);
 
 			endTime1 = clock();
-			Logger::Print((std::string("Frame Time : ") + std::to_string(endTime1 - startTime1) + "\n\n").c_str());
+			//Logger::Print((std::string("Frame Time : ") + std::to_string(endTime1 - startTime1) + "\n\n").c_str());
 		}
 	}
 

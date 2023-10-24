@@ -81,7 +81,7 @@ void WeaponCom::Update(float elapsedTime)
 
             //‚Á”ò‚Î‚µ
             float power = attackStatus_[animIndex].impactPower;
-            status->OnDamage(DirectX::XMFLOAT3(dir.x * power, dir.y * power, dir.z * power)
+            status->OnDamage(attackStatus_[animIndex].damage, DirectX::XMFLOAT3(dir.x * power, dir.y * power, dir.z * power)
                 , attackStatus_[animIndex].specialType);
 
 

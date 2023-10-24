@@ -6,6 +6,9 @@
 #include "TextureFormat.h"
 #include "Graphics\Shaders\3D\ShaderParameter3D.h"
 
+#define BlurCount 6
+#define BloomCount BlurCount + 1
+
 class PostEffect
 {
 public:
@@ -77,7 +80,7 @@ private:
     std::unique_ptr<ShaderPost> postRender_;
 
     std::unique_ptr<TextureFormat> drawTexture_;
-    std::unique_ptr<PostRenderTarget> renderPost_[5];
+    std::unique_ptr<PostRenderTarget> renderPost_[BloomCount];   //0:輝度、1～:ブラー
     std::unique_ptr<PostRenderTarget> renderPostSun_;
     std::unique_ptr<PostRenderTarget> renderPostFull_;  //フルスクリーン用のレンダーターゲット
 };

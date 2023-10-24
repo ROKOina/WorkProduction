@@ -13,7 +13,7 @@ cbuffer ExtractionData : register(b0)
 };
 
 Texture2D mainTexture : register(t0);
-SamplerState samplerLiner[3] : register(s0);
+SamplerState samplerLiner[4] : register(s0);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {

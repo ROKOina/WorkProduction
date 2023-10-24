@@ -172,7 +172,7 @@ bool MovePlayer::IsMove(float elapsedTime)
 
     //ƒWƒƒƒ“ƒv
     GamePad& gamePad = Input::Instance().GetGamePad();
-    if (gamePad.GetButtonDown() & GamePad::BTN_B)
+    if (gamePad.GetButtonDown() & GamePad::BTN_A)
     {
         if (jumpCount_ > 0)
         {

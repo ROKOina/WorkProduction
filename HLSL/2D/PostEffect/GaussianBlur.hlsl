@@ -16,7 +16,7 @@ cbuffer BlurData : register(b7)
 };
 
 Texture2D blurTexture : register(t0);
-SamplerState samplers[3] : register(s0);    //0:WRAP 1:CLAMP 2:BORDER,POINT
+SamplerState samplers[5] : register(s0);    //0:WRAP 1:CLAMP 2:BORDER,POINT 3:ANISO 4:BORDER,LINER
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
@@ -28,7 +28,7 @@ float4 main(VS_OUT pin) : SV_TARGET
         float weight = Weight[i].z;
         color.rgb +=
 			blurTexture.Sample(
-				samplers[0], pin.texcoord + offset).rgb * weight;
+				samplers[4], pin.texcoord + offset).rgb * weight;
     }
     return color;
 }

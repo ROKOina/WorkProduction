@@ -78,6 +78,8 @@ public:
     enum class SAMPLER_TYPE {
         TEXTURE_ADDRESS_WRAP,
         TEXTURE_ADDRESS_CLAMP,
+        TEXTURE_ADDRESS_BORDER_LINER,
+        TEXTURE_ADDRESS_WRAP_ANISO,
         TEXTURE_ADDRESS_BORDER_POINT, //影用
         TEXTURE_TRAIL, //トレイル用
         DEFALT,           //何もなし（保険）

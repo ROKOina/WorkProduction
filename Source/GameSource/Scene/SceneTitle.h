@@ -4,11 +4,11 @@
 #include "Scene.h"
 
 //タイトルシーン
-class ScneTitle :public Scene
+class SceneTitle :public Scene
 {
 public:
-    ScneTitle(){}
-    ~ScneTitle()override{}
+    SceneTitle(){}
+    ~SceneTitle()override{}
 
     //初期化
     void Initialize()override;

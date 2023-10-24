@@ -33,11 +33,7 @@ public:
     void JustAvoidJudge();
 
     //ジャスト回避を開始する
-    void StartJustAvoid()
-    {
-        isJustJudge_ = true;
-        justAvoidState_ = 0;
-    }
+    void StartJustAvoid();
 
     //ゲッター＆セッター
     const std::weak_ptr<GameObject> GetJustHitEnemy() const { return justHitEnemy_; }

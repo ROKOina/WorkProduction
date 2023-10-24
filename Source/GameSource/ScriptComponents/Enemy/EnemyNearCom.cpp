@@ -7,6 +7,8 @@
 
 #include "BehaviorTree/JudgmentDerived.h"
 #include "BehaviorTree/ActionDerived.h"
+#include "../Weapon\WeaponCom.h"
+#include "../CharacterStatusCom.h"
 
 
 #include <imgui.h>
@@ -45,12 +47,21 @@ void EnemyNearCom::Start()
 
     SetRandomTargetPosition();
 
+    //武器ステータス初期化
+    std::shared_ptr<WeaponCom> weapon = GetGameObject()->GetChildFind("Banana")->GetComponent<WeaponCom>();
+    weapon->SetAttackStatus(ATTACK01_SWORD, 1, 30, 0.9f, 0.1f);
+
+    //ステータス設定
+    std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
+    status->SetHP(3);
+
+
     //移動パラメーター設定
     //moveDataEnemy.
 
-    ////発光を消す
-    //std::vector<ModelResource::Material>& materials = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResourceShared()->GetMaterialsEdit();
-    //materials[0].toonStruct._Emissive_Color.w = 0;
+    //発光を消す
+    std::vector<ModelResource::Material>& materials = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResourceShared()->GetMaterialsEdit();
+    materials[0].toonStruct._Emissive_Color.w = 0;
 }
 
 // 更新処理
@@ -60,7 +71,6 @@ void EnemyNearCom::Update(float elapsedTime)
 
     //接近フラグ管理
     NearFlagProcess();
-
 }
 
 // GUI描画
@@ -123,7 +133,7 @@ void EnemyNearCom::AnimationInitialize()
     animator->SetFloatTransition(RUN_SWORD, WALK_SWORD,
         "moveSpeed", moveDataEnemy_.walkMaxSpeed + 1, PARAMETER_JUDGE::LESS);
 
-
+    //攻撃
     animator->AddAnimatorTransition(ATTACK01_SWORD, false, 0);
     animator->SetTriggerTransition(ATTACK01_SWORD, "attack");
     animator->AddAnimatorTransition(ATTACK01_SWORD, IDLE_SWORD, true);

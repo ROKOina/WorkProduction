@@ -8,14 +8,14 @@
 #include "imgui.h"
 
 //初期化
-void ScneTitle::Initialize()
+void SceneTitle::Initialize()
 {
     //スプライト初期化
     sprite_ = new Sprite("Data/Sprite/Title.png");
 }
 
 //終了化
-void ScneTitle::Finalize()
+void SceneTitle::Finalize()
 {
     //スプライト終了化
     if (sprite_ != nullptr)
@@ -26,7 +26,7 @@ void ScneTitle::Finalize()
 }
 
 //更新処理
-void ScneTitle::Update(float elapsedTime)
+void SceneTitle::Update(float elapsedTime)
 {
     GamePad& gamePad = Input::Instance().GetGamePad();
 
@@ -56,7 +56,7 @@ void ScneTitle::Update(float elapsedTime)
 }
 
 //描画処理
-void ScneTitle::Render()
+void SceneTitle::Render()
 {
     Graphics& graphics = Graphics::Instance();
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();

@@ -19,36 +19,56 @@ void CharacterStatusCom::Update(float elapsedTime)
     if (isFrameDamage_)
     {
         //１フレーム後の処理
-        if (oneFrameJudge)
+        if (oneFrameJudge_)
         {
             isFrameDamage_ = false;
-            oneFrameJudge = false;
+            oneFrameJudge_ = false;
             isAnimDamage_ = true;   //アニメーション中
             damageType_ = ATTACK_SPECIAL_TYPE::NORMAL;
         }
         else
-            oneFrameJudge = true;
+            oneFrameJudge_ = true;
     }
 
     //ダメージ
-    if (isDamage_)
+    if (isInvincible_)
     {
-        //プレイヤーの被弾時間
+        //プレイヤーの被弾
         if (GetGameObject()->GetComponent<PlayerCom>())
         {
-            damageTimer_ += elapsedTime;
-            if (damageTimer_ > damageInvincibleTime_)
+            if (!isAnimDamage_) //ダメージアニメーション中
             {
-                isDamage_ = false;
-                damageTimer_ = 0;
+                damageTimer_ += elapsedTime;
+                if (damageTimer_ > damageInvincibleTime_)
+                {
+                    if (!invincibleSetFlag) //無敵時間を別に設定している場合はとばす
+                        isInvincible_ = false;
+                    damageTimer_ = 0;
+                }
             }
         }
         else //敵の被弾時間
         {
             //プレイヤー武器取得
             std::shared_ptr<GameObject> playerWeapon = GameObjectManager::Instance().Find("Candy");
-            if(!playerWeapon->GetComponent<WeaponCom>()->GetIsAttackAnim()) //攻撃が終わったらフラグを切る
-                isDamage_ = false;
+            if (!playerWeapon->GetComponent<WeaponCom>()->GetIsAttackAnim()) //攻撃が終わったらフラグを切る
+            {
+                if (!invincibleSetFlag) //無敵時間を別に設定している場合はとばす
+                    isInvincible_ = false;
+            }
+        }
+    }
+
+    //無敵時間を設定していれば（ダメージとは別）
+    {
+        if (invincibleSetFlag)
+        {
+            invincibleSetTimer -= elapsedTime;
+            if (invincibleSetTimer <= 0)
+            {
+                isInvincible_ = false;
+                invincibleSetFlag = false;
+            }
         }
     }
 
@@ -64,17 +84,23 @@ void CharacterStatusCom::Update(float elapsedTime)
 void CharacterStatusCom::OnGUI()
 {
     ImGui::InputInt("hp", &hp_);
+
+    bool damage = isAnimDamage_;
+    ImGui::Checkbox("isDamageAnimation", &damage);
+    damage = isInvincible_;
+    ImGui::Checkbox("isInvincible", &damage);
 }
 
 
 //ダメージ
-void CharacterStatusCom::OnDamage(DirectX::XMFLOAT3& power, ATTACK_SPECIAL_TYPE attackType)
+void CharacterStatusCom::OnDamage(int minasHP, DirectX::XMFLOAT3& power, ATTACK_SPECIAL_TYPE attackType)
 {
-    isDamage_ = true;
+    isInvincible_ = true;
     isFrameDamage_ = true;
+    isAnimDamage_ = true;
     damageType_ = attackType;
-    hp_ -= 1;
+    hp_ -= minasHP;
 
-    if (!isAttackNonMove_)
-        GetGameObject()->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);
+    if (!isAttackNonMove_)  //攻撃による移動するか判定
+        GetGameObject()->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);   //移動
 }
