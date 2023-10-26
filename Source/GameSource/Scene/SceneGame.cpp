@@ -3,6 +3,9 @@
 #include "Input\Input.h"
 
 #include "SceneGame.h"
+#include "SceneTitle.h"
+#include "SceneManager.h"
+#include "SceneLoading.h"
 #include "imgui.h"
 
 #include "Components\System\GameObject.h"
@@ -83,7 +86,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for(int i = 0;i < 5;++i)
+	for(int i = 0;i < 1;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -388,12 +391,16 @@ void SceneGame::Initialize()
 	//ポストエフェクト
 	{
 		Graphics& graphics = Graphics::Instance();
-		postEff = std::make_unique<PostEffect>(
+		postEff_ = std::make_unique<PostEffect>(
 			static_cast<UINT>(graphics.GetScreenWidth()) ,
 			static_cast<UINT>(graphics.GetScreenHeight()));
 
+		//ブルーム
 		graphics.shaderParameter3D_.bloomData2.intensity = 5;
 		graphics.shaderParameter3D_.bloomData2.threshold = 1;
+
+		//太陽
+		graphics.shaderParameter3D_.lightDirection = { 0.626f,-0.55f,-0.533f,0 };
 	}
 
 	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
@@ -419,17 +426,35 @@ void SceneGame::Finalize()
 
 }
 
-
 // 更新処理
 void SceneGame::Update(float elapsedTime)
 {
+#if defined(StageEdit)
+
+#else
+	//1フレームは初期化のため待機
+	//終了処理
+	if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_)	//敵の数0の時
+	{
+		GameObjectManager::Instance().AllRemove();
+		SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
+		gameEndFlag_ = true;
+	}
+	//一回目通るときにスタートフラグをON
+	if (!gameStartFlag_)
+	{
+		gameStartFlag_ = true;
+	}
+#endif
+
 	GameObjectManager::Instance().Update(elapsedTime);
 	
 #if defined(StageEdit)
 	
 #else
-	//経路探査
-	SeachGraph::Instance().UpdatePath();
+	if (!gameEndFlag_)
+		//経路探査
+		SeachGraph::Instance().UpdatePath();
 #endif
 
 	//エフェクト更新処理
@@ -440,11 +465,13 @@ void SceneGame::Update(float elapsedTime)
 	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
 	//std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
 	//particle_->integrate(elapsedTime, { player->transform_->GetWorldPosition().x, player->transform_->GetWorldPosition().y, player->transform_->GetWorldPosition().z, 0 }, camera->GetView(), camera->GetProjection());
+
 }
 
 // 描画処理
 void SceneGame::Render()
 {
+	if (gameEndFlag_)return;
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 	ID3D11RenderTargetView* rtv = graphics.GetRenderTargetView();
@@ -492,7 +519,7 @@ void SceneGame::Render()
 	dc->RSSetViewports(1, &vp);
 
 	//スカイマップ描画
-	postEff->SkymapRender();
+	postEff_->SkymapRender(mainCamera_);
 
 	GameObjectManager::Instance().UpdateTransform();
 
@@ -532,8 +559,8 @@ void SceneGame::Render()
 	//バッファ戻す
 	Graphics::Instance().RestoreRenderTargets();
 
-	postEff->Render();
-	postEff->ImGuiRender();
+	postEff_->Render(mainCamera_);
+	postEff_->ImGuiRender();
 	
 
 	//3Dエフェクト描画
@@ -559,99 +586,19 @@ void SceneGame::Render()
 
 			if (ImGui::Begin("WorldSetting", nullptr, ImGuiWindowFlags_None))
 			{
-
 				//世界のスピード
 				float worldSpeed = graphics.GetWorldSpeed();
 				if (ImGui::DragFloat("worldSpeed", &worldSpeed, 0.01f, 0, 2))
 					graphics.SetWorldSpeed(worldSpeed);
-
-				//敵マネージャー
-				EnemyManager::Instance().OnGui();
-
-				if (ImGui::Button("Add"))
-				{
-					std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-					obj->SetName("picolabo");
-					obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-					obj->transform_->SetWorldPosition({ -10.0f * 2, 0, 5 });
-					obj->transform_->SetEulerRotation({ 0,180,0 });
-
-					const char* filename = "Data/Model/picolabo/picolabo.mdl";
-					std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
-					r->LoadModel(filename);
-					r->SetShaderID(SHADER_ID::UnityChanToon);
-
-					////発光を消す
-					//std::vector<ModelResource::Material>& materials = r->GetModel()->GetResourceShared()->GetMaterialsEdit();
-					//materials[0].toonStruct._Emissive_Color.w = 0;
-
-
-					std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
-					std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
-
-					std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-					//a->PlayAnimation(5, true);
-
-					std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
-
-					std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
-					c->SetMyTag(COLLIDER_TAG::Enemy);
-					c->SetJudgeTag(COLLIDER_TAG::Player | COLLIDER_TAG::Wall);
-					c->SetSize(DirectX::XMFLOAT3(0.5f, 1.2f, 0.5f));
-					c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.9f, 0));
-
-					std::shared_ptr<EnemyNearCom> e = obj->AddComponent<EnemyNearCom>();
-
-					//ジャスト回避用
-					{
-						std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
-						justAttack->SetName("picolaboAttackJust");
-						std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
-						justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
-						justCol->SetJudgeTag(COLLIDER_TAG::Player);
-						justCol->SetSize({ 1.3f,1,1.3f });
-
-						justAttack->transform_->SetLocalPosition({ -1.569f ,0,95.493f });
-					}
-
-					//押し出し用当たり判定
-					{
-						std::shared_ptr<GameObject> pushBack = obj->AddChildObject();
-						pushBack->SetName("PushBackObj");
-						std::shared_ptr<SphereColliderCom> col = pushBack->AddComponent<SphereColliderCom>();
-						col->SetMyTag(COLLIDER_TAG::EnemyPushBack);
-						col->SetJudgeTag(COLLIDER_TAG::PlayerPushBack | COLLIDER_TAG::EnemyPushBack);
-						col->SetPushBack(true);
-						col->SetPushBackObj(obj);
-					}
-
-					//剣("RightHand")
-					{
-						std::shared_ptr<GameObject> sword = obj->AddChildObject();
-						sword->SetName("Banana");
-						sword->transform_->SetScale(DirectX::XMFLOAT3(3, 3, 3));
-						sword->transform_->SetEulerRotation(DirectX::XMFLOAT3(7, -85, 108));
-						sword->transform_->SetLocalPosition(DirectX::XMFLOAT3(11, -6, -15));
-
-						const char* filename = "Data/Model/Swords/banana/banana.mdl";
-						std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
-						r->LoadModel(filename);
-						r->SetShaderID(SHADER_ID::UnityChanToon);
-
-						std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
-						attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
-						attackCol->SetJudgeTag(COLLIDER_TAG::Player);
-						attackCol->SetRadius(0.19f);
-
-						std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
-						weapon->SetObject(sword->GetParent());
-						weapon->SetNodeName("RightHand");
-						weapon->SetColliderUpDown({ 1.36f,0 });
-					}
-
-				}
 			}
 			ImGui::End();
+		}
+
+		//敵マネージャーGUI
+		if (1)
+		{
+			//敵マネージャー
+			EnemyManager::Instance().OnGui();
 		}
 	}
 

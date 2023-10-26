@@ -135,6 +135,15 @@ void GameObjectManager::Remove(std::shared_ptr<GameObject> obj)
 	removeGameObject_.insert(obj);
 }
 
+// ‘Síœ
+void GameObjectManager::AllRemove()
+{
+	for (auto& updateObj : updateGameObject_)
+		removeGameObject_.insert(updateObj);
+	for (auto& startObj : startGameObject_)
+		removeGameObject_.insert(startObj);
+}
+
 bool GameObjectManager::EnemyObjFind(std::shared_ptr<GameObject> obj)
 {
 	if (obj->GetComponent<EnemyCom>())return true;
@@ -277,6 +286,15 @@ void GameObjectManager::Update(float elapsedTime)
 			{
 				renderSortObject_.erase(renderSortObject_.begin() + ren);
 				--ren;
+			}
+		}
+		//swordTrailObject‰ğ•ú
+		for (int tra = 0; tra < swordTrailObject_.size(); ++tra)
+		{
+			if (swordTrailObject_[tra].expired())
+			{
+				swordTrailObject_.erase(swordTrailObject_.begin() + tra);
+				--tra;
 			}
 		}
 

@@ -132,6 +132,8 @@ public:
 
 	// íœ
 	void Remove(std::shared_ptr<GameObject> obj);
+	// ‘Síœ
+	void AllRemove();
 
 	// XV
 	void Update(float elapsedTime);

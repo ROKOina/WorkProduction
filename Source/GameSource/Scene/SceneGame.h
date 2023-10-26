@@ -31,7 +31,9 @@ public:
 private:
 	std::unique_ptr<AudioSource> bgm_=Audio::Instance().LoadAudioSource("Data/Audio/BGM.wav");
 
+	bool gameEndFlag_ = false;
+	bool gameStartFlag_ = false;
 
 	std::unique_ptr<Particle> particle_;
-	std::unique_ptr<PostEffect> postEff;
+	std::unique_ptr<PostEffect> postEff_;
 };

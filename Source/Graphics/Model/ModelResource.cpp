@@ -267,6 +267,7 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname)
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
+	int meshCount = 0;
 	for (Mesh& mesh : meshes_)
 	{
 		// サブセット
@@ -318,6 +319,8 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname)
 		{
 			for (int i = 0; i < mesh.shapeData.size(); ++i)
 			{
+				shapeIndex_ = meshCount;
+
 				D3D11_BUFFER_DESC buffer_desc{};
 				buffer_desc.ByteWidth = static_cast<UINT>(sizeof(DirectX::XMFLOAT3) * mesh.shapeData[i].shapeVertex.size());
 				buffer_desc.StructureByteStride = sizeof(DirectX::XMFLOAT3);
@@ -342,6 +345,8 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname)
 				device->CreateShaderResourceView(mesh.shapeData[i].sBuffer.Get(), &srvDesc, mesh.shapeData[i].srvBuffer.GetAddressOf());
 			}
 		}
+
+		meshCount++;
 	}
 }
 

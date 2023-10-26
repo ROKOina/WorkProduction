@@ -6,10 +6,10 @@
 #include "Framework.h"
 
 
-//const LONG SCREEN_WIDTH = 1920;
-//const LONG SCREEN_HEIGHT = 1080;
-const LONG SCREEN_WIDTH = 1280;
-const LONG SCREEN_HEIGHT = 720;
+const LONG SCREEN_WIDTH = static_cast<LONG>(1920 * 0.8f);
+const LONG SCREEN_HEIGHT = static_cast<LONG>(1080 * 0.8f);
+//const LONG SCREEN_WIDTH = 1280;
+//const LONG SCREEN_HEIGHT = 720;
 
 LRESULT CALLBACK fnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {

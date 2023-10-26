@@ -168,6 +168,7 @@ public:
 	std::vector<Mesh>& GetMeshesEdit() { return meshes_; }
 	std::vector<Material>& GetMaterialsEdit()  { return materials_; }
 
+	const int& GetShapeIndex() const { return shapeIndex_; }
 
 	// ì«Ç›çûÇ›
 	void Load(ID3D11Device* device, const char* filename);
@@ -193,4 +194,6 @@ protected:
 	std::vector<Material>	materials_;
 	std::vector<Mesh>		meshes_;
 	std::vector<Animation>	animations_;
+
+	int shapeIndex_ = 0;
 };

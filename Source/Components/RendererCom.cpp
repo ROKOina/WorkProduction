@@ -74,15 +74,9 @@ void RendererCom::OnGUI()
         model_->SetMaterialColor(color);
     }
 
-    for (auto& mesh : model_->GetResourceShared()->GetMeshesEdit())
+    for (auto& shape : model_->GetResourceShared()->GetMeshesEdit()[model_->GetResource()->GetShapeIndex()].shapeData)
     {
-        if (mesh.shapeData.size() > 0)
-        {
-            for (auto& shape : mesh.shapeData)
-            {
-                ImGui::SliderFloat(shape.name.c_str(), &shape.rate, 0, 1);
-            }
-        }
+        ImGui::SliderFloat(shape.name.c_str(), &shape.rate, 0, 1);
     }
 
 }

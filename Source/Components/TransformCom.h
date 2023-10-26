@@ -67,6 +67,7 @@ public:
         euler.z = DirectX::XMConvertToDegrees(euler.z);
         eulerRotation_ = euler;
     }
+    const DirectX::XMFLOAT3& GetEulerRotation() { return eulerRotation_; }
 
     // ƒXƒP[ƒ‹
     void SetScale(const DirectX::XMFLOAT3& scale) { this->scale_ = scale; }

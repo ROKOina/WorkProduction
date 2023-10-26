@@ -6,6 +6,8 @@
 #include "TextureFormat.h"
 #include "Graphics\Shaders\3D\ShaderParameter3D.h"
 
+class CameraCom;
+
 #define BlurCount 6
 #define BloomCount BlurCount + 1
 
@@ -16,13 +18,13 @@ public:
     ~PostEffect() {}
 
     //描画
-    void Render();
+    void Render(std::shared_ptr<CameraCom> camera);
 
     //ImGui描画
     void ImGuiRender();
 
     //スカイマップ描画
-    void SkymapRender();
+    void SkymapRender(std::shared_ptr<CameraCom> camera);
 
 private:
     //ポストエフェクト用構造体

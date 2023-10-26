@@ -111,7 +111,7 @@ void UnityChanToonShader::Draw(ID3D11DeviceContext* dc, const Model* model)
 
     //•`‰æŠÖ”i“§–¾‚Æ•s“§–¾‚ğ•ª‚¯‚é‚½‚ßj
     //alphaMat(true : “§–¾•`‰æ)
-    auto DrawLambda = [&](std::vector<ModelResource::Mesh>& meshContainer, bool alphaMat)
+    auto DrawLambda = [&](std::vector<ModelResource::Mesh>& meshContainer, std::vector<ModelResource::Material>& matContainer,bool alphaMat)
     {
         for (const ModelResource::Mesh& mesh : meshContainer)
         {
@@ -167,7 +167,7 @@ void UnityChanToonShader::Draw(ID3D11DeviceContext* dc, const Model* model)
                     }
                 }
 
-                dc->UpdateSubresource(unityChanToonConstantBuffer_.Get(), 0, 0, &subset.material->toonStruct, 0, 0);
+                dc->UpdateSubresource(unityChanToonConstantBuffer_.Get(), 0, 0, &matContainer[subset.materialIndex].toonStruct, 0, 0);
 
                 dc->UpdateSubresource(subsetConstantBuffer_.Get(), 0, 0, &cbSubset, 0, 0);
                 ID3D11ShaderResourceView* srvs[] = {
@@ -184,8 +184,8 @@ void UnityChanToonShader::Draw(ID3D11DeviceContext* dc, const Model* model)
     };
 
     
-    DrawLambda(model->GetResourceShared()->GetMeshesEdit(), false);
-    DrawLambda(alphaMesh, true);
+    DrawLambda(model->GetResourceShared()->GetMeshesEdit(), model->GetResourceShared()->GetMaterialsEdit(), false);
+    DrawLambda(alphaMesh, model->GetResourceShared()->GetMaterialsEdit(), true);
 
 }
 

@@ -56,6 +56,7 @@ enum ANIMATION_PLAYER
     DAMAGE_LEFT,
     DAMAGE_FRONT,
     DAMAGE_BACK,
+    SIT_TITLE,
 };
 
 class PlayerCom : public Component

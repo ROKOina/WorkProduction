@@ -97,7 +97,7 @@ PostEffect::PostEffect(UINT width, UINT height)
 }
 
 //描画
-void PostEffect::Render()
+void PostEffect::Render(std::shared_ptr<CameraCom> camera)
 {
     Graphics& graphics = Graphics::Instance();
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();
@@ -138,8 +138,6 @@ void PostEffect::Render()
 
 
         //座標送る
-        std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
-
         graphics.shaderParameter3D_.sunAtmosphere.view = camera->GetView();
 
         DirectX::XMStoreFloat4x4(&graphics.shaderParameter3D_.sunAtmosphere.inverseProjection,
@@ -467,12 +465,12 @@ void PostEffect::Render()
     }
 
     //解放
-    ID3D11ShaderResourceView* srvNull[4] = { NULL };
+    ID3D11ShaderResourceView* srvNull[BloomCount] = { nullptr };
     dc->PSSetShaderResources(0, ARRAYSIZE(srvNull), srvNull);
 
     FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    dc->ClearRenderTargetView(renderPost_[1]->renderTargetView.Get(), color);
-    dc->ClearRenderTargetView(renderPost_[3]->renderTargetView.Get(), color);
+    //dc->ClearRenderTargetView(renderPost_[1]->renderTargetView.Get(), color);
+    //dc->ClearRenderTargetView(renderPost_[3]->renderTargetView.Get(), color);
 }
 
 //ImGui
@@ -579,16 +577,12 @@ void PostEffect::ImGuiRender()
         {
             ImGui::Text("Color");
             ImGui::Image(drawTexture_->GetShaderResourceView().Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
-            ImGui::Text("Post0");
-            ImGui::Image(renderPost_[0]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
-            ImGui::Text("Post1");
-            ImGui::Image(renderPost_[1]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
-            ImGui::Text("Post2");
-            ImGui::Image(renderPost_[2]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
-            ImGui::Text("Post3");
-            ImGui::Image(renderPost_[3]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
-            ImGui::Text("Post4");
-            ImGui::Image(renderPost_[4]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            for (int i = 0; i < BloomCount; ++i)
+            {
+                std::string s = "Post" + std::to_string(i);
+                ImGui::Text(s.c_str());
+                ImGui::Image(renderPost_[i]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            }
 
             ImGui::TreePop();
         }
@@ -599,7 +593,7 @@ void PostEffect::ImGuiRender()
 }
 
 //スカイマップ描画
-void PostEffect::SkymapRender()
+void PostEffect::SkymapRender(std::shared_ptr<CameraCom> camera)
 {
     if (!enabledSkyMap_)return;
 
@@ -626,12 +620,11 @@ void PostEffect::SkymapRender()
     dc->PSSetShader(skyPixel_.Get(), 0, 0);
 
     //コンスタントバッファ
-    std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
     SkymapData skymapData;
 
     DirectX::XMStoreFloat4x4(&skymapData.invMat,
         DirectX::XMMatrixInverse(nullptr, 
-            DirectX::XMLoadFloat4x4(&camera->GetView()) 
+            DirectX::XMLoadFloat4x4(&camera->GetView())
             * DirectX::XMLoadFloat4x4(&camera->GetProjection())));
 
     dc->UpdateSubresource(skymapBuffer_.Get(), 0, NULL, &skymapData, 0, 0);

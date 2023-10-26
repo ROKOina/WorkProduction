@@ -44,6 +44,7 @@ public:
 		player_ = player;
 	}
 
+	
 	//‹ßÚ“G‚ÌUŒ‚ƒJƒEƒ“ƒgæ“¾
 	int GetCurrentNearAttackCount();
 
@@ -52,6 +53,10 @@ public:
 
 	//‹ßÚ“G‚ÌŒo˜H’T¸ƒJƒEƒ“ƒgæ“¾
 	int GetCurrentNearPathCount();
+
+
+	//“G‚Ì”æ“¾
+	int GetEnemyCount();
 
 	//ID‚©‚ç“G‚ğƒQƒbƒg
 	std::shared_ptr<GameObject> GetEnemyFromId(int id);
