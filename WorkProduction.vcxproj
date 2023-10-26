@@ -151,6 +151,7 @@
     <ClInclude Include="Source\Components\ColliderCom.h" />
     <ClInclude Include="Source\Components\MovementCom.h" />
     <ClInclude Include="Source\Components\RendererCom.h" />
+    <ClInclude Include="Source\GameSource\Math\easing.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyFarCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionBase.h" />
@@ -238,6 +239,7 @@
     <ClCompile Include="Source\Components\ColliderCom.cpp" />
     <ClCompile Include="Source\Components\MovementCom.cpp" />
     <ClCompile Include="Source\Components\RendererCom.cpp" />
+    <ClCompile Include="Source\GameSource\Math\easing.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\CharacterStatusCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionDerived.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\BehaviorData.cpp" />

@@ -233,6 +233,15 @@ void ModelResource::Animation::serialize(Archive& archive, int version)
 	);
 }
 
+//シェイプ0クリア
+void ModelResource::ShapeReset()
+{
+	for (auto& shape : meshes_[shapeIndex_].shapeData)
+	{
+		shape.rate = 0;
+	}
+}
+
 // 読み込み
 void ModelResource::Load(ID3D11Device* device, const char* filename)
 {

@@ -7,6 +7,7 @@
 #include "SceneLoading.h"
 #include "imgui.h"
 #include "GameSource/Math/Mathf.h"
+#include "GameSource/Math/easing.h"
 
 #include "Components\System\GameObject.h"
 #include "Components\RendererCom.h"
@@ -26,6 +27,7 @@ void SceneTitle::Initialize()
         obj->SetName("picoTitle");
         obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
         obj->transform_->SetWorldPosition({ 0, 0, -10 });
+        obj->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 6, 7));
 
         const char* filename = "Data/Model/pico/picoAnim.mdl";
         std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
@@ -34,6 +36,7 @@ void SceneTitle::Initialize()
 
         std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 
+        //子にカメラをフォーカスさせる
         {
             std::shared_ptr<GameObject> lookCamera = obj->AddChildObject();
             lookCamera->SetName("lookCamera");
@@ -47,7 +50,8 @@ void SceneTitle::Initialize()
     {   //candy
         std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
         obj->SetName("CandyTitle");
-        obj->transform_->SetScale(DirectX::XMFLOAT3(0.002f, 0.002f, 0.002f));
+        obj->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 0, 0));
+        obj->transform_->SetWorldPosition(DirectX::XMFLOAT3(0, -14, 0));
 
         const char* filename = "Data/Model/Swords/Candy/Candy.mdl";
         std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
@@ -103,11 +107,32 @@ void SceneTitle::Initialize()
         graphics.shaderParameter3D_.lightDirection = { -0.972198129f,-0.0744780228f,-0.222000003f,0 };
     }
 
-    firstAnimation_ = false;
+    //フラグ設定
+    firstFrameSkip_ = false;
     isSceneEndFlag_ = false;
     startFlag_ = false;
     isStageMove_ = true;
     isStopFlag_ = false;
+
+    //ロリポップ設定
+    candyID_ = 0;
+
+    candyData_[0].nodeName = "Head";
+    std::shared_ptr<GameObject> candy = GameObjectManager::Instance().Find("CandyTitle");
+    candyData_[0].pos = { 0.18f,3.91f,2.37f };
+    candyData_[0].angle = { -1.15f,0,0.15 };
+    candyData_[0].scale = { 0.2f,0.2f,0.2f };
+    candy->transform_->SetScale(candyData_[0].scale);
+
+    candyData_[1].nodeName = "RightHandMiddle1";
+    candyData_[1].pos = { -0.3f,-2.1f,6.5f };
+    candyData_[1].angle = { 0,0,-3.478f };
+    candyData_[1].scale = { 2,2,2 };
+
+    candySizeCount_ = 1;
+
+    //瞬き
+    eyeTime_ = 3;
 }
 
 //終了化
@@ -118,7 +143,7 @@ void SceneTitle::Finalize()
     {
         delete sprite_;
         sprite_ = nullptr;
-    }
+    }       
 }
 
 //更新処理
@@ -147,9 +172,6 @@ void SceneTitle::Update(float elapsedTime)
 
     if (gamePad.GetButtonDown() & anyButton)
     {
-        //SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame));
-        //GameObjectManager::Instance().AllRemove();
-        //isSceneEndFlag_ = true;
         startFlag_ = true;
     }
 
@@ -157,193 +179,76 @@ void SceneTitle::Update(float elapsedTime)
     {
         SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame));
         GameObjectManager::Instance().AllRemove();
+
+        //シェイプ設定
+        std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
+        std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+        res->ShapeReset();
     }
+
+    //Renderを遅らせる
+    if (firstFrameSkip_)
+        frameDelayRender = true;
+
+    //ロリポップ行列設定
+    if (firstFrameSkip_)
+    {
+        std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
+        std::shared_ptr<GameObject> candy = GameObjectManager::Instance().Find("CandyTitle");
+        Model::Node* parentNode = pico->GetComponent<RendererCom>()->GetModel()->FindNode(candyData_[candyID_].nodeName.c_str());
+
+        //子にする
+        DirectX::XMMATRIX Candy = DirectX::XMLoadFloat4x4(&candy->transform_->GetLocalTransform());
+
+        DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(candyData_[candyID_].angle.x, candyData_[candyID_].angle.y, candyData_[candyID_].angle.z);
+        DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(candyData_[candyID_].pos.x, candyData_[candyID_].pos.y, candyData_[candyID_].pos.z);
+        DirectX::XMMATRIX CP;
+        if (candyID_ == 0)
+            CP = R * T;
+        if (candyID_ == 1)
+            CP = R;
+        DirectX::XMMATRIX Parent = DirectX::XMLoadFloat4x4(&parentNode->worldTransform);
+        DirectX::XMMATRIX Tra = Candy * CP * Parent;
+
+        //行列入れる
+        DirectX::XMFLOAT4X4 tra;
+        DirectX::XMStoreFloat4x4(&tra, Tra);
+        candy->transform_->SetWorldTransform(tra);
+    }
+
 
     GameObjectManager::Instance().Update(elapsedTime);
 
     if (isSceneEndFlag_)return;
 
+    //演出
+    TitleProductionUpdate(elapsedTime);
 
-    std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
-    std::shared_ptr<AnimationCom> picoAnim = pico->GetComponent<AnimationCom>();
-    std::shared_ptr<GameObject> stage = GameObjectManager::Instance().Find("DonutsTitle");
-    std::shared_ptr<GameObject> lookCamera = GameObjectManager::Instance().Find("lookCamera");
-
-    //上下に動かす
-    if (isStageMove_)
+    //ここで最初のアニメーション再生
+    if (!firstFrameSkip_)
     {
-        static float sinPosY = 0;
-        static float time = 0;
-        static DirectX::XMFLOAT3 picoPos = pico->transform_->GetWorldPosition();
-        static DirectX::XMFLOAT3 stagePos = stage->transform_->GetWorldPosition();
-        time += elapsedTime;
-        sinPosY = sin(time) * 0.3f;
+        std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
+        std::shared_ptr<AnimationCom> picoAnim = pico->GetComponent<AnimationCom>();
 
-        DirectX::XMFLOAT3 pPos = picoPos;
-        pPos.y += sinPosY;
-        DirectX::XMFLOAT3 sPos = stagePos;
-        sPos.y += sinPosY;
-
-        pico->transform_->SetWorldPosition(pPos);
-        stage->transform_->SetWorldPosition(sPos);
-    }
-
-    //カメラをフォーカス
-    {
-        DirectX::XMFLOAT3 lerpPos = lookCamera->transform_->GetWorldPosition();
-        static  DirectX::XMFLOAT3 oldPos = lerpPos;
-
-        DirectX::XMStoreFloat3(&lerpPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&oldPos), DirectX::XMLoadFloat3(&lerpPos), 0.1f));
-        oldPos = lerpPos;
-
-        mainCamera_->SetLookAt(lerpPos);
-
-    }
-
-    //step２顔にアップ後処理
-    {
-        if (picoAnim->GetCurrentAnimationEventIsEnd("upCamera") && !isStopFlag_)
-        {
-
-            isStopFlag_ = true;
-            isStageMove_ = false;
-            picoAnim->SetEnabled(false);
-            stopTime_ = 1.0f;
-        }
-
-        if (stopTime_ > 0)
-        {
-            stopTime_ -= elapsedTime;
-        }
-        else
-        {
-            if (isStopFlag_)
-            {
-                isStageMove_ = true;
-                picoAnim->SetEnabled(true);
-            }
-        }
-    }
-
-    //step３顔アップから引く処理
-    {
-        if (picoAnim->GetCurrentAnimationEventIsEnd("headFocus"))
-        {
-            DirectX::XMFLOAT3 cPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
-            DirectX::XMStoreFloat3(&cPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cPos), DirectX::XMLoadFloat3(&startAfter_.cameraPos2), 0.08f));
-            mainCamera_->GetGameObject()->transform_->SetWorldPosition(cPos);
-        }
-    }
-
-    //lookCameraを顔に動かす
-    {
-        DirectX::XMFLOAT3 headPos;
-        if (picoAnim->GetCurrentAnimationEvent("upCamera", headPos))    //step１顔アップ
-        {
-            //注視点
-            lookCamera->transform_->SetWorldPosition(headPos);
-
-            //カメラ動かす
-            DirectX::XMFLOAT3 lookPos = { headPos.x + startAfter_.cameraPos1.x,headPos.y + startAfter_.cameraPos1.y,headPos.z + startAfter_.cameraPos1.z };
-            DirectX::XMFLOAT3 cPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
-            DirectX::XMStoreFloat3(&cPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cPos), DirectX::XMLoadFloat3(&lookPos), 0.08f));
-            mainCamera_->GetGameObject()->transform_->SetWorldPosition(cPos);
-        }
-        else if (picoAnim->GetCurrentAnimationEvent("headFocus", headPos))  //カメラをフォーカス
-        {
-            lookCamera->transform_->SetWorldPosition(headPos);
-        }
-    }
-
-    //スタート時処理
-    if (startFlag_)
-    {
-        if (picoAnim->GetCurrentAnimationIndex() != 49)
-            picoAnim->PlayAnimation(49, false);
-
-        if (picoAnim->GetCurrentAnimationEvent("turn", DirectX::XMFLOAT3()))
-        {
-            //回転
-            DirectX::XMFLOAT3 picoEuler = pico->transform_->GetEulerRotation();
-            picoEuler.y = Mathf::Lerp(picoEuler.y, startAfter_.playerEulerY, 0.1f);
-            pico->transform_->SetEulerRotation(picoEuler);
-        }
-
-        if (picoAnim->GetCurrentAnimationEventIsEnd("headFocus"))
-        {
-            //lookCameraを動かす
-            DirectX::XMFLOAT3 lookPos = lookCamera->transform_->GetLocalPosition();
-            lookPos.y = Mathf::Lerp(lookPos.y, startAfter_.lookCameraPosY, 0.1f);
-            lookCamera->transform_->SetLocalPosition(lookPos);
-
-        }
-
-        //アニメーション終わり
-        if (!picoAnim->IsPlayAnimation())
-        {
-            isSceneEndFlag_ = true;
-
-            //仮処理
-            picoAnim->PlayAnimation(48, true, 0);
-            pico->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 6, 7));
-            mainCamera_->GetGameObject()->transform_->SetWorldPosition({ -1.6f, 1.1f, -8.3f });
-            isStopFlag_ = false;
-            lookCamera->transform_->SetLocalPosition(DirectX::XMFLOAT3(31.4f, 51.5f, 63.1f));
-            startFlag_ = false;
-        }
-    }
-
-    //ここでアニメーション再生
-    if (!firstAnimation_)
-    {
         picoAnim->PlayAnimation(48, true, 0);
-        firstAnimation_ = true;
+        firstFrameSkip_ = true;
 
-        //シェイプ設定
+        //シェイプ初期設定
         std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+        res->ShapeReset();
         res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[2].rate = 1;
         res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[3].rate = 1;
         res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[7].rate = 0;
         res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[8].rate = 0;
     }
 
-    //瞬き
-    eyeTime_ -= elapsedTime;
-    static bool eyeDir = true;  //瞬き用フラグ
-    if (eyeTime_ < 0)
-    {
-        eyeTime_ = Mathf::RandomRange(3, 6);
-        isShapeEye_ = true;
-        eyeDir = true;
-    }
-    if (isShapeEye_)    //瞬き実行
-    {
-        if (eyeDir)
-        {
-            shapeEye_ += elapsedTime * 2* Mathf::RandomRange(1, 2);
-            if (shapeEye_ >= 1)
-                eyeDir = false;
-        }
-        else
-        {
-            shapeEye_ -= elapsedTime * 2;
-            if (shapeEye_ < 0)
-            {
-                shapeEye_ = 0;
-                isShapeEye_ = false;
-            }
-        }
-        //シェイプ設定
-        std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
-        res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[0].rate = shapeEye_;
-    }
 }
 
 //描画処理
 void SceneTitle::Render()
 {
     if (isSceneEndFlag_)return;
-    if (!firstAnimation_)return;
+    if (!frameDelayRender)return;
 
     Graphics& graphics = Graphics::Instance();
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();
@@ -427,12 +332,307 @@ void SceneTitle::Render()
 
 
 
-    //if (ImGui::Begin("A", nullptr, ImGuiWindowFlags_None))
-    //if(ImGui::TreeNode("A"))
-    //{
-    //    static float a;
-    //    ImGui::DragFloat("a",&a );
-    //    ImGui::TreePop();
-    //}
-    //ImGui::End();
+    if (ImGui::Begin("A", nullptr, ImGuiWindowFlags_None))
+        ImGui::DragFloat3("angleCandy", &candyData_[0].angle.x, 0.01f);
+        ImGui::DragFloat3("posCandy", &candyData_[0].pos.x, 0.01f);
+        ImGui::DragFloat3("angleCandy1", &candyData_[1].angle.x, 0.01f);
+    ImGui::End();
+}
+
+//演出
+void SceneTitle::TitleProductionUpdate(float elapsedTime)
+{
+    std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
+    std::shared_ptr<AnimationCom> picoAnim = pico->GetComponent<AnimationCom>();
+    std::shared_ptr<GameObject> stage = GameObjectManager::Instance().Find("DonutsTitle");
+    std::shared_ptr<GameObject> lookCamera = GameObjectManager::Instance().Find("lookCamera");
+
+    //ステージ上下に動かす
+    if (isStageMove_)
+    {
+        static float sinPosY = 0;
+        static float time = 0;
+        static DirectX::XMFLOAT3 picoPos = pico->transform_->GetWorldPosition();
+        static DirectX::XMFLOAT3 stagePos = stage->transform_->GetWorldPosition();
+        time += elapsedTime;
+        sinPosY = sin(time) * 0.3f;
+
+        DirectX::XMFLOAT3 pPos = picoPos;
+        pPos.y += sinPosY;
+        DirectX::XMFLOAT3 sPos = stagePos;
+        sPos.y += sinPosY;
+
+        pico->transform_->SetWorldPosition(pPos);
+        stage->transform_->SetWorldPosition(sPos);
+    }
+
+    //ロリポップ角度設定
+    if (!startFlag_)
+    {
+        //Xの往復をみて、Zを動かす
+        static int roundCount = 0;
+        static int roundRand = Mathf::RandomRange(2, 6);
+
+        //Xの動き
+        static float dirX = 1;
+        static float speedX = 0.2f;
+        float x = candyData_[candyID_].angle.x;
+        x += elapsedTime * speedX * dirX;
+        candyData_[candyID_].angle.x = x;
+        if (x > -1.0f)
+        {
+            dirX = -1.0f;
+            speedX = Mathf::RandomRange(0.2f, 0.5f);
+            roundCount++;
+        }
+        if (x < -1.2f)
+        {
+            dirX = 1.0f;
+            speedX = Mathf::RandomRange(0.2f, 0.5f);
+            roundCount++;
+        }
+
+        //Zの動き
+        static bool moveZ = false;
+        if (roundCount >= roundRand)    //往復カウントが設定した値になったら
+        {
+            roundCount = 0;
+            roundRand = Mathf::RandomRange(2, 6);
+            moveZ = true;
+        }
+
+        if (moveZ)
+        {
+            static float dirZ = 1;
+            static float speedZ = 0.2f;
+            float z = candyData_[candyID_].angle.z;
+            z += elapsedTime * speedZ * dirZ;
+            candyData_[candyID_].angle.z = z;
+            if (z > 0.15f && dirZ > 0)
+            {
+                dirZ = -1.0f;
+                speedZ = Mathf::RandomRange(0.2f, 0.5f);
+                moveZ = false;
+            }
+            if (z < 0 && dirZ < 0)
+            {
+                dirZ = 1.0f;
+                speedZ = Mathf::RandomRange(0.2f, 0.5f);
+                moveZ = false;
+            }
+        }
+    }
+
+    //瞬き
+    {
+        eyeTime_ -= elapsedTime;
+        static bool eyeDir = true;  //瞬き用フラグ
+        if (eyeTime_ < 0)
+        {
+            eyeTime_ = Mathf::RandomRange(3, 6);
+            isShapeEye_ = true;
+            eyeDir = true;
+        }
+        if (isShapeEye_)    //瞬き実行
+        {
+            if (eyeDir)
+            {
+                shapeEye_ += elapsedTime * 2 * Mathf::RandomRange(1, 2);
+                if (shapeEye_ >= 1)
+                    eyeDir = false;
+            }
+            else
+            {
+                shapeEye_ -= elapsedTime * 2;
+                if (shapeEye_ < 0)
+                {
+                    shapeEye_ = 0;
+                    isShapeEye_ = false;
+                }
+            }
+            //シェイプ設定
+            std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+            res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[0].rate = shapeEye_;
+        }
+    }
+
+    //カメラをlookにフォーカス
+    {
+        DirectX::XMFLOAT3 lerpPos = lookCamera->transform_->GetWorldPosition();
+        static  DirectX::XMFLOAT3 oldPos = lerpPos;
+
+        DirectX::XMStoreFloat3(&lerpPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&oldPos), DirectX::XMLoadFloat3(&lerpPos), 0.1f));
+        oldPos = lerpPos;
+
+        mainCamera_->SetLookAt(lerpPos);
+
+    }
+
+
+    //スタート時処理
+    if (startFlag_)
+    {
+        if (picoAnim->GetCurrentAnimationIndex() != 49)
+            picoAnim->PlayAnimation(49, false);
+
+        //回転
+        if (picoAnim->GetCurrentAnimationEvent("turn", DirectX::XMFLOAT3()))
+        {
+            //回転
+            DirectX::XMFLOAT3 picoEuler = pico->transform_->GetEulerRotation();
+            picoEuler.y = Mathf::Lerp(picoEuler.y, startAfter_.playerEulerY, 0.1f);
+            pico->transform_->SetEulerRotation(picoEuler);
+        }
+        //lookCamera設定
+        if (picoAnim->GetCurrentAnimationEventIsEnd("headFocus"))
+        {
+            //lookCameraを動かす
+            DirectX::XMFLOAT3 lookPos = lookCamera->transform_->GetLocalPosition();
+            lookPos.y = Mathf::Lerp(lookPos.y, startAfter_.lookCameraPosY, 0.1f);
+            lookCamera->transform_->SetLocalPosition(lookPos);
+
+        }
+
+        //step１顔アップ
+        {
+            DirectX::XMFLOAT3 headPos;
+            if (picoAnim->GetCurrentAnimationEvent("upCamera", headPos))
+            {
+                //注視点
+                lookCamera->transform_->SetWorldPosition(headPos);
+
+                //カメラ動かす
+                DirectX::XMFLOAT3 lookPos = { headPos.x + startAfter_.cameraPos1.x,headPos.y + startAfter_.cameraPos1.y,headPos.z + startAfter_.cameraPos1.z };
+                DirectX::XMFLOAT3 cPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
+                DirectX::XMStoreFloat3(&cPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cPos), DirectX::XMLoadFloat3(&lookPos), 0.08f));
+                mainCamera_->GetGameObject()->transform_->SetWorldPosition(cPos);
+            }
+            else if (picoAnim->GetCurrentAnimationEvent("headFocus", headPos))  //カメラをフォーカス
+            {
+                lookCamera->transform_->SetWorldPosition(headPos);
+            }
+        }
+
+        //step２顔にアップ後処理
+        {
+            if (picoAnim->GetCurrentAnimationEventIsEnd("upCamera") && !isStopFlag_)
+            {
+                isStopFlag_ = true;
+                isStageMove_ = false;
+                picoAnim->SetEnabled(false);
+                stopTime_ = 1.0f;
+
+                candyID_ = 1;
+                GameObjectManager::Instance().Find("CandyTitle")->transform_->SetEulerRotation(DirectX::XMFLOAT3(-154, -85, 82));
+                GameObjectManager::Instance().Find("CandyTitle")->transform_->SetWorldPosition(candyData_[candyID_].pos);
+
+                //シェイプ設定
+                std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+                res->ShapeReset();
+            }
+
+            {
+                if (isStopFlag_)
+                {
+                    //シェイプ設定
+                    std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+                    float rate7 = res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[7].rate;
+                    float rate8 = res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[8].rate;
+                    rate7 = Mathf::Lerp(rate7, 1, 0.1f);
+                    rate8 = Mathf::Lerp(rate8, 0.5f, 0.1f);
+                    res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[7].rate = rate7;
+                    res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[8].rate = rate8;
+                }
+            }
+
+            //動きとめる
+            if (stopTime_ > 0)
+            {
+                stopTime_ -= elapsedTime;
+            }
+            else
+            {
+                if (isStopFlag_)
+                {
+                    isStageMove_ = true;
+                    picoAnim->SetEnabled(true);
+                }
+            }
+        }
+
+        //step３顔アップから引く処理
+        {
+            if (picoAnim->GetCurrentAnimationEventIsEnd("headFocus"))
+            {
+                DirectX::XMFLOAT3 cPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
+                DirectX::XMStoreFloat3(&cPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cPos), DirectX::XMLoadFloat3(&startAfter_.cameraPos2), 0.08f));
+                mainCamera_->GetGameObject()->transform_->SetWorldPosition(cPos);
+            }
+        }
+
+        //ロリポップサイズ設定
+        {
+            std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
+            std::shared_ptr<AnimationCom> picoAnim = pico->GetComponent<AnimationCom>();
+
+            if (picoAnim->GetCurrentAnimationEvent("bigCandy", DirectX::XMFLOAT3(0, 0, 0)))
+            {
+                static int sizeCount = 3;
+                auto& animCandy = picoAnim->GetAnimationEvent("bigCandy");
+                static float start = animCandy.resourceEventData.startFrame;
+                static float len = animCandy.resourceEventData.endFrame - animCandy.resourceEventData.startFrame;
+                float animTime = picoAnim->GetCurrentAnimationSecoonds();
+
+                if (start + (len * candySizeCount_ / sizeCount) > animTime)
+                {
+                    std::shared_ptr<GameObject> candy = GameObjectManager::Instance().Find("CandyTitle");
+                    static float distSize = candyData_[1].scale.x - candyData_[0].scale.x;
+                    float size = candyData_[0].scale.x + distSize * candySizeCount_ / sizeCount;
+                    candy->transform_->SetScale(DirectX::XMFLOAT3(size, size, size));
+                }
+                else
+                    candySizeCount_++;
+
+            }
+        }
+
+
+        //アニメーション終わり
+        if (!picoAnim->IsPlayAnimation())
+        {
+            //シーン遷移フラグON
+            //isSceneEndFlag_ = true;
+
+            //仮処理
+            //if(0)
+            {
+                picoAnim->PlayAnimation(48, true, 0);
+                pico->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 6, 7));
+                mainCamera_->GetGameObject()->transform_->SetWorldPosition({ -1.6f, 1.1f, -8.3f });
+                isStopFlag_ = false;
+                lookCamera->transform_->SetLocalPosition(DirectX::XMFLOAT3(31.4f, 51.5f, 63.1f));
+                startFlag_ = false;
+                candyID_ = 0;
+
+                std::shared_ptr<GameObject> candy = GameObjectManager::Instance().Find("CandyTitle");
+                candy->transform_->SetEulerRotation(DirectX::XMFLOAT3(-0, -0, 0));
+                candy->transform_->SetWorldPosition(DirectX::XMFLOAT3(-0, -14, 0));
+                candy->transform_->SetScale(DirectX::XMFLOAT3(candyData_[0].scale.x, candyData_[0].scale.y, candyData_[0].scale.z));
+                candySizeCount_ = 1;
+
+                eyeTime_ = 3;
+
+                //シェイプ初期設定
+                std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+                res->ShapeReset();
+                res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[2].rate = 1;
+                res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[3].rate = 1;
+                res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[7].rate = 0;
+                res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[8].rate = 0;
+            }
+        }
+
+        //瞬きをしなくする
+        eyeTime_ = 100;
+    }
 }

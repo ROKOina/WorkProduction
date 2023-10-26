@@ -170,6 +170,9 @@ public:
 
 	const int& GetShapeIndex() const { return shapeIndex_; }
 
+	//シェイプ0クリア
+	void ShapeReset();
+
 	// 読み込み
 	void Load(ID3D11Device* device, const char* filename);
 
