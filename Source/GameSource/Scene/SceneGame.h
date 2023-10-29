@@ -34,6 +34,5 @@ private:
 	bool gameEndFlag_ = false;
 	bool gameStartFlag_ = false;
 
-	std::unique_ptr<Particle> particle_;
 	std::unique_ptr<PostEffect> postEff_;
 };

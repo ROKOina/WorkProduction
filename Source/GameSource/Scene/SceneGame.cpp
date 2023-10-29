@@ -403,8 +403,6 @@ void SceneGame::Initialize()
 		graphics.shaderParameter3D_.lightDirection = { 0.626f,-0.55f,-0.533f,0 };
 	}
 
-	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
-	//particle_ = std::make_unique<Particle>(DirectX::XMFLOAT4{ player->transform_->GetWorldPosition().x, player->transform_->GetWorldPosition().y, player->transform_->GetWorldPosition().z,0 });
 
 #if defined(StageEdit)
 
@@ -462,9 +460,6 @@ void SceneGame::Update(float elapsedTime)
 
 	Graphics& graphics = Graphics::Instance();
 
-	//std::shared_ptr<GameObject> player = GameObjectManager::Instance().Find("pico");
-	//std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
-	//particle_->integrate(elapsedTime, { player->transform_->GetWorldPosition().x, player->transform_->GetWorldPosition().y, player->transform_->GetWorldPosition().z, 0 }, camera->GetView(), camera->GetProjection());
 
 }
 
@@ -528,33 +523,6 @@ void SceneGame::Render()
 	// デバッグレンダラ描画実行
 	graphics.GetDebugRenderer()->Render(dc, mainCamera_->GetView(), mainCamera_->GetProjection());
 
-
-	//	//パーティクル
-	//{
-	//	Dx11StateLib* dx11State_ = Graphics::Instance().GetDx11State().get();
-	//	const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	//	dc->OMSetBlendState(
-	//		dx11State_->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::PARTICLE).Get(),
-	//		blend_factor, 0xFFFFFFFF);
-	//	dc->OMSetDepthStencilState(
-	//		dx11State_->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::PARTICLE).Get(),
-	//		0);
-	//	dc->RSSetState(
-	//		dx11State_->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::PARTICLE).Get()
-	//	);
-
-	//	particle_->Render(graphics.shaderParameter3D_);
-
-	//	dc->OMSetBlendState(
-	//		dx11State_->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA).Get(),
-	//		blend_factor, 0xFFFFFFFF);
-	//	dc->OMSetDepthStencilState(
-	//		dx11State_->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_3D).Get(),
-	//		0);
-	//	dc->RSSetState(
-	//		dx11State_->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_FALSE_CULLBACK).Get()
-	//	);
-	//}
 
 	//バッファ戻す
 	Graphics::Instance().RestoreRenderTargets();
