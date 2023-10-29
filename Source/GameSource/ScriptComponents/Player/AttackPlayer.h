@@ -26,7 +26,6 @@ private:
     bool IsAttackInput(float elapsedTime);
     void SquareInput();
     void TriangleInput();
-    void DashInput();
     //コンボ処理
     void ComboProcess(float elapsedTime);
 
@@ -44,7 +43,7 @@ public://intでステートを返す、ステートをコードにする
 
     //ノーマル攻撃
 public: 
-    void NormalAttack();
+    void NormalAttack(bool middleAssist = false);
 
 private:
     int NormalAttackUpdate(float elapsedTime);
@@ -106,8 +105,8 @@ public:
     const bool& GetIsNormalAttack()const { return isNormalAttack_; }
     void SetIsNormalAttack(bool flag) { isNormalAttack_ = flag; }
 
-    const int& GetComboAttackCount()const { return comboAttackCount_; }
-    void SetComboAttackCount(int count) { comboAttackCount_ = count; }
+    const int& GetComboSquareCount()const { return comboSquareCount_; }
+    const int& GetComboTriangleCount()const { return comboTriangleCount_; }
 
     void SetAnimFlagName(std::string str) { animFlagName_ = str; }
 
@@ -130,7 +129,6 @@ private:
     {
         SQUARE,     //□
         TRIANGLE,   //△
-        DASH,       //DASH
 
         NULL_KEY,
     };
@@ -143,11 +141,22 @@ private:
 
     bool isJumpSquareInput_ = false;    //ジャンプ中□コンボ一回までにするため
 
+    //ジャンプ中攻撃のコンボ受付時間
+    float jumpAttackComboWaitTime_ = 0.5f;
+    float jumpAttackComboWaitTimer_ = 0;
+
     //コンボ継続処理判定をするか
     bool isComboJudge_ = true;
 
+    //強制的にコンボを終わらせるフラグ
+    bool comboJudgeEnd_ = false;
+
     //攻撃の段階（コンボ回数ではない）
-    int comboAttackCount_ = 0;
+    int comboSquareCount_ = 0;
+    int comboTriangleCount_ = 0;
+
+    //中距離アシストを有効にするか
+    bool isMiddleAssist_ = false;
 
     //降下攻撃中か
     bool isJumpFall_ = false;
@@ -155,6 +164,7 @@ private:
     //他から攻撃に引き継ぐ用
     std::string animFlagName_ = "";
 
+    //敵に攻撃が当たっているかアニメーション中だけ保存
     bool onHitEnemy_ = false;
 
     //攻撃の動きを管理

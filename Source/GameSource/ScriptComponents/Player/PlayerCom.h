@@ -57,6 +57,11 @@ enum ANIMATION_PLAYER
     DAMAGE_FRONT,
     DAMAGE_BACK,
     SIT_TITLE,
+    STANDUP_TITLE,
+    TRIANGLE_ATTACK_02,
+    TRIANGLE_ATTACK_01,
+    TRIANGLE_ATTACK_03,
+    TRIANGLE_ATTACK_PUSH,
 };
 
 class PlayerCom : public Component
@@ -102,6 +107,7 @@ public:
         ATTACK,
         ATTACK_DASH,
         ATTACK_JUMP,
+        ATTACK_JUMP_FALL_BEFORE,
         ATTACK_JUMP_FALL,
     };
     PLAYER_STATUS GetPlayerStatus() { return playerStatus_; }

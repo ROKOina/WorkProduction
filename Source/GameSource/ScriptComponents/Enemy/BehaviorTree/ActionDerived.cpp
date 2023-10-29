@@ -23,8 +23,8 @@ ActionBase::State IdleAction::Run(float elapsedTime)
 		runTimer_ = 2;
 
 		step_++;
-		break;
 	}
+	break;
 	case 1:
 		runTimer_ -= elapsedTime;
 
@@ -45,6 +45,14 @@ ActionBase::State IdleAction::Run(float elapsedTime)
 		}
 
 		break;
+
+	//ã≠êßèIóπ
+	case  Action::END_STEP:
+	{
+		step_ = 0;
+	}
+	break;
+
 	}
 	return ActionBase::State::Run;
 }
@@ -62,8 +70,8 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 		move->SetMoveMaxSpeed(owner_.lock()->GetMoveDataEnemy().walkMaxSpeed);
 
 		step_++;
-		break;
 	}
+	break;
 	case 1:
 	{
 		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
@@ -92,7 +100,7 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 
 		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
 		move->AddForce(force);
-		
+
 		//âÒì]Ç∑ÇÈ
 		QuaternionStruct myQ = myTransform->GetRotation();
 		QuaternionStruct focusQ = QuaternionStruct::LookRotation(force);
@@ -107,8 +115,14 @@ ActionBase::State WanderAction::Run(float elapsedTime)
 			// úpújê¨å˜Çï‘Ç∑
 			return ActionBase::State::Complete;
 		}
-		break;
 	}
+	break;
+	//ã≠êßèIóπ
+	case  Action::END_STEP:
+	{
+		step_ = 0;
+	}
+	break;
 
 	}
 	// é¿çsíÜ

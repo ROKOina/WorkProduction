@@ -114,6 +114,9 @@ private:
     void SetAnimationSpeed(float speed);
     float GetAnimationSpeed();
 
+    //hasExitをクリア
+    void ResetHasExit();
+
 private:
     //キーをそのままアニメーションのindexに使う
     std::map<int, AnimatorData> animatorData_;

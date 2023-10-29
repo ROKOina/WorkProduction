@@ -77,21 +77,47 @@ void AnimatorCom::Update(float elapsedTime)
 
     }
 
+    //現在のアニメーション
+    int currentIndex = animation->GetCurrentAnimationIndex();
+
     //次に遷移
+    bool onHasExitNonTrigger = false;
     if (hasExit_)
     {
-        //アニメーション遷移
-        animation->PlayAnimation(
-            saveIndex_,
-            animatorData_[saveIndex_].isLoop,
-            saveBlendTime_);
+        //遷移先があるか
+        std::vector<AnimTransition>& currentTransitions = animatorData_[currentIndex].transitions;
+        if (currentTransitions.size() > 0)
+        {
+            for (AnimTransition& transition : currentTransitions)
+            {
+                for (auto& triggerParam : transition.triggerParameters)
+                {
+                    //トリガーがtrueなら飛ばす
+                    if (triggerParam->trigger)
+                    {
+                        onHasExitNonTrigger = true;
+                        break;
+                    }
+                }
+                if (onHasExitNonTrigger)
+                    break;
+            }
+        }
+
+        if (!onHasExitNonTrigger)
+        {
+            //アニメーション遷移
+            animation->PlayAnimation(
+                saveIndex_,
+                animatorData_[saveIndex_].isLoop,
+                saveBlendTime_);
+        }
+
         hasExit_ = false;
         saveIndex_ = -1;
         saveBlendTime_ = -1;
     }
 
-    //現在のアニメーション
-    int currentIndex = animation->GetCurrentAnimationIndex();
     //遷移先があるか
     std::vector<AnimTransition>& currentTransitions = animatorData_[currentIndex].transitions;
     if (currentTransitions.size() > 0)
@@ -138,6 +164,9 @@ void AnimatorCom::Update(float elapsedTime)
             }
 #pragma endregion
 
+            if (onHasExitNonTrigger)
+                continue;
+
 #pragma region hasExitで遷移判別
             if (transition.hasExit)
             {
@@ -172,6 +201,7 @@ void AnimatorCom::Update(float elapsedTime)
 
         }
     }
+
 }
 
 // GUI描画
@@ -370,4 +400,12 @@ void AnimatorCom::ResetParameterList()
     {
         triggerList->trigger = false;
     }
+}
+
+//hasExitをクリア
+void AnimatorCom::ResetHasExit()
+{
+    hasExit_ = false;
+    saveIndex_ = -1;
+    saveBlendTime_ = -1;
 }

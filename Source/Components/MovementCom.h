@@ -2,7 +2,7 @@
 
 #include "System\Component.h"
 
-#define GRAVITY_NORMAL -80
+#define GRAVITY_NORMAL -70
 #define GRAVITY_FALL -120
 #define GRAVITY_ZERO 0
 

@@ -41,9 +41,6 @@ void SceneTitle::Initialize()
             std::shared_ptr<GameObject> lookCamera = obj->AddChildObject();
             lookCamera->SetName("lookCamera");
             lookCamera->transform_->SetLocalPosition(DirectX::XMFLOAT3(31.4f, 51.5f, 63.1f));
-
-            std::shared_ptr<SphereColliderCom> col = lookCamera->AddComponent<SphereColliderCom>();
-            col->SetRadius(0.19f);
         }
     }
 
@@ -149,6 +146,8 @@ void SceneTitle::Finalize()
 //更新処理
 void SceneTitle::Update(float elapsedTime)
 {
+
+
     GamePad& gamePad = Input::Instance().GetGamePad();
 
     //何かボタンを押したらゲームシーンへ切りかえ
@@ -601,7 +600,7 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
         if (!picoAnim->IsPlayAnimation())
         {
             //シーン遷移フラグON
-            //isSceneEndFlag_ = true;
+            isSceneEndFlag_ = true;
 
             //仮処理
             //if(0)

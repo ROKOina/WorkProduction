@@ -432,14 +432,14 @@ void SceneGame::Update(float elapsedTime)
 #if defined(StageEdit)
 
 #else
-	//1フレームは初期化のため待機
-	//終了処理
-	if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_)	//敵の数0の時
-	{
-		GameObjectManager::Instance().AllRemove();
-		SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
-		gameEndFlag_ = true;
-	}
+	////1フレームは初期化のため待機
+	////終了処理
+	//if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_)	//敵の数0の時
+	//{
+	//	GameObjectManager::Instance().AllRemove();
+	//	SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
+	//	gameEndFlag_ = true;
+	//}
 	//一回目通るときにスタートフラグをON
 	if (!gameStartFlag_)
 	{

@@ -77,13 +77,16 @@ void PlayerCom::Update(float elapsedTime)
         attackPlayer_->Update(elapsedTime);
     }
 
-    //初期化
+    //ダメージ
     if (status->GetFrameDamage())
     {
         //アニメーター
         std::shared_ptr<AnimatorCom> animator = GetGameObject()->GetComponent<AnimatorCom>();
         animator->ResetParameterList();
         animator->SetTriggerOn("damageFront");
+        std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+        attackPlayer_->AttackFlagEnd();
+        movePlayer_->DashEndFlag(true);
     }
 
     //カプセル当たり判定設定
@@ -164,46 +167,44 @@ void PlayerCom::AnimationInitialize()
     animator->SetLoopAnimation(ANIMATION_PLAYER::IDEL_2, true);
 
     //アニメーションパラメーター追加
-    animator->AddTriggerParameter("idle");
-    animator->AddTriggerParameter("jump");
-    animator->AddTriggerParameter("jumpFall");
-    animator->AddTriggerParameter("punch");
-    animator->AddTriggerParameter("dash");
-    animator->AddTriggerParameter("dashBack");
-    animator->AddTriggerParameter("runTurn");
-    animator->AddTriggerParameter("runStop");
+    //トリガーで判定
+    {
+        animator->AddTriggerParameter("idle");
+        animator->AddTriggerParameter("jump");
+        animator->AddTriggerParameter("jumpFall");
+        animator->AddTriggerParameter("dash");
+        animator->AddTriggerParameter("dashBack");
+        animator->AddTriggerParameter("runTurn");
+        animator->AddTriggerParameter("runStop");
 
-    animator->AddTriggerParameter("damageFront");
+        animator->AddTriggerParameter("damageFront");
 
-    animator->AddTriggerParameter("square");    //□
-    animator->AddTriggerParameter("triangle");  //△
-    //入力無し
-    animator->AddTriggerParameter("squareIdle");
-    animator->AddTriggerParameter("squareDash");
-    animator->AddTriggerParameter("squareJump");
+        animator->AddTriggerParameter("square");    //□
+        animator->AddTriggerParameter("squareIdle");
+        animator->AddTriggerParameter("squareDash");
+        animator->AddTriggerParameter("squareJump");
 
-    animator->AddTriggerParameter("triangleIdle");
-    animator->AddTriggerParameter("triangleDash");
-    animator->AddTriggerParameter("triangleJump");
-    animator->AddTriggerParameter("triangleJumpDown");
+        animator->AddTriggerParameter("triangle");  //△
+        animator->AddTriggerParameter("triangleDash");
+        animator->AddTriggerParameter("triangleJump");
+        animator->AddTriggerParameter("triangleJumpDown");
 
-    animator->AddTriggerParameter("jumpAttackEnd");
+        //ジャスト時
+        animator->AddTriggerParameter("squareJust");
+        animator->AddTriggerParameter("triangleJust");
+        //ジャスト回避
+        animator->AddTriggerParameter("justBack");
+        animator->AddTriggerParameter("justFront");
+        animator->AddTriggerParameter("justLeft");
+        animator->AddTriggerParameter("justRight");
+    }
 
-    //dashコンボの待機
-    animator->AddTriggerParameter("dashComboWait");
+    //フロートで判定
+    {
+        animator->AddFloatParameter("moveSpeed");
+    }
 
-    //ジャスト時
-    animator->AddTriggerParameter("squareJust");
-    animator->AddTriggerParameter("triangleJust");
-    //ジャスト回避
-    animator->AddTriggerParameter("justBack");
-    animator->AddTriggerParameter("justFront");
-    animator->AddTriggerParameter("justLeft");
-    animator->AddTriggerParameter("justRight");
-
-    animator->AddFloatParameter("moveSpeed");
-
-    //アニメーション遷移とパラメーター設定をする決める
+    //アニメーション遷移とパラメーター設定を決める
     {
         //idle
         animator->AddAnimatorTransition(IDEL_2, WALK_RUNRUN_2, false, 0.5f);
@@ -233,26 +234,8 @@ void PlayerCom::AnimationInitialize()
 
         //run止まり
         animator->AddAnimatorTransition(RUN_STOP);
-        //animator->AddAnimatorTransition(RUN_HARD_2, RUN_STOP);
         animator->SetTriggerTransition(RUN_STOP, "runStop");
-        //animator->SetTriggerTransition(RUN_HARD_2, RUN_STOP, "runStop");
         animator->AddAnimatorTransition(RUN_STOP, IDEL_2, true);
-
-        {   //dashコンボ
-            //dash１
-
-            //コンボ2
-            animator->AddAnimatorTransition(BIGSWORD_DASH);
-            animator->SetTriggerTransition(BIGSWORD_DASH, "triangleDash");
-            animator->AddAnimatorTransition(BIGSWORD_DASH, IDEL_2, true, 3.5f);
-
-            //コンボ3
-            animator->AddAnimatorTransition(BIGSWORD_DASH, BIGSWORD_COM2_02);
-            animator->SetTriggerTransition(BIGSWORD_DASH, BIGSWORD_COM2_02, "square");
-            animator->AddAnimatorTransition(BIGSWORD_COM2_02, IDEL_2, true, 3.5f);
-        }
-
-        //どこからでも遷移する
 
         //jump
         animator->AddAnimatorTransition(JUMP_IN);
@@ -267,11 +250,6 @@ void PlayerCom::AnimationInitialize()
         animator->SetTriggerTransition(JUMP_FALL, IDEL_2, "idle");
         animator->SetLoopAnimation(JUMP_FALL, true);
 
-        //punch
-        animator->AddAnimatorTransition(PUNCH);
-        animator->SetTriggerTransition(PUNCH, "punch");
-        animator->AddAnimatorTransition(PUNCH, IDEL_2, true);
-
         //dash
         animator->AddAnimatorTransition(DASH_ANIM);
         animator->SetTriggerTransition(DASH_ANIM, "dash");
@@ -284,44 +262,96 @@ void PlayerCom::AnimationInitialize()
         animator->SetTriggerTransition(DASH_BACK, IDEL_2, "idle");
 
         //ジャスト回避回避
-        //back
-        animator->AddAnimatorTransition(DODGE_BACK);
-        animator->SetTriggerTransition(DODGE_BACK, "justBack");
-        animator->AddAnimatorTransition(DODGE_BACK, IDEL_2, true);
-        //front
-        animator->AddAnimatorTransition(DODGE_FRONT);
-        animator->SetTriggerTransition(DODGE_FRONT, "justFront");
-        animator->AddAnimatorTransition(DODGE_FRONT, IDEL_2, true);
-        //left
-        animator->AddAnimatorTransition(DODGE_LEFT);
-        animator->SetTriggerTransition(DODGE_LEFT, "justLeft");
-        animator->AddAnimatorTransition(DODGE_LEFT, IDEL_2, true);
-        //right
-        animator->AddAnimatorTransition(DODGE_RIGHT);
-        animator->SetTriggerTransition(DODGE_RIGHT, "justRight");
-        animator->AddAnimatorTransition(DODGE_RIGHT, IDEL_2, true);
+        {
+            //back
+            animator->AddAnimatorTransition(DODGE_BACK);
+            animator->SetTriggerTransition(DODGE_BACK, "justBack");
+            animator->AddAnimatorTransition(DODGE_BACK, IDEL_2, true);
+            //front
+            animator->AddAnimatorTransition(DODGE_FRONT);
+            animator->SetTriggerTransition(DODGE_FRONT, "justFront");
+            animator->AddAnimatorTransition(DODGE_FRONT, IDEL_2, true);
+            //left
+            animator->AddAnimatorTransition(DODGE_LEFT);
+            animator->SetTriggerTransition(DODGE_LEFT, "justLeft");
+            animator->AddAnimatorTransition(DODGE_LEFT, IDEL_2, true);
+            //right
+            animator->AddAnimatorTransition(DODGE_RIGHT);
+            animator->SetTriggerTransition(DODGE_RIGHT, "justRight");
+            animator->AddAnimatorTransition(DODGE_RIGHT, IDEL_2, true);
+        }
 
-        {   //□□□
+        {   //中距離コンボ
+
+
+            //コンボ2
+            animator->AddAnimatorTransition(BIGSWORD_DASH);
+            animator->SetTriggerTransition(BIGSWORD_DASH, "triangleDash");
+            animator->AddAnimatorTransition(BIGSWORD_DASH, IDEL_2, true, 3.5f);
+
+            //コンボ3
+            animator->AddAnimatorTransition(BIGSWORD_DASH, BIGSWORD_COM2_02);
+            animator->SetTriggerTransition(BIGSWORD_DASH, BIGSWORD_COM2_02, "square");
+            animator->AddAnimatorTransition(BIGSWORD_COM2_02, IDEL_2, true, 3.5f);
+        }
+
+        //攻撃
+        {  
+
+            //□
             //combo01
             animator->AddAnimatorTransition(BIGSWORD_COM1_01);
             animator->SetTriggerTransition(BIGSWORD_COM1_01, "squareIdle");
             animator->AddAnimatorTransition(BIGSWORD_COM1_01, IDEL_2, true, 3.5f);
-            //combo2に行く
+
+            //combo2
+            //□ (前□）
             animator->AddAnimatorTransition(BIGSWORD_COM1_01, BIGSWORD_COM1_02);
             animator->SetTriggerTransition(BIGSWORD_COM1_01, BIGSWORD_COM1_02, "square");
-
-            //combo02
-            animator->AddAnimatorTransition(BIGSWORD_COM1_02);
-            animator->SetTriggerTransition(BIGSWORD_COM1_02, "squareJust");
             animator->AddAnimatorTransition(BIGSWORD_COM1_02, IDEL_2, true, 3.5f);
-            //combo3に行く
+
+            //□ (前△）
+            animator->AddAnimatorTransition(TRIANGLE_ATTACK_01, BIGSWORD_COM1_02);
+            animator->SetTriggerTransition(TRIANGLE_ATTACK_01, BIGSWORD_COM1_02, "square");
+
+            //△
+            animator->AddAnimatorTransition(BIGSWORD_COM1_01, TRIANGLE_ATTACK_01, false, 1.0f);
+            animator->SetTriggerTransition(BIGSWORD_COM1_01, TRIANGLE_ATTACK_01, "triangle");
+            animator->AddAnimatorTransition(TRIANGLE_ATTACK_01, IDEL_2, true, 3.5f);
+
+            //combo3
+            //□ (前□)
             animator->AddAnimatorTransition(BIGSWORD_COM1_02, BIGSWORD_COM1_03);
             animator->SetTriggerTransition(BIGSWORD_COM1_02, BIGSWORD_COM1_03, "square");
-
-            //combo03
-            animator->AddAnimatorTransition(BIGSWORD_COM1_03);
-            //animator->SetTriggerTransition(BIGSWORD_COM1_03, "squareJust");
             animator->AddAnimatorTransition(BIGSWORD_COM1_03, IDEL_2, true, 3.5f);
+
+            //□ (前△)
+            animator->AddAnimatorTransition(TRIANGLE_ATTACK_02, BIGSWORD_COM1_03);
+            animator->SetTriggerTransition(TRIANGLE_ATTACK_02, BIGSWORD_COM1_03, "square");
+
+            //△ (前□)
+            animator->AddAnimatorTransition(BIGSWORD_COM1_02, TRIANGLE_ATTACK_02, false, 1.0f);
+            animator->SetTriggerTransition(BIGSWORD_COM1_02, TRIANGLE_ATTACK_02, "triangle");
+            animator->AddAnimatorTransition(TRIANGLE_ATTACK_02, IDEL_2, true, 3.5f);
+
+            //△ (前△)
+            animator->AddAnimatorTransition(TRIANGLE_ATTACK_01, TRIANGLE_ATTACK_02, false, 1.0f);
+            animator->SetTriggerTransition(TRIANGLE_ATTACK_01, TRIANGLE_ATTACK_02, "triangle");
+
+            //最後△
+            //△ (前□)
+            animator->AddAnimatorTransition(BIGSWORD_COM1_03, TRIANGLE_ATTACK_03);
+            animator->SetTriggerTransition(BIGSWORD_COM1_03, TRIANGLE_ATTACK_03, "triangle");
+            animator->AddAnimatorTransition(TRIANGLE_ATTACK_03, IDEL_2, true, 3.5f);
+
+            //△ (前△)
+            animator->AddAnimatorTransition(TRIANGLE_ATTACK_02, TRIANGLE_ATTACK_03);
+            animator->SetTriggerTransition(TRIANGLE_ATTACK_02, TRIANGLE_ATTACK_03, "triangle");
+
+
+            //ジャスト回避時
+            animator->AddAnimatorTransition(BIGSWORD_COM1_02);
+            animator->SetTriggerTransition(BIGSWORD_COM1_02, "squareJust");
         }
 
         //ジャンプコンボ
@@ -336,7 +366,7 @@ void PlayerCom::AnimationInitialize()
             animator->SetTriggerTransition(JUMP_ATTACK_UPPER, JUMP_ATTACK_01, "square");
         }
 
-        //ジャンプ中下強攻撃
+        //ジャンプ中、下強攻撃
         {   //J△
             animator->AddAnimatorTransition(JUMP_ATTACK_DOWN_START);
             animator->SetTriggerTransition(JUMP_ATTACK_DOWN_START, "triangleJumpDown");
@@ -354,17 +384,17 @@ void PlayerCom::AnimationInitialize()
         {
             animator->AddAnimatorTransition(JUMP_ATTACK_01);
             animator->SetTriggerTransition(JUMP_ATTACK_01, "squareJump");
-            animator->AddAnimatorTransition(JUMP_ATTACK_01, IDEL_2, true);
+            animator->AddAnimatorTransition(JUMP_ATTACK_01, IDEL_2);
             animator->SetTriggerTransition(JUMP_ATTACK_01, IDEL_2, "idle");
 
             animator->AddAnimatorTransition(JUMP_ATTACK_01, JUMP_ATTACK_02);
             animator->SetTriggerTransition(JUMP_ATTACK_01, JUMP_ATTACK_02, "square");
-            animator->AddAnimatorTransition(JUMP_ATTACK_02, IDEL_2, true);
+            animator->AddAnimatorTransition(JUMP_ATTACK_02, IDEL_2);
             animator->SetTriggerTransition(JUMP_ATTACK_02, IDEL_2, "idle");
 
             animator->AddAnimatorTransition(JUMP_ATTACK_02, JUMP_ATTACK_03);
             animator->SetTriggerTransition(JUMP_ATTACK_02, JUMP_ATTACK_03, "square");
-            animator->AddAnimatorTransition(JUMP_ATTACK_03, IDEL_2, true);
+            animator->AddAnimatorTransition(JUMP_ATTACK_03, IDEL_2);
             animator->SetTriggerTransition(JUMP_ATTACK_03, IDEL_2, "idle");
         }
 

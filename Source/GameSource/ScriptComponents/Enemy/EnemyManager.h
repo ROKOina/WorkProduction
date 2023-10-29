@@ -83,7 +83,7 @@ public:
 
 struct NearEnemyLevel	//近接敵の集まり方のデザイン
 {
-	float radius = 5;	//プレイヤーの半径
+	float radius = 5;	//プレイヤー中心の半径
 	int inRadiusCount = 3;	//半径に何人入れるか
 
 	int togetherAttackCount = 2;	//同時に攻撃できる回数
