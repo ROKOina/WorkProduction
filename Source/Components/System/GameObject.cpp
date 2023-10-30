@@ -6,6 +6,7 @@
 #include "../TransformCom.h"
 #include "../CameraCom.h"
 #include "../ColliderCom.h"
+#include "../ParticleSystemCom.h"
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
 #include "GameSource\ScriptComponents\Weapon\SwordTrailCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
@@ -195,6 +196,13 @@ void GameObjectManager::Update(float elapsedTime)
 			swordTrailObject_.emplace_back(trailComponent);
 		}
 
+		//パーティクルオブジェクトがあれば入れる
+		std::shared_ptr<ParticleSystemCom> particleComponent = obj->GetComponent<ParticleSystemCom>();
+		if (particleComponent)
+		{
+			particleObject_.emplace_back(particleComponent);
+		}
+
 		obj->Start();
 		updateGameObject_.emplace_back(obj);
 
@@ -324,6 +332,9 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 
 	//トレイル描画
 	SwordTrailRender();
+
+	//パーティクル描画
+	ParticleRender();
 
 	//debug
 	if(1)
@@ -569,6 +580,21 @@ void GameObjectManager::SwordTrailRender()
 
 	}
 
+}
+
+//パーティクル描画
+void GameObjectManager::ParticleRender()
+{
+	if (particleObject_.size() <= 0)return;
+
+	for (std::weak_ptr<ParticleSystemCom>& particleObj : particleObject_)
+	{
+		if (!particleObj.lock()->GetGameObject()->GetEnabled())continue;
+		if (!particleObj.lock()->GetEnabled())continue;
+
+		particleObj.lock()->Render();
+
+	}
 }
 
 //オブジェクト解放

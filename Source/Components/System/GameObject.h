@@ -11,6 +11,7 @@
 class Component;
 class TransformCom;
 class RendererCom;
+class ParticleSystemCom;
 class SwordTrailCom;
 class Collider;
 
@@ -165,6 +166,9 @@ private:
 	//トレイル描画
 	void SwordTrailRender();
 
+	//パーティクル描画
+	void ParticleRender();
+
 	//オブジェクト解放
 	void EraseObject(std::vector<std::shared_ptr<GameObject>>& objs, std::shared_ptr<GameObject> removeObj);
 
@@ -190,6 +194,9 @@ private:
 
 	//トレイル描画用
 	std::vector<std::weak_ptr<SwordTrailCom>>   swordTrailObject_;
+
+	//パーティクル描画用
+	std::vector<std::weak_ptr<ParticleSystemCom>>   particleObject_;
 
 	bool					isHiddenLister_ = false;
 	bool					isHiddenDetail_ = false;

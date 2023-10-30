@@ -16,6 +16,7 @@
 #include "Components\AnimatorCom.h"
 #include "Components\ColliderCom.h"
 #include "Components\MovementCom.h"
+#include "Components\ParticleSystemCom.h"
 
 #include "GameSource\ScriptComponents\Player\PlayerCom.h"
 #include "GameSource\ScriptComponents\Player\PlayerCameraCom.h"
@@ -31,6 +32,7 @@
 //経路探査
 #include "GameSource/Stage/PathSearch.h"
 
+//未完成
 //レベルデザイン時に起動
 //メモ帳に保存する
 //#define StageEdit
@@ -367,6 +369,16 @@ void SceneGame::Initialize()
 		}
 	}
 
+	//particle
+	for(int i=0;i<5;++i)
+	{
+		std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
+		p->SetName("Particle");
+		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 0.01f, 0, 0));
+
+		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(1000);
+	}
+
 #endif
 
 	//カメラを生成
@@ -415,7 +427,6 @@ void SceneGame::Initialize()
 	//EnemyManagerにプレイヤー登録
 	EnemyManager::Instance().RegisterPlayer(GameObjectManager::Instance().Find("pico"));
 #endif
-
 }
 
 // 終了化
@@ -457,9 +468,6 @@ void SceneGame::Update(float elapsedTime)
 
 	//エフェクト更新処理
 	EffectManager::Instance().Update(elapsedTime);
-
-	Graphics& graphics = Graphics::Instance();
-
 
 }
 

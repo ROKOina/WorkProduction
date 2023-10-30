@@ -558,7 +558,7 @@ void PostEffect::ImGuiRender()
                 bloomKawaseFilter_->SetEnabled(enabledKawase);
             }
             ImGui::Separator();
-            ImGui::SliderFloat("intensity", &graphics.shaderParameter3D_.bloomData2.intensity, 0, 10);
+            ImGui::SliderFloat("intensity", &graphics.shaderParameter3D_.bloomData2.intensity, 0, 100);
             ImGui::SliderFloat("threshold", &graphics.shaderParameter3D_.bloomData2.threshold, 0, 1);
 
            

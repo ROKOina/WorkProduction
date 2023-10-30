@@ -210,9 +210,6 @@
     <ClInclude Include="External\imgui-docking\backends\imgui_impl_win32.h">
       <Filter>External\imguiDocking</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Graphics\Shaders\compute\particle.h">
-      <Filter>Source\Graphics\compute</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Components\CameraCom.h">
       <Filter>Source\GameSource\Camera</Filter>
     </ClInclude>
@@ -260,6 +257,7 @@
     <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
     <ClInclude Include="Source\ThreadPool\ThreadPool.h" />
     <ClInclude Include="Source\GameSource\Math\easing.h" />
+    <ClInclude Include="Source\Components\ParticleSystemCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -379,9 +377,6 @@
     <ClCompile Include="External\imgui-docking\backends\imgui_impl_win32.cpp">
       <Filter>External\imguiDocking</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Shaders\compute\particle.cpp">
-      <Filter>Source\Graphics\compute</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Components\CameraCom.cpp">
       <Filter>Source\GameSource\Camera</Filter>
     </ClCompile>
@@ -488,6 +483,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\Math\easing.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\ParticleSystemCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -606,6 +604,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\3D\SwordTrailVS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\compute\ParticleInitializeCS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

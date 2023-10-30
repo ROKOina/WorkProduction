@@ -19,6 +19,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     tex += blurTexture[3].Sample(samplerLiner[0], pin.texcoord) * pin.color;
     tex += blurTexture[4].Sample(samplerLiner[0], pin.texcoord) * pin.color;
     tex += blurTexture[5].Sample(samplerLiner[0], pin.texcoord) * pin.color;
+    //tex.rgb *= 2;
 
     //•½‹Ï‰»‚·‚é
     float4 color = tex / 4;

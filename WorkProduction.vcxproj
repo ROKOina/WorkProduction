@@ -150,6 +150,7 @@
     <ClInclude Include="Source\Components\AnimatorCom.h" />
     <ClInclude Include="Source\Components\ColliderCom.h" />
     <ClInclude Include="Source\Components\MovementCom.h" />
+    <ClInclude Include="Source\Components\ParticleSystemCom.h" />
     <ClInclude Include="Source\Components\RendererCom.h" />
     <ClInclude Include="Source\GameSource\Math\easing.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
@@ -183,7 +184,6 @@
     <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\UnityChanToonShader.h" />
-    <ClInclude Include="Source\Graphics\Shaders\compute\particle.h" />
     <ClInclude Include="Source\Graphics\DebugRenderer\DebugRenderer.h" />
     <ClInclude Include="Source\Graphics\Dx11StateLib.h" />
     <ClInclude Include="Source\Graphics\Encoding.h" />
@@ -238,6 +238,7 @@
     <ClCompile Include="Source\Components\AnimatorCom.cpp" />
     <ClCompile Include="Source\Components\ColliderCom.cpp" />
     <ClCompile Include="Source\Components\MovementCom.cpp" />
+    <ClCompile Include="Source\Components\ParticleSystemCom.cpp" />
     <ClCompile Include="Source\Components\RendererCom.cpp" />
     <ClCompile Include="Source\GameSource\Math\easing.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\CharacterStatusCom.cpp" />
@@ -267,7 +268,6 @@
     <ClCompile Include="Source\GameSource\Stage\PathSearch.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\UnityChanToonShader.cpp" />
-    <ClCompile Include="Source\Graphics\Shaders\compute\particle.cpp" />
     <ClCompile Include="Source\Graphics\DebugRenderer\DebugRenderer.cpp" />
     <ClCompile Include="Source\Graphics\Dx11StateLib.cpp" />
     <ClCompile Include="Source\Graphics\Encoding.cpp" />
@@ -391,6 +391,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="HLSL\compute\ParticleInitializeCS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="HLSL\compute\ParticlePS.hlsl">

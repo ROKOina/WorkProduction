@@ -17,9 +17,10 @@ public:
     //shaderƒZƒbƒg
 public:
     HRESULT createVsFromCso(ID3D11Device* device, const char* cso_name, ID3D11VertexShader** vertex_shader,
-        ID3D11InputLayout** input_layout, D3D11_INPUT_ELEMENT_DESC* input_element_desc, UINT num_elements);
-
+        ID3D11InputLayout** inputLayout_, D3D11_INPUT_ELEMENT_DESC* input_element_desc, UINT num_elements);
     HRESULT createPsFromCso(ID3D11Device* device, const char* cso_name, ID3D11PixelShader** pixel_shader);
+    HRESULT createGsFromCso(ID3D11Device* device, const char* cso_name, ID3D11GeometryShader** geometry_shader);
+    HRESULT createCsFromCso(ID3D11Device* device, const char* cso_name, ID3D11ComputeShader** compute_shader);
 
     HRESULT load_texture_from_file(ID3D11Device* device, const wchar_t* filename, 
         ID3D11ShaderResourceView** shader_resource_view, D3D11_TEXTURE2D_DESC* texture2d_desc);

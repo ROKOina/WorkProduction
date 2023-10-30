@@ -17,7 +17,7 @@ SamplerState samplerLiner[4] : register(s0);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
-    float4 tex = mainTexture.Sample(samplerLiner[0], pin.texcoord) * pin.color;
+    float4 tex = mainTexture.Sample(samplerLiner[3], pin.texcoord) * pin.color;
 
 	// çÇãPìxíäèo    
     static const float3 luminanceValue = float3(0.299f, 0.587f, 0.114f);
@@ -28,8 +28,8 @@ float4 main(VS_OUT pin) : SV_TARGET
     
     
     float4 color = float4(0,0,0,0);
-    color.rgb = contribution * tex.rgb * intensity;
-    color.a = 1;
+    color.rgb = (contribution * tex.rgb) * intensity;
+    color.a = pin.color.a;
     
     return color;
 }

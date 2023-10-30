@@ -6,7 +6,6 @@
 #include "Audio\Audio.h"
 
 #include "Graphics\Shaders\PostEffect.h"
-#include "Graphics\Shaders\compute\particle.h"
 
 // ƒQ[ƒ€ƒV[ƒ“
 class SceneGame :public Scene
