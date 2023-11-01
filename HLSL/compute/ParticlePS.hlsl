@@ -1,13 +1,13 @@
 #include "Particle.hlsli"
 
 SamplerState samplerState : register(s0);
-Texture2D texture_map : register(t0);
+Texture2D textureMap : register(t0);
 
 float4 main(GS_OUT pin) : SV_TARGET
 {
     //UV
-    pin.texcoord *= texSize;
-    pin.texcoord += texPos;
+    pin.texcoord *= particleUV.size;
+    pin.texcoord += particleUV.pos;
     
-    return texture_map.Sample(samplerState, pin.texcoord) * pin.color;
+    return textureMap.Sample(samplerState, pin.texcoord) * pin.color;
 }

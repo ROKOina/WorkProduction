@@ -28,6 +28,7 @@
 #include "GameSource\ScriptComponents\CharacterStatusCom.h"
 
 #include "GameSource\ScriptComponents\Enemy\EnemyManager.h"
+#include "Components/ParticleComManager.h"
 
 //経路探査
 #include "GameSource/Stage/PathSearch.h"
@@ -40,7 +41,6 @@
 // 初期化
 void SceneGame::Initialize()
 {
-
 	//床
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
@@ -370,13 +370,25 @@ void SceneGame::Initialize()
 	}
 
 	//particle
-	for(int i=0;i<5;++i)
+	for(int i=0;i<1;++i)
 	{
 		std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
 		p->SetName("Particle");
-		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 0.01f, 0, 0));
+		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
 
 		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(1000);
+		//c->LoadTexture("Data/Sprite/smoke_pop.png");
+		//c->Load("Data/Effect/para/honoo.ipff");
+
+		p->AddComponent<SphereColliderCom>();
+
+		//{
+		//	std::shared_ptr<GameObject> pChild = p->AddChildObject();
+		//	pChild->SetName("ParticleChild");
+
+		//	std::shared_ptr<ParticleSystemCom> c1 = pChild->AddComponent<ParticleSystemCom>(10000);
+		//	c1->LoadTexture("Data/Sprite/smoke_pop.png");
+		//}
 	}
 
 #endif
@@ -576,6 +588,9 @@ void SceneGame::Render()
 			//敵マネージャー
 			EnemyManager::Instance().OnGui();
 		}
+
+		//パーティクルマネージャー
+		ParticleComManager::Instance().OnGui();
 	}
 
 	// 2Dスプライト描画

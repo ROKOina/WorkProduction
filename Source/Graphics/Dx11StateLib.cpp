@@ -99,7 +99,7 @@ HRESULT Dx11StateLib::createCsFromCso(ID3D11Device* device, const char* cso_name
 	return hr;
 }
 
-HRESULT Dx11StateLib::load_texture_from_file(ID3D11Device* device, const wchar_t* filename,
+HRESULT Dx11StateLib::load_texture_from_file(ID3D11Device* device, const char* filename,
 	ID3D11ShaderResourceView** shader_resource_view, D3D11_TEXTURE2D_DESC* texture2d_desc)
 {
 	HRESULT hr{ S_OK };
@@ -116,7 +116,10 @@ HRESULT Dx11StateLib::load_texture_from_file(ID3D11Device* device, const wchar_t
 	}
 	else
 	{
-		hr = DirectX::CreateWICTextureFromFile(device, filename, resource.GetAddressOf(), shader_resource_view);
+		wchar_t wfilename[256];
+		::MultiByteToWideChar(CP_ACP, 0, filename, -1, wfilename, 256);
+
+		hr = DirectX::CreateWICTextureFromFile(device, wfilename, resource.GetAddressOf(), shader_resource_view);
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 

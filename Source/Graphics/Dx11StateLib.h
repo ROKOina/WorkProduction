@@ -22,7 +22,7 @@ public:
     HRESULT createGsFromCso(ID3D11Device* device, const char* cso_name, ID3D11GeometryShader** geometry_shader);
     HRESULT createCsFromCso(ID3D11Device* device, const char* cso_name, ID3D11ComputeShader** compute_shader);
 
-    HRESULT load_texture_from_file(ID3D11Device* device, const wchar_t* filename, 
+    HRESULT load_texture_from_file(ID3D11Device* device, const char* filename, 
         ID3D11ShaderResourceView** shader_resource_view, D3D11_TEXTURE2D_DESC* texture2d_desc);
 
     //コンスタントバッファ生成

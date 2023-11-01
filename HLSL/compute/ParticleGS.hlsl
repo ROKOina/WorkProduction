@@ -1,9 +1,13 @@
 #include "Particle.hlsli"
 
-StructuredBuffer<particle> particle_buffer : register(t9);
+StructuredBuffer<particle> particleBuffer : register(t9);
 
 float4 rotato(float3 angle,float4 position,float2 scale,float3 corner)
 {
+    
+    angle.x = radians(angle.x);
+    angle.y = radians(angle.y);
+    angle.z = radians(angle.z);
     
     // 回転行列を作る
     half c = cos(angle.x);
@@ -25,13 +29,18 @@ float4 rotato(float3 angle,float4 position,float2 scale,float3 corner)
                                     s, c, 0, 0,
                                     0, 0, 1, 0,
                                     0, 0, 0, 1);
-    float4 pos;
-    pos = mul(float4(corner.xyz, 1), rotateMatrixX);
-    pos = mul(float4(pos.xyz, 1), rotateMatrixY);
-    pos = mul(float4(pos.xyz, 1), rotateMatrixZ);
-    pos *= float4(scale, 1,1);
+
+    float4 cornerPos = float4(corner, 1);
     
-    return float4(position.xyz + pos.xyz, position.w);
+    //cornerPos *= float4(scale, 1, 1);
+    
+    cornerPos = mul(float4(corner.xyz, 1), rotateMatrixX);
+    cornerPos = mul(float4(cornerPos.xyz, 1), rotateMatrixY);
+    cornerPos = mul(float4(cornerPos.xyz, 1), rotateMatrixZ);
+
+    cornerPos = float4(scale, 1, 1) * float4(cornerPos.xyz, 1);
+    
+    return float4(position.xyz + cornerPos.xyz, position.w);
 }
 
 
@@ -53,23 +62,41 @@ void main(point VS_OUT input[1] : SV_POSITION, inout TriangleStream<GS_OUT> outp
 		float2(1.0f, 0.0f),
     };
 	
-    particle p = particle_buffer[input[0].vertex_id];
+    particle p = particleBuffer[input[0].vertex_id];
 
-    const float aspect_ratio = 1280.0 / 720.0;
-    float2 particle_scale = float2(particle_size, particle_size * aspect_ratio);
+    const float aspectRatio = 1280.0 / 720.0;
+    
+    //サイズ算出
+    float2 particleScale = float2(p.size.x, p.size.y * aspectRatio);
 
+    //エミッションが発生してない場合
+    if (p.emmitterFlag == 0)
+    {
+        particleScale = 0;
+    }
+        
 	[unroll]
-    for (uint vertex_index = 0; vertex_index < 4; ++vertex_index)
+    for (uint vertexIndex = 0; vertexIndex < 4; ++vertexIndex)
     {
         GS_OUT element;
-
+        
+        //エミッションが発生していないか、ワールド基準の場合
+        if (p.emmitterFlag == 0 || isWorld == 0)
+        {
 		// Transform to clip space
-        element.position = mul(float4(p.position, 1), view_projection);
+            element.position = mul(float4(p.position, 1), mul(modelMat, viewProjection));
 
-        element.position = rotato(p.angle, element.position, particle_scale, corners[vertex_index]);
+        //element.position.xy += corners[vertexIndex].xy * particleScale;
+            element.position.xy = rotato(p.angle, element.position, particleScale, corners[vertexIndex]).xy;
+        }
+        else
+        {
+            element.position = mul(float4(p.position, 1), mul(p.saveModel, viewProjection));
+            element.position.xy = rotato(p.angle, element.position, particleScale, corners[vertexIndex]).xy;
+        }
         
         element.color = p.color;
-        element.texcoord = texcoords[vertex_index];
+        element.texcoord = texcoords[vertexIndex];
         output.Append(element);
     }
 

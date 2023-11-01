@@ -86,21 +86,8 @@ public:
 	//スレッドプール取得
 	ThreadPool* GetThreadPool() { return threadPool_.get(); }
 
-	//public:	//サブウィンドウ
-	//	// スワップチェイン作成
-	//	void CreateSubWindowSwapChain(HWND hWnd_, int width, int height);
-	//
-	//	// スワップチェーン取得
-	//	IDXGISwapChain* GetSubWindowSwapChain(int index) const { return subWswapchain[index].Get(); }
-	//
-	//	// レンダーターゲットビュー取得
-	//	ID3D11RenderTargetView* GetSubWindowRenderTargetView(int index) const { return subWrenderTargetView[index].Get(); }
-	//
-private:
-	//std::vector<Microsoft::WRL::ComPtr<ID3D11RenderTargetView>>	subWrenderTargetView;
-	//std::vector<Microsoft::WRL::ComPtr<IDXGISwapChain>>			subWswapchain;
-	//std::vector<std::unique_ptr<ImGuiRenderer>>					subWImguiRenderer;
-
+	//ハンドルゲット
+	HWND GetHwnd() { return hWnd_; }
 
 public:
 	ShaderParameter3D shaderParameter3D_;
@@ -141,6 +128,8 @@ private:
 
 	//スレッドプール
 	std::unique_ptr<ThreadPool> threadPool_;
+
+	const HWND				hWnd_;
 
 	//世界の速度
 public:

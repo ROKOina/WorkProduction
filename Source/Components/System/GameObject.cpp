@@ -330,11 +330,11 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 	//3D描画
 	Render3D();
 
-	//トレイル描画
-	SwordTrailRender();
-
 	//パーティクル描画
 	ParticleRender();
+
+	//トレイル描画
+	SwordTrailRender();
 
 	//debug
 	if(1)

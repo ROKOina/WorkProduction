@@ -8,6 +8,7 @@ Graphics* Graphics::instance_ = nullptr;
 
 // コンストラクタ
 Graphics::Graphics(HWND hWnd)
+	:hWnd_(hWnd)
 {
 	// インスタンス設定
 	_ASSERT_EXPR(instance_ == nullptr, "already instantiated");

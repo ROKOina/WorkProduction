@@ -61,7 +61,7 @@ PostEffect::PostEffect(UINT width, UINT height)
         texture2d_desc.CPUAccessFlags = 0;
         texture2d_desc.MiscFlags = 0;
 
-        dx11State->load_texture_from_file(device, L"Data/Sprite/sky.dds", skymapSrv_.GetAddressOf(), &texture2d_desc);
+        dx11State->load_texture_from_file(device, "Data/Sprite/sky.dds", skymapSrv_.GetAddressOf(), &texture2d_desc);
 
         dx11State->createVsFromCso(device, "Shader\\FullScreenVS.cso", skyVertex_.ReleaseAndGetAddressOf(), nullptr, nullptr, 0);
         dx11State->createPsFromCso(device, "Shader\\Skymap.cso", skyPixel_.ReleaseAndGetAddressOf());

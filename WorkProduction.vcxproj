@@ -150,8 +150,10 @@
     <ClInclude Include="Source\Components\AnimatorCom.h" />
     <ClInclude Include="Source\Components\ColliderCom.h" />
     <ClInclude Include="Source\Components\MovementCom.h" />
+    <ClInclude Include="Source\Components\ParticleComManager.h" />
     <ClInclude Include="Source\Components\ParticleSystemCom.h" />
     <ClInclude Include="Source\Components\RendererCom.h" />
+    <ClInclude Include="Source\Dialog.h" />
     <ClInclude Include="Source\GameSource\Math\easing.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyFarCom.h" />
@@ -238,8 +240,10 @@
     <ClCompile Include="Source\Components\AnimatorCom.cpp" />
     <ClCompile Include="Source\Components\ColliderCom.cpp" />
     <ClCompile Include="Source\Components\MovementCom.cpp" />
+    <ClCompile Include="Source\Components\ParticleComManager.cpp" />
     <ClCompile Include="Source\Components\ParticleSystemCom.cpp" />
     <ClCompile Include="Source\Components\RendererCom.cpp" />
+    <ClCompile Include="Source\Dialog.cpp" />
     <ClCompile Include="Source\GameSource\Math\easing.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\CharacterStatusCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionDerived.cpp" />
@@ -303,6 +307,7 @@
     <None Include="HLSL\Debugs\Line.hlsli" />
     <None Include="HLSL\2D\Sprite.hlsli" />
     <None Include="HLSL\noise.hlsli" />
+    <None Include="HLSL\Rand.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\2D\PostEffect\BloomExtract.hlsl">
@@ -379,13 +384,9 @@
     </FxCompile>
     <FxCompile Include="HLSL\compute\ParticleCS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">main</EntryPointName>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">main</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="HLSL\compute\ParticleGS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>

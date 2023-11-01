@@ -4,6 +4,165 @@
 #include "Graphics/Graphics.h"
 #include <imgui.h>
 
+#include "Dialog.h"
+#include "Logger.h"
+#include <fstream>
+#include <cereal/cereal.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
+
+CEREAL_CLASS_VERSION(ParticleSystemCom::UV, 1)
+CEREAL_CLASS_VERSION(ParticleSystemCom::Shape, 1)
+CEREAL_CLASS_VERSION(ParticleSystemCom::VelocityLifeTime, 1)
+CEREAL_CLASS_VERSION(ParticleSystemCom::ScaleLifeTime, 1)
+CEREAL_CLASS_VERSION(ParticleSystemCom::RotationLifeTime, 1)
+CEREAL_CLASS_VERSION(ParticleSystemCom::ParticleConstants, 1)
+CEREAL_CLASS_VERSION(ParticleSystemCom::SaveParticleData, 1)
+
+// シリアライズ
+namespace DirectX
+{
+	template<class Archive>
+	void serialize(Archive& archive, XMUINT4& v)
+	{
+		archive(
+			cereal::make_nvp("x", v.x),
+			cereal::make_nvp("y", v.y),
+			cereal::make_nvp("z", v.z),
+			cereal::make_nvp("w", v.w)
+		);
+	}
+
+	template<class Archive>
+	void serialize(Archive& archive, XMFLOAT2& v)
+	{
+		archive(
+			cereal::make_nvp("x", v.x),
+			cereal::make_nvp("y", v.y)
+		);
+	}
+
+	template<class Archive>
+	void serialize(Archive& archive, XMFLOAT3& v)
+	{
+		archive(
+			cereal::make_nvp("x", v.x),
+			cereal::make_nvp("y", v.y),
+			cereal::make_nvp("z", v.z)
+		);
+	}
+
+	template<class Archive>
+	void serialize(Archive& archive, XMFLOAT4& v)
+	{
+		archive(
+			cereal::make_nvp("x", v.x),
+			cereal::make_nvp("y", v.y),
+			cereal::make_nvp("z", v.z),
+			cereal::make_nvp("w", v.w)
+		);
+	}
+
+	template<class Archive>
+	void serialize(Archive& archive, XMFLOAT4X4& m)
+	{
+		archive(
+			cereal::make_nvp("_11", m._11), cereal::make_nvp("_12", m._12), cereal::make_nvp("_13", m._13), cereal::make_nvp("_14", m._14),
+			cereal::make_nvp("_21", m._21), cereal::make_nvp("_22", m._22), cereal::make_nvp("_23", m._23), cereal::make_nvp("_24", m._24),
+			cereal::make_nvp("_31", m._31), cereal::make_nvp("_32", m._32), cereal::make_nvp("_33", m._33), cereal::make_nvp("_34", m._34),
+			cereal::make_nvp("_41", m._41), cereal::make_nvp("_42", m._42), cereal::make_nvp("_43", m._43), cereal::make_nvp("_44", m._44)
+		);
+	}
+}
+
+template<class Archive>
+void ParticleSystemCom::UV::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(texSize),
+		CEREAL_NVP(texPos)
+	);
+}
+
+template<class Archive>
+void ParticleSystemCom::Shape::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(shapeID),
+		CEREAL_NVP(shaDummy),
+		CEREAL_NVP(angle),
+		CEREAL_NVP(radius),
+		CEREAL_NVP(radiusThickness),
+		CEREAL_NVP(arc)
+	);
+}
+
+template<class Archive>
+void ParticleSystemCom::VelocityLifeTime::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(linearVelocity),
+		CEREAL_NVP(orbitalVelocity),
+		CEREAL_NVP(radial),
+		CEREAL_NVP(vDummy)
+	);
+}
+
+template<class Archive>
+void ParticleSystemCom::ScaleLifeTime::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(keyTime),
+		CEREAL_NVP(value),
+		CEREAL_NVP(curvePower),
+		CEREAL_NVP(sDummy)
+	);
+}
+
+template<class Archive>
+void ParticleSystemCom::RotationLifeTime::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(rotation),
+		CEREAL_NVP(rotationRand)
+	);
+}
+
+template<class Archive>
+void ParticleSystemCom::ParticleConstants::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(isWorld),
+		CEREAL_NVP(isRoop),
+		CEREAL_NVP(rateTime),
+		CEREAL_NVP(gravity),
+		CEREAL_NVP(emitterPosition),
+		CEREAL_NVP(startAngle),
+		CEREAL_NVP(startAngleRand),
+		CEREAL_NVP(startSize),
+		CEREAL_NVP(startSpeed),
+		CEREAL_NVP(lifeTime),
+		CEREAL_NVP(uv),
+		CEREAL_NVP(shape),
+		CEREAL_NVP(velocityLifeTime),
+		CEREAL_NVP(scaleLifeTime),
+		CEREAL_NVP(scaleLifeTimeRand),
+		CEREAL_NVP(rotationLifeTime)
+	);
+}
+
+template<class Archive>
+void ParticleSystemCom::SaveParticleData::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(particleTexture),
+		CEREAL_NVP(particleData)
+	);
+}
+
+
+
 UINT align(UINT num, UINT alignment)
 {
 	return (num + (alignment - 1)) & ~(alignment - 1);
@@ -12,7 +171,11 @@ UINT align(UINT num, UINT alignment)
 // 開始処理
 void ParticleSystemCom::Start()
 {
-	particleData_.emitterPosition = GetGameObject()->transform_->GetWorldPosition();
+	int p[10];
+	for (int i = 0; i < 10; ++i)
+	{
+		p[i] = i * 256;
+	}
 
 	Graphics& graphics = Graphics::Instance();
 	ID3D11Device* device = graphics.GetDevice();
@@ -49,8 +212,14 @@ void ParticleSystemCom::Start()
 
 	//画像読み込み
 	D3D11_TEXTURE2D_DESC texture2d_desc{};
-	dx11State->load_texture_from_file(device, L"Data/Sprite/color.png", particleSprite_.GetAddressOf(), &texture2d_desc);
-
+	if (particleData_.particleTexture.size() > 0)
+	{
+		dx11State->load_texture_from_file(device, particleData_.particleTexture.c_str(), particleSprite_.GetAddressOf(), &texture2d_desc);
+	}
+	else
+	{
+		dx11State->load_texture_from_file(device, "Data/Sprite/color.png", particleSprite_.GetAddressOf(), &texture2d_desc);
+	}
 	//定数バッファ
 	dx11State->createConstantBuffer(device, sizeof(ParticleConstants), constantBuffer_.GetAddressOf());
 	dx11State->createConstantBuffer(device, sizeof(ParticleScene), sceneBuffer_.GetAddressOf());
@@ -69,17 +238,25 @@ void ParticleSystemCom::Start()
 // 更新処理
 void ParticleSystemCom::Update(float elapsedTime)
 {
-	particleData_.emitterPosition = GetGameObject()->transform_->GetWorldPosition();
+	//リスタート
+	if (isRestart_)
+	{
+		isRestart_ = false;
+		Initialize();
+	}
 
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
 	dc->CSSetUnorderedAccessViews(0, 1, particleUAV_.GetAddressOf(), NULL);
 
-	particleData_.time += elapsedTime;
-	particleData_.elapsedTime = elapsedTime;
-	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_, 0, 0);
+	particleData_.particleData.time += elapsedTime;
+	particleData_.particleData.elapsedTime = elapsedTime;
+	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_.particleData, 0, 0);
 	dc->CSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
+
+
+	dc->CSSetConstantBuffers(1, 1, sceneBuffer_.GetAddressOf());
 
 	dc->CSSetShader(particleCompute_.Get(), NULL, 0);
 
@@ -93,8 +270,287 @@ void ParticleSystemCom::Update(float elapsedTime)
 // GUI描画
 void ParticleSystemCom::OnGUI()
 {
-	ImGui::DragFloat2("texSize", &particleData_.texSize.x, 0.01f);
-	ImGui::DragFloat2("texPos", &particleData_.texPos.x, 0.01f);
+	//シリアライザ
+	if (ImGui::TreeNode("Cereal"))
+	{
+		if (ImGui::Button("Save"))
+		{
+			SaveParticle();
+		}
+		if (ImGui::Button("Load"))
+		{
+			LoadFromFileParticle();
+		}
+		ImGui::TreePop();
+	}
+
+	//デバッグ用
+	ImGui::Checkbox("Restart", &isRestart_);
+
+	//出現設定
+	bool roop = particleData_.particleData.isRoop;
+	if (ImGui::Checkbox("isRoop", &roop))
+	{
+		if (roop) particleData_.particleData.isRoop = 1;
+		else particleData_.particleData.isRoop = 0;
+	}
+
+	bool world = particleData_.particleData.isWorld;
+	if (ImGui::Checkbox("isWorld", &world))
+	{
+		if (world)  particleData_.particleData.isWorld = 1;
+		else  particleData_.particleData.isWorld = 0;
+	}
+
+	ImGui::DragInt("emmitCount", &particleData_.particleData.rateTime, 1, 0, 100000);
+
+	ImGui::DragFloat3("emitterPosition", &particleData_.particleData.emitterPosition.x, 0.1f);
+
+	ImGui::DragFloat("startSpeed", &particleData_.particleData.startSpeed, 0.01f);
+
+	ImGui::DragFloat("gravity", &particleData_.particleData.gravity, 0.01f);
+	ImGui::DragFloat("lifeTime", &particleData_.particleData.lifeTime, 0.01f, 0.01f, 100);
+
+	//サイズ
+	{
+		bool isRan = false;
+		if (particleData_.particleData.startSizeRand.w > 0.01f)isRan = true;
+		if (ImGui::Checkbox("ranSize", &isRan))
+		{
+			if (!isRan)
+				particleData_.particleData.startSizeRand.w = 0;
+			else
+				particleData_.particleData.startSizeRand.w = 1;
+		}
+
+		ImGui::DragFloat2("startSize", &particleData_.particleData.startSize.x, 0.01f, 0.01f, 100);
+		if (isRan)
+		{
+			ImGui::DragFloat("startSizeRand", &particleData_.particleData.startSizeRand.x, 0.01f, 0.01f, 100);
+		}
+	}
+
+	//角度
+	{
+		bool isRan = false;
+		if (particleData_.particleData.startAngleRand.w > 0.01f)isRan = true;
+		if (ImGui::Checkbox("ranAngle", &isRan))
+		{
+			if (!isRan)
+				particleData_.particleData.startAngleRand.w = 0;
+			else
+				particleData_.particleData.startAngleRand.w = 1;
+		}
+
+		ImGui::DragFloat3("startAngle", &particleData_.particleData.startAngle.x, 0.1f);
+		if (isRan)
+		{
+			ImGui::DragFloat3("startAngleRand", &particleData_.particleData.startAngleRand.x, 0.1f);
+		}
+	}
+
+	//UV
+	if (ImGui::TreeNode("UV"))
+	{
+		ImGui::DragFloat2("texSize", &particleData_.particleData.uv.texSize.x, 0.01f);
+		ImGui::DragFloat2("texPos", &particleData_.particleData.uv.texPos.x, 0.01f);
+
+		ImGui::TreePop();
+	}
+
+	//shape
+	if (ImGui::TreeNode("Shape"))
+	{
+		const char* shapeName[] = { "Cone", "Sphere" };
+		ImGui::Combo("shapeID", &particleData_.particleData.shape.shapeID, shapeName, _countof(shapeName));
+
+		ImGui::DragFloat("shapeAngle", &particleData_.particleData.shape.angle, 0.1f, 0.01f, 90);
+		ImGui::DragFloat("shapeRadius", &particleData_.particleData.shape.radius, 0.01f, 0.01f, 100);
+		ImGui::DragFloat("shapeRadiusThickness", &particleData_.particleData.shape.radiusThickness, 0.01f, 0, 1);
+		ImGui::DragFloat("arc", &particleData_.particleData.shape.arc, 0.01f, 0, 1);
+
+		ImGui::TreePop();
+	}
+
+	//velocity
+	if (ImGui::TreeNode("VelocityLifeTime"))
+	{
+		ImGui::DragFloat3("linearVelo", &particleData_.particleData.velocityLifeTime.linearVelocity.x, 0.1f);
+		ImGui::DragFloat3("orbVelo", &particleData_.particleData.velocityLifeTime.orbitalVelocity.x, 0.1f);
+		ImGui::DragFloat("radialVelo", &particleData_.particleData.velocityLifeTime.radial, 0.1f);
+
+		ImGui::TreePop();
+	}
+
+	//scaleLifeTime
+	if (ImGui::TreeNode("ScaleOverLifeTime"))
+	{
+		//scale
+		if (ImGui::TreeNode("ScaleLifeTime"))
+		{
+			if (ImGui::Button("AddKey"))	//キー追加
+			{
+				for (int i = 0; i < scaleKeyCount; ++i)
+				{
+					if (particleData_.particleData.scaleLifeTime[i].keyTime >= 0)continue;
+
+					if (i == 0)
+					{
+						particleData_.particleData.scaleLifeTime[i].keyTime = 0;
+						break;
+					}
+					else
+					{
+						//キーの時間か最大で入れれない
+						if (particleData_.particleData.scaleLifeTime[i - 1].keyTime > 0.99f)
+						{
+							break;
+						}
+
+						//前のキーの次に打つ
+						particleData_.particleData.scaleLifeTime[i].keyTime =
+							particleData_.particleData.scaleLifeTime[i - 1].keyTime + 0.01f;
+						break;
+					}
+				}
+			}
+			for (int i = 0; i < scaleKeyCount; ++i)
+			{
+				//キーがないならbreak
+				if (particleData_.particleData.scaleLifeTime[i].keyTime < 0)break;
+				//キー
+				if (ImGui::TreeNode(std::to_string(i).c_str()))
+				{
+					if (ImGui::DragFloat("keyTime", &particleData_.particleData.scaleLifeTime[i].keyTime, 0.01f, 0, 1))
+					{
+						//下限処理
+						if (i != 0)
+						{
+							if (particleData_.particleData.scaleLifeTime[i].keyTime <= particleData_.particleData.scaleLifeTime[i - 1].keyTime)
+								particleData_.particleData.scaleLifeTime[i].keyTime = particleData_.particleData.scaleLifeTime[i - 1].keyTime + 0.01f;
+						}
+						//上限処理
+						if (i != scaleKeyCount - 1)
+						{
+							if (particleData_.particleData.scaleLifeTime[i + 1].keyTime >= 0)
+							{
+								if (particleData_.particleData.scaleLifeTime[i].keyTime >= particleData_.particleData.scaleLifeTime[i + 1].keyTime)
+									particleData_.particleData.scaleLifeTime[i].keyTime = particleData_.particleData.scaleLifeTime[i + 1].keyTime - 0.01f;
+							}
+						}
+					}
+
+					ImGui::DragFloat2("velue", &particleData_.particleData.scaleLifeTime[i].value.x, 0.1f, 0, 100);
+					ImGui::DragFloat2("curvePower", &particleData_.particleData.scaleLifeTime[i].curvePower.x, 0.1f);
+
+					//キー削除
+					if (ImGui::Button("Delete"))
+					{
+						DeleteScaleKey(i, particleData_.particleData.scaleLifeTime);
+					}
+
+					ImGui::TreePop();
+				}
+			}
+
+			ImGui::TreePop();
+		}
+
+		//scaleRand
+		if (ImGui::TreeNode("ScaleLifeTimeRand"))
+		{
+			if (ImGui::Button("AddKey"))	//キー追加
+			{
+				for (int i = 0; i < scaleKeyCount; ++i)
+				{
+					if (particleData_.particleData.scaleLifeTimeRand[i].keyTime >= 0)continue;
+
+					if (i == 0)
+					{
+						particleData_.particleData.scaleLifeTimeRand[i].keyTime = 0;
+						break;
+					}
+					else
+					{
+						//キーの時間か最大で入れれない
+						if (particleData_.particleData.scaleLifeTimeRand[i - 1].keyTime > 0.99f)
+						{
+							break;
+						}
+
+						//前のキーの次に打つ
+						particleData_.particleData.scaleLifeTimeRand[i].keyTime =
+							particleData_.particleData.scaleLifeTimeRand[i - 1].keyTime + 0.01f;
+						break;
+					}
+				}
+			}
+			for (int i = 0; i < scaleKeyCount; ++i)
+			{
+				//キーがないならbreak
+				if (particleData_.particleData.scaleLifeTimeRand[i].keyTime < 0)break;
+				//キー
+				if (ImGui::TreeNode(std::to_string(i).c_str()))
+				{
+					if (ImGui::DragFloat("keyTime", &particleData_.particleData.scaleLifeTimeRand[i].keyTime, 0.01f, 0, 1))
+					{
+						//下限処理
+						if (i != 0)
+						{
+							if (particleData_.particleData.scaleLifeTimeRand[i].keyTime <= particleData_.particleData.scaleLifeTimeRand[i - 1].keyTime)
+								particleData_.particleData.scaleLifeTimeRand[i].keyTime = particleData_.particleData.scaleLifeTimeRand[i - 1].keyTime + 0.01f;
+						}
+						//上限処理
+						if (i != scaleKeyCount - 1)
+						{
+							if (particleData_.particleData.scaleLifeTimeRand[i + 1].keyTime >= 0)
+							{
+								if (particleData_.particleData.scaleLifeTimeRand[i].keyTime >= particleData_.particleData.scaleLifeTimeRand[i + 1].keyTime)
+									particleData_.particleData.scaleLifeTimeRand[i].keyTime = particleData_.particleData.scaleLifeTimeRand[i + 1].keyTime - 0.01f;
+							}
+						}
+					}
+
+					ImGui::DragFloat2("velue", &particleData_.particleData.scaleLifeTimeRand[i].value.x, 0.1f, 0, 100);
+					ImGui::DragFloat2("curvePower", &particleData_.particleData.scaleLifeTimeRand[i].curvePower.x, 0.1f);
+
+					//キー削除
+					if (ImGui::Button("Delete"))
+					{
+						DeleteScaleKey(i, particleData_.particleData.scaleLifeTimeRand);
+					}
+
+					ImGui::TreePop();
+				}
+			}
+
+			ImGui::TreePop();
+		}
+
+		ImGui::TreePop();
+	}
+
+	//rotation
+	if (ImGui::TreeNode("RotationLifeTime"))
+	{
+		bool isRan = false;
+		if (particleData_.particleData.rotationLifeTime.rotationRand.w > 0.01f)isRan = true;
+		if (ImGui::Checkbox("ranRota", &isRan))
+		{
+			if (!isRan)
+				particleData_.particleData.rotationLifeTime.rotationRand.w = 0;
+			else
+				particleData_.particleData.rotationLifeTime.rotationRand.w = 1;
+		}
+
+		ImGui::DragFloat3("rotation", &particleData_.particleData.rotationLifeTime.rotation.x);
+		if (isRan)
+		{
+			ImGui::DragFloat3("rotationRand", &particleData_.particleData.rotationLifeTime.rotationRand.x);
+		}
+
+		ImGui::TreePop();
+	}
 }
 
 void ParticleSystemCom::Initialize()
@@ -104,7 +560,7 @@ void ParticleSystemCom::Initialize()
 
 	dc->CSSetUnorderedAccessViews(0, 1, particleUAV_.GetAddressOf(), NULL);
 
-	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_, 0, 0);
+	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_.particleData, 0, 0);
 	dc->CSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
 
 	dc->CSSetShader(particleInitializerCompute_.Get(), NULL, 0);
@@ -122,34 +578,48 @@ void ParticleSystemCom::Render()
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 	Dx11StateLib* dx11State = graphics.GetDx11State().get();
 
-	ID3D11SamplerState* samplerState = dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP).Get();
-	dc->PSSetSamplers(0, 1, &samplerState);
+	//背面カリングオフに
+	dc->RSSetState(dx11State->GetRasterizerState(Dx11StateLib::RASTERIZER_TYPE::FRONTCOUNTER_TRUE_CULLNONE).Get());
 
-	dc->PSSetShaderResources(0, 1, particleSprite_.GetAddressOf());
 
+	//シェーダーセット
 	dc->VSSetShader(particleVertex_.Get(), NULL, 0);
 	dc->PSSetShader(particlePixel_.Get(), NULL, 0);
 	dc->GSSetShader(particleGeometry_.Get(), NULL, 0);
 	dc->GSSetShaderResources(9, 1, particleSRV_.GetAddressOf());
 
+	//サンプラーステート
+	ID3D11SamplerState* samplerState = dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP).Get();
+	dc->PSSetSamplers(0, 1, &samplerState);
+
+	//画像
+	dc->PSSetShaderResources(0, 1, particleSprite_.GetAddressOf());
 	
+	//コンスタントバッファ
 	ParticleScene scene;
 
 	scene.cameraPos = graphics.shaderParameter3D_.viewPosition;
 
-	DirectX::XMStoreFloat4x4(&scene.viweProj, 
-		DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.view) 
+	//モデル情報
+	DirectX::XMStoreFloat4x4(&scene.modelMat,
+		DirectX::XMLoadFloat4x4(&GetGameObject()->transform_->GetWorldTransform()));
+
+	//ビュープロジェクション
+	DirectX::XMStoreFloat4x4(&scene.viweProj,
+		DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.view)
 		* DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.projection));
+
 	scene.lightDir = graphics.shaderParameter3D_.lightDirection;
 
 	dc->UpdateSubresource(sceneBuffer_.Get(), 0, 0, &scene, 0, 0);
 	dc->GSSetConstantBuffers(1, 1, sceneBuffer_.GetAddressOf());
 
-	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_, 0, 0);
+	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_.particleData, 0, 0);
 	dc->VSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
 	dc->PSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
 	dc->GSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
 
+	//解放
 	dc->IASetInputLayout(NULL);
 	dc->IASetVertexBuffers(0, 0, NULL, NULL, NULL);
 	dc->IASetIndexBuffer(NULL, DXGI_FORMAT_R32_UINT, 0);
@@ -161,4 +631,117 @@ void ParticleSystemCom::Render()
 	dc->VSSetShader(NULL, NULL, 0);
 	dc->PSSetShader(NULL, NULL, 0);
 	dc->GSSetShader(NULL, NULL, 0);
+}
+
+//ファイルネームでロード
+void ParticleSystemCom::Load(const char* filename)
+{
+	LoadParticle(filename);
+}
+
+void ParticleSystemCom::LoadTexture(const char* filename)
+{
+	particleData_.particleTexture = filename;
+}
+
+//スケールキーを削除する
+void ParticleSystemCom::DeleteScaleKey(int id, ScaleLifeTime(&scaleLife)[scaleKeyCount])
+{
+	//削除
+	scaleLife[id].keyTime = -1;
+	scaleLife[id].value = { 1, 1, 1, 1 };
+	scaleLife[id].curvePower = { 0, 0, 0, 0 };
+
+	//配列ずらす
+	for (int i = id; i < scaleKeyCount - 1; ++i)
+	{
+		//次のキーがない場合
+		if (scaleLife[i + 1].keyTime < 0)
+		{
+			scaleLife[i].keyTime = -1;
+			scaleLife[i].value = { 1, 1, 1, 1 };
+			scaleLife[i].curvePower = { 0, 0, 0, 0 };
+		
+			break;
+		}
+
+		scaleLife[i].keyTime =
+			scaleLife[i + 1].keyTime;
+		scaleLife[i].value =
+			scaleLife[i + 1].value;
+		scaleLife[i].curvePower =
+			scaleLife[i + 1].curvePower;
+
+		//配列の最後のひとつ前に場合
+		if (id == scaleKeyCount - 2)
+		{
+			scaleLife[i + 1].keyTime = -1;
+			scaleLife[i + 1].value = { 1, 1, 1, 1 };
+			scaleLife[i + 1].curvePower = { 0, 0, 0, 0 };
+
+			break;
+		}
+	}
+}
+
+//シリアルでパーティクルを保存
+void ParticleSystemCom::SaveParticle()
+{
+	static const char* filter = "Model Files(*.ipff)\0*.ipff;\0All Files(*.*)\0*.*;\0\0";
+
+	char filename[256] = { 0 };
+	DialogResult result = Dialog::SaveFileName(filename, sizeof(filename), filter, nullptr, "ipff", Graphics::Instance().GetHwnd());
+	if (result == DialogResult::OK)
+	{
+		std::ofstream ostream(filename, std::ios::binary);
+		if (ostream.is_open())
+		{
+			cereal::BinaryOutputArchive archive(ostream);
+
+			try
+			{
+				archive(
+					CEREAL_NVP(particleData_.particleData)
+				);
+			}
+			catch (...)
+			{
+				LOG("particle deserialize failed.\n%s\n", filename);
+				return;
+			}
+		}
+	}
+}
+
+void ParticleSystemCom::LoadFromFileParticle()
+{
+	static const char* filter = "Model Files(*.ipff)\0*.ipff;\0All Files(*.*)\0*.*;\0\0";
+
+	char filename[256] = { 0 };
+	DialogResult result = Dialog::OpenFileName(filename, sizeof(filename), filter, nullptr, Graphics::Instance().GetHwnd());
+	if (result == DialogResult::OK)
+	{
+		LoadParticle(filename);
+	}
+}
+
+void ParticleSystemCom::LoadParticle(const char* filename)
+{
+	std::ifstream istream(filename, std::ios::binary);
+	if (istream.is_open())
+	{
+		cereal::BinaryInputArchive archive(istream);
+
+		try
+		{
+			archive(
+				CEREAL_NVP(particleData_.particleData)
+			);
+		}
+		catch (...)
+		{
+			LOG("particle deserialize failed.\n%s\n", filename);
+			return;
+		}
+	}
 }

@@ -258,6 +258,8 @@
     <ClInclude Include="Source\ThreadPool\ThreadPool.h" />
     <ClInclude Include="Source\GameSource\Math\easing.h" />
     <ClInclude Include="Source\Components\ParticleSystemCom.h" />
+    <ClInclude Include="Source\Dialog.h" />
+    <ClInclude Include="Source\Components\ParticleComManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -488,6 +490,12 @@
     <ClCompile Include="Source\Components\ParticleSystemCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Dialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Components\ParticleComManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Debugs\Debug.hlsli">
@@ -520,6 +528,9 @@
     <None Include="HLSL\3D\SwordTrail.hlsli">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="HLSL\Rand.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\Debugs\DebugPS.hlsl">
@@ -539,9 +550,6 @@
     </FxCompile>
     <FxCompile Include="HLSL\2D\SpritePS.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="HLSL\compute\ParticleCS.hlsl">
-      <Filter>HLSL\compute</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\compute\ParticleVS.hlsl">
       <Filter>HLSL\compute</Filter>
@@ -607,6 +615,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\compute\ParticleInitializeCS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\compute\ParticleCS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
