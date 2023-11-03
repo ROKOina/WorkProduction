@@ -328,6 +328,20 @@ void SceneGame::Initialize()
 
 			std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
 			trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
+
+			{
+				std::shared_ptr<GameObject> p = sword->AddChildObject();
+				p->SetName("Particle");
+
+				std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(1000);
+				c->SetSweetsParticle(true);	//お菓子用
+
+				c->Load("Data/Effect/para/SwordOkasi.ipff");
+				//c->LoadTexture("Data/Sprite/sweetsParticle.png");
+
+				p->AddComponent<SphereColliderCom>();
+			}
+
 		}
 
 		//ジャスト回避用プレイヤー
@@ -377,6 +391,10 @@ void SceneGame::Initialize()
 		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
 
 		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(1000);
+		c->SetSweetsParticle(true);	//お菓子用
+
+		c->LoadTexture("Data/Sprite/sweetsParticle.png");
+		//c->LoadTexture("Data/Sprite/default_eff.png");
 		//c->LoadTexture("Data/Sprite/smoke_pop.png");
 		//c->Load("Data/Effect/para/honoo.ipff");
 
@@ -481,6 +499,7 @@ void SceneGame::Update(float elapsedTime)
 	//エフェクト更新処理
 	EffectManager::Instance().Update(elapsedTime);
 
+	ParticleComManager::Instance().Update(elapsedTime);
 }
 
 // 描画処理

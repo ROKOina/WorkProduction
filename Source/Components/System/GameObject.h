@@ -88,6 +88,9 @@ public:
 		return nullptr;
 	}
 
+	//子から期限切れのポインタ削除
+	void EraseExpiredChild();
+
 	const bool GetEnabled() const { return isEnabled_; }
 	void SetEnabled(bool enabled) { isEnabled_ = enabled; }
 

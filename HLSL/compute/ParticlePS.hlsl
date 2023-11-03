@@ -9,5 +9,10 @@ float4 main(GS_OUT pin) : SV_TARGET
     pin.texcoord *= particleUV.size;
     pin.texcoord += particleUV.pos;
     
-    return textureMap.Sample(samplerState, pin.texcoord) * pin.color;
+    float4 pixelColor = pin.color;
+    //0.5à»â∫Ç™ìßñæÇ…Ç»ÇÈÇÃÇ≈ï‚ê≥
+    pixelColor.w = 0.49f + 0.51f * pixelColor.w;
+    pixelColor.w = clamp(pixelColor.w, 0, 1);
+    
+    return textureMap.Sample(samplerState, pin.texcoord) * pixelColor;
 }

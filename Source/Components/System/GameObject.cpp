@@ -108,6 +108,18 @@ std::shared_ptr<GameObject> GameObject::AddChildObject()
 	return obj;
 }
 
+void GameObject::EraseExpiredChild()
+{
+	for (int childCount = 0; childCount < childrenObject_.size(); ++childCount)
+	{
+		if (childrenObject_[childCount].expired())
+		{
+			childrenObject_.erase(childrenObject_.begin() + childCount);
+			--childCount;
+		}
+	}
+}
+
 #pragma endregion	endGameObject
 
 
@@ -263,6 +275,7 @@ void GameObjectManager::Update(float elapsedTime)
 
 
 	//削除
+	std::vector<std::weak_ptr<GameObject>> parentObj;
 	for (const std::shared_ptr<GameObject>& obj : removeGameObject_)
 	{
 		EraseObject(startGameObject_, obj);
@@ -273,11 +286,22 @@ void GameObjectManager::Update(float elapsedTime)
 		{
 			selectionGameObject_.erase(itSelection);
 		}
+
+		if (obj->GetParent())
+			parentObj.emplace_back(obj->GetParent());
 	}
 	removeGameObject_.clear();
 
+
+
 	//各オブジェクト解放(削除)
 	{
+		//child解放
+		for (std::weak_ptr<GameObject> parent : parentObj)
+		{
+			parent.lock()->EraseExpiredChild();
+		}
+
 		//collider解放
 		for (int col = 0; col < colliderObject_.size(); ++col)
 		{
@@ -303,6 +327,16 @@ void GameObjectManager::Update(float elapsedTime)
 			{
 				swordTrailObject_.erase(swordTrailObject_.begin() + tra);
 				--tra;
+			}
+		}
+
+		//particleObject解放
+		for (int per = 0; per < particleObject_.size(); ++per)
+		{
+			if (particleObject_[per].expired())
+			{
+				particleObject_.erase(particleObject_.begin() + per);
+				--per;
 			}
 		}
 

@@ -16,6 +16,7 @@ CEREAL_CLASS_VERSION(ParticleSystemCom::UV, 1)
 CEREAL_CLASS_VERSION(ParticleSystemCom::Shape, 1)
 CEREAL_CLASS_VERSION(ParticleSystemCom::VelocityLifeTime, 1)
 CEREAL_CLASS_VERSION(ParticleSystemCom::ScaleLifeTime, 1)
+CEREAL_CLASS_VERSION(ParticleSystemCom::ColorLifeTime, 1)
 CEREAL_CLASS_VERSION(ParticleSystemCom::RotationLifeTime, 1)
 CEREAL_CLASS_VERSION(ParticleSystemCom::ParticleConstants, 1)
 CEREAL_CLASS_VERSION(ParticleSystemCom::SaveParticleData, 1)
@@ -114,9 +115,20 @@ void ParticleSystemCom::ScaleLifeTime::serialize(Archive& archive, int version)
 {
 	archive(
 		CEREAL_NVP(keyTime),
+		CEREAL_NVP(sDummy),
 		CEREAL_NVP(value),
-		CEREAL_NVP(curvePower),
-		CEREAL_NVP(sDummy)
+		CEREAL_NVP(curvePower)
+	);
+}
+
+template<class Archive>
+void ParticleSystemCom::ColorLifeTime::serialize(Archive& archive, int version)
+{
+	archive(
+		CEREAL_NVP(keyTime),
+		CEREAL_NVP(cDummy),
+		CEREAL_NVP(value),
+		CEREAL_NVP(curvePower)
 	);
 }
 
@@ -137,6 +149,7 @@ void ParticleSystemCom::ParticleConstants::serialize(Archive& archive, int versi
 		CEREAL_NVP(isRoop),
 		CEREAL_NVP(rateTime),
 		CEREAL_NVP(gravity),
+		CEREAL_NVP(color),
 		CEREAL_NVP(emitterPosition),
 		CEREAL_NVP(startAngle),
 		CEREAL_NVP(startAngleRand),
@@ -148,6 +161,7 @@ void ParticleSystemCom::ParticleConstants::serialize(Archive& archive, int versi
 		CEREAL_NVP(velocityLifeTime),
 		CEREAL_NVP(scaleLifeTime),
 		CEREAL_NVP(scaleLifeTimeRand),
+		CEREAL_NVP(colorLifeTime),
 		CEREAL_NVP(rotationLifeTime)
 	);
 }
@@ -211,17 +225,22 @@ void ParticleSystemCom::Start()
 	Dx11StateLib* dx11State = graphics.GetDx11State().get();
 
 	//画像読み込み
-	D3D11_TEXTURE2D_DESC texture2d_desc{};
-	if (particleData_.particleTexture.size() > 0)
+	if (!particleSprite_)
 	{
-		dx11State->load_texture_from_file(device, particleData_.particleTexture.c_str(), particleSprite_.GetAddressOf(), &texture2d_desc);
+		D3D11_TEXTURE2D_DESC texture2d_desc{};
+		if (particleData_.particleTexture.size() > 0)
+		{
+			dx11State->load_texture_from_file(device, particleData_.particleTexture.c_str(), particleSprite_.GetAddressOf(), &texture2d_desc);
+		}
+		else
+		{
+			dx11State->load_texture_from_file(device, "Data/Sprite/color.png", particleSprite_.GetAddressOf(), &texture2d_desc);
+		}
 	}
-	else
-	{
-		dx11State->load_texture_from_file(device, "Data/Sprite/color.png", particleSprite_.GetAddressOf(), &texture2d_desc);
-	}
+
 	//定数バッファ
 	dx11State->createConstantBuffer(device, sizeof(ParticleConstants), constantBuffer_.GetAddressOf());
+	dx11State->createConstantBuffer(device, sizeof(GameParticleData), gameBuffer_.GetAddressOf());
 	dx11State->createConstantBuffer(device, sizeof(ParticleScene), sceneBuffer_.GetAddressOf());
 
 	//シェーダー初期化
@@ -242,7 +261,18 @@ void ParticleSystemCom::Update(float elapsedTime)
 	if (isRestart_)
 	{
 		isRestart_ = false;
+		lifeLimit_ = 0;
 		Initialize();
+	}
+
+	//削除判定
+	if (!particleData_.particleData.isRoop)
+	{
+		lifeLimit_ += elapsedTime;
+	}
+	else
+	{
+		lifeLimit_ = 0;
 	}
 
 	Graphics& graphics = Graphics::Instance();
@@ -255,6 +285,8 @@ void ParticleSystemCom::Update(float elapsedTime)
 	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_.particleData, 0, 0);
 	dc->CSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
 
+	dc->UpdateSubresource(gameBuffer_.Get(), 0, 0, &gameData_, 0, 0);
+	dc->CSSetConstantBuffers(10, 1, gameBuffer_.GetAddressOf());
 
 	dc->CSSetConstantBuffers(1, 1, sceneBuffer_.GetAddressOf());
 
@@ -304,6 +336,8 @@ void ParticleSystemCom::OnGUI()
 
 	ImGui::DragInt("emmitCount", &particleData_.particleData.rateTime, 1, 0, 100000);
 
+
+	ImGui::DragFloat4("color", &particleData_.particleData.color.x, 0.01f, 0, 5);
 	ImGui::DragFloat3("emitterPosition", &particleData_.particleData.emitterPosition.x, 0.1f);
 
 	ImGui::DragFloat("startSpeed", &particleData_.particleData.startSpeed, 0.01f);
@@ -530,6 +564,77 @@ void ParticleSystemCom::OnGUI()
 		ImGui::TreePop();
 	}
 
+	//colorLifeTime
+	if (ImGui::TreeNode("ColorOverLifeTime"))
+	{
+		if (ImGui::Button("AddKey"))	//キー追加
+		{
+			for (int i = 0; i < colorKeyCount; ++i)
+			{
+				if (particleData_.particleData.colorLifeTime[i].keyTime >= 0)continue;
+
+				if (i == 0)
+				{
+					particleData_.particleData.colorLifeTime[i].keyTime = 0;
+					break;
+				}
+				else
+				{
+					//キーの時間か最大で入れれない
+					if (particleData_.particleData.colorLifeTime[i - 1].keyTime > 0.99f)
+					{
+						break;
+					}
+
+					//前のキーの次に打つ
+					particleData_.particleData.colorLifeTime[i].keyTime =
+						particleData_.particleData.colorLifeTime[i - 1].keyTime + 0.01f;
+					break;
+				}
+			}
+		}
+		for (int i = 0; i < colorKeyCount; ++i)
+		{
+			//キーがないならbreak
+			if (particleData_.particleData.colorLifeTime[i].keyTime < 0)break;
+			//キー
+			if (ImGui::TreeNode(std::to_string(i).c_str()))
+			{
+				if (ImGui::DragFloat("keyTime", &particleData_.particleData.colorLifeTime[i].keyTime, 0.01f, 0, 1))
+				{
+					//下限処理
+					if (i != 0)
+					{
+						if (particleData_.particleData.colorLifeTime[i].keyTime <= particleData_.particleData.colorLifeTime[i - 1].keyTime)
+							particleData_.particleData.colorLifeTime[i].keyTime = particleData_.particleData.colorLifeTime[i - 1].keyTime + 0.01f;
+					}
+					//上限処理
+					if (i != colorKeyCount - 1)
+					{
+						if (particleData_.particleData.colorLifeTime[i + 1].keyTime >= 0)
+						{
+							if (particleData_.particleData.colorLifeTime[i].keyTime >= particleData_.particleData.colorLifeTime[i + 1].keyTime)
+								particleData_.particleData.colorLifeTime[i].keyTime = particleData_.particleData.colorLifeTime[i + 1].keyTime - 0.01f;
+						}
+					}
+				}
+
+				ImGui::DragFloat4("velue", &particleData_.particleData.colorLifeTime[i].value.x, 0.1f, 0, 100);
+				ImGui::DragFloat("curvePower", &particleData_.particleData.colorLifeTime[i].curvePower.x, 0.1f);
+
+				//キー削除
+				if (ImGui::Button("Delete"))
+				{
+					DeleteColorKey(i, particleData_.particleData.colorLifeTime);
+				}
+
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::TreePop();
+	}
+
 	//rotation
 	if (ImGui::TreeNode("RotationLifeTime"))
 	{
@@ -551,6 +656,21 @@ void ParticleSystemCom::OnGUI()
 
 		ImGui::TreePop();
 	}
+
+
+	//ゲーム用パーティクル設定
+	if (ImGui::TreeNode("GameParticle"))
+	{
+		bool sweets = false;
+		if (gameData_.sweetsData.isEnable == 1)sweets = true;
+		if (ImGui::Checkbox("Sweets", &sweets))
+		{
+			if (sweets)gameData_.sweetsData.isEnable = 1;
+			else gameData_.sweetsData.isEnable = 0;
+		}
+
+		ImGui::TreePop();
+	}
 }
 
 void ParticleSystemCom::Initialize()
@@ -562,6 +682,9 @@ void ParticleSystemCom::Initialize()
 
 	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_.particleData, 0, 0);
 	dc->CSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
+
+	dc->UpdateSubresource(gameBuffer_.Get(), 0, 0, &gameData_, 0, 0);
+	dc->CSSetConstantBuffers(10, 1, gameBuffer_.GetAddressOf());
 
 	dc->CSSetShader(particleInitializerCompute_.Get(), NULL, 0);
 
@@ -609,7 +732,27 @@ void ParticleSystemCom::Render()
 		DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.view)
 		* DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.projection));
 
+	DirectX::XMStoreFloat4x4(&scene.inverseModelMat,
+		DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&GetGameObject()->transform_->GetWorldTransform())));
+
+	//逆ビュープロジェクション
+	DirectX::XMStoreFloat4x4(&scene.inverseViweProj,
+		DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.projection))
+		* DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.view)));
+
+
+	DirectX::XMStoreFloat4x4(&scene.view, DirectX::XMMatrixInverse(nullptr, DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.view)));
+	DirectX::XMStoreFloat4x4(&scene.gProj,  DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.projection));
+
 	scene.lightDir = graphics.shaderParameter3D_.lightDirection;
+
+
+	DirectX::XMFLOAT3 up = GetGameObject()->transform_->GetWorldPosition();
+	DirectX::XMFLOAT4 down = { up.x,up.y-1,up.z,1 };
+
+
+	scene.downVec = down; 
+
 
 	dc->UpdateSubresource(sceneBuffer_.Get(), 0, 0, &scene, 0, 0);
 	dc->GSSetConstantBuffers(1, 1, sceneBuffer_.GetAddressOf());
@@ -642,6 +785,19 @@ void ParticleSystemCom::Load(const char* filename)
 void ParticleSystemCom::LoadTexture(const char* filename)
 {
 	particleData_.particleTexture = filename;
+}
+
+void ParticleSystemCom::SetSweetsParticle(bool enable)
+{
+	gameData_.sweetsData.isEnable = enable;
+}
+
+bool ParticleSystemCom::DeleteFlag()
+{
+	//ライフタイムの２倍でパーティクルは全て消えている
+	if (particleData_.particleData.lifeTime * 2 < lifeLimit_)
+		return true;
+	return false;
 }
 
 //スケールキーを削除する
@@ -684,6 +840,46 @@ void ParticleSystemCom::DeleteScaleKey(int id, ScaleLifeTime(&scaleLife)[scaleKe
 	}
 }
 
+//カラーキーを削除する
+void ParticleSystemCom::DeleteColorKey(int id, ColorLifeTime(&colorLife)[colorKeyCount])
+{
+	//削除
+	colorLife[id].keyTime = -1;
+	colorLife[id].value = { 1, 1, 1, 1 };
+	colorLife[id].curvePower = { 0, 0, 0, 0 };
+
+	//配列ずらす
+	for (int i = id; i < colorKeyCount - 1; ++i)
+	{
+		//次のキーがない場合
+		if (colorLife[i + 1].keyTime < 0)
+		{
+			colorLife[i].keyTime = -1;
+			colorLife[i].value = { 1, 1, 1, 1 };
+			colorLife[i].curvePower = { 0, 0, 0, 0 };
+
+			break;
+		}
+
+		colorLife[i].keyTime =
+			colorLife[i + 1].keyTime;
+		colorLife[i].value =
+			colorLife[i + 1].value;
+		colorLife[i].curvePower =
+			colorLife[i + 1].curvePower;
+
+		//配列の最後のひとつ前に場合
+		if (id == scaleKeyCount - 2)
+		{
+			colorLife[i + 1].keyTime = -1;
+			colorLife[i + 1].value = { 1, 1, 1, 1 };
+			colorLife[i + 1].curvePower = { 0, 0, 0, 0 };
+
+			break;
+		}
+	}
+}
+
 //シリアルでパーティクルを保存
 void ParticleSystemCom::SaveParticle()
 {
@@ -701,7 +897,7 @@ void ParticleSystemCom::SaveParticle()
 			try
 			{
 				archive(
-					CEREAL_NVP(particleData_.particleData)
+					CEREAL_NVP(particleData_)
 				);
 			}
 			catch (...)
@@ -735,7 +931,7 @@ void ParticleSystemCom::LoadParticle(const char* filename)
 		try
 		{
 			archive(
-				CEREAL_NVP(particleData_.particleData)
+				CEREAL_NVP(particleData_)
 			);
 		}
 		catch (...)
@@ -744,4 +940,22 @@ void ParticleSystemCom::LoadParticle(const char* filename)
 			return;
 		}
 	}
+
+	Graphics& graphics = Graphics::Instance();
+	ID3D11Device* device = graphics.GetDevice();
+	Dx11StateLib* dx11State = graphics.GetDx11State().get();
+
+	//画像読み込み
+	if (particleSprite_)
+		particleSprite_.Get()->Release();	//解放
+	D3D11_TEXTURE2D_DESC texture2d_desc{};
+	if (particleData_.particleTexture.size() > 0)
+	{
+		dx11State->load_texture_from_file(device, particleData_.particleTexture.c_str(), particleSprite_.GetAddressOf(), &texture2d_desc);
+	}
+	else
+	{
+		dx11State->load_texture_from_file(device, "Data/Sprite/color.png", particleSprite_.GetAddressOf(), &texture2d_desc);
+	}
+
 }

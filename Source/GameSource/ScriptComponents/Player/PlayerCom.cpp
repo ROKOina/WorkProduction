@@ -282,8 +282,6 @@ void PlayerCom::AnimationInitialize()
         }
 
         {   //中距離コンボ
-
-
             //コンボ2
             animator->AddAnimatorTransition(BIGSWORD_DASH);
             animator->SetTriggerTransition(BIGSWORD_DASH, "triangleDash");
@@ -297,7 +295,6 @@ void PlayerCom::AnimationInitialize()
 
         //攻撃
         {  
-
             //□
             //combo01
             animator->AddAnimatorTransition(BIGSWORD_COM1_01);

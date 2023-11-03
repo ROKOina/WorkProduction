@@ -29,14 +29,26 @@ struct Particle
 	//出現しているか
 	int emmitterFlag = 0;
 
+	DirectX::XMFLOAT2 uvSize;
+	DirectX::XMFLOAT2 uvPos;
+
+	DirectX::XMFLOAT4 downPP;
+
 	DirectX::XMFLOAT4X4 saveModel;
 };
 struct ParticleScene
 {
 	DirectX::XMFLOAT4X4 modelMat;
 	DirectX::XMFLOAT4X4 viweProj;
+
+	DirectX::XMFLOAT4X4 inverseModelMat;
+	DirectX::XMFLOAT4X4 inverseViweProj;
+	DirectX::XMFLOAT4X4 view;
+	DirectX::XMFLOAT4X4 gProj;
+
 	DirectX::XMFLOAT4 lightDir;
 	DirectX::XMFLOAT4 cameraPos;
+	DirectX::XMFLOAT4 downVec;
 };
 
 class ParticleSystemCom : public Component
@@ -127,6 +139,20 @@ public:
 		void serialize(Archive& archive, int version);
 	};
 
+	//消えるまでの時間で色を変更できる
+#define colorKeyCount 5
+	struct ColorLifeTime
+	{
+		float keyTime = -1;
+		DirectX::XMFLOAT3 cDummy;
+
+		DirectX::XMFLOAT4 value{1, 1, 1, 1};
+		DirectX::XMFLOAT4 curvePower{0, 0, 0, 0};	//valueに行くまでのカーブ
+
+		template<class Archive>
+		void serialize(Archive& archive, int version);
+	};
+
 	struct RotationLifeTime
 	{
 		DirectX::XMFLOAT4 rotation{0, 0, 0, 0};
@@ -147,13 +173,13 @@ public:
 		int rateTime = 100;	//一秒間に出現する数
 		float gravity = 0;
 
-
+		DirectX::XMFLOAT4 color{1, 1, 1, 1};
 		DirectX::XMFLOAT4 emitterPosition{};
 
 		DirectX::XMFLOAT4 startAngle{0, 0, 0, 0};
 		DirectX::XMFLOAT4 startAngleRand{0, 0, 0, 0};	//最後の値（ｗ）を1にすればランダムになる
 
-		DirectX::XMFLOAT4 startSize{ 0.05f, 0.05f, 0, 0 };	
+		DirectX::XMFLOAT4 startSize{ 0.5f, 0.5f, 0, 0 };	
 		DirectX::XMFLOAT4 startSizeRand{ 0, 0, 0, 0 };	//最後の値（ｗ）を1にすればランダムになる
 
 		float startSpeed{ 1 };
@@ -172,12 +198,16 @@ public:
 		ScaleLifeTime scaleLifeTime[scaleKeyCount];	//並び替えてkey順にする
 		ScaleLifeTime scaleLifeTimeRand[scaleKeyCount];
 
+		ColorLifeTime colorLifeTime[colorKeyCount];
+
 		RotationLifeTime rotationLifeTime;
+
 
 		template<class Archive>
 		void serialize(Archive& archive, int version);
 	};
 
+	//シリアルする情報
 	struct SaveParticleData
 	{
 		std::string particleTexture;
@@ -187,8 +217,32 @@ public:
 		void serialize(Archive& archive, int version);
 	};
 
+public:
+	//お菓子パーティクル設定にする
+	void SetSweetsParticle(bool enable);
+
+	//削除判定
+	bool DeleteFlag();
+private:
+	//お菓子をだすパーティクル用
+	struct SweetsParticleData
+	{
+		//uvスクロールで一枚の画像からお菓子を出す
+		int isEnable = false;
+
+		int sweetsCount = 23;
+		DirectX::XMFLOAT2 uvCount{8, 8};
+	};
+
+	//このゲーム用パーティクルデータ(シリアルしない)
+	struct GameParticleData
+	{
+		SweetsParticleData sweetsData;
+	};
+
 private:
 	void DeleteScaleKey(int id, ScaleLifeTime(&scaleLife)[scaleKeyCount]);
+	void DeleteColorKey(int id, ColorLifeTime(&colorLife)[colorKeyCount]);
 
 	//シリアルでパーティクルを保存
 	void SaveParticle();
@@ -199,7 +253,9 @@ private:
 	const size_t maxParticleCount_;
 
 	SaveParticleData particleData_;
+	GameParticleData gameData_;
 
+	float lifeLimit_ = 0;	//ゲームオブジェクトを消すよう
 
 	//画像
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleSprite_;
@@ -218,6 +274,7 @@ private:
 
 	//コンスタントバッファ
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer_;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> gameBuffer_;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> sceneBuffer_;
 
 

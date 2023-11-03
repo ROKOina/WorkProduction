@@ -70,10 +70,10 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
         p.startSize = float3(0, 0, 0);
         if (startSizeRand.w > 0.5f)
         {
-            p.startSize.xy = lerp(startSize.xy, startSizeRand.xy, f1);
+            p.startSize.xyz = lerp(startSize.xyz, startSizeRand.xyz, f1);
         }
         else
-            p.startSize.xy = float3(startSize.xy, 0);
+            p.startSize = float3(startSize.xy, 0);
     }
     
     p.randAngle = float3(0, 0, 0);
@@ -91,12 +91,7 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
             p.randAngle = lerp(rotationLifeTime.rotation.xyz, rotationLifeTime.rotationRand.xyz, f1);
     }
   
-    //p.color.x = 1.0;
-    //p.color.y = f0 * 0.5;
-    //p.color.z = f0 * 0.05;
-    //p.color.xyz *= 3.0;
-    //p.color.w = 1.0f;
-    p.color = float4(1, 1, 1, 1);
+    p.color = color;
    
     
     p.size = float3(0,0,0);
@@ -108,6 +103,23 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
     
     p.emitPosition = float3(0, 0, 0);
     p.emmitterFlag = 0;
+    
+    p.uvSize = float2(1, 1);
+    p.uvPos = float2(0, 0);
+
+    //お菓子パーティクル起動中の時
+    if (sweetsData.isEnable)
+    {
+        //サイズ
+        p.uvSize = 1.0f / sweetsData.uvCount;
+        //スクロール位置をランダムで決める
+        int index = XOrShift32(id) % sweetsData.sweetsCount;
+        p.uvPos.x = int(index % sweetsData.uvCount.x) * p.uvSize.x;
+        p.uvPos.y = int(index / sweetsData.uvCount.x) * p.uvSize.y;
+
+    }
+    
+    p.downPP = float4(0, 0, 0, 0);
     
     p.saveModel = float4x4(
     1,0,0,0,

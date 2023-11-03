@@ -8,7 +8,9 @@
 #include "Components\AnimationCom.h"
 #include "Components\AnimatorCom.h"
 #include "SystemStruct\QuaternionStruct.h"
+#include "Components/ParticleComManager.h"
 #include "../Weapon\WeaponCom.h"
+
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include <imgui.h>
@@ -245,6 +247,10 @@ void AttackPlayer::SquareInput()
 
     if (DoComboAttack())    //コンボ受付判定
     {
+        //仮エフェクト
+        ParticleComManager::Instance().SetEffect(ParticleComManager::DOOM_SWEETS
+            , player_.lock()->GetGameObject()->transform_->GetWorldPosition());
+
         std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
         //空中攻撃
         if (!playerObj->GetComponent<MovementCom>()->OnGround())

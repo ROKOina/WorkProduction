@@ -77,10 +77,10 @@ particle ResetParticle(uint id)
     {
         if (startSizeRand.w > 0.5f)
         {
-            p.startSize.xy = lerp(startSize.xy, startSizeRand.xy, f1);
+            p.startSize = lerp(startSize.xyz, startSizeRand.xyz, f1);
         }
         else
-            p.startSize.xy = float3(startSize.xy, 0);
+            p.startSize = float3(startSize.xy, 0);
         
         //カーブ使用時
         if (scaleLifeTimeRand[0].keyTime >= 0)
@@ -106,12 +106,7 @@ particle ResetParticle(uint id)
             p.randAngle = lerp(rotationLifeTime.rotation.xyz, rotationLifeTime.rotationRand.xyz, f1);        
     }
     
-    //p.color.x = 1.0;
-    //p.color.y = f0 * 0.5;
-    //p.color.z = f0 * 0.05;
-    //p.color.xyz *= 3.0;
-    //p.color.w = 1.0f;
-    p.color = float4(1, 1, 1, 1);
+    p.color = color;
     p.emmitterFlag = 0;
     
     p.age = lifeTime * f2;
@@ -237,6 +232,49 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
             p.angle += rotationLifeTime.rotation.xyz * elapsedTime;
         }
         
+        //カーブでカラーを変える
+        if (colorLifeTime[0].keyTime >= 0)  //キーが打たれていたら
+        {
+            for (int colorIndex = 0; colorIndex < 5; ++colorIndex)
+            {
+                if (lifeRatio < colorLifeTime[colorIndex].keyTime)  //現在ライフ時間がキーよりも下の場合入る
+                {
+                    float keyRatio; //キー毎の補間値
+                    if (colorIndex != 0)
+                    {
+                        keyRatio = (lifeRatio - colorLifeTime[colorIndex - 1].keyTime)
+                            / (colorLifeTime[colorIndex].keyTime - colorLifeTime[colorIndex - 1].keyTime);
+                        
+                        p.color.x = BezierCurve(colorLifeTime[colorIndex - 1].value.x, colorLifeTime[colorIndex].value.x
+                            , colorLifeTime[colorIndex].curvePower.x, keyRatio);
+                        p.color.y = BezierCurve(colorLifeTime[colorIndex - 1].value.y, colorLifeTime[colorIndex].value.y
+                            , colorLifeTime[colorIndex].curvePower.x, keyRatio);
+                        p.color.z = BezierCurve(colorLifeTime[colorIndex - 1].value.z, colorLifeTime[colorIndex].value.z
+                            , colorLifeTime[colorIndex].curvePower.x, keyRatio);
+                        p.color.w = BezierCurve(colorLifeTime[colorIndex - 1].value.w, colorLifeTime[colorIndex].value.w
+                            , colorLifeTime[colorIndex].curvePower.x, keyRatio);
+                    }
+                    else
+                    {
+                        keyRatio = lifeRatio / colorLifeTime[colorIndex].keyTime;
+
+                        p.color.x = BezierCurve(1, colorLifeTime[colorIndex].value.x
+                            , colorLifeTime[colorIndex].curvePower.x, keyRatio);
+                        p.color.y = BezierCurve(1, colorLifeTime[colorIndex].value.y
+                            , colorLifeTime[colorIndex].curvePower.x, keyRatio);
+                        p.color.z = BezierCurve(1, colorLifeTime[colorIndex].value.z
+                            , colorLifeTime[colorIndex].curvePower.x, keyRatio);
+                        p.color.w = BezierCurve(1, colorLifeTime[colorIndex].value.w
+                            , colorLifeTime[colorIndex].curvePower.x, keyRatio);
+                    }
+                        
+                    //通ればbreak
+                    break;
+                }
+            }
+            
+        }
+            
         //パーティクル方向のノーマルベクトル
         float3 normVec = normalize(p.emitPosition - p.position);
         
@@ -252,7 +290,20 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
         //中心方向に動く
         float3 radialVec = -normVec * velocityLifeTime.radial;
 
-        p.velocity.y += gravity;
+        //重力わからん
+        float4 downVecCS = mul(float4(p.position, 1), inverseViweProj * inverseModelMat);
+        //float4 downVecCS = mul(float4(0, 0, 0, 1),  inverseModelMat*inverseViweProj);
+
+        //float4 downVecCS1 = downVecCS;
+        downVecCS.y -= 1;
+        float4 downVecCS2 = downVecCS;
+
+        //downVecCS1 = mul(downVecCS1, modelMat*viewProjection);
+        downVecCS2 = mul(downVecCS2, modelMat * viewProjection);
+
+        p.velocity += normalize(downVecCS2.xyz - downVecCS.xyz) * gravity;
+        
+        
         
         p.position += (p.velocity + velocityLifeTime.linearVelocity.xyz + orbVelo + radialVec) * elapsedTime;
 
