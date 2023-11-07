@@ -30,19 +30,19 @@ void CharacterStatusCom::Update(float elapsedTime)
             oneFrameJudge_ = true;
     }
 
-    //ダメージ
+    //無敵終了処理
     if (isInvincible_)
     {
         //プレイヤーの被弾
         if (GetGameObject()->GetComponent<PlayerCom>())
         {
-            if (!isAnimDamage_) //ダメージアニメーション中
+            if (!isAnimDamage_) //ダメージアニメーション中ではない場合
             {
                 damageTimer_ += elapsedTime;
                 if (damageTimer_ > damageInvincibleTime_)
                 {
                     if (!invincibleSetFlag) //無敵時間を別に設定している場合はとばす
-                        isInvincible_ = false;
+                        isInvincible_ = false;//無敵終了
                     damageTimer_ = 0;
                 }
             }
@@ -50,10 +50,17 @@ void CharacterStatusCom::Update(float elapsedTime)
         else //敵の被弾時間
         {
             //プレイヤー武器取得
-            std::shared_ptr<GameObject> playerWeapon = GameObjectManager::Instance().Find("Candy");
-            if (!playerWeapon->GetComponent<WeaponCom>()->GetIsAttackAnim()) //攻撃が終わったらフラグを切る
+            if (!saveWeapon_.expired())
             {
-                if (!invincibleSetFlag) //無敵時間を別に設定している場合はとばす
+                if (!saveWeapon_.lock()->GetIsAttackAnim()) //攻撃が終わったらフラグを切る
+                {
+                    if (!invincibleSetFlag) //無敵時間を別に設定している場合はとばす
+                        isInvincible_ = false;  //無敵終了
+                }
+            }
+            else
+            {
+                if (!invincibleSetFlag)
                     isInvincible_ = false;
             }
         }
@@ -93,8 +100,15 @@ void CharacterStatusCom::OnGUI()
 
 
 //ダメージ
-void CharacterStatusCom::OnDamage(int minasHP, DirectX::XMFLOAT3& power, ATTACK_SPECIAL_TYPE attackType)
+void CharacterStatusCom::OnDamage(std::shared_ptr<WeaponCom> weapon, int minasHP, DirectX::XMFLOAT3& power, ATTACK_SPECIAL_TYPE attackType, float invincibleNonDamage)
 {
+    //無敵時間を設定されていれば
+    if (invincibleNonDamage > 0)
+    {
+        SetInvincibleNonDamage(invincibleNonDamage);
+    }
+
+    saveWeapon_ = weapon;
     isInvincible_ = true;
     isFrameDamage_ = true;
     isAnimDamage_ = true;

@@ -9,8 +9,10 @@
 #include "Components\AnimatorCom.h"
 #include "SystemStruct\QuaternionStruct.h"
 #include "Components/ParticleComManager.h"
+#include "Components/ParticleSystemCom.h"
 #include "../Weapon\WeaponCom.h"
 
+#include "GameSource/Math/Mathf.h"
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include <imgui.h>
@@ -543,8 +545,20 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
             //回転可能
             player_.lock()->GetMovePlayer()->SetIsInputTurn(true);
         }
+        
+        if (!isSquareDirection_)    //強攻撃演出していない場合
+        {
+            //強攻撃１
+            if (animCom->GetCurrentAnimationEvent("AutoCollisionTriangleAttack01", DirectX::XMFLOAT3()))
+            {
+                //SpawnCombo1();
+                SpawnCombo2();
+            }
+        }
     }
 
+    //強攻撃演出更新
+    SquareAttackDirection(elapsedTime);
 
 }
 
@@ -583,6 +597,8 @@ void AttackPlayer::NormalAttack(bool middleAssist)
     onHitEnemy_ = false;    //攻撃が入力されたらfalseに
     isMiddleAssist_ = middleAssist; //中距離アシスト
     attackFlagState_ = ATTACK_FLAG::Normal;
+
+    isSquareDirection_ = false;
 }
 
 int AttackPlayer::NormalAttackUpdate(float elapsedTime)
@@ -902,6 +918,161 @@ bool AttackPlayer::ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> en
     playerObj->transform_->SetRotation(playerQuaternion);
 
     return false;
+}
+
+void AttackPlayer::SquareAttackDirection(float elapsedTime)
+{
+    //攻撃を種類で回す
+    for (int attackIndex = 0; attackIndex < squareAttackMove_.size(); ++attackIndex)
+    {
+        auto& squDir = squareAttackMove_[attackIndex];
+        if (!squDir.enable)continue;
+
+        squDir.directionTimer -= elapsedTime;
+        if (squDir.directionTimer < 0)
+        {
+            squDir.enable = false;
+        }
+
+        for (int index = 0; index < squDir.objData.size();)
+        {
+            //解放処理
+            if (squDir.objData[index].obj.expired())
+            {
+                squDir.objData.erase(squDir.objData.begin() + index);
+                continue;
+            }
+
+            //エフェクト終了処理
+            std::shared_ptr<ParticleSystemCom> particle = squDir.objData[index].obj.lock()->GetComponent<ParticleSystemCom>();
+            if (!squDir.enable)
+                particle->SetRoop(false);
+
+            //エフェクトループ中のみ
+            if (particle->GetRoop())
+            {
+                //動かす
+                DirectX::XMFLOAT3 pos = squDir.objData[index].obj.lock()->transform_->GetWorldPosition();
+                pos.x += squDir.objData[index].velocity.x * squDir.objData[index].speed * elapsedTime;
+                pos.z += squDir.objData[index].velocity.z * squDir.objData[index].speed * elapsedTime;
+                squDir.objData[index].obj.lock()->transform_->SetWorldPosition(pos);
+
+                if (attackIndex > 0)
+                {
+                    //サイズ大きく
+                    float timeRatio = (squDir.directionTime-squDir.directionTimer) / squDir.directionTime;
+                    float scale = Mathf::Lerp(squDir.colliderScale, squDir.colliderScaleEnd, timeRatio);
+
+                    squDir.objData[index].obj.lock()
+                        ->GetChildren()[0].lock()
+                        ->GetComponent<SphereColliderCom>()->SetRadius(scale);
+
+                    particle->GetSaveParticleData().particleData.shape.radius = scale;
+                }
+            }
+
+            index++;
+        }
+    }
+}
+
+void AttackPlayer::SpawnCombo1()
+{
+    std::shared_ptr<GameObject> player = player_.lock()->GetGameObject();
+
+    //強攻撃発動フラグ
+    isSquareDirection_ = true;
+
+    //obj生成
+    std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::COMBO_1);
+    particle->transform_->SetWorldPosition(player->transform_->GetWorldPosition());
+
+    //子に当たり判定
+    {
+        //std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+        std::shared_ptr<GameObject> obj = particle->AddChildObject();
+        obj->SetName("attack");
+
+        std::shared_ptr<SphereColliderCom> attackCol = obj->AddComponent<SphereColliderCom>();
+        attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+        attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+        attackCol->SetRadius(2.3f);
+
+        std::shared_ptr<WeaponCom> weapon = obj->AddComponent<WeaponCom>();
+        weapon->SetObject(GameObjectManager::Instance().Find("pico"));
+        weapon->SetNodeParent(particle);
+        weapon->SetIsForeverUse();
+        weapon->SetAttackDefaultStatus(1, 0);
+    }
+
+    //強攻撃動き初期化
+    {
+        squareAttackMove_[0].enable = true;
+        squareAttackMove_[0].directionTime = 1;
+        squareAttackMove_[0].directionTimer = squareAttackMove_[0].directionTime;
+        squareAttackMove_[0].colliderScale = 2.3f;
+        //加速を指定
+        SquareAttackMove::ObjData oData;
+        oData.obj = particle;
+        oData.velocity = player->transform_->GetWorldFront();
+        oData.speed = 20;
+        squareAttackMove_[0].objData.emplace_back(oData);
+    }
+
+}
+
+void AttackPlayer::SpawnCombo2()
+{
+    std::shared_ptr<GameObject> player = player_.lock()->GetGameObject();
+
+    //強攻撃発動フラグ
+    isSquareDirection_ = true;
+
+    //obj生成
+    std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::COMBO_2);
+    DirectX::XMFLOAT3 pos = player->transform_->GetWorldPosition();
+    pos.y += 1;
+    particle->transform_->SetWorldPosition(pos);
+
+    //回転角度算出
+    DirectX::XMVECTOR PlayerFront = DirectX::XMLoadFloat3(&player->transform_->GetWorldFront());
+    float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMVector3Normalize(PlayerFront), { 0,0,1 }));
+    float angle = ((dot * -1 + 1) / 2)*180;
+    if (0 < DirectX::XMVectorGetY(DirectX::XMVector3Cross(DirectX::XMVector3Normalize(PlayerFront), { 0,0,1 })))
+        angle *= -1;
+    particle->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, angle + -54, 0));
+
+    //子に当たり判定
+    {
+        std::shared_ptr<GameObject> obj = particle->AddChildObject();
+        obj->SetName("attack");
+
+        std::shared_ptr<SphereColliderCom> attackCol = obj->AddComponent<SphereColliderCom>();
+        attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+        attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+        attackCol->SetRadius(2.3f);
+
+        std::shared_ptr<WeaponCom> weapon = obj->AddComponent<WeaponCom>();
+        weapon->SetObject(GameObjectManager::Instance().Find("pico"));
+        weapon->SetNodeParent(particle);
+        weapon->SetIsForeverUse();
+        weapon->SetAttackDefaultStatus(1, 0);
+    }
+
+    //強攻撃動き初期化
+    {
+        squareAttackMove_[1].enable = true;
+        squareAttackMove_[1].directionTime = 1;
+        squareAttackMove_[1].directionTimer = squareAttackMove_[1].directionTime;
+        squareAttackMove_[1].colliderScale = 3;
+        squareAttackMove_[1].colliderScaleEnd = 6;
+        //加速を指定
+        SquareAttackMove::ObjData oData;
+        oData.obj = particle;
+        oData.velocity = { 0,0,0 };
+        oData.speed = 0;
+        squareAttackMove_[1].objData.emplace_back(oData);
+    }
 }
 
 //着地時攻撃処理

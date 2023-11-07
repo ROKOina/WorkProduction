@@ -58,6 +58,8 @@ public:
 
     //ヒットストップ
     void HitStop(float sec);
+    bool GetIsHitStop() { return isHitStop_; }
+
 
 private:
     //座標系

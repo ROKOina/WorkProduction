@@ -25,8 +25,9 @@ public:
 
     //CharacterStatusComクラス
 public:
-    //ダメージ
-    void OnDamage(int minasHP, DirectX::XMFLOAT3& power = DirectX::XMFLOAT3(0, 0, 0), ATTACK_SPECIAL_TYPE attackType = ATTACK_SPECIAL_TYPE::NORMAL);
+    //ダメージ（invincibleNonDamageはプレイヤーアニメーション関係なく無敵時間判定）
+    void OnDamage(std::shared_ptr<WeaponCom> weapon, int minasHP, DirectX::XMFLOAT3& power = DirectX::XMFLOAT3(0, 0, 0)
+        , ATTACK_SPECIAL_TYPE attackType = ATTACK_SPECIAL_TYPE::NORMAL, float invincibleNonDamage = -1.0f);
 
     //無敵時間
     void SetInvincibleTime(float time) { damageInvincibleTime_ = time; }
@@ -77,6 +78,9 @@ private:
 
     //hp
     int hp_ = 100;
+
+    //被弾時に保存する
+    std::weak_ptr<WeaponCom> saveWeapon_;
 
     //攻撃による移動を制限
     bool isAttackNonMove_ = false;

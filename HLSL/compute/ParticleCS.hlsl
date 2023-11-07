@@ -75,20 +75,18 @@ particle ResetParticle(uint id)
     
     //サイズ
     {
-        if (startSizeRand.w > 0.5f)
+        if (startSize.w > 0.5f)
         {
-            p.startSize = lerp(startSize.xyz, startSizeRand.xyz, f1);
+            p.startSize = lerp(startSize.x, startSize.y, f1);
         }
         else
-            p.startSize = float3(startSize.xy, 0);
+            p.startSize = startSize.x;
         
         //カーブ使用時
         if (scaleLifeTimeRand[0].keyTime >= 0)
         {
             //補間値保存
-            p.randSizeCurve.x = XOrShift32(id) % 100 * 0.01f;
-            p.randSizeCurve.y = XOrShift32(f0) % 100 * 0.01f;
-            p.randSizeCurve.z = 0;
+            p.randSizeCurve = XOrShift32(id) % 100 * 0.01f;
         }
     }
     
@@ -109,8 +107,20 @@ particle ResetParticle(uint id)
     p.color = color;
     p.emmitterFlag = 0;
     
-    p.age = lifeTime * f2;
-    p.state = 0;
+    p.uvSize = float2(1, 1);
+    p.uvPos = float2(0, 0);
+    
+        //お菓子パーティクル起動中の時
+    if (sweetsData.isEnable)
+    {
+        //サイズ
+        p.uvSize = 1.0f / sweetsData.uvCount;
+        //スクロール位置をランダムで決める
+        int index = XOrShift32(id) % sweetsData.sweetsCount;
+        p.uvPos.x = int(index % sweetsData.uvCount.x) * p.uvSize.x;
+        p.uvPos.y = int(index / sweetsData.uvCount.x) * p.uvSize.y;
+
+    }
     
     return p;
 }
@@ -130,7 +140,7 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
     //p.angle.x += elapsedTime * 100;
     
     //動作中
-    if (p.age > lifeTime)
+    if (p.startFlag == 1)
     {
         //出現フラグ
         if (p.emmitterFlag == 0)
@@ -155,19 +165,15 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
                         keyRatio = (lifeRatio - scaleLifeTime[scaleIndex - 1].keyTime)
                             / (scaleLifeTime[scaleIndex].keyTime - scaleLifeTime[scaleIndex - 1].keyTime);
                         
-                        p.size.x = BezierCurve(scaleLifeTime[scaleIndex - 1].value.x, scaleLifeTime[scaleIndex].value.x
-                            , scaleLifeTime[scaleIndex].curvePower.x, keyRatio) * p.startSize.x;
-                        p.size.y = BezierCurve(scaleLifeTime[scaleIndex - 1].value.y, scaleLifeTime[scaleIndex].value.y
-                            , scaleLifeTime[scaleIndex].curvePower.y, keyRatio) * p.startSize.y;
+                        p.size = BezierCurve(scaleLifeTime[scaleIndex - 1].value, scaleLifeTime[scaleIndex].value
+                            , scaleLifeTime[scaleIndex].curvePower, keyRatio) * p.startSize;
                     }
                     else
                     {
                         keyRatio = lifeRatio / scaleLifeTime[scaleIndex].keyTime;
 
-                        p.size.x = BezierCurve(1, scaleLifeTime[scaleIndex].value.x
-                            , scaleLifeTime[scaleIndex].curvePower.x, keyRatio) * p.startSize.x;
-                        p.size.y = BezierCurve(1, scaleLifeTime[scaleIndex].value.y
-                            , scaleLifeTime[scaleIndex].curvePower.y, keyRatio) * p.startSize.y;
+                        p.size = BezierCurve(1, scaleLifeTime[scaleIndex].value
+                            , scaleLifeTime[scaleIndex].curvePower, keyRatio) * p.startSize;
                     }
                         
                     //通ればbreak
@@ -188,26 +194,22 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
                             keyRatio = (lifeRatio - scaleLifeTimeRand[scaleIndex - 1].keyTime)
                             / (scaleLifeTimeRand[scaleIndex].keyTime - scaleLifeTimeRand[scaleIndex - 1].keyTime);
                         
-                            float2 randSize;
-                            randSize.x = BezierCurve(scaleLifeTimeRand[scaleIndex - 1].value.x, scaleLifeTimeRand[scaleIndex].value.x
-                            , scaleLifeTimeRand[scaleIndex].curvePower.x, keyRatio) * p.startSize.x;
-                            randSize.y = BezierCurve(scaleLifeTimeRand[scaleIndex - 1].value.y, scaleLifeTimeRand[scaleIndex].value.y
-                            , scaleLifeTimeRand[scaleIndex].curvePower.y, keyRatio) * p.startSize.y;
+                            float randSize;
+                            randSize = BezierCurve(scaleLifeTimeRand[scaleIndex - 1].value, scaleLifeTimeRand[scaleIndex].value
+                            , scaleLifeTimeRand[scaleIndex].curvePower, keyRatio) * p.startSize;
 
-                            p.size.xy = lerp(p.size.xy, randSize, p.randSizeCurve.xy);
+                            p.size = lerp(p.size, randSize, p.randSizeCurve);
 
                         }
                         else
                         {
                             keyRatio = lifeRatio / scaleLifeTimeRand[scaleIndex].keyTime;
                             
-                            float2 randSize;
-                            randSize.x = BezierCurve(1, scaleLifeTimeRand[scaleIndex].value.x
-                            , scaleLifeTimeRand[scaleIndex].curvePower.x, keyRatio) * p.startSize.x;
-                            randSize.y = BezierCurve(1, scaleLifeTimeRand[scaleIndex].value.y
-                            , scaleLifeTimeRand[scaleIndex].curvePower.y, keyRatio) * p.startSize.y;
+                            float randSize;
+                            randSize = BezierCurve(1, scaleLifeTimeRand[scaleIndex].value
+                            , scaleLifeTimeRand[scaleIndex].curvePower, keyRatio) * p.startSize;
 
-                            p.size.xy = lerp(p.size.xy, randSize, p.randSizeCurve.xy);
+                            p.size = lerp(p.size, randSize, p.randSizeCurve);
                         }
                         
                     //通ればbreak
@@ -309,7 +311,15 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
 
         p.lifeTime -= elapsedTime;
     }
+    
     p.age += elapsedTime;
+    if (p.age > lifeTime && p.startFlag==0)
+    {
+        //生成処理
+        p = ResetParticle(id);
+        p.startFlag = 1;
+        p.lifeTime = lifeTime;
+    }
     
     if (p.lifeTime < 0)
     {
@@ -318,12 +328,20 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
         {
             p.velocity = float3(0, 0, 0);
             p.position = float3(0, 0, 0);
+            p.size = 0;
             p.age = 0;
+            
         }
-        else    //生成処理
+        else    
         {
-            p = ResetParticle(id);
-            p.lifeTime = lifeTime;
+            //ループ処理
+            const float noiseScale = 1.0;
+            float f0 = rand(float2((id + time) * noiseScale,
+                rand(float2((id + time) * noiseScale, (id + time) * noiseScale))
+                ));
+
+            p.age = lifeTime * f0;
+            p.startFlag = 0;
         }
     }
 

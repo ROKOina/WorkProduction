@@ -24,6 +24,9 @@ void JustAvoidPlayer::Update(float elapsedTime)
         JustAvoidanceAttackInput();
     }
 
+    //ジャスト回避演出
+    JustAvoidDirection(elapsedTime);
+
     //反撃処理更新
     switch (justAvoidKey_)
     {
@@ -47,8 +50,9 @@ void JustAvoidPlayer::JustInisialize()
 {
     justAvoidState_ = -1;
     isJustJudge_ = false;
-    //無敵時間なくす
-    player_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetInvincibleNonDamage(0);
+    Graphics::Instance().SetWorldSpeed(1);
+    //カラーグレーディング戻す
+    Graphics::Instance().shaderParameter3D_.colorGradingData.saturation = 1.5f;
 
     for (int i = 0; i < 4; ++i)
     {
@@ -91,6 +95,10 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
 
         //animator->SetAnimationSpeedOffset(0.3f);
 
+        //プレイヤー透明に
+        player_.lock()->GetGameObject()->GetComponent<RendererCom>()->
+            GetModel()->SetMaterialColor({ 1,1,1,0 });
+
         bool inputFlag = false;
         if (DirectX::XMVectorGetX(DirectX::XMVector3Length(Input)) > 0.1f)
         {
@@ -126,19 +134,30 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUST);
 
 
+        //カラーグレーディング
+        Graphics::Instance().shaderParameter3D_.colorGradingData.saturation = 0.4f;
 
         ////カメラシェイク
         //GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>()->CameraShake(0.1f, 0.25f);
 
         //ヒットストップ
-        GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>()->HitStop(0.2f);
+        GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>()
+            ->HitStop(0.2f);
+        hitStopEnd_ = false;
 
         justAvoidState_++;
-        break;
     }
+    break;
     //分身移動処理＆アニメスピード戻す
     case 1:
     {
+        //ヒットストップ後スロー
+        if (!GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>()->GetIsHitStop() && !hitStopEnd_)
+        {
+            hitStopEnd_ = true;
+            Graphics::Instance().SetWorldSpeed(0.5f);
+        }
+
         //ステートエンドフラグ
         bool endFlag = false;
 
@@ -151,16 +170,18 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             //アニメスピードをプレイヤーに合わせる
             std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
             std::shared_ptr<AnimationCom> picoAnim = player_.lock()->GetGameObject()->GetComponent<AnimationCom>();
-            justAnim->SetAnimationSpeed(picoAnim->GetAnimationSpeed());  
+            justAnim->SetAnimationSpeed(picoAnim->GetAnimationSpeed());
         }
+        float speed = 250;
+        float moveRange = 100;
         //縦位置更新
         for (int f = 0; f < 2; ++f)
         {
             float g = 1;
             if (f == 1)g = -1;
-            if (justPicoPos[f].z * justPicoPos[f].z < 100 * 100)
+            if (justPicoPos[f].z * justPicoPos[f].z < moveRange * moveRange)
             {
-                justPicoPos[f].z += 500 * elapsedTime * g;
+                justPicoPos[f].z += speed * elapsedTime * g;
                 justPico[f]->transform_->SetLocalPosition(justPicoPos[f]);
             }
         }
@@ -169,27 +190,38 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         {
             float g = 1;
             if (r == 1)g = -1;
-            if (justPicoPos[r + 2].x * justPicoPos[r + 2].x < 100 * 100)
+            if (justPicoPos[r + 2].x * justPicoPos[r + 2].x < moveRange * moveRange)
             {
-                justPicoPos[r + 2].x += 500 * elapsedTime * g;
+                justPicoPos[r + 2].x += speed * elapsedTime * g;
                 justPico[r + 2]->transform_->SetLocalPosition(justPicoPos[r + 2]);
             }
             else
                 endFlag = true;
         }
 
+        //カラーグレーディング戻す
+        Graphics::Instance().shaderParameter3D_.colorGradingData.saturation += elapsedTime;
+
         //ステート終わり
         if (endFlag)
-            justAvoidState_++;
+        {
+            //プレイヤー少し光らせる
+            player_.lock()->GetGameObject()->GetComponent<RendererCom>()->
+                GetModel()->SetMaterialColor({ 1,2.0f,1,1.5f });
+            playerDirection_ = true;    //戻す処理をJustAvoidDirection関数でする
 
-        break;
+            justAvoidState_++;
+        }
+
     }
+    break;
     //分身消す
     //プレイヤー出す
     case 2:
     {
         //ステートエンドフラグ
         bool endFlag = false;
+
 
         //徐々に透明に
         for (int i = 0; i < 4; ++i)
@@ -207,13 +239,16 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             //アニメスピードをプレイヤーに合わせる
             std::shared_ptr<AnimationCom> justAnim = justPico[i]->GetComponent<AnimationCom>();
             std::shared_ptr<AnimationCom> picoAnim = player_.lock()->GetGameObject()->GetComponent<AnimationCom>();
-            justAnim->SetAnimationSpeed(picoAnim->GetAnimationSpeed());  //アニメ速度スローに
+            justAnim->SetAnimationSpeed(picoAnim->GetAnimationSpeed());  
         }
+
+        //カラーグレーディング戻す
+        Graphics::Instance().shaderParameter3D_.colorGradingData.saturation += elapsedTime;
+
         if (endFlag)
             justAvoidState_++;
-
-        break;
     }
+    break;
     //反撃受け入れ
     case 3:
     {
@@ -223,7 +258,17 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             //プレイヤーアニメスピード戻す
             std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
             animator->SetAnimationSpeedOffset(1.0f);
+
+            justAvoidTimer_ = -1;
         }
+
+        //スロー和らげる
+        float slow = Graphics::Instance().GetWorldSpeed();
+        slow += 0.5f * elapsedTime;
+        Graphics::Instance().SetWorldSpeed(slow);
+
+        //カラーグレーディング戻す
+        Graphics::Instance().shaderParameter3D_.colorGradingData.saturation += elapsedTime;
 
         //ジャスト回避終了タイマー
         justAvoidTimer_ -= elapsedTime;
@@ -237,8 +282,14 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             break;
         }
 
-        break;
     }
+    break;
+    }
+
+    //カラーグレーディング制限
+    if (Graphics::Instance().shaderParameter3D_.colorGradingData.saturation > 1.5f)
+    {
+        Graphics::Instance().shaderParameter3D_.colorGradingData.saturation = 1.5f;
     }
 
     //移動出来るか
@@ -375,7 +426,25 @@ void JustAvoidPlayer::JustAvoidJudge()
 void JustAvoidPlayer::StartJustAvoid()
 {
     //無敵時間
-    player_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetInvincibleNonDamage(100);
+    player_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()
+        ->SetInvincibleNonDamage(2);
     isJustJudge_ = true;
     justAvoidState_ = 0;
+}
+
+void JustAvoidPlayer::JustAvoidDirection(float elapsedTime)
+{
+    if (!playerDirection_)return;
+
+    //プレイヤー色戻す
+    DirectX::XMFLOAT4 playerColor = player_.lock()->GetGameObject()->GetComponent<RendererCom>()->
+        GetModel()->GetMaterialColor();
+    playerColor.y -= 0.8f * elapsedTime;
+    playerColor.w -= 0.5f * elapsedTime;
+    //両方戻っていれば演出終了
+    if (playerColor.y < 1 && playerColor.w < 1)playerDirection_ = false;
+    if (playerColor.y < 1)playerColor.y = 1;
+    if (playerColor.w < 1)playerColor.w = 1;
+    player_.lock()->GetGameObject()->GetComponent<RendererCom>()->
+        GetModel()->SetMaterialColor(playerColor);
 }

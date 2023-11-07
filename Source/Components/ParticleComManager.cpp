@@ -26,7 +26,7 @@ void ParticleComManager::Update(float elapsedTime)
     }
 }
 
-void ParticleComManager::SetEffect(EFFECT_ID id, DirectX::XMFLOAT3 pos, std::shared_ptr<GameObject> parent)
+std::shared_ptr<GameObject> ParticleComManager::SetEffect(EFFECT_ID id, DirectX::XMFLOAT3 pos, std::shared_ptr<GameObject> parent)
 {
     std::shared_ptr<GameObject> obj;
     if (parent)
@@ -42,12 +42,14 @@ void ParticleComManager::SetEffect(EFFECT_ID id, DirectX::XMFLOAT3 pos, std::sha
 
     obj->SetName("Particle");
 
-    std::shared_ptr<ParticleSystemCom> p = obj->AddComponent<ParticleSystemCom>(iniParticle_[id].maxParticle);
+    std::shared_ptr<ParticleSystemCom> p = obj->AddComponent<ParticleSystemCom>(iniParticle_[id].maxParticle, iniParticle_[id].isAutoDeleteRoopFlag);
     p->SetSweetsParticle(iniParticle_[id].setSweets);	//‚¨‰ÙŽq—p
 
     p->Load(iniParticle_[id].particleName.c_str());
 
     particles_.emplace_back(obj);
+
+    return obj;
 }
 
 void ParticleComManager::OnGui()

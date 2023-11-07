@@ -67,13 +67,13 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
     
     //ƒTƒCƒY
     {
-        p.startSize = float3(0, 0, 0);
-        if (startSizeRand.w > 0.5f)
+        p.startSize = 0;
+        if (startSize.w > 0.5f)
         {
-            p.startSize.xyz = lerp(startSize.xyz, startSizeRand.xyz, f1);
+            p.startSize = lerp(startSize.x, startSize.y, f1);
         }
         else
-            p.startSize = float3(startSize.xy, 0);
+            p.startSize =startSize.x;
     }
     
     p.randAngle = float3(0, 0, 0);
@@ -94,11 +94,11 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
     p.color = color;
    
     
-    p.size = float3(0,0,0);
-    p.randSizeCurve = float3(0, 0, 0);
+    p.size = 0;
+    p.randSizeCurve = 0;
     
     p.age = lifeTime * f2;
-    p.state = 0;
+    p.startFlag = 0;
     p.lifeTime = lifeTime;
     
     p.emitPosition = float3(0, 0, 0);

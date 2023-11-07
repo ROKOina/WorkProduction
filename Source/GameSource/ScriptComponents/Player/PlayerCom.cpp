@@ -29,20 +29,24 @@ void PlayerCom::Start()
     GetGameObject()->GetComponent<CapsuleColliderCom>()->SetRadius(0.17f);
 
     //武器ステータス初期化
+    //Candy
     std::shared_ptr<WeaponCom> weapon = GetGameObject()->GetChildFind("Candy")->GetComponent<WeaponCom>();
-    weapon->SetAttackStatus(BIGSWORD_RIGHT, 1, 30,0.7f,0.3f);
-    weapon->SetAttackStatus(BIGSWORD_UP, 1, 30, 0.2f, 0.8f);
     weapon->SetAttackStatus(BIGSWORD_COM1_01, 1, 15, 0.8f, 0.2f, 1.5f);
-    weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
-    weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f, 2.0f);
     weapon->SetAttackStatus(BIGSWORD_DASH, 1, 100, 0.9f, 0.1f);
-    //空中攻撃
-    {
-        weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 25, 0.0f, 1.0f, 1.5f, ATTACK_SPECIAL_TYPE::JUMP_START | ATTACK_SPECIAL_TYPE::UNSTOP);
-        weapon->SetAttackStatus(JUMP_ATTACK_01, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
-        weapon->SetAttackStatus(JUMP_ATTACK_02, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
-        weapon->SetAttackStatus(JUMP_ATTACK_03, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
-    }
+    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 25, 0.0f, 1.0f, 1.5f, ATTACK_SPECIAL_TYPE::JUMP_START | ATTACK_SPECIAL_TYPE::UNSTOP);
+    weapon->SetAttackStatus(JUMP_ATTACK_01, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    weapon->SetAttackStatus(JUMP_ATTACK_DOWN_DO, 1, 1, 0.0f, -1.0f);
+
+    //CandyCircle
+    weapon = GetGameObject()->GetChildFind("CandyCircle")->GetComponent<WeaponCom>();
+    weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
+    weapon->SetAttackStatus(BIGSWORD_COM2_02, 1, 10, 1.0f, 0.0f);
+    weapon->SetAttackStatus(JUMP_ATTACK_02, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+
+    //CandyStick
+    weapon = GetGameObject()->GetChildFind("CandyStick")->GetComponent<WeaponCom>();
+    weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f, 2.0f);
+    weapon->SetAttackStatus(JUMP_ATTACK_03, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
 
     std::shared_ptr<PlayerCom> myCom = GetGameObject()->GetComponent<PlayerCom>();
     //攻撃管理を初期化
@@ -246,7 +250,7 @@ void PlayerCom::AnimationInitialize()
         //jumpFall
         animator->AddAnimatorTransition(JUMP_FALL, false, 1.0f);
         animator->SetTriggerTransition(JUMP_FALL, "jumpFall");
-        animator->AddAnimatorTransition(JUMP_FALL, IDEL_2);
+        animator->AddAnimatorTransition(JUMP_FALL, IDEL_2, false, 0.5f);
         animator->SetTriggerTransition(JUMP_FALL, IDEL_2, "idle");
         animator->SetLoopAnimation(JUMP_FALL, true);
 
@@ -270,7 +274,7 @@ void PlayerCom::AnimationInitialize()
             //front
             animator->AddAnimatorTransition(DODGE_FRONT);
             animator->SetTriggerTransition(DODGE_FRONT, "justFront");
-            animator->AddAnimatorTransition(DODGE_FRONT, IDEL_2, true);
+            animator->AddAnimatorTransition(DODGE_FRONT, IDEL_2, true,0.5f);
             //left
             animator->AddAnimatorTransition(DODGE_LEFT);
             animator->SetTriggerTransition(DODGE_LEFT, "justLeft");

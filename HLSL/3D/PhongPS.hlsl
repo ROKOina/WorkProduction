@@ -72,5 +72,5 @@ float4 main(VS_OUT pin) : SV_TARGET
 
     float4 color = diffuseColor;	//アルファ値用
     color.rgb = diffuseColor.rgb * (ambient + directionalDiffuse) * materialColor.rgb;
-    return color;
+    return float4(color.xyz, materialColor.a);
 }

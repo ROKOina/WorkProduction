@@ -2,7 +2,7 @@
 
 StructuredBuffer<particle> particleBuffer : register(t9);
 
-float4 rotato(float3 angle,float4 position,float2 scale,float3 corner)
+float4 rotate(float3 angle,float4 position,float2 scale,float3 corner)
 {
     
     angle.x = radians(angle.x);
@@ -43,7 +43,7 @@ float4 rotato(float3 angle,float4 position,float2 scale,float3 corner)
     
     half4x4 Rota = mul(rotateMatrixZ, mul(rotateMatrixY, rotateMatrixX));
     
-    cornerPos = mul(float4(corner.xyz, 1), mul(scaleMatrix,Rota));
+    cornerPos = mul(float4(corner.xyz, 1), mul(Rota,scaleMatrix));
 
     
     //cornerPos = mul(float4(corner.xyz, 1), rotateMatrixX);
@@ -77,10 +77,11 @@ void main(point VS_OUT input[1] : SV_POSITION, inout TriangleStream<GS_OUT> outp
     particle p = particleBuffer[input[0].vertex_id];
 
     //const float aspectRatio = 1280.0 / 720.0;
+    //const float aspectRatio = 1.0f; //(1920 * 0.8f) / (1080 * 0.8f);
     const float aspectRatio = (1920 * 0.8f) / (1080 * 0.8f);
     
     //サイズ算出
-    float2 particleScale = float2(p.size.x, p.size.y * aspectRatio);
+    float2 particleScale = float2(p.size.x, p.size.x * aspectRatio);
 
     //エミッションが発生してない場合
     if (p.emmitterFlag == 0)
@@ -96,17 +97,30 @@ void main(point VS_OUT input[1] : SV_POSITION, inout TriangleStream<GS_OUT> outp
         //エミッションが発生していないか、ワールド基準の場合
         if (p.emmitterFlag == 0 || isWorld == 0)
         {
-		// Transform to clip space
-            element.position = mul(float4(p.position, 1), mul(modelMat, viewProjection));
+  //          element.position = rotato(p.angle, float4(p.position, 1), particleScale, corners[vertexIndex]);
 
+		//// Transform to clip space
+  //          float4x4 m = view;
+  //          m._41 = 0;
+  //          m._42 = 0;
+  //          m._43 = 0;
+  //          //m._41 =modelMat._41;
+  //          //m._42 = modelMat._42;
+  //          //m._43 = modelMat._43;
+  //          m = mul(m, modelMat);
+            
+            //element.position = mul(element.position, mul(m, viewProjection));
+            
+            element.position = mul(float4(p.position, 1), mul(modelMat, viewProjection));
             //element.position.xy += corners[vertexIndex].xy * particleScale;
-            element.position.xy = rotato(p.angle, element.position, particleScale, corners[vertexIndex]).xy;
+            element.position.xy = rotate(p.angle, element.position, particleScale, corners[vertexIndex]).xy;
+
         }
         else
         {
             element.position = mul(float4(p.position, 1), mul(p.saveModel, viewProjection));
             //element.position.xy += corners[vertexIndex].xy * particleScale;
-            element.position.xy = rotato(p.angle, element.position, particleScale, corners[vertexIndex]).xy;
+            element.position.xy = rotate(p.angle, element.position, particleScale, corners[vertexIndex]).xy;
         }
         
         element.color = p.color;

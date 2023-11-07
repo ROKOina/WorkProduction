@@ -154,7 +154,10 @@ void UnityChanToonShader::Draw(ID3D11DeviceContext* dc, const Model* model)
             for (const ModelResource::Subset& subset : mesh.subsets)
             {
                 CbSubset cbSubset;
-                cbSubset.materialColor = subset.material->color;
+                cbSubset.materialColor.x = subset.material->color.x* model->GetMaterialColor().x;
+                cbSubset.materialColor.y = subset.material->color.y* model->GetMaterialColor().y;
+                cbSubset.materialColor.z = subset.material->color.z* model->GetMaterialColor().z;
+                cbSubset.materialColor.w = subset.material->color.w* model->GetMaterialColor().w;
 
 
                 //“§–¾•`‰æ‚È‚çŒã‰ñ‚µ‚É‚·‚é

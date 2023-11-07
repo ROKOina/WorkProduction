@@ -51,6 +51,7 @@ void SceneGame::Initialize()
 		const char* filename = "Data/Model/stages/yuka/cookie.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
+		r->GetModel()->SetMaterialColor({ 0.82f, 1.19f, 0.15f, 1 });
 		r->SetShaderID(SHADER_ID::UnityChanToon);
 	}
 	//壁
@@ -131,7 +132,7 @@ void SceneGame::Initialize()
 			justCol->SetJudgeTag(COLLIDER_TAG::Player);
 			justCol->SetSize({ 1.3f,1,1.3f });
 
-			justAttack->transform_->SetLocalPosition({ -1.569f ,0,95.493f });
+			justAttack->transform_->SetLocalPosition({ -1.569f ,0 ,95.493f });
 		}
 
 		//押し出し用当たり判定
@@ -165,8 +166,10 @@ void SceneGame::Initialize()
 
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(sword->GetParent());
+			weapon->SetNodeParent(sword->GetParent());
 			weapon->SetNodeName("RightHand");
 			weapon->SetColliderUpDown({ 1.36f,0 });
+			weapon->SetIsForeverUse();
 		}
 	}
 
@@ -303,7 +306,7 @@ void SceneGame::Initialize()
 			attackAssistCol->SetRadius(10);
 		}
 
-		//剣("RightHandMiddle2")
+		//剣(Candy)
 		{
 			std::shared_ptr<GameObject> sword = obj->AddChildObject();
 			sword->SetName("Candy");
@@ -315,6 +318,42 @@ void SceneGame::Initialize()
 			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
 			r->LoadModel(filename);
 			r->SetShaderID(SHADER_ID::UnityChanToon);
+			r->SetEnabled(false);
+
+			std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+			attackCol->SetRadius(0.19f);
+			attackCol->SetEnabled(false);
+
+			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
+			weapon->SetObject(sword->GetParent());
+			weapon->SetNodeParent(sword->GetParent());
+			weapon->SetNodeName("RightHandMiddle2");
+			weapon->SetColliderUpDown({ 2,0 });
+
+			//std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
+			//trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
+
+			{
+				//パーティクルを子に
+				std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::SWORD_SWEETS, { 0,0,0 }, sword);
+				particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
+			}
+
+		}
+		//剣(CandyCircle)
+		{
+			std::shared_ptr<GameObject> sword = obj->AddChildObject();
+			sword->SetName("CandyCircle");
+			sword->transform_->SetEulerRotation(DirectX::XMFLOAT3(-63, 0, 0));
+			sword->transform_->SetScale(DirectX::XMFLOAT3(0.2f, 0.2f, 0.2f));
+
+			const char* filename = "Data/Model/Swords/CandyCircle/candyCircle.mdl";
+			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
+			r->LoadModel(filename);
+			r->SetShaderID(SHADER_ID::UnityChanToon);
+			r->SetEnabled(false);
 
 			std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
 			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
@@ -323,25 +362,46 @@ void SceneGame::Initialize()
 
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(sword->GetParent());
+			weapon->SetNodeParent(sword->GetParent());
 			weapon->SetNodeName("RightHandMiddle2");
 			weapon->SetColliderUpDown({ 2,0 });
 
-			std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
-			trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
+			{
+				//パーティクルを子に
+				std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::SWORD_SWEETS, { 0,0,0 }, sword);
+				particle->transform_->SetScale(DirectX::XMFLOAT3(10, 10, 10));
+				particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
+			}
+		}
+		//剣(CandyStick)
+		{
+			std::shared_ptr<GameObject> sword = obj->AddChildObject();
+			sword->SetName("CandyStick");
+			sword->transform_->SetEulerRotation(DirectX::XMFLOAT3(-63, 0, 0));
+
+			const char* filename = "Data/Model/Swords/CandyStick/candyStick.mdl";
+			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
+			r->LoadModel(filename);
+			r->SetShaderID(SHADER_ID::UnityChanToon);
+			r->SetEnabled(false);
+
+			std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+			attackCol->SetRadius(0.19f);
+
+			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
+			weapon->SetObject(sword->GetParent());
+			weapon->SetNodeParent(sword->GetParent());
+			weapon->SetNodeName("RightHandMiddle2");
+			weapon->SetColliderUpDown({ 2,0 });
 
 			{
-				std::shared_ptr<GameObject> p = sword->AddChildObject();
-				p->SetName("Particle");
-
-				std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(1000);
-				c->SetSweetsParticle(true);	//お菓子用
-
-				c->Load("Data/Effect/para/SwordOkasi.ipff");
-				//c->LoadTexture("Data/Sprite/sweetsParticle.png");
-
-				p->AddComponent<SphereColliderCom>();
+				//パーティクルを子に
+				std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::SWORD_SWEETS, { 0,0,0 }, sword);
+				particle->transform_->SetScale(DirectX::XMFLOAT3(2, 2, 2));
+				particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
 			}
-
 		}
 
 		//ジャスト回避用プレイヤー
@@ -384,21 +444,26 @@ void SceneGame::Initialize()
 	}
 
 	//particle
-	for(int i=0;i<1;++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
-		p->SetName("Particle");
+		std::string n = "Particle" + std::to_string(i);
+		p->SetName(n.c_str());
 		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
 
 		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(1000);
-		c->SetSweetsParticle(true);	//お菓子用
+		//c->SetSweetsParticle(true);	//お菓子用
 
-		c->LoadTexture("Data/Sprite/sweetsParticle.png");
+		//c->LoadTexture("./Data/Sprite/sweetsParticle.png");
+		
 		//c->LoadTexture("Data/Sprite/default_eff.png");
 		//c->LoadTexture("Data/Sprite/smoke_pop.png");
 		//c->Load("Data/Effect/para/honoo.ipff");
 
-		p->AddComponent<SphereColliderCom>();
+		//p->AddComponent<SphereColliderCom>();
+
+		//std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::COMBO_1);
+
 
 		//{
 		//	std::shared_ptr<GameObject> pChild = p->AddChildObject();
@@ -407,6 +472,26 @@ void SceneGame::Initialize()
 		//	std::shared_ptr<ParticleSystemCom> c1 = pChild->AddComponent<ParticleSystemCom>(10000);
 		//	c1->LoadTexture("Data/Sprite/smoke_pop.png");
 		//}
+
+
+		//	//攻撃オブジェ
+		//{
+		//	//std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		//	std::shared_ptr<GameObject> obj = particle->AddChildObject();
+		//	obj->SetName("attack");
+
+		//	std::shared_ptr<SphereColliderCom> attackCol = obj->AddComponent<SphereColliderCom>();
+		//	attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+		//	attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+		//	attackCol->SetRadius(2.3f);
+
+		//	std::shared_ptr<WeaponCom> weapon = obj->AddComponent<WeaponCom>();
+		//	weapon->SetObject(GameObjectManager::Instance().Find("pico"));
+		//	weapon->SetNodeParent(particle);
+		//	weapon->SetIsForeverUse();
+		//	weapon->SetAttackDefaultStatus(1, 0);
+		//}
+
 	}
 
 #endif

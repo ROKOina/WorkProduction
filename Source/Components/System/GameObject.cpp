@@ -565,7 +565,10 @@ void GameObjectManager::Render3D()
 
 	//シェーダーIDが変更された時に呼ぶ
 	if (isChangeShaderID_)
+	{
 		SortRenderObject();
+		isChangeShaderID_ = false;
+	}
 
 	// 描画
 	int oldShaderID = renderSortObject_[0].lock()->GetShaderID();	//違うシェーダーを使用するため、古いIDを保存

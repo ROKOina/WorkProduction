@@ -29,9 +29,9 @@ struct VelocityLifeTime
 struct ScaleLifeTime
 {
     float keyTime;
-    float3 sDummy;
-    float4 value;
-    float4 curvePower;
+    float value;
+    float curvePower;
+    float sDummy;
 };
 
 #define colorKeyCount 5
@@ -64,7 +64,6 @@ cbuffer PARTICLE_CONSTANTS : register(b9)
     float4 startAngleRand;
     
     float4 startSize;
-    float4 startSizeRand;
     
     float startSpeed;
     
@@ -138,14 +137,14 @@ struct particle
     float3 startAngle;
     float3 randAngle;
     
-    float3 size;
-    float3 startSize;
-    float3 randSizeCurve;
+    float size;
+    float startSize;
+    float randSizeCurve;
 
     float3 velocity;
     float age;
     float lifeTime;
-    int state;
+    int startFlag;
     int emmitterFlag;
     
     float2 uvSize;

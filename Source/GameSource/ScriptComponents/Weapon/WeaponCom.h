@@ -58,8 +58,13 @@ public:
 
     //WeaponComクラス
 public:
+    //武器コンポーネント常時使用フラグ
+    void SetIsForeverUse() { isForeverUse_ = true; }
+
     //オブジェクトをセット
     void SetObject(std::shared_ptr<GameObject> obj) { parentObject_ = obj; }
+    //ノードのオブジェクト設定
+    void SetNodeParent(std::shared_ptr<GameObject> obj) { nodeParent_ = obj; }
     //名前をセット
     void SetNodeName(const char* name) { nodeName_ = name; }
 
@@ -80,6 +85,8 @@ public:
     };
     //アニメーションとステータスを紐づける
     void SetAttackStatus(int animIndex, int damage, float impactPower, float front = 1, float up = 0, float animSpeed = 1, ATTACK_SPECIAL_TYPE specialAttack = ATTACK_SPECIAL_TYPE::NORMAL);
+    //デフォルトステータスを紐づける
+    void SetAttackDefaultStatus(int damage, float impactPower, float front = 1, float up = 0, float animSpeed = 1, ATTACK_SPECIAL_TYPE specialAttack = ATTACK_SPECIAL_TYPE::NORMAL);
 
     //ヒット確認
     bool GetOnHit() { return onHit_; }
@@ -94,10 +101,30 @@ public:
     }
 
 private:
+
+    //コリジョンで処理を変える
+    void CollisionWeaponAttack();
+
+    //親子関係更新
+    void ParentSetting();
+
+    //攻撃処理
+    void AttackProcess(std::shared_ptr<GameObject> damageObj, bool useAnim = true, float invincibleTime = -1.0f);
+
     //アニメイベント名から当たり判定を付けるか判断("AutoCollision"から始まるイベントを自動で取得)
     bool CollsionFromEventJudge();
 
+    //武器出現演出
+    void DirectionStart(float elapsedTime);
+    //武器終了演出
+    void DirectionEnd(float elapsedTime);
+
 private:
+    //武器コンポーネント使用時だけONにするか
+    bool isForeverUse_ = false;
+    //武器使用時
+    bool isWeaponUse = false;
+
     //攻撃のヒット確認
     bool onHit_ = false;
 
@@ -111,13 +138,23 @@ private:
     bool oldIsAnim_ = false;
     int oldAnimIndex = -1;
 
+    //演出フラグ
+    bool isDirectionStart_ = true; //武器を出すとき
+    bool isDirectionEnd_ = false;   //武器をしまうとき
+    int directionState_ = -1;
+
     //武器の当たり判定調整({up,down})
     DirectX::XMFLOAT2 colliderUpDown_ = { 0,0 };
 
-    //武器の親になるオブジェクト
+    //武器を使うオブジェクト（アニメーション関係）
     std::weak_ptr<GameObject> parentObject_;
-    //武器の子にさせたいノードの名前
+    //武器のノードの親(行列関係)
+    std::weak_ptr<GameObject> nodeParent_;
+    //武器の子にさせたいノードの名前(ない場合nodeParent_の行列を使う)
     std::string nodeName_;
+
+    //アニメーション使用しないときに使用する
+    AttackStatus defaultStatus_;
 
     //攻撃時のステータス（int:アニメーションIndex）
     std::map<int, AttackStatus> attackStatus_;

@@ -7,6 +7,8 @@
 #include "Dialog.h"
 #include "Logger.h"
 #include <fstream>
+#include <filesystem>
+#include <shlwapi.h>
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
@@ -257,6 +259,8 @@ void ParticleSystemCom::Start()
 // 更新処理
 void ParticleSystemCom::Update(float elapsedTime)
 {
+	float worldElapsedTime = Graphics::Instance().GetWorldSpeed() * elapsedTime;
+
 	//リスタート
 	if (isRestart_)
 	{
@@ -266,9 +270,9 @@ void ParticleSystemCom::Update(float elapsedTime)
 	}
 
 	//削除判定
-	if (!particleData_.particleData.isRoop)
+	if (!particleData_.particleData.isRoop && isAutoDeleteFlag_)
 	{
-		lifeLimit_ += elapsedTime;
+		lifeLimit_ += worldElapsedTime;
 	}
 	else
 	{
@@ -280,8 +284,8 @@ void ParticleSystemCom::Update(float elapsedTime)
 
 	dc->CSSetUnorderedAccessViews(0, 1, particleUAV_.GetAddressOf(), NULL);
 
-	particleData_.particleData.time += elapsedTime;
-	particleData_.particleData.elapsedTime = elapsedTime;
+	particleData_.particleData.time += worldElapsedTime;
+	particleData_.particleData.elapsedTime = worldElapsedTime;
 	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_.particleData, 0, 0);
 	dc->CSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
 
@@ -313,6 +317,55 @@ void ParticleSystemCom::OnGUI()
 		{
 			LoadFromFileParticle();
 		}
+
+		Graphics& graphics = Graphics::Instance();
+		ID3D11Device* device = graphics.GetDevice();
+		Dx11StateLib* dx11State = graphics.GetDx11State().get();
+
+		//テクスチャロード
+		char textureFile[256];
+		ZeroMemory(textureFile, sizeof(textureFile));
+		::strncpy_s(textureFile, sizeof(textureFile), particleData_.particleTexture.c_str(), sizeof(textureFile));
+		if (ImGui::Button("..."))
+		{
+			const char* filter = "Texture Files(*.dds;*.png;*.tga;*.jpg;*.tif)\0*.dds;*.png;*.tga;*.jpg;*.tif;\0All Files(*.*)\0*.*;\0\0";
+			DialogResult result = Dialog::OpenFileName(textureFile, sizeof(textureFile), filter, nullptr, graphics.GetHwnd());
+			if (result == DialogResult::OK)
+			{
+				std::filesystem::path path = std::filesystem::current_path();
+				path.append("Data");
+
+				char drive[32], dir[256], dirname[256];
+				::_splitpath_s(path.string().c_str(), drive, sizeof(drive), dir, sizeof(dir), nullptr, 0, nullptr, 0);
+				::_makepath_s(dirname, sizeof(dirname), drive, dir, nullptr, nullptr);
+				dirname[strlen(dirname) - 1] = '\0';
+				char relativeTextureFile[MAX_PATH];
+				PathRelativePathToA(relativeTextureFile, dirname, FILE_ATTRIBUTE_DIRECTORY, textureFile, FILE_ATTRIBUTE_ARCHIVE);
+
+				// 読み込み
+				particleData_.particleTexture = relativeTextureFile;
+				D3D11_TEXTURE2D_DESC texture2d_desc{};
+				if (particleSprite_)
+					particleSprite_.Get()->Release();	//解放
+				dx11State->load_texture_from_file(device, particleData_.particleTexture.c_str(), particleSprite_.GetAddressOf(), &texture2d_desc);
+			}
+		}
+		ImGui::SameLine();
+
+		::strncpy_s(textureFile, sizeof(textureFile), particleData_.particleTexture.c_str(), sizeof(textureFile));
+		if (ImGui::InputText("texture", textureFile, sizeof(textureFile), ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			particleData_.particleTexture = textureFile;
+
+			char drive[32], dir[256], fullPath[256];
+			::_splitpath_s(textureFile, drive, sizeof(drive), dir, sizeof(dir), nullptr, 0, nullptr, 0);
+			::_makepath_s(fullPath, sizeof(fullPath), drive, dir, textureFile, nullptr);
+			D3D11_TEXTURE2D_DESC texture2d_desc{};
+			if (particleSprite_)
+				particleSprite_.Get()->Release();	//解放
+			dx11State->load_texture_from_file(device, particleData_.particleTexture.c_str(), particleSprite_.GetAddressOf(), &texture2d_desc);
+		}
+
 		ImGui::TreePop();
 	}
 
@@ -348,19 +401,19 @@ void ParticleSystemCom::OnGUI()
 	//サイズ
 	{
 		bool isRan = false;
-		if (particleData_.particleData.startSizeRand.w > 0.01f)isRan = true;
+		if (particleData_.particleData.startSize.w > 0.01f)isRan = true;
 		if (ImGui::Checkbox("ranSize", &isRan))
 		{
 			if (!isRan)
-				particleData_.particleData.startSizeRand.w = 0;
+				particleData_.particleData.startSize.w = 0;
 			else
-				particleData_.particleData.startSizeRand.w = 1;
+				particleData_.particleData.startSize.w = 1;
 		}
 
-		ImGui::DragFloat2("startSize", &particleData_.particleData.startSize.x, 0.01f, 0.01f, 100);
+		ImGui::DragFloat("startSize", &particleData_.particleData.startSize.x, 0.01f, 0.01f, 100);
 		if (isRan)
 		{
-			ImGui::DragFloat("startSizeRand", &particleData_.particleData.startSizeRand.x, 0.01f, 0.01f, 100);
+			ImGui::DragFloat("startSizeRand", &particleData_.particleData.startSize.y, 0.01f, 0.01f, 100);
 		}
 	}
 
@@ -474,8 +527,8 @@ void ParticleSystemCom::OnGUI()
 						}
 					}
 
-					ImGui::DragFloat2("velue", &particleData_.particleData.scaleLifeTime[i].value.x, 0.1f, 0, 100);
-					ImGui::DragFloat2("curvePower", &particleData_.particleData.scaleLifeTime[i].curvePower.x, 0.1f);
+					ImGui::DragFloat("velue", &particleData_.particleData.scaleLifeTime[i].value, 0.1f, 0, 100);
+					ImGui::DragFloat("curvePower", &particleData_.particleData.scaleLifeTime[i].curvePower, 0.1f);
 
 					//キー削除
 					if (ImGui::Button("Delete"))
@@ -545,8 +598,8 @@ void ParticleSystemCom::OnGUI()
 						}
 					}
 
-					ImGui::DragFloat2("velue", &particleData_.particleData.scaleLifeTimeRand[i].value.x, 0.1f, 0, 100);
-					ImGui::DragFloat2("curvePower", &particleData_.particleData.scaleLifeTimeRand[i].curvePower.x, 0.1f);
+					ImGui::DragFloat("velue", &particleData_.particleData.scaleLifeTimeRand[i].value, 0.1f, 0, 100);
+					ImGui::DragFloat("curvePower", &particleData_.particleData.scaleLifeTimeRand[i].curvePower, 0.1f);
 
 					//キー削除
 					if (ImGui::Button("Delete"))
@@ -805,8 +858,8 @@ void ParticleSystemCom::DeleteScaleKey(int id, ScaleLifeTime(&scaleLife)[scaleKe
 {
 	//削除
 	scaleLife[id].keyTime = -1;
-	scaleLife[id].value = { 1, 1, 1, 1 };
-	scaleLife[id].curvePower = { 0, 0, 0, 0 };
+	scaleLife[id].value = 1;
+	scaleLife[id].curvePower = 1;
 
 	//配列ずらす
 	for (int i = id; i < scaleKeyCount - 1; ++i)
@@ -815,8 +868,8 @@ void ParticleSystemCom::DeleteScaleKey(int id, ScaleLifeTime(&scaleLife)[scaleKe
 		if (scaleLife[i + 1].keyTime < 0)
 		{
 			scaleLife[i].keyTime = -1;
-			scaleLife[i].value = { 1, 1, 1, 1 };
-			scaleLife[i].curvePower = { 0, 0, 0, 0 };
+			scaleLife[i].value = 1;
+			scaleLife[i].curvePower = 1;
 		
 			break;
 		}
@@ -832,8 +885,8 @@ void ParticleSystemCom::DeleteScaleKey(int id, ScaleLifeTime(&scaleLife)[scaleKe
 		if (id == scaleKeyCount - 2)
 		{
 			scaleLife[i + 1].keyTime = -1;
-			scaleLife[i + 1].value = { 1, 1, 1, 1 };
-			scaleLife[i + 1].curvePower = { 0, 0, 0, 0 };
+			scaleLife[i + 1].value = 1;
+			scaleLife[i + 1].curvePower = 1;
 
 			break;
 		}
@@ -923,6 +976,9 @@ void ParticleSystemCom::LoadFromFileParticle()
 
 void ParticleSystemCom::LoadParticle(const char* filename)
 {
+	//ファイルネーム保存
+	ipffFilename_ = filename;
+
 	std::ifstream istream(filename, std::ios::binary);
 	if (istream.is_open())
 	{

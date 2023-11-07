@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+#include <DirectXMath.h>
 
 //前方宣言
 class PlayerCom;
@@ -11,7 +13,13 @@ class GameObject;
 class AttackPlayer
 {
 public:
-    AttackPlayer(std::shared_ptr<PlayerCom> player) : player_(player) {}
+    AttackPlayer(std::shared_ptr<PlayerCom> player) : player_(player) 
+    {
+        squareAttackMove_.resize(squareAttackKindCount_);
+        squareAttackMove_[0].directionTime = 2;
+        squareAttackMove_[1].directionTime = 2;
+        squareAttackMove_[2].directionTime = 2;
+    }
     ~AttackPlayer(){}
 
     void Update(float elapsedTime);
@@ -100,6 +108,12 @@ private:
     //敵の方向へ回転する ( true:完了 )
     bool ForcusEnemy(float elapsedTime, std::shared_ptr<GameObject> enemy, float rollSpeed);
 
+    //強攻撃動きと演出更新
+    void SquareAttackDirection(float elapsedTime);
+    //強攻撃出現
+    void SpawnCombo1();
+    void SpawnCombo2();
+
 public: 
     //ゲッター＆セッター
     const bool& GetIsNormalAttack()const { return isNormalAttack_; }
@@ -138,6 +152,26 @@ private:
     bool isNormalAttack_ = true;     //攻撃できるか
 
     bool isSquareAttack_ = true;
+
+    //強攻撃管理
+    struct SquareAttackMove
+    {
+        bool enable = false;    //起動中か
+        float directionTime;    //演出タイム
+        float directionTimer;
+        float colliderScale;
+        float colliderScaleEnd; //終了時の大きさ
+        struct ObjData
+        {
+            std::weak_ptr<GameObject> obj;
+            float speed;    //移動スピード
+            DirectX::XMFLOAT3 velocity; //移動方向
+        };
+        std::vector<ObjData> objData;
+    };
+    bool isSquareDirection_ = false;    //強攻撃を一度打つため、演出していたらtrue
+    int squareAttackKindCount_ = 3; //強攻撃の種類
+    std::vector<SquareAttackMove> squareAttackMove_;
 
     bool isJumpSquareInput_ = false;    //ジャンプ中□コンボ一回までにするため
 

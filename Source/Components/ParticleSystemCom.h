@@ -14,13 +14,13 @@ struct Particle
 	DirectX::XMFLOAT3 position{ 0, 0, 0 };
 	DirectX::XMFLOAT3 emitPosition{0, 0, 0};	//出現位置を保存
 
-	DirectX::XMFLOAT3 angle{ 0, 0, 0 };
-	DirectX::XMFLOAT3 startAngle{ 0, 0, 0 };
-	DirectX::XMFLOAT3 startAngleRand{0, 0, 0};
+	DirectX::XMFLOAT3 angle{ 0,0,0 };
+	DirectX::XMFLOAT3 startAngle{ 0,0,0 };
+	DirectX::XMFLOAT3 startAngleRand{ 0,0,0 };
 
-	DirectX::XMFLOAT3 size{ 1,1,1 };
-	DirectX::XMFLOAT3 startSize{ 1,1,1 };
-	DirectX::XMFLOAT3 randSizeCurve{0, 0, 0};	//乱数サイズカーブの補間値
+	float size{ 1 };
+	float startSize{ 1 };
+	float randSizeCurve{0};	//乱数サイズカーブの補間値
 
 	DirectX::XMFLOAT3 velocity{ 0, 0, 0 };
 	float age{};
@@ -55,8 +55,8 @@ class ParticleSystemCom : public Component
 {
 	//コンポーネントオーバーライド
 public:
-	ParticleSystemCom(int particleCount) 
-		: maxParticleCount_(particleCount) {}
+	ParticleSystemCom(int particleCount, bool isAutoDeleteFlag = true)
+		: maxParticleCount_(particleCount), isAutoDeleteFlag_(isAutoDeleteFlag) {  }
 	~ParticleSystemCom() {}
 
 	// 名前取得
@@ -130,10 +130,10 @@ public:
 	{
 		float keyTime = -1;
 
-		DirectX::XMFLOAT3 sDummy;
+		float value{1};
+		float curvePower{1};	//valueに行くまでのカーブ
 
-		DirectX::XMFLOAT4 value{1, 1, 1, 1};
-		DirectX::XMFLOAT4 curvePower{0, 0, 0, 0};	//valueに行くまでのカーブ
+		float sDummy;
 
 		template<class Archive>
 		void serialize(Archive& archive, int version);
@@ -147,7 +147,7 @@ public:
 		DirectX::XMFLOAT3 cDummy;
 
 		DirectX::XMFLOAT4 value{1, 1, 1, 1};
-		DirectX::XMFLOAT4 curvePower{0, 0, 0, 0};	//valueに行くまでのカーブ
+		DirectX::XMFLOAT4 curvePower{1, 1, 1, 1};	//valueに行くまでのカーブ
 
 		template<class Archive>
 		void serialize(Archive& archive, int version);
@@ -179,8 +179,8 @@ public:
 		DirectX::XMFLOAT4 startAngle{0, 0, 0, 0};
 		DirectX::XMFLOAT4 startAngleRand{0, 0, 0, 0};	//最後の値（ｗ）を1にすればランダムになる
 
-		DirectX::XMFLOAT4 startSize{ 0.5f, 0.5f, 0, 0 };	
-		DirectX::XMFLOAT4 startSizeRand{ 0, 0, 0, 0 };	//最後の値（ｗ）を1にすればランダムになる
+		//最後の値（ｗ）を1にすればランダムになる、Yをランダム値に
+		DirectX::XMFLOAT4 startSize{ 0.5f, 0, 0, 0};
 
 		float startSpeed{ 1 };
 
@@ -218,6 +218,12 @@ public:
 	};
 
 public:
+	//ループ
+	void SetRoop(bool roop) { particleData_.particleData.isRoop = roop; }
+	bool GetRoop() { return particleData_.particleData.isRoop; }
+
+	SaveParticleData& GetSaveParticleData() { return particleData_; }
+
 	//お菓子パーティクル設定にする
 	void SetSweetsParticle(bool enable);
 
@@ -250,12 +256,17 @@ private:
 	void LoadParticle(const char* filename);
 
 private:
+	//ループじゃない場合勝手に削除されるか
+	bool isAutoDeleteFlag_ = true;
+
 	const size_t maxParticleCount_;
 
 	SaveParticleData particleData_;
 	GameParticleData gameData_;
 
 	float lifeLimit_ = 0;	//ゲームオブジェクトを消すよう
+
+	std::string ipffFilename_;
 
 	//画像
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleSprite_;
