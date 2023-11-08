@@ -244,7 +244,7 @@ void SceneTitle::Update(float elapsedTime)
 }
 
 //•`‰æˆ—
-void SceneTitle::Render()
+void SceneTitle::Render(float elapsedTime)
 {
     if (isSceneEndFlag_)return;
     if (!frameDelayRender)return;

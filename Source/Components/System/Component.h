@@ -21,6 +21,9 @@ public:
 	// GUI描画
 	virtual void OnGUI() {}
 
+	//sprite描画用
+	virtual void Render2D(float elapsedTime){}
+
 	// ゲームオブジェクト設定
 	void SetGameObject(std::shared_ptr<GameObject> obj) { this->gameObject_ = obj; }
 

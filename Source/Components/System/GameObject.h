@@ -34,6 +34,9 @@ public:
 	// GUI表示
 	virtual void OnGUI();
 
+	//sprite描画用
+	virtual void Render2D(float elapsedTime);
+
 	// 名前の設定
 	void SetName(const char* name) { this->name_ = name; }
 
@@ -147,6 +150,9 @@ public:
 
 	// 描画
 	void Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection);
+
+	//sprite描画
+	void Render2D(float elapsedTime);
 
 	//ゲームオブジェクトを探す
 	std::shared_ptr<GameObject> Find(const char* name);

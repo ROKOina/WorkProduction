@@ -24,11 +24,11 @@ void SceneManager::Update(float elapsedTime)
 }
 
 //•`‰æˆ—
-void SceneManager::Render()
+void SceneManager::Render(float elapsedTime)
 {
     if (currentScene_ != nullptr)
     {
-        currentScene_->Render();
+        currentScene_->Render(elapsedTime);
     }
 }
 

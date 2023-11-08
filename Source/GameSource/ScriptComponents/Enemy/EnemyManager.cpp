@@ -20,7 +20,6 @@
 // XVˆ—
 void EnemyManager::Update(float elapsedTime)
 {
-    
 }
 
 //GUI
@@ -53,7 +52,7 @@ void EnemyManager::OnGui()
             std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
             obj->SetName("picolabo");
             obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-            obj->transform_->SetWorldPosition({ -10.0f * 2, 0, 5 });
+            obj->transform_->SetWorldPosition({ -10.0f , 0, 5 });
             obj->transform_->SetEulerRotation({ 0,180,0 });
 
             const char* filename = "Data/Model/picolabo/picolabo.mdl";
@@ -91,7 +90,7 @@ void EnemyManager::OnGui()
                 justCol->SetJudgeTag(COLLIDER_TAG::Player);
                 justCol->SetSize({ 1.3f,1,1.3f });
 
-                justAttack->transform_->SetLocalPosition({ -1.569f ,0,95.493f });
+                justAttack->transform_->SetLocalPosition({ -1.569f ,0 ,95.493f });
             }
 
             //‰Ÿ‚µo‚µ—p“–‚½‚è”»’è
@@ -125,14 +124,47 @@ void EnemyManager::OnGui()
 
                 std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
                 weapon->SetObject(sword->GetParent());
+                weapon->SetNodeParent(sword->GetParent());
                 weapon->SetNodeName("RightHand");
                 weapon->SetColliderUpDown({ 1.36f,0 });
+                weapon->SetIsForeverUse();
             }
 
         }
 
     }
+    ImGui::DragInt("A", &killCount_);
+    ImGui::DragFloat4("killCountSprite_", &killCountSprite_.x, 0.1f);
     ImGui::End();
+}
+
+void EnemyManager::Render2D(float elapsedTime)
+{
+    ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
+
+    killCount_ = GetEnemyCount();
+
+    //‚PŒ…
+    enemyCount_->Render(dc, killCountSprite_.x, killCountSprite_.y, enemyCount_->GetTextureWidth()*0.1f* killCountSprite_.z, enemyCount_->GetTextureHeight() * killCountSprite_.z
+        , 170* killCount_, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+        , 0, 1, 1, 1, 1);
+    //‚QŒ…
+    if (killCount_ >= 10)
+    {
+        int keta = killCount_ / 10 % 10;
+        enemyCount_->Render(dc, killCountSprite_.x - killCountSprite_.w, killCountSprite_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSprite_.z, enemyCount_->GetTextureHeight() * killCountSprite_.z
+            , 170 * keta, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+            , 0, 1, 1, 1, 1);
+    }
+    //‚RŒ…
+    if (killCount_ >= 100)
+    {
+        int keta = killCount_ / 100 % 10;
+        enemyCount_->Render(dc, killCountSprite_.x - killCountSprite_.w*2, killCountSprite_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSprite_.z, enemyCount_->GetTextureHeight() * killCountSprite_.z
+            , 170 * keta, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+            , 0, 1, 1, 1, 1);
+    }
+
 }
 
 // “G“o˜^

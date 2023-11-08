@@ -94,6 +94,9 @@ public:
     //攻撃アニメーション中
     bool GetIsAttackAnim() { return isAttackAnim_; }
 
+    //当たり判定特殊設定（△コンボ２用）
+    void SetCircleArc(bool enable) { circleArc_ = enable; }
+
     //当たり判定調整セット
     void SetColliderUpDown(DirectX::XMFLOAT2 upDown) {
         colliderUpDown_.x = upDown.x;
@@ -142,6 +145,9 @@ private:
     bool isDirectionStart_ = true; //武器を出すとき
     bool isDirectionEnd_ = false;   //武器をしまうとき
     int directionState_ = -1;
+
+    //当たり判定特定の設定（△コンボ２用）
+    bool circleArc_ = false;
 
     //武器の当たり判定調整({up,down})
     DirectX::XMFLOAT2 colliderUpDown_ = { 0,0 };

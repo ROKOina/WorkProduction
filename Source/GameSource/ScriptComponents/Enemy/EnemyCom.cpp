@@ -256,14 +256,16 @@ void EnemyCom::DamageProcess(float elapsedTime)
         if (attackType == ATTACK_SPECIAL_TYPE::JUMP_NOW)
             endTree = true;
 
-        //アクションノードがない場合
-        if (!activeNode_)
-            endTree = true;
 
         //被弾する行動か判断
         for (int& id : damageAnimAiTreeId_)
         {
+            //アクションノードがない場合
+            if (!activeNode_)
+                endTree = true;
+
             if (endTree)break;
+
 
             NodeBase* node = activeNode_.get();
             //被弾時にアニメーションするか確認
@@ -281,8 +283,12 @@ void EnemyCom::DamageProcess(float elapsedTime)
                 if (!node)break;
             }
 
+        }
+
             //遷移を終わらせてアニメーションする
-            if (endTree)
+        if (endTree)
+        {
+            if (activeNode_)
             {
                 activeNode_->EndActionSetStep();
                 activeNode_->Run(GetGameObject()->GetComponent<EnemyCom>(), elapsedTime);

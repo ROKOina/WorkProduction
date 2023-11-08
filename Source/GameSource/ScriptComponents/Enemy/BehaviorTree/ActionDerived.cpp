@@ -10,6 +10,7 @@
 #include "../EnemyManager.h"
 #include "../EnemyNearCom.h"
 #include "../EnemyFarCom.h"
+#include "../../CharacterStatusCom.h"
 
 #include "GameSource/Stage/PathSearch.h"
 
@@ -20,7 +21,7 @@ ActionBase::State IdleAction::Run(float elapsedTime)
 	{
 	case 0:
 	{
-		runTimer_ = 2;
+		runTimer_ = rand() % 200 * 0.01f;
 
 		step_++;
 	}
@@ -482,6 +483,9 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 		//アニメーター
 		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 		animator->SetTriggerOn("attack");
+		//攻撃を受けても移動しないように
+		owner_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetAttackNonMove(true);
+
 		step_++;
 		break;
 	}
@@ -544,6 +548,9 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 		{
 			//攻撃フラグを切る
 			owner_.lock()->SetIsAttackFlag(false);
+			owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsAttackIdleFlag(false);
+			owner_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetAttackNonMove(false);
+
 			step_ = 0;
 			// 攻撃成功を返す
 			return ActionBase::State::Complete;
@@ -556,6 +563,8 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 	{
 		//攻撃フラグを切る
 		owner_.lock()->SetIsAttackFlag(false);
+		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsAttackIdleFlag(false);
+		owner_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetAttackNonMove(false);
 
 		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
 		animator->SetIsStop(false);
@@ -570,5 +579,43 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 	}
 
 	// スキル中を返す
+	return ActionBase::State::Run;
+}
+
+ActionBase::State NearAttackIdleAction::Run(float elapsedTime)
+{
+	switch (step_)
+	{
+	case 0:
+	{
+		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsAttackIdleFlag(true);
+		runTimer_ = rand() % 200 * 0.01f;
+
+		step_++;
+	}
+	break;
+	case 1:
+		runTimer_ -= elapsedTime;
+
+		// 待機時間が過ぎた時
+		if (runTimer_ <= 0.0f)
+		{
+			step_ = 0;
+			return ActionBase::State::Complete;
+		}
+
+		break;
+
+		//強制終了
+	case  Action::END_STEP:
+	{
+		owner_.lock()->SetIsAttackFlag(false);
+		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsAttackIdleFlag(false);
+
+		step_ = 0;
+	}
+	break;
+
+	}
 	return ActionBase::State::Run;
 }

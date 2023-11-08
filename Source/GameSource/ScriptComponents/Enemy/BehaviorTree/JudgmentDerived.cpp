@@ -113,3 +113,13 @@ bool RoutePathJudgment::Judgment()
 
 	return false;
 }
+
+bool AttackIdleJudgment::Judgment()
+{
+	if (!owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsAttackIdleFlag())
+	{
+		return true;
+	}
+
+	return false;
+}

@@ -4,13 +4,18 @@
 #include <memory>
 #include "TelegramEnemy.h"
 
+#include "Graphics/Sprite/Sprite.h"
+
 class GameObject;
 
 //エネミーマネージャー
 class EnemyManager
 {
 private:
-	EnemyManager() {}
+	EnemyManager() 
+	{
+		enemyCount_ = std::make_unique<Sprite>("./Data/Sprite/suuzi.png");
+	}
 	~EnemyManager() {}
 
 public:
@@ -27,6 +32,9 @@ public:
 
 	//GUI
 	void OnGui();
+
+	//sprite描画
+	void Render2D(float elapsedTime);
 
 	//敵情報
 	enum class EnemyKind
@@ -121,4 +129,7 @@ private:
 
 	int currentIndex_ = 0;
 
+	std::unique_ptr<Sprite> enemyCount_;
+	int killCount_;
+	DirectX::XMFLOAT4 killCountSprite_ = { 762.2f,-1.2f,0.5f,70.0f }; //xy:pos z:size w:間隔
 };

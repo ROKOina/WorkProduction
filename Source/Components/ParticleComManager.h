@@ -26,11 +26,10 @@ public:
 	//どのパーティクルを出すか
 	enum EFFECT_ID
 	{
-		DOOM_SWEETS,
-		SITA_WAKU,
 		SWORD_SWEETS,
 		COMBO_1,
 		COMBO_2,
+		COMBO_3,
 
 		MAX_EFFECT,
 	};
@@ -57,11 +56,10 @@ private:
 
 	const InializeParticle iniParticle_[MAX_EFFECT] =
 	{
-		InializeParticle("Data/Effect/para/doomSweets.ipff", true, 1000, true),
-		InializeParticle("Data/Effect/para/sitaWaku.ipff"),
 		InializeParticle("Data/Effect/para/SwordOkasi.ipff", false, 1000, true),
 		InializeParticle("Data/Effect/para/combo1.ipff"),
 		InializeParticle("Data/Effect/para/combo2.ipff"),
+		InializeParticle("Data/Effect/para/combo3.ipff", true, 1500, true),
 	};
 
     std::vector<std::weak_ptr<GameObject>> particles_;

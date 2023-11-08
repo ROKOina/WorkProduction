@@ -71,7 +71,7 @@ void Framework::Render(float elapsedTime/*Elapsed seconds from last frame*/)
 
 
 	// シーン描画処理
-	SceneManager::Instance().Render();
+	SceneManager::Instance().Render(elapsedTime);
 
 	// IMGUIデモウインドウ描画（IMGUI機能テスト用）
 	//ImGui::ShowDemoWindow();

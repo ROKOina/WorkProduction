@@ -113,6 +113,7 @@ private:
     //強攻撃出現
     void SpawnCombo1();
     void SpawnCombo2();
+    void SpawnCombo3();
 
 public: 
     //ゲッター＆セッター

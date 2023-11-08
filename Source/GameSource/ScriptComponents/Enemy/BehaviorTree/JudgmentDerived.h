@@ -37,3 +37,12 @@ public:
 	// ”»’è
 	bool Judgment();
 };
+
+// AttackIdleNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class AttackIdleJudgment : public JudgmentBase
+{
+public:
+	AttackIdleJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
+	// ”»’è
+	bool Judgment();
+};

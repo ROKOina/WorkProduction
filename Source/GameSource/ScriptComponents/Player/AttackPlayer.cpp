@@ -249,10 +249,6 @@ void AttackPlayer::SquareInput()
 
     if (DoComboAttack())    //ÉRÉìÉ{éÛïtîªíË
     {
-        //âºÉGÉtÉFÉNÉg
-        ParticleComManager::Instance().SetEffect(ParticleComManager::DOOM_SWEETS
-            , player_.lock()->GetGameObject()->transform_->GetWorldPosition());
-
         std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
         //ãÛíÜçUåÇ
         if (!playerObj->GetComponent<MovementCom>()->OnGround())
@@ -352,7 +348,8 @@ void AttackPlayer::TriangleInput()
 
         //êÿÇËè„Ç∞çUåÇ
         if(player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::IDLE
-            || player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::MOVE)
+            || player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::MOVE
+            || player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
         {
             animator->ResetParameterList();
             animator->SetTriggerOn("triangleJump");
@@ -551,8 +548,17 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
             //ã≠çUåÇÇP
             if (animCom->GetCurrentAnimationEvent("AutoCollisionTriangleAttack01", DirectX::XMFLOAT3()))
             {
-                //SpawnCombo1();
+                SpawnCombo1();
+            }
+            //ã≠çUåÇÇQ
+            if (animCom->GetCurrentAnimationEvent("AutoCollisionTriangleAttack02", DirectX::XMFLOAT3()))
+            {
                 SpawnCombo2();
+            }
+            //ã≠çUåÇÇR
+            if (animCom->GetCurrentAnimationEvent("AutoCollisionTriangleAttack03", DirectX::XMFLOAT3()))
+            {
+                SpawnCombo3();
             }
         }
     }
@@ -864,9 +870,14 @@ std::shared_ptr<GameObject> AttackPlayer::AssistGetMediumEnemy()
 bool AttackPlayer::ApproachEnemy(std::shared_ptr<GameObject> enemy, float dist, float speed)
 {
     std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
-
-    DirectX::XMVECTOR P = DirectX::XMLoadFloat3(&playerObj->transform_->GetWorldPosition());
-    DirectX::XMVECTOR E = DirectX::XMLoadFloat3(&enemy->transform_->GetWorldPosition());
+    
+    //çÇÇ≥Çè¡Ç∑
+    DirectX::XMFLOAT3 pPos = playerObj->transform_->GetWorldPosition();
+    pPos.y = 0;
+    DirectX::XMVECTOR P = DirectX::XMLoadFloat3(&pPos);
+    DirectX::XMFLOAT3 ePos = enemy->transform_->GetWorldPosition();
+    ePos.y = 0;
+    DirectX::XMVECTOR E = DirectX::XMLoadFloat3(&ePos);
 
     DirectX::XMVECTOR PE = DirectX::XMVectorSubtract(E, P);
     //ãóó£Ç™èkÇ‹ÇÍÇŒtrue
@@ -880,7 +891,6 @@ bool AttackPlayer::ApproachEnemy(std::shared_ptr<GameObject> enemy, float dist, 
     PE = DirectX::XMVector3Normalize(PE);
     DirectX::XMFLOAT3 vec;
     DirectX::XMStoreFloat3(&vec, DirectX::XMVectorScale(PE, speed));
-    vec.y = 0;
     
     //ÉvÉåÉCÉÑÅ[à⁄ìÆ
     playerObj->GetComponent<MovementCom>()->AddNonMaxSpeedForce(vec);
@@ -1037,10 +1047,59 @@ void AttackPlayer::SpawnCombo2()
     //âÒì]äpìxéZèo
     DirectX::XMVECTOR PlayerFront = DirectX::XMLoadFloat3(&player->transform_->GetWorldFront());
     float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMVector3Normalize(PlayerFront), { 0,0,1 }));
-    float angle = ((dot * -1 + 1) / 2)*180;
+    float angle = ((dot * -1 + 1) / 2) * 180;
     if (0 < DirectX::XMVectorGetY(DirectX::XMVector3Cross(DirectX::XMVector3Normalize(PlayerFront), { 0,0,1 })))
         angle *= -1;
     particle->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, angle + -54, 0));
+
+    //éqÇ…ìñÇΩÇËîªíË
+    {
+        std::shared_ptr<GameObject> obj = particle->AddChildObject();
+        obj->SetName("attack");
+        obj->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 54, 0));
+
+        std::shared_ptr<SphereColliderCom> attackCol = obj->AddComponent<SphereColliderCom>();
+        attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+        attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+        attackCol->SetRadius(2.3f);
+
+        std::shared_ptr<WeaponCom> weapon = obj->AddComponent<WeaponCom>();
+        weapon->SetObject(GameObjectManager::Instance().Find("pico"));
+        weapon->SetNodeParent(particle);
+        weapon->SetIsForeverUse();
+        weapon->SetAttackDefaultStatus(1, 0);
+        weapon->SetCircleArc(true);
+
+    }
+
+    //ã≠çUåÇìÆÇ´èâä˙âª
+    {
+        squareAttackMove_[1].enable = true;
+        squareAttackMove_[1].directionTime = 1;
+        squareAttackMove_[1].directionTimer = squareAttackMove_[1].directionTime;
+        squareAttackMove_[1].colliderScale = 1;
+        squareAttackMove_[1].colliderScaleEnd = 10;
+        //â¡ë¨ÇéwíË
+        SquareAttackMove::ObjData oData;
+        oData.obj = particle;
+        oData.velocity = { 0,0,0 };
+        oData.speed = 0;
+        squareAttackMove_[1].objData.emplace_back(oData);
+    }
+}
+
+void AttackPlayer::SpawnCombo3()
+{
+    std::shared_ptr<GameObject> player = player_.lock()->GetGameObject();
+
+    //ã≠çUåÇî≠ìÆÉtÉâÉO
+    isSquareDirection_ = true;
+
+    //objê∂ê¨
+    std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::COMBO_3);
+    DirectX::XMFLOAT3 pos = player->transform_->GetWorldPosition();
+    pos.y += 0.5;
+    particle->transform_->SetWorldPosition(pos);
 
     //éqÇ…ìñÇΩÇËîªíË
     {
@@ -1057,21 +1116,22 @@ void AttackPlayer::SpawnCombo2()
         weapon->SetNodeParent(particle);
         weapon->SetIsForeverUse();
         weapon->SetAttackDefaultStatus(1, 0);
+
     }
 
     //ã≠çUåÇìÆÇ´èâä˙âª
     {
-        squareAttackMove_[1].enable = true;
-        squareAttackMove_[1].directionTime = 1;
-        squareAttackMove_[1].directionTimer = squareAttackMove_[1].directionTime;
-        squareAttackMove_[1].colliderScale = 3;
-        squareAttackMove_[1].colliderScaleEnd = 6;
+        squareAttackMove_[2].enable = true;
+        squareAttackMove_[2].directionTime = 1;
+        squareAttackMove_[2].directionTimer = squareAttackMove_[2].directionTime;
+        squareAttackMove_[2].colliderScale = 1;
+        squareAttackMove_[2].colliderScaleEnd = 10;
         //â¡ë¨ÇéwíË
         SquareAttackMove::ObjData oData;
         oData.obj = particle;
         oData.velocity = { 0,0,0 };
         oData.speed = 0;
-        squareAttackMove_[1].objData.emplace_back(oData);
+        squareAttackMove_[2].objData.emplace_back(oData);
     }
 }
 

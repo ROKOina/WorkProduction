@@ -96,6 +96,15 @@ void GameObject::OnGUI()
 	}
 }
 
+void GameObject::Render2D(float elapsedTime)
+{
+	// コンポーネント
+	for (std::shared_ptr<Component>& component : components_)
+	{
+		component->Render2D(elapsedTime);
+	}
+}
+
 //親子
 std::shared_ptr<GameObject> GameObject::AddChildObject()
 {
@@ -299,7 +308,8 @@ void GameObjectManager::Update(float elapsedTime)
 		//child解放
 		for (std::weak_ptr<GameObject> parent : parentObj)
 		{
-			parent.lock()->EraseExpiredChild();
+			if (!parent.expired())
+				parent.lock()->EraseExpiredChild();
 		}
 
 		//collider解放
@@ -386,6 +396,14 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 
 		// 詳細描画
 		DrawDetail();
+	}
+}
+
+void GameObjectManager::Render2D(float elapsedTime)
+{
+	for (std::shared_ptr<GameObject>& obj : updateGameObject_)
+	{
+		obj->Render2D(elapsedTime);
 	}
 }
 

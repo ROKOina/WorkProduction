@@ -31,6 +31,9 @@ public:
     //経路探索フラグ
     bool GetIsPathFlag() { return isPathFlag_; }
     void SetIsPathFlag(bool flag) { isPathFlag_ = flag; }
+    //攻撃前待機フラグ
+    bool GetIsAttackIdleFlag() { return isAttackIdle_; }
+    void SetIsAttackIdleFlag(bool flag) { isAttackIdle_ = flag; }
 
 private:
     //被弾時にアニメーションする時のAITREEを決める
@@ -49,4 +52,7 @@ private:
 
     //経路探索フラグ
     bool isPathFlag_ = false;
+
+    //攻撃前待機
+    bool isAttackIdle_ = false;
 };

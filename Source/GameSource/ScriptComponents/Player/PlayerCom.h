@@ -5,6 +5,8 @@
 #include "MovePlayer.h"
 #include "JustAvoidPlayer.h"
 
+#include "Graphics/Sprite/Sprite.h"
+
 //アニメーションリスト
 enum ANIMATION_PLAYER
 {
@@ -83,6 +85,9 @@ public:
     // GUI描画
     void OnGUI() override;
 
+    // sprite描画
+    void Render2D(float elapsedTime) override;
+
     //PlayerComクラス
 
 
@@ -130,4 +135,6 @@ private:
     std::shared_ptr<AttackPlayer> attackPlayer_;
     std::shared_ptr<MovePlayer> movePlayer_;
     std::shared_ptr<JustAvoidPlayer> justAvoidPlayer_;
+
+    std::unique_ptr<Sprite> sprite;
 };

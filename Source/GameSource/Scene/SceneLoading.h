@@ -21,7 +21,7 @@ public:
     void Update(float elapsedTime)override;
 
     //描画処理
-    void Render()override;
+    void Render(float elapsedTime)override;
 
 private:
     //ローディングスレッド

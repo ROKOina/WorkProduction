@@ -26,6 +26,16 @@ void WeaponCom::Update(float elapsedTime)
 
     //現在のアニメーションインデックス取得
     std::shared_ptr<AnimationCom> animCom = parentObject_.lock()->GetComponent<AnimationCom>();
+
+    //アニメーション速度変更していたら戻す
+    if (isAnimSetting)
+    {
+        //攻撃速度をいじる
+        std::shared_ptr<AnimatorCom> animator = parentObject_.lock()->GetComponent<AnimatorCom>();
+        animator->SetAnimationSpeedOffset(1);
+        isAnimSetting = false;
+    }
+
     //今のアニメーションが登録されているか確認
     auto it = attackStatus_.find(animCom->GetCurrentAnimationIndex());
     if (it == attackStatus_.end() && !isForeverUse_)    //登録されない時
@@ -165,6 +175,41 @@ void WeaponCom::CollisionWeaponAttack()
     {
         for (auto& coll : sphere->OnHitGameObject())
         {
+            //円を弧の判定にする
+            if (circleArc_)
+            {
+                float spOffset = 1.5f;
+                float spRad = sphere->GetRadius() - spOffset;
+                if (spRad > 0)
+                {
+                    DirectX::XMFLOAT3 collPos = coll.gameObject.lock()->transform_->GetWorldPosition();
+                    DirectX::XMFLOAT3 collOffPos = coll.gameObject.lock()->GetComponent<Collider>()->GetOffsetPosition();
+                    collPos = { collPos.x + collOffPos.x,collPos.y + collOffPos.y,collPos.z + collOffPos.z };
+                    DirectX::XMFLOAT3 spPos = sphere->GetGameObject()->transform_->GetWorldPosition();
+                    DirectX::XMFLOAT3 spOffPos = sphere->GetGameObject()->GetComponent<SphereColliderCom>()->GetOffsetPosition();
+                    spPos = { spPos.x + spOffPos.x,spPos.y + spOffPos.y,spPos.z + spOffPos.z };
+
+                    //距離求める
+                    DirectX::XMVECTOR SpCo= DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&collPos), DirectX::XMLoadFloat3(&spPos));
+                    float dist = DirectX::XMVectorGetX(DirectX::XMVector3Length(SpCo));
+                    float radius = spRad;
+
+                    //当たっていたらcontinue
+                    if (dist < radius)
+                    {
+                        continue;
+                    }
+
+                    //角度でcontinue
+                    DirectX::XMVECTOR SpFront = DirectX::XMLoadFloat3(&sphere->GetGameObject()->transform_->GetWorldFront());
+                    float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMVector3Normalize(SpCo), DirectX::XMVector3Normalize(SpFront)));
+                    if (dot < 54 / 90)
+                    {
+                        continue;
+                    }
+                }
+            }
+
             //攻撃処理
             AttackProcess(coll.gameObject.lock(), false, 0.2f);
         }
@@ -251,14 +296,14 @@ bool WeaponCom::CollsionFromEventJudge()
 {
     std::shared_ptr<AnimationCom> animCom = parentObject_.lock()->GetComponent<AnimationCom>();
 
-    //アニメーション速度変更していたら戻す
-    if (isAnimSetting)
-    {
-        //攻撃速度をいじる
-        std::shared_ptr<AnimatorCom> animator = parentObject_.lock()->GetComponent<AnimatorCom>();
-        animator->SetAnimationSpeedOffset(1);
-        isAnimSetting = false;
-    }
+    ////アニメーション速度変更していたら戻す
+    //if (isAnimSetting)
+    //{
+    //    //攻撃速度をいじる
+    //    std::shared_ptr<AnimatorCom> animator = parentObject_.lock()->GetComponent<AnimatorCom>();
+    //    animator->SetAnimationSpeedOffset(1);
+    //    isAnimSetting = false;
+    //}
 
     //今のアニメーションが登録されているか確認
     auto it = attackStatus_.find(animCom->GetCurrentAnimationIndex());

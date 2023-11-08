@@ -115,6 +115,6 @@ void CharacterStatusCom::OnDamage(std::shared_ptr<WeaponCom> weapon, int minasHP
     damageType_ = attackType;
     hp_ -= minasHP;
 
-    if (!isAttackNonMove_)  //UŒ‚‚É‚æ‚éˆÚ“®‚·‚é‚©”»’è
+    if (!isAttackNonMove_|| damageType_== ATTACK_SPECIAL_TYPE::UNSTOP)  //UŒ‚‚É‚æ‚éˆÚ“®‚·‚é‚©”»’è
         GetGameObject()->GetComponent<MovementCom>()->AddNonMaxSpeedForce(power);   //ˆÚ“®
 }

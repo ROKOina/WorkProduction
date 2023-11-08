@@ -22,7 +22,7 @@ public:
     virtual void Update(float elapsedTime) = 0;
 
     //•`‰æˆ—
-    virtual void Render() = 0;
+    virtual void Render(float elapsedTime) = 0;
 
     //€”õŠ®—¹‚µ‚Ä‚¢‚é‚©
     bool IsReady()const { return isReady_; }

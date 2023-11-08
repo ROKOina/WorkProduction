@@ -89,12 +89,14 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for(int i = 0;i < 1;++i)
+	for(int i = 0;i < 15;++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		obj->transform_->SetWorldPosition({ -10.0f+i*2, 0, 5 });
+		obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
+			0,  (rand() % (230 * 2) - 230) * 0.1f });
+		//obj->transform_->SetWorldPosition({ -10.0f+i*2, 0, 5 });
 		obj->transform_->SetEulerRotation({ 0,180,0 });
 
 		const char* filename = "Data/Model/picolabo/picolabo.mdl";
@@ -359,6 +361,7 @@ void SceneGame::Initialize()
 			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
 			attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
 			attackCol->SetRadius(0.19f);
+			attackCol->SetEnabled(false);
 
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(sword->GetParent());
@@ -389,6 +392,7 @@ void SceneGame::Initialize()
 			attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
 			attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
 			attackCol->SetRadius(0.19f);
+			attackCol->SetEnabled(false);
 
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(sword->GetParent());
@@ -444,7 +448,7 @@ void SceneGame::Initialize()
 	}
 
 	//particle
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 0; ++i)
 	{
 		std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
 		std::string n = "Particle" + std::to_string(i);
@@ -556,14 +560,14 @@ void SceneGame::Update(float elapsedTime)
 #if defined(StageEdit)
 
 #else
-	////1フレームは初期化のため待機
-	////終了処理
-	//if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_)	//敵の数0の時
-	//{
-	//	GameObjectManager::Instance().AllRemove();
-	//	SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
-	//	gameEndFlag_ = true;
-	//}
+	//1フレームは初期化のため待機
+	//終了処理
+	if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_)	//敵の数0の時
+	{
+		GameObjectManager::Instance().AllRemove();
+		SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
+		gameEndFlag_ = true;
+	}
 	//一回目通るときにスタートフラグをON
 	if (!gameStartFlag_)
 	{
@@ -588,7 +592,7 @@ void SceneGame::Update(float elapsedTime)
 }
 
 // 描画処理
-void SceneGame::Render()
+void SceneGame::Render(float elapsedTime)
 {
 	if (gameEndFlag_)return;
 	Graphics& graphics = Graphics::Instance();
@@ -699,6 +703,8 @@ void SceneGame::Render()
 
 	// 2Dスプライト描画
 	{
+		GameObjectManager::Instance().Render2D(elapsedTime);
+		EnemyManager::Instance().Render2D(elapsedTime);
 	}
 
 

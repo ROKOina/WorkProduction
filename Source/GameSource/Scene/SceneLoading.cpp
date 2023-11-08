@@ -47,7 +47,7 @@ void SceneLoading::Update(float elapsedTime)
 
 
 //•`‰æˆ—
-void SceneLoading::Render()
+void SceneLoading::Render(float elapsedTime)
 {
     Graphics& graphics = Graphics::Instance();
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();

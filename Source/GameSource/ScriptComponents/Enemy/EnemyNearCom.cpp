@@ -19,7 +19,7 @@ void EnemyNearCom::Start()
     EnemyManager::Instance().Register(GetGameObject(), EnemyManager::EnemyKind::NEAR_ENEMY);
 
     //ダメージアニメーションをするノードを登録
-    OnDamageAnimAI_TREE(AI_TREE::WANDER, AI_TREE::PURSUIT, AI_TREE::ROUTE/*, AI_TREE::NORMAL*/);
+    OnDamageAnimAI_TREE(AI_TREE::WANDER, AI_TREE::PURSUIT, AI_TREE::ROUTE, AI_TREE::ATTACK_IDLE/*, AI_TREE::NORMAL*/);
 
     //アニメーション初期化
     AnimationInitialize();
@@ -31,19 +31,20 @@ void EnemyNearCom::Start()
     aiTree_->AddNode(AI_TREE::NONE_AI, AI_TREE::ROOT, 0, BehaviorTree::SelectRule::Priority, nullptr, nullptr);
 
     //2層
-    //aiTree_->AddNode(AI_TREE::ROOT, AI_TREE::BATTLE, 1, BehaviorTree::SelectRule::Priority, std::make_shared<BattleJudgment>(myShared), nullptr);
+    aiTree_->AddNode(AI_TREE::ROOT, AI_TREE::BATTLE, 1, BehaviorTree::SelectRule::Priority, std::make_shared<BattleJudgment>(myShared), nullptr);
     aiTree_->AddNode(AI_TREE::ROOT, AI_TREE::SCOUT, 2, BehaviorTree::SelectRule::Priority, nullptr, nullptr);
 
     //3層
     aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::WANDER, 1, BehaviorTree::SelectRule::Non, std::make_shared<WanderJudgment>(myShared), std::make_shared<WanderAction>(myShared));
     aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::IDLE, 2, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<IdleAction>(myShared));
 
-    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ATTACK, 1, BehaviorTree::SelectRule::Random, std::make_shared<NearAttackJudgment>(myShared), nullptr);
+    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ATTACK, 1, BehaviorTree::SelectRule::Priority, std::make_shared<NearAttackJudgment>(myShared), nullptr);
     aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ROUTE, 2, BehaviorTree::SelectRule::Non, std::make_shared<RoutePathJudgment>(myShared), std::make_shared<RoutePathAction>(myShared));
     aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::PURSUIT, 3, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<PursuitAction>(myShared));
 
     //4層
-    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 1, BehaviorTree::SelectRule::Priority, std::make_shared<NearAttackJudgment>(myShared), std::make_shared<NearAttackAction>(myShared));
+    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::ATTACK_IDLE, 1, BehaviorTree::SelectRule::Non, std::make_shared<AttackIdleJudgment>(myShared), std::make_shared<NearAttackIdleAction>(myShared));
+    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 2, BehaviorTree::SelectRule::Non, std::make_shared<NearAttackJudgment>(myShared), std::make_shared<NearAttackAction>(myShared));
 
     SetRandomTargetPosition();
 
@@ -53,7 +54,8 @@ void EnemyNearCom::Start()
 
     //ステータス設定
     std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
-    status->SetHP(30000);
+    status->SetMaxHP(10);
+    status->SetHP(10);
 
 
     //移動パラメーター設定
@@ -190,7 +192,11 @@ void EnemyNearCom::NearFlagProcess()
 
     //接近して無かったら
     if (length > nearRadius)
+    {
         isNearFlag_ = false;
+        isAttackFlag_ = false;
+        isAttackIdle_ = false;
+    }
 }
 
 

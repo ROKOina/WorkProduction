@@ -52,3 +52,12 @@ public:
 private:
 	float timer_ = 0;
 };
+
+// í“¬‘Ò‹@s“®
+class NearAttackIdleAction : public ActionBase
+{
+public:
+	NearAttackIdleAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
+	ActionBase::State Run(float elapsedTime);
+};
+

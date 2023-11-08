@@ -53,6 +53,8 @@ public:
     bool GetAttackNonMove() { return isAttackNonMove_; }
 
     //hpŽæ“¾
+    void SetMaxHP(int hp) { maxHp_ = hp; }
+    int GetMaxHP() { return maxHp_; }
     void SetHP(int hp) { hp_ = hp; }
     int GetHP() { return hp_; }
 
@@ -78,6 +80,7 @@ private:
 
     //hp
     int hp_ = 100;
+    int maxHp_ = 100;
 
     //”í’eŽž‚É•Û‘¶‚·‚é
     std::weak_ptr<WeaponCom> saveWeapon_;

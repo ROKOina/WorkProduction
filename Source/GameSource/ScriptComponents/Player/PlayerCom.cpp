@@ -61,7 +61,10 @@ void PlayerCom::Start()
 
     //ステータス設定
     std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
+    status->SetMaxHP(10);
     status->SetHP(10);
+
+    sprite = std::make_unique<Sprite>("./Data/Sprite/rect.png");
 }
 
 // 更新処理
@@ -157,6 +160,23 @@ void PlayerCom::OnGUI()
     {
         movePlayer_->OnGui();
         ImGui::TreePop();
+    }
+}
+
+void PlayerCom::Render2D(float elapsedTime)
+{
+    ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
+    //hp
+    {
+        sprite->Render(dc, 10, 10, sprite->GetTextureWidth() * 1.8f, sprite->GetTextureHeight() * 0.2f
+            , 0, 0, sprite->GetTextureWidth(), sprite->GetTextureHeight()
+            , 0, 0.0f, 0.5f, 0.9f, 1);
+        std::shared_ptr<CharacterStatusCom> stats = GetGameObject()->GetComponent<CharacterStatusCom>();
+        float hpRatio = float(stats->GetHP()) / float(stats->GetMaxHP());
+        sprite->Render(dc, 22.5f, 22.5f, sprite->GetTextureWidth() * 1.7f * hpRatio
+            , sprite->GetTextureHeight() * 0.1f
+            , 0, 0, sprite->GetTextureWidth(), sprite->GetTextureHeight()
+            , 0, 1, 0.9f, 0, 1);
     }
 }
 

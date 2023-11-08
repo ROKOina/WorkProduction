@@ -51,6 +51,7 @@ enum class AI_TREE
     //BATTLE
     ATTACK,
     ROUTE,
+    ATTACK_IDLE,
     PURSUIT,
 
     //4‘w

@@ -24,7 +24,7 @@ public:
 	void Update(float elapsedTime)override;
 
 	// •`‰æˆ—
-	void Render()override;
+	void Render(float elapsedTime)override;
 
 
 private:

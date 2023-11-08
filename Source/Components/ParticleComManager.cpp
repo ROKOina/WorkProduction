@@ -62,7 +62,7 @@ void ParticleComManager::OnGui()
         //‰¼’Ç‰Á
         if (ImGui::Button("Add"))
         {
-            SetEffect(EFFECT_ID::DOOM_SWEETS
+            SetEffect(EFFECT_ID::COMBO_3
                 , GameObjectManager::Instance().Instance().Find("pico")->transform_->GetWorldPosition());
             //SetEffect(EFFECT_ID::DOOM_SWEETS, {0,0,0}
             //    ,GameObjectManager::Instance().Instance().Find("pico"));
