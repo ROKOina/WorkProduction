@@ -184,76 +184,19 @@ UINT align(UINT num, UINT alignment)
 	return (num + (alignment - 1)) & ~(alignment - 1);
 }
 
+ParticleSystemCom::ParticleSystemCom(int particleCount, bool isAutoDeleteFlag)
+	: maxParticleCount_(particleCount), isAutoDeleteFlag_(isAutoDeleteFlag)
+{
+	////パーティクル初期化
+	//future = Graphics::Instance().GetThreadPool()->submit([&]() { return Initialize(); });
+}
+
 // 開始処理
 void ParticleSystemCom::Start()
 {
-	int p[10];
-	for (int i = 0; i < 10; ++i)
-	{
-		p[i] = i * 256;
-	}
-
-	Graphics& graphics = Graphics::Instance();
-	ID3D11Device* device = graphics.GetDevice();
-
-	HRESULT hr{ S_OK };
-	D3D11_BUFFER_DESC buffer_desc{};
-	buffer_desc.ByteWidth = static_cast<UINT>(sizeof(Particle) * maxParticleCount_);
-	buffer_desc.StructureByteStride = sizeof(Particle);
-	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-	buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	buffer_desc.CPUAccessFlags = 0;
-	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	hr = device->CreateBuffer(&buffer_desc, NULL, particleBuffer_.GetAddressOf());
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC shader_resource_view_desc;
-	shader_resource_view_desc.Format = DXGI_FORMAT_UNKNOWN;
-	shader_resource_view_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-	shader_resource_view_desc.Buffer.ElementOffset = 0;
-	shader_resource_view_desc.Buffer.NumElements = static_cast<UINT>(maxParticleCount_);
-	hr = device->CreateShaderResourceView(particleBuffer_.Get(), &shader_resource_view_desc, particleSRV_.GetAddressOf());
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-	D3D11_UNORDERED_ACCESS_VIEW_DESC unordered_access_view_desc;
-	unordered_access_view_desc.Format = DXGI_FORMAT_UNKNOWN;
-	unordered_access_view_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	unordered_access_view_desc.Buffer.FirstElement = 0;
-	unordered_access_view_desc.Buffer.NumElements = static_cast<UINT>(maxParticleCount_);
-	unordered_access_view_desc.Buffer.Flags = 0;
-	hr = device->CreateUnorderedAccessView(particleBuffer_.Get(), &unordered_access_view_desc, particleUAV_.GetAddressOf());
-	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-	Dx11StateLib* dx11State = graphics.GetDx11State().get();
-
-	//画像読み込み
-	if (!particleSprite_)
-	{
-		D3D11_TEXTURE2D_DESC texture2d_desc{};
-		if (particleData_.particleTexture.size() > 0)
-		{
-			dx11State->load_texture_from_file(device, particleData_.particleTexture.c_str(), particleSprite_.GetAddressOf(), &texture2d_desc);
-		}
-		else
-		{
-			dx11State->load_texture_from_file(device, "Data/Sprite/color.png", particleSprite_.GetAddressOf(), &texture2d_desc);
-		}
-	}
-
-	//定数バッファ
-	dx11State->createConstantBuffer(device, sizeof(ParticleConstants), constantBuffer_.GetAddressOf());
-	dx11State->createConstantBuffer(device, sizeof(GameParticleData), gameBuffer_.GetAddressOf());
-	dx11State->createConstantBuffer(device, sizeof(ParticleScene), sceneBuffer_.GetAddressOf());
-
-	//シェーダー初期化
-	dx11State->createVsFromCso(device, "Shader\\ParticleVS.cso", particleVertex_.ReleaseAndGetAddressOf(), NULL, NULL, 0);
-	dx11State->createPsFromCso(device, "Shader\\ParticlePS.cso", particlePixel_.ReleaseAndGetAddressOf());
-	dx11State->createGsFromCso(device, "Shader\\ParticleGS.cso", particleGeometry_.ReleaseAndGetAddressOf());
-	dx11State->createCsFromCso(device, "Shader\\ParticleCS.cso", particleCompute_.ReleaseAndGetAddressOf());
-	dx11State->createCsFromCso(device, "Shader\\ParticleInitializeCS.cso", particleInitializerCompute_.ReleaseAndGetAddressOf());
-
 	//パーティクル初期化
 	Initialize();
+	//future.get();
 }
 
 // 更新処理
@@ -730,6 +673,64 @@ void ParticleSystemCom::Initialize()
 {
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+	ID3D11Device* device = graphics.GetDevice();
+
+	HRESULT hr{ S_OK };
+	D3D11_BUFFER_DESC buffer_desc{};
+	buffer_desc.ByteWidth = static_cast<UINT>(sizeof(Particle) * maxParticleCount_);
+	buffer_desc.StructureByteStride = sizeof(Particle);
+	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	buffer_desc.CPUAccessFlags = 0;
+	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	hr = device->CreateBuffer(&buffer_desc, NULL, particleBuffer_.GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC shader_resource_view_desc;
+	shader_resource_view_desc.Format = DXGI_FORMAT_UNKNOWN;
+	shader_resource_view_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	shader_resource_view_desc.Buffer.ElementOffset = 0;
+	shader_resource_view_desc.Buffer.NumElements = static_cast<UINT>(maxParticleCount_);
+	hr = device->CreateShaderResourceView(particleBuffer_.Get(), &shader_resource_view_desc, particleSRV_.GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC unordered_access_view_desc;
+	unordered_access_view_desc.Format = DXGI_FORMAT_UNKNOWN;
+	unordered_access_view_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	unordered_access_view_desc.Buffer.FirstElement = 0;
+	unordered_access_view_desc.Buffer.NumElements = static_cast<UINT>(maxParticleCount_);
+	unordered_access_view_desc.Buffer.Flags = 0;
+	hr = device->CreateUnorderedAccessView(particleBuffer_.Get(), &unordered_access_view_desc, particleUAV_.GetAddressOf());
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	Dx11StateLib* dx11State = graphics.GetDx11State().get();
+
+	//画像読み込み
+	if (!particleSprite_)
+	{
+		D3D11_TEXTURE2D_DESC texture2d_desc{};
+		if (particleData_.particleTexture.size() > 0)
+		{
+			dx11State->load_texture_from_file(device, particleData_.particleTexture.c_str(), particleSprite_.GetAddressOf(), &texture2d_desc);
+		}
+		else
+		{
+			dx11State->load_texture_from_file(device, "Data/Sprite/color.png", particleSprite_.GetAddressOf(), &texture2d_desc);
+		}
+	}
+
+	//定数バッファ
+	dx11State->createConstantBuffer(device, sizeof(ParticleConstants), constantBuffer_.GetAddressOf());
+	dx11State->createConstantBuffer(device, sizeof(GameParticleData), gameBuffer_.GetAddressOf());
+	dx11State->createConstantBuffer(device, sizeof(ParticleScene), sceneBuffer_.GetAddressOf());
+
+	//シェーダー初期化
+	dx11State->createVsFromCso(device, "Shader\\ParticleVS.cso", particleVertex_.ReleaseAndGetAddressOf(), NULL, NULL, 0);
+	dx11State->createPsFromCso(device, "Shader\\ParticlePS.cso", particlePixel_.ReleaseAndGetAddressOf());
+	dx11State->createGsFromCso(device, "Shader\\ParticleGS.cso", particleGeometry_.ReleaseAndGetAddressOf());
+	dx11State->createCsFromCso(device, "Shader\\ParticleCS.cso", particleCompute_.ReleaseAndGetAddressOf());
+	dx11State->createCsFromCso(device, "Shader\\ParticleInitializeCS.cso", particleInitializerCompute_.ReleaseAndGetAddressOf());
+
 
 	dc->CSSetUnorderedAccessViews(0, 1, particleUAV_.GetAddressOf(), NULL);
 
@@ -976,9 +977,6 @@ void ParticleSystemCom::LoadFromFileParticle()
 
 void ParticleSystemCom::LoadParticle(const char* filename)
 {
-	//ファイルネーム保存
-	ipffFilename_ = filename;
-
 	std::ifstream istream(filename, std::ios::binary);
 	if (istream.is_open())
 	{

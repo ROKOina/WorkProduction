@@ -20,6 +20,7 @@
 
 #include "GameSource\ScriptComponents\Player\PlayerCom.h"
 #include "GameSource\ScriptComponents\Player\PlayerCameraCom.h"
+#include "GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyNearCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyFarCom.h"
 //#include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
@@ -48,7 +49,7 @@ void SceneGame::Initialize()
 		obj->transform_->SetWorldPosition({ 0, 0, 0 });
 		obj->transform_->SetScale({ 1.00f, 1.00f, 1.00f });
 
-		const char* filename = "Data/Model/stages/yuka/cookie.mdl";
+		const char* filename = "Data/Model/stages/yuka/cookie1.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
 		r->GetModel()->SetMaterialColor({ 0.82f, 1.19f, 0.15f, 1 });
@@ -94,9 +95,9 @@ void SceneGame::Initialize()
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
-			0,  (rand() % (230 * 2) - 230) * 0.1f });
-		//obj->transform_->SetWorldPosition({ -10.0f+i*2, 0, 5 });
+		//obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
+		//	0,  (rand() % (230 * 2) - 230) * 0.1f });
+		obj->transform_->SetWorldPosition({ 0, 0, 5 });
 		obj->transform_->SetEulerRotation({ 0,180,0 });
 
 		const char* filename = "Data/Model/picolabo/picolabo.mdl";
@@ -171,7 +172,7 @@ void SceneGame::Initialize()
 			weapon->SetNodeParent(sword->GetParent());
 			weapon->SetNodeName("RightHand");
 			weapon->SetColliderUpDown({ 1.36f,0 });
-			weapon->SetIsForeverUse();
+			weapon->SetIsForeverUse(true);
 		}
 	}
 
@@ -308,6 +309,8 @@ void SceneGame::Initialize()
 			attackAssistCol->SetRadius(10);
 		}
 
+
+
 		//剣(Candy)
 		{
 			std::shared_ptr<GameObject> sword = obj->AddChildObject();
@@ -334,8 +337,9 @@ void SceneGame::Initialize()
 			weapon->SetNodeName("RightHandMiddle2");
 			weapon->SetColliderUpDown({ 2,0 });
 
-			//std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
-			//trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
+			std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
+			trail->SetEnabled(false);
+			trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
 
 			{
 				//パーティクルを子に
@@ -369,6 +373,10 @@ void SceneGame::Initialize()
 			weapon->SetNodeName("RightHandMiddle2");
 			weapon->SetColliderUpDown({ 2,0 });
 
+			std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();			
+			trail->SetEnabled(false);
+			trail->SetHeadTailNodeName("candyCircle", "head");	//トレイル表示ノード指定
+
 			{
 				//パーティクルを子に
 				std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::SWORD_SWEETS, { 0,0,0 }, sword);
@@ -400,6 +408,10 @@ void SceneGame::Initialize()
 			weapon->SetNodeName("RightHandMiddle2");
 			weapon->SetColliderUpDown({ 2,0 });
 
+			std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();
+			trail->SetEnabled(false);
+			trail->SetHeadTailNodeName("stick", "head");	//トレイル表示ノード指定
+
 			{
 				//パーティクルを子に
 				std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::SWORD_SWEETS, { 0,0,0 }, sword);
@@ -407,6 +419,7 @@ void SceneGame::Initialize()
 				particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
 			}
 		}
+
 
 		//ジャスト回避用プレイヤー
 		for (int i = 0; i < 4; ++i)
@@ -447,6 +460,51 @@ void SceneGame::Initialize()
 		}
 	}
 
+	//移動用剣
+	{
+		std::shared_ptr<GameObject> moveObj = GameObjectManager::Instance().Create();
+		moveObj->SetName("Push");
+		moveObj->transform_->SetScale(DirectX::XMFLOAT3(0.01f, 0.01f, 0.01f));
+
+		moveObj->AddComponent<PushWeaponCom>();
+
+		{
+			std::shared_ptr<GameObject> sword = moveObj->AddChildObject();
+			sword->SetName("CandyPush");
+			sword->transform_->SetScale(DirectX::XMFLOAT3(2, 2, 2));
+			sword->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, -37, -62));
+
+
+			const char* filename = "Data/Model/Swords/Candy/Candy.mdl";
+			std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
+			r->LoadModel(filename);
+			r->SetShaderID(SHADER_ID::UnityChanToon);
+			r->SetEnabled(false);
+
+			//std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
+			//attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
+			//attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
+			//attackCol->SetRadius(0.19f);
+			//attackCol->SetEnabled(false);
+
+			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
+			weapon->SetObject(GameObjectManager::Instance().Find("pico"));
+			weapon->SetNodeParent(moveObj);
+			weapon->SetNodeName("");
+
+			//std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
+			//trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
+
+			//{
+			//	//パーティクルを子に
+			//	std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::SWORD_SWEETS, { 0,0,0 }, sword);
+			//	particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
+			//}
+
+		}
+	}
+
+
 	//particle
 	for (int i = 0; i < 0; ++i)
 	{
@@ -456,9 +514,9 @@ void SceneGame::Initialize()
 		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
 
 		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(1000);
-		//c->SetSweetsParticle(true);	//お菓子用
+		c->SetSweetsParticle(true);	//お菓子用
 
-		//c->LoadTexture("./Data/Sprite/sweetsParticle.png");
+		c->LoadTexture("./Data/Sprite/sweetsParticle.png");
 		
 		//c->LoadTexture("Data/Sprite/default_eff.png");
 		//c->LoadTexture("Data/Sprite/smoke_pop.png");
@@ -560,14 +618,14 @@ void SceneGame::Update(float elapsedTime)
 #if defined(StageEdit)
 
 #else
-	//1フレームは初期化のため待機
-	//終了処理
-	if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_)	//敵の数0の時
-	{
-		GameObjectManager::Instance().AllRemove();
-		SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
-		gameEndFlag_ = true;
-	}
+	////1フレームは初期化のため待機
+	////終了処理
+	//if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_)	//敵の数0の時
+	//{
+	//	GameObjectManager::Instance().AllRemove();
+	//	SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
+	//	gameEndFlag_ = true;
+	//}
 	//一回目通るときにスタートフラグをON
 	if (!gameStartFlag_)
 	{
@@ -577,6 +635,8 @@ void SceneGame::Update(float elapsedTime)
 
 	GameObjectManager::Instance().Update(elapsedTime);
 	
+	EnemyManager::Instance().Update(elapsedTime);
+
 #if defined(StageEdit)
 	
 #else

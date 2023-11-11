@@ -28,6 +28,9 @@ private:
     //□反撃
     void JustAvoidanceSquare(float elapsedTime);
 
+    //△反撃
+    void JustAvoidanceTriangle(float elapsedTime);
+
 public:
     //ジャスト回避出来たか判定
     void JustAvoidJudge();
@@ -63,6 +66,8 @@ private:
         NULL_KEY,
     };
     JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
+    int triangleState_ = 0;
+    std::weak_ptr<GameObject> lockTriangleEnemy_;
 
 private:
     std::weak_ptr<PlayerCom> player_;

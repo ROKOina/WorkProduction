@@ -30,10 +30,14 @@ public:
 		COMBO_1,
 		COMBO_2,
 		COMBO_3,
+		DAMAGE_SWETTS,
+		DAMAGE_SWETTS_ENEMY,
 
 		MAX_EFFECT,
 	};
-	std::shared_ptr<GameObject> SetEffect(EFFECT_ID id, DirectX::XMFLOAT3 pos = { 0,0,0 }, std::shared_ptr<GameObject> parent = nullptr);
+	//pos:出現位置　parent:子にする　posObj:オブジェクトの位置に追従する(offsetがあれば入れる)
+	std::shared_ptr<GameObject> SetEffect(EFFECT_ID id, DirectX::XMFLOAT3 pos = { 0,0,0 }
+	, std::shared_ptr<GameObject> parent = nullptr, std::shared_ptr<GameObject> posObj = nullptr, DirectX::XMFLOAT3 offsetPos = { 0,0,0 });
 
 	void OnGui();
 
@@ -56,11 +60,20 @@ private:
 
 	const InializeParticle iniParticle_[MAX_EFFECT] =
 	{
-		InializeParticle("Data/Effect/para/SwordOkasi.ipff", false, 1000, true),
+		InializeParticle("Data/Effect/para/SwordOkasi.ipff", false, 100, true),
 		InializeParticle("Data/Effect/para/combo1.ipff"),
 		InializeParticle("Data/Effect/para/combo2.ipff"),
 		InializeParticle("Data/Effect/para/combo3.ipff", true, 1500, true),
+		InializeParticle("Data/Effect/para/damageSweets.ipff", true, 100, true),
+		InializeParticle("Data/Effect/para/damageSweetsEnemy.ipff", true, 10, true),
 	};
 
-    std::vector<std::weak_ptr<GameObject>> particles_;
+	struct ParticleDataMove
+	{
+		std::weak_ptr<GameObject> particle;
+		std::weak_ptr<GameObject> posObj;	//追従するオブジェクト
+		DirectX::XMFLOAT3 offsetPos;		//追従のオフセット	
+	};
+
+    std::vector<ParticleDataMove> particles_;
 };

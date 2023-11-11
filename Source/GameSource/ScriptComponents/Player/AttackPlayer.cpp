@@ -7,6 +7,7 @@
 #include "Components\MovementCom.h"
 #include "Components\AnimationCom.h"
 #include "Components\AnimatorCom.h"
+#include "Components\CameraCom.h"
 #include "SystemStruct\QuaternionStruct.h"
 #include "Components/ParticleComManager.h"
 #include "Components/ParticleSystemCom.h"
@@ -158,7 +159,9 @@ bool AttackPlayer::IsAttackInput(float elapsedTime)
 
     if (animFlagName_.size() > 0)
     {
-        animator->SetTriggerOn(animFlagName_);
+        animator->ResetParameterList();
+        animator->SetTriggerOn(animFlagName_);   
+
         comboSquareCount_++;
         animFlagName_ = "";
     }
@@ -514,12 +517,20 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
     std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
 
     //武器取得
-    std::shared_ptr<WeaponCom> weapon = playerObj->GetChildFind("Candy")->GetComponent<WeaponCom>();
+    std::shared_ptr<WeaponCom> weapon1 = playerObj->GetChildFind("Candy")->GetComponent<WeaponCom>();
+    std::shared_ptr<WeaponCom> weapon2 = playerObj->GetChildFind("CandyCircle")->GetComponent<WeaponCom>();
+    std::shared_ptr<WeaponCom> weapon3 = playerObj->GetChildFind("CandyStick")->GetComponent<WeaponCom>();
 
     //一回でも攻撃が当たっているなら次の攻撃が来るまで、trueにする
-    if (weapon->GetOnHit())
+    if (weapon1->GetOnHit()||weapon2->GetOnHit()||weapon3->GetOnHit())
     {
-        onHitEnemy_ = true;
+        if (!onHitEnemy_)
+        {
+            onHitEnemy_ = true;
+
+            //ヒット時カメラストップ
+            GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>()->HitStop(0.1f);
+        }
     }
 
 
@@ -1011,7 +1022,7 @@ void AttackPlayer::SpawnCombo1()
         std::shared_ptr<WeaponCom> weapon = obj->AddComponent<WeaponCom>();
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
-        weapon->SetIsForeverUse();
+        weapon->SetIsForeverUse(true);
         weapon->SetAttackDefaultStatus(1, 0);
     }
 
@@ -1066,7 +1077,7 @@ void AttackPlayer::SpawnCombo2()
         std::shared_ptr<WeaponCom> weapon = obj->AddComponent<WeaponCom>();
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
-        weapon->SetIsForeverUse();
+        weapon->SetIsForeverUse(true);
         weapon->SetAttackDefaultStatus(1, 0);
         weapon->SetCircleArc(true);
 
@@ -1114,7 +1125,7 @@ void AttackPlayer::SpawnCombo3()
         std::shared_ptr<WeaponCom> weapon = obj->AddComponent<WeaponCom>();
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
-        weapon->SetIsForeverUse();
+        weapon->SetIsForeverUse(true);
         weapon->SetAttackDefaultStatus(1, 0);
 
     }

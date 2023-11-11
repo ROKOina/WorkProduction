@@ -5,6 +5,8 @@
 #include "Components/System/GameObject.h"
 #include "Components/TransformCom.h"
 
+#include "GameSource/Math/easing.h"
+
 //追加用
 #include "Components\RendererCom.h"
 #include "Components\AnimationCom.h"
@@ -20,6 +22,28 @@
 // 更新処理
 void EnemyManager::Update(float elapsedTime)
 {
+    //スロー戻り処理
+    if (isSlow_)
+    {
+        //イージングで戻りかたを決める
+        slowTimer_ += elapsedTime;
+        if (slowTimer_ >= slowSeconds_)
+        {
+            slowTimer_ = slowSeconds_;
+            isSlow_ = false;
+        }
+
+        float ratio = slowTimer_ / slowSeconds_;
+        float speed = Expo::easeIn(ratio, slowSpeed_, 1, 1);
+        for (auto& nearEnemy : nearEnemies_)
+        {
+            nearEnemy.enemy.lock()->SetObjSpeed(speed);
+        }
+
+        //プレイヤー無敵に
+        player_.lock()->GetComponent<CharacterStatusCom>()
+            ->SetInvincibleNonDamage(0.2f);
+    }
 }
 
 //GUI
@@ -127,7 +151,7 @@ void EnemyManager::OnGui()
                 weapon->SetNodeParent(sword->GetParent());
                 weapon->SetNodeName("RightHand");
                 weapon->SetColliderUpDown({ 1.36f,0 });
-                weapon->SetIsForeverUse();
+                weapon->SetIsForeverUse(true);
             }
 
         }
@@ -338,6 +362,14 @@ void EnemyManager::EraseExpiredEnemy()
         else
             i++;
     }
+}
+
+void EnemyManager::SetEnemySpeed(float speed, float seconds)
+{
+    isSlow_ = true;
+    slowSeconds_ = seconds;
+    slowSpeed_ = speed;
+    slowTimer_ = 0;
 }
 
 

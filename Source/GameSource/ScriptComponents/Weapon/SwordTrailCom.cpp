@@ -249,4 +249,5 @@ void SwordTrailCom::ResetNodePos()
 	{
 		posArray_[i] = tempPos;
 	}
+
 }

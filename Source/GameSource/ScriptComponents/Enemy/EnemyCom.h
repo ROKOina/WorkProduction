@@ -160,6 +160,8 @@ protected:
     bool isAnimDamage_ = false; //ダメージアニメーションするときはtrue
     bool oldAnimDamage_ = false;
 
+    float damageEffTimer_;
+
     DirectX::XMFLOAT3 targetPosition_;
     //攻撃範囲
     float attackRange_ = 2;

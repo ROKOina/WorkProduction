@@ -11,45 +11,59 @@ void ParticleComManager::Update(float elapsedTime)
     int index = 0;
     for (; index < particles_.size(); )
     {
-        if (particles_[index].expired())    //データがないなら削除
+        if (particles_[index].particle.expired())    //データがないなら削除
         {
             particles_.erase(particles_.begin() + index);
             continue;
         }
 
         //削除判定
-        std::shared_ptr<ParticleSystemCom> par = particles_[index].lock()->GetComponent<ParticleSystemCom>();
+        std::shared_ptr<ParticleSystemCom> par = particles_[index].particle.lock()->GetComponent<ParticleSystemCom>();
         if (par->DeleteFlag())
-            GameObjectManager::Instance().Remove(particles_[index].lock());
+            GameObjectManager::Instance().Remove(particles_[index].particle.lock());
+
+        //追従処理
+        if (particles_[index].posObj.lock())
+        {
+            DirectX::XMFLOAT3 pos = particles_[index].posObj.lock()->transform_->GetWorldPosition();
+            pos.x += particles_[index].offsetPos.x;
+            pos.y += particles_[index].offsetPos.y;
+            pos.z += particles_[index].offsetPos.z;
+            particles_[index].particle.lock()->transform_->SetWorldPosition(pos);
+        }
 
         index++;
     }
 }
 
-std::shared_ptr<GameObject> ParticleComManager::SetEffect(EFFECT_ID id, DirectX::XMFLOAT3 pos, std::shared_ptr<GameObject> parent)
+std::shared_ptr<GameObject> ParticleComManager::SetEffect(EFFECT_ID id, DirectX::XMFLOAT3 pos
+    , std::shared_ptr<GameObject> parent, std::shared_ptr<GameObject> posObj, DirectX::XMFLOAT3 offsetPos)
 {
-    std::shared_ptr<GameObject> obj;
+    ParticleDataMove obj;
     if (parent)
     {
-        obj = parent->AddChildObject();
-        obj->transform_->SetLocalPosition(pos);
+        obj.particle = parent->AddChildObject();
+        obj.particle.lock()->transform_->SetLocalPosition(pos);
     }
     else
     {
-        obj = GameObjectManager::Instance().Create();
-        obj->transform_->SetWorldPosition(pos);
+        obj.particle = GameObjectManager::Instance().Create();
+        obj.particle.lock()->transform_->SetWorldPosition(pos);
     }
 
-    obj->SetName("Particle");
+    obj.particle.lock()->SetName("Particle");
 
-    std::shared_ptr<ParticleSystemCom> p = obj->AddComponent<ParticleSystemCom>(iniParticle_[id].maxParticle, iniParticle_[id].isAutoDeleteRoopFlag);
+    std::shared_ptr<ParticleSystemCom> p = obj.particle.lock()->AddComponent<ParticleSystemCom>(iniParticle_[id].maxParticle, iniParticle_[id].isAutoDeleteRoopFlag);
     p->SetSweetsParticle(iniParticle_[id].setSweets);	//お菓子用
 
     p->Load(iniParticle_[id].particleName.c_str());
 
+    obj.posObj = posObj;
+    obj.offsetPos = offsetPos;
+
     particles_.emplace_back(obj);
 
-    return obj;
+    return obj.particle.lock();
 }
 
 void ParticleComManager::OnGui()

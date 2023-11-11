@@ -270,9 +270,12 @@ void GameObjectManager::Update(float elapsedTime)
 	}
 
 	int enemyCount = static_cast<int>(enemyGameObject_.size());
-	for (int enemyC = 0; enemyC < enemyCount; ++enemyC)
+	if (EnemyManager::Instance().GetIsUpdateFlag())	//更新フラグがOnの時
 	{
-		future.emplace_back(Graphics::Instance().GetThreadPool()->submit([&](auto id, auto elapsedTime) { return ThreadEnemyUpdate(id, elapsedTime); }, enemyC, elapsedTime));
+		for (int enemyC = 0; enemyC < enemyCount; ++enemyC)
+		{
+			future.emplace_back(Graphics::Instance().GetThreadPool()->submit([&](auto id, auto elapsedTime) { return ThreadEnemyUpdate(id, elapsedTime); }, enemyC, elapsedTime));
+		}
 	}
 
 	for (auto& f : future)

@@ -74,6 +74,9 @@ public:
     const int& GetJumpCount()const { return jumpCount_; }
     void SetJumpCount(int count) { jumpCount_ = count; }
 
+    const bool& GetJumpFlag()const { return isJump_; }
+    void SetJumpFlag(bool flag) { isJump_ = flag; }
+
 private:
     struct
     {
@@ -101,6 +104,7 @@ private:
     bool isStopRunStop_ = false;
 
     //ジャンプ関連
+    bool isJump_ = true;
     float jumpSpeed_ = 20.0f;
     int jumpCount_ = 2;
     int jumpDashCount_ = 1; //空中ダッシュできる回数

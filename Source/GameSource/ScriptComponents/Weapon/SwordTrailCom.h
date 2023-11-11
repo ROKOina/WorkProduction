@@ -81,7 +81,6 @@ private:
     //線の長さ
     int index_ = 20;
 
-
     //トレイルの先端と末端ノードの名前
     std::string nodeName_[2];   //0:末端　、1:先端
 

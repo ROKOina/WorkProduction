@@ -55,8 +55,7 @@ class ParticleSystemCom : public Component
 {
 	//コンポーネントオーバーライド
 public:
-	ParticleSystemCom(int particleCount, bool isAutoDeleteFlag = true)
-		: maxParticleCount_(particleCount), isAutoDeleteFlag_(isAutoDeleteFlag) {  }
+	ParticleSystemCom(int particleCount, bool isAutoDeleteFlag = true);	
 	~ParticleSystemCom() {}
 
 	// 名前取得
@@ -229,7 +228,8 @@ public:
 
 	//削除判定
 	bool DeleteFlag();
-private:
+
+public:
 	//お菓子をだすパーティクル用
 	struct SweetsParticleData
 	{
@@ -266,8 +266,6 @@ private:
 
 	float lifeLimit_ = 0;	//ゲームオブジェクトを消すよう
 
-	std::string ipffFilename_;
-
 	//画像
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleSprite_;
 
@@ -288,6 +286,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> gameBuffer_;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> sceneBuffer_;
 
+	////パーティクル生成をスレッド化
+	//std::future<void> future;			
 
 	//debug関係
 	bool isRestart_ = false;

@@ -8,6 +8,7 @@
 #include "Components\AnimationCom.h"
 #include "Components\AnimatorCom.h"
 #include "Components\ParticleSystemCom.h"
+#include "SwordTrailCom.h"
 
 #include "../CharacterStatusCom.h"
 
@@ -28,21 +29,21 @@ void WeaponCom::Update(float elapsedTime)
     std::shared_ptr<AnimationCom> animCom = parentObject_.lock()->GetComponent<AnimationCom>();
 
     //アニメーション速度変更していたら戻す
-    if (isAnimSetting)
+    if (isAnimSetting_)
     {
         //攻撃速度をいじる
         std::shared_ptr<AnimatorCom> animator = parentObject_.lock()->GetComponent<AnimatorCom>();
         animator->SetAnimationSpeedOffset(1);
-        isAnimSetting = false;
+        isAnimSetting_ = false;
     }
 
     //今のアニメーションが登録されているか確認
     auto it = attackStatus_.find(animCom->GetCurrentAnimationIndex());
     if (it == attackStatus_.end() && !isForeverUse_)    //登録されない時
     {
-        if (isWeaponUse) //武器使用終了時
+        if (isWeaponUse_) //武器使用終了時
         {
-            isWeaponUse = false; 
+            isWeaponUse_ = false; 
 
             //攻撃終了処理
             isAttackAnim_ = false;
@@ -53,16 +54,17 @@ void WeaponCom::Update(float elapsedTime)
 
             //コライダー切る
             std::shared_ptr<Collider> col = GetGameObject()->GetComponent<Collider>();
-            col->SetEnabled(false);
+            if (col)
+                col->SetEnabled(false);
 
         }
         return;
     }
     else
     {
-        if (!isWeaponUse)
+        if (!isWeaponUse_)
         {
-            isWeaponUse = true;
+            isWeaponUse_ = true;
 
             //武器演出起動
             isDirectionStart_ = true;
@@ -75,6 +77,7 @@ void WeaponCom::Update(float elapsedTime)
                 if (particle->GetComponent<ParticleSystemCom>())
                     particle->GetComponent<ParticleSystemCom>()->SetRoop(true);
             }
+
         }
     }
 
@@ -95,6 +98,7 @@ void WeaponCom::Update(float elapsedTime)
 void WeaponCom::OnGUI()
 {
     ImGui::DragFloat2("colliderUpDown", &colliderUpDown_.x, 0.01f);
+    ImGui::Checkbox("isForeverUse_", &isForeverUse_);
 }
 
 
@@ -160,10 +164,10 @@ void WeaponCom::CollisionWeaponAttack()
         if (isAttackAnim_)
         {
             if (oldIsAnim_)
-                if (attackAnimIndex_ != oldAnimIndex)
+                if (attackAnimIndex_ != oldAnimIndex_)
                     isAttackAnim_ = false;  //攻撃コンボの場合、１フレームだけfalseに
 
-            oldAnimIndex = parentObject_.lock()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
+            oldAnimIndex_ = parentObject_.lock()->GetComponent<AnimationCom>()->GetCurrentAnimationIndex();
         }
         oldIsAnim_ = isAttackAnim_;
 
@@ -329,7 +333,7 @@ bool WeaponCom::CollsionFromEventJudge()
         {
             //アニメーションスピードを設定
             animator->SetAnimationSpeedOffset(attackStatus_[animCom->GetCurrentAnimationIndex()].animSpeed);
-            isAnimSetting = true;
+            isAnimSetting_ = true;
         }
 
         if (!animCom->GetCurrentAnimationEvent(animEvent.name.c_str(), DirectX::XMFLOAT3(0, 0, 0)))continue;
@@ -350,7 +354,7 @@ void WeaponCom::DirectionStart(float elapsedTime)
         isDirectionStart_ = false;
         directionState_ = -1;
     }
-
+    static int waitFrame = 0;
     //光らせる処理
     switch (directionState_)
     {
@@ -358,6 +362,8 @@ void WeaponCom::DirectionStart(float elapsedTime)
     {
         renderCom->SetEnabled(true);
         renderCom->GetModel()->SetMaterialColor({ 1,2,1,2 });
+
+        waitFrame = 2;
 
         directionState_++;
     }
@@ -376,6 +382,18 @@ void WeaponCom::DirectionStart(float elapsedTime)
         if (color.y < 1)color.y = 1;
         if (color.w < 1)color.w = 1;
         renderCom->GetModel()->SetMaterialColor(color);
+
+        waitFrame--;
+        if (waitFrame == 0)
+        {   
+            //トレイル出す
+            std::shared_ptr<SwordTrailCom> trail = GetGameObject()->GetComponent<SwordTrailCom>();
+            if (trail)
+            {
+                trail->SetEnabled(true);
+                trail->ResetNodePos();
+            }
+        }
     }
     break;
     }
@@ -423,6 +441,13 @@ void WeaponCom::DirectionEnd(float elapsedTime)
                 std::shared_ptr<GameObject> particle = GetGameObject()->GetChildren()[0].lock();
                 if (particle->GetComponent<ParticleSystemCom>())
                     particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
+            }
+
+            //トレイル切る
+            std::shared_ptr<SwordTrailCom> trail = GetGameObject()->GetComponent<SwordTrailCom>();
+            if (trail)
+            {
+                trail->SetEnabled(false);
             }
 
         }

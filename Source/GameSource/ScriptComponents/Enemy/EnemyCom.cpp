@@ -5,6 +5,7 @@
 #include "Components\MovementCom.h"
 #include "Components\AnimatorCom.h"
 #include "Components\RendererCom.h"
+#include "Components\ParticleComManager.h"
 
 #include "BehaviorTree/JudgmentDerived.h"
 #include "BehaviorTree/ActionDerived.h"
@@ -243,6 +244,9 @@ void EnemyCom::DamageProcess(float elapsedTime)
         }
     }
 
+    //ダメージエフェクト間隔管理
+    damageEffTimer_ -= elapsedTime;
+
     //ダメージ処理
     if (OnDamageEnemy())
     {
@@ -323,6 +327,17 @@ void EnemyCom::DamageProcess(float elapsedTime)
             {
                 animator->SetTriggerOn("damage");
             }
+        }
+
+        //エフェクト
+        if (damageEffTimer_ < 0)
+        {
+            DirectX::XMFLOAT3 effPos = GetGameObject()->transform_->GetWorldPosition();
+            effPos.y += 1;
+            std::shared_ptr<GameObject> effObj = ParticleComManager::Instance().SetEffect(ParticleComManager::DAMAGE_SWETTS_ENEMY, effPos
+                , nullptr, GetGameObject(), { 0,1,0 });
+            //effObj->transform_->SetScale(DirectX::XMFLOAT3(100, 100, 100));
+            damageEffTimer_ = 0.5f;
         }
     }
 }

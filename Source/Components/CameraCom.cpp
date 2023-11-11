@@ -136,7 +136,8 @@ void CameraCom::SetPerspectiveFov(float fovY, float aspect, float nearZ, float f
 //ヒットストップ
 void CameraCom::HitStop(float sec)
 {
-    saveWorldSpeed_ = Graphics::Instance().GetWorldSpeed();
+    if (!isHitStop_)
+        saveWorldSpeed_ = Graphics::Instance().GetWorldSpeed();
     isHitStop_ = true;
     hitTimer_ = sec;
 }

@@ -59,7 +59,8 @@ public:
     //WeaponComクラス
 public:
     //武器コンポーネント常時使用フラグ
-    void SetIsForeverUse() { isForeverUse_ = true; }
+    void SetIsForeverUse(bool flag) { isForeverUse_ = flag; }
+    bool GetIsForeverUse() { return isForeverUse_; }
 
     //オブジェクトをセット
     void SetObject(std::shared_ptr<GameObject> obj) { parentObject_ = obj; }
@@ -126,20 +127,20 @@ private:
     //武器コンポーネント使用時だけONにするか
     bool isForeverUse_ = false;
     //武器使用時
-    bool isWeaponUse = false;
+    bool isWeaponUse_ = false;
 
     //攻撃のヒット確認
     bool onHit_ = false;
 
     //アニメーション速度を変更したフラグ
-    bool isAnimSetting = false;
+    bool isAnimSetting_ = false;
 
     //攻撃アニメーション中trueに
     bool isAttackAnim_ = false;
     int attackAnimIndex_ = -1;
     //攻撃終了タイミング用
     bool oldIsAnim_ = false;
-    int oldAnimIndex = -1;
+    int oldAnimIndex_ = -1;
 
     //演出フラグ
     bool isDirectionStart_ = true; //武器を出すとき

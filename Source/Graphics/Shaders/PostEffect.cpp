@@ -15,7 +15,7 @@ void CalcGaussianFilter(DirectX::XMFLOAT4* array, int karnel_size, float sigma) 
         for (int x = -karnel_size / 2; x <= karnel_size / 2; x++) {
             array[id].x = (float)x;
             array[id].y = (float)y;
-            float a = 1.0f / (2.0f * PI * sigma * sigma);
+            float a = 1.0f / (2.0f * PI_ANGLE * sigma * sigma);
             float b = expf(-(x * x + y * y) / (2.0f * sigma * sigma));
             array[id].z = a * b;
             sum += array[id].z;

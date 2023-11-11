@@ -181,6 +181,7 @@
     <ClInclude Include="Source\GameSource\Render\Effect\EffectManager.h" />
     <ClInclude Include="Source\Framework.h" />
     <ClInclude Include="Source\Components\CameraCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
     <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
@@ -267,6 +268,7 @@
     <ClCompile Include="Source\GameSource\Render\Effect\EffectManager.cpp" />
     <ClCompile Include="Source\Framework.cpp" />
     <ClCompile Include="Source\Components\CameraCom.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.cpp" />
     <ClCompile Include="Source\GameSource\Stage\PathSearch.cpp" />

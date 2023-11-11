@@ -33,20 +33,21 @@ void PlayerCom::Start()
     std::shared_ptr<WeaponCom> weapon = GetGameObject()->GetChildFind("Candy")->GetComponent<WeaponCom>();
     weapon->SetAttackStatus(BIGSWORD_COM1_01, 1, 15, 0.8f, 0.2f, 1.5f);
     weapon->SetAttackStatus(BIGSWORD_DASH, 1, 100, 0.9f, 0.1f);
-    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 25, 0.0f, 1.0f, 1.5f, ATTACK_SPECIAL_TYPE::JUMP_START | ATTACK_SPECIAL_TYPE::UNSTOP);
-    weapon->SetAttackStatus(JUMP_ATTACK_01, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    //ジャンプ攻撃
+    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 20, 0.0f, 1.0f, 1.5f, ATTACK_SPECIAL_TYPE::JUMP_START | ATTACK_SPECIAL_TYPE::UNSTOP);
+    weapon->SetAttackStatus(JUMP_ATTACK_01, 1, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
     weapon->SetAttackStatus(JUMP_ATTACK_DOWN_DO, 1, 1, 0.0f, -1.0f);
 
     //CandyCircle
     weapon = GetGameObject()->GetChildFind("CandyCircle")->GetComponent<WeaponCom>();
     weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
     weapon->SetAttackStatus(BIGSWORD_COM2_02, 1, 10, 1.0f, 0.0f);
-    weapon->SetAttackStatus(JUMP_ATTACK_02, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    weapon->SetAttackStatus(JUMP_ATTACK_02, 1, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
 
     //CandyStick
     weapon = GetGameObject()->GetChildFind("CandyStick")->GetComponent<WeaponCom>();
     weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f, 2.0f);
-    weapon->SetAttackStatus(JUMP_ATTACK_03, 1, 10, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    weapon->SetAttackStatus(JUMP_ATTACK_03, 1, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
 
     std::shared_ptr<PlayerCom> myCom = GetGameObject()->GetComponent<PlayerCom>();
     //攻撃管理を初期化
@@ -370,9 +371,13 @@ void PlayerCom::AnimationInitialize()
             animator->SetTriggerTransition(TRIANGLE_ATTACK_02, TRIANGLE_ATTACK_03, "triangle");
 
 
-            //ジャスト回避時
+            //ジャスト回避時□
             animator->AddAnimatorTransition(BIGSWORD_COM1_02);
             animator->SetTriggerTransition(BIGSWORD_COM1_02, "squareJust");
+
+            //ジャスト回避時△
+            animator->AddAnimatorTransition(TRIANGLE_ATTACK_PUSH);
+            animator->SetTriggerTransition(TRIANGLE_ATTACK_PUSH, "triangleJust");
         }
 
         //ジャンプコンボ

@@ -17,6 +17,16 @@ void PlayerCameraCom::Start()
 // 更新処理
 void PlayerCameraCom::Update(float elapsedTime)
 {
+    if (isJust)
+    {
+        //カメラに値を代入
+        std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
+        cameraObj->transform_->SetWorldPosition(pos);
+        oldCameraPos_ = pos;
+        cameraObj->transform_->LookAtTransform(lerpFocusPos_);
+        return;
+    }
+
     //入力情報を取得
     GamePad& gamePad = Input::Instance().GetGamePad();
     angleY_ += gamePad.GetAxisRX() * 180.0f * elapsedTime;
@@ -61,7 +71,7 @@ void PlayerCameraCom::Update(float elapsedTime)
 
     //// スムーズなカメラ移動
     //{
-    //    DirectX::XMStoreFloat3(&oldCameraPos_, DirectX::XMVectorLerp(XMLoadFloat3(&cameraPos), DirectX::XMLoadFloat3(&oldCameraPos_), 1.0f - 0.08f));
+        DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorLerp(XMLoadFloat3(&oldCameraPos_), DirectX::XMLoadFloat3(&cameraPos), 0.1f * lerpSpeed_));
 
     //    // 新しい目標の Target を計算
     //    DirectX::XMStoreFloat3(&focusPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cameraPos), DirectX::XMLoadFloat3(&focusPos), 1.0f - 0.09f));
@@ -117,7 +127,7 @@ void PlayerCameraCom::Update(float elapsedTime)
     std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
     cameraObj->transform_->SetWorldPosition(cameraPos);
     //cameraObj->transform_->SetWorldPosition(oldCameraPos_);
-    cameraObj->transform_->LookAtTransform(focusPos);
+    cameraObj->transform_->LookAtTransform(lerpFocusPos_);
 }
 
 
@@ -129,5 +139,7 @@ void PlayerCameraCom::OnGUI()
     ImGui::DragFloat("angleLimit_", &angleLimit_, 0.1f);
     ImGui::DragFloat("range", &range_, 0.1f);
     ImGui::DragFloat("lerpSpeed_", &lerpSpeed_, 0.1f);
+
+    ImGui::Checkbox("isJust", &isJust);
 }
 

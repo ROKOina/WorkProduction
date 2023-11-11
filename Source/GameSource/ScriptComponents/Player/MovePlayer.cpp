@@ -1,6 +1,7 @@
 #include "MovePlayer.h"
 
 #include "PlayerCom.h"
+#include "../Enemy/EnemyManager.h"
 #include "Components/MovementCom.h"
 #include "Components/AnimatorCom.h"
 #include "Components/AnimationCom.h"
@@ -173,8 +174,8 @@ bool MovePlayer::IsMove(float elapsedTime)
     {
         if (jumpCount_ > 0)
         {
-            //ジャスト回避中のみジャンプできない
-            if (!player_.lock()->GetJustAvoidPlayer()->GetIsJustJudge())
+            //ジャスト回避中じゃない時とジャンプフラグOnの時
+            if (!player_.lock()->GetJustAvoidPlayer()->GetIsJustJudge()&& isJump_)
             {
                 //終了フラグ
                 player_.lock()->GetAttackPlayer()->AttackFlagEnd();
@@ -467,10 +468,14 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
         //ジャスト回避判定
         if (player_.lock()->GetJustAvoidPlayer()->GetJustHitEnemy().lock())
         {
-            player_.lock()->GetJustAvoidPlayer()->StartJustAvoid();
-            dashState_ = -1;
-            isDashJudge_ = false;
-            break;
+            //敵スロー中じゃない場合
+            if (!EnemyManager::Instance().GetIsSlow())
+            {
+                player_.lock()->GetJustAvoidPlayer()->StartJustAvoid();
+                dashState_ = -1;
+                isDashJudge_ = false;
+                break;
+            }
         }
 
         //空中の時は重力を0に
@@ -545,10 +550,14 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
         //ジャスト回避判定
         if (player_.lock()->GetJustAvoidPlayer()->GetJustHitEnemy().lock())
         {
-            player_.lock()->GetJustAvoidPlayer()->StartJustAvoid();
-            dashState_ = -1;
-            isDashJudge_ = false;
-            break;
+            //敵スロー中じゃない場合
+            if (!EnemyManager::Instance().GetIsSlow())
+            {
+                player_.lock()->GetJustAvoidPlayer()->StartJustAvoid();
+                dashState_ = -1;
+                isDashJudge_ = false;
+                break;
+            }
         }
 
         //空中の時は重力を0に

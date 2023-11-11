@@ -260,6 +260,7 @@
     <ClInclude Include="Source\Components\ParticleSystemCom.h" />
     <ClInclude Include="Source\Dialog.h" />
     <ClInclude Include="Source\Components\ParticleComManager.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -494,6 +495,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Components\ParticleComManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

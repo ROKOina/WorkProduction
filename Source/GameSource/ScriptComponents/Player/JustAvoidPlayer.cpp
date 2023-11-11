@@ -1,6 +1,9 @@
 #include "JustAvoidPlayer.h"
 
 #include "PlayerCom.h"
+#include "PlayerCameraCom.h"
+#include "PlayerWeapon/CandyPushCom.h"
+#include "../Weapon/WeaponCom.h"
 #include "Components\MovementCom.h"
 #include "Components\AnimationCom.h"
 #include "Components\AnimatorCom.h"
@@ -10,7 +13,11 @@
 #include "Components\CameraCom.h"
 #include "../CharacterStatusCom.h"
 
+#include "../Enemy/EnemyManager.h"
+#include "../Enemy/EnemyCom.h"
+
 #include "Input/Input.h"
+#include <imgui.h>
 
 void JustAvoidPlayer::Update(float elapsedTime)
 {
@@ -34,14 +41,15 @@ void JustAvoidPlayer::Update(float elapsedTime)
     case JUST_AVOID_KEY::SQUARE:
         JustAvoidanceSquare(elapsedTime);
         break;
+        //△反撃
     case JUST_AVOID_KEY::TRIANGLE:
+        JustAvoidanceTriangle(elapsedTime);
         break;
     }
 }
 
 void JustAvoidPlayer::OnGui()
 {
-
 }
 
 
@@ -345,6 +353,17 @@ void JustAvoidPlayer::JustAvoidanceAttackInput()
 
         //敵の方を向く
         player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_.lock()->transform_->GetWorldPosition());
+
+        //敵をスローにする
+        EnemyManager::Instance().SetEnemySpeed(0.1f, 5.0f);
+    }
+
+    //△の場合
+    if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+    {
+        JustInisialize();
+        triangleState_ = 0;
+        justAvoidKey_ = JUST_AVOID_KEY::TRIANGLE;
     }
 }
 
@@ -383,6 +402,326 @@ void JustAvoidPlayer::JustAvoidanceSquare(float elapsedTime)
         //力に加える
         move->AddForce(dir);
 
+    }
+}
+
+//△反撃
+void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
+{
+    //指定のカメラポスを返す
+    auto GetCameraPos = [&]()
+    {
+        DirectX::XMFLOAT3 playerPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
+
+        DirectX::XMFLOAT3 cameraPos;
+        DirectX::XMVECTOR f = DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldFront());
+        DirectX::XMVECTOR r = DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldRight());
+        DirectX::XMVECTOR u = DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldUp());
+
+        DirectX::XMStoreFloat3(&cameraPos,
+            DirectX::XMVectorAdd(
+                DirectX::XMLoadFloat3(&playerPos), DirectX::XMVectorAdd(
+                    DirectX::XMVectorScale(r, 0.2f),
+                    DirectX::XMVectorAdd(
+                        DirectX::XMVectorScale(u, 1.1f),
+                        DirectX::XMVectorScale(f, -0.5f)
+                    )
+                )));
+
+        return cameraPos;
+    };
+
+    static float pushSeconds = 0;   //アニメーションイベントまでの時間
+    static float lockEnemySeconds = 0;  //ロックオン変更時に使う
+    static DirectX::XMFLOAT3 focusEnemy{0, 0, 0};
+    switch (triangleState_)
+    {
+        //アニメーション再生
+    case 0:
+    {
+        std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
+        animator->SetTriggerOn("triangleJust");
+
+        lockTriangleEnemy_ = justHitEnemy_;
+        pushSeconds = 0.0f;
+
+        triangleState_++;
+    }
+    break;
+    //時を止める、カメラ動かす
+    case 1:
+    {
+        //アニメーションイベントまでの時間の割合
+        float animEventStartTime = 0.4f;
+        pushSeconds += elapsedTime;
+        if (pushSeconds > animEventStartTime)pushSeconds = animEventStartTime;
+        float startRatio = pushSeconds / animEventStartTime;
+
+        focusEnemy = lockTriangleEnemy_.lock()->transform_->GetWorldPosition();
+
+        //カメラ変更
+        {
+            //カメラコントローラー取得
+            std::shared_ptr<PlayerCameraCom> playerCameraCom = player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>();
+            playerCameraCom->isJust = true;
+
+            //補間して移動
+            DirectX::XMVECTOR CameraPos = DirectX::XMLoadFloat3(&GameObjectManager::Instance().Find("Camera")->transform_->GetWorldPosition());
+            DirectX::XMStoreFloat3(&playerCameraCom->pos, DirectX::XMVectorLerp(CameraPos, DirectX::XMLoadFloat3(&GetCameraPos()), startRatio));
+
+            DirectX::XMVECTOR FocusPos = DirectX::XMLoadFloat3(&playerCameraCom->GetForcusPos());
+            DirectX::XMFLOAT3 focus;
+            DirectX::XMStoreFloat3(&focus, DirectX::XMVectorLerp(FocusPos, DirectX::XMLoadFloat3(&focusEnemy), startRatio));
+
+            playerCameraCom->SetForcusPos(focus);
+
+            DirectX::XMFLOAT3 pPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
+            DirectX::XMVECTOR PPos = DirectX::XMLoadFloat3(&pPos);
+            pPos.y = 5;
+            DirectX::XMStoreFloat3(&pPos, DirectX::XMVectorLerp(PPos, DirectX::XMLoadFloat3(&pPos), startRatio));
+            player_.lock()->GetGameObject()->transform_->SetWorldPosition(pPos);
+
+            //カメラの向きにプレイヤー向かせる
+            QuaternionStruct cameraQuaternion = GameObjectManager::Instance().Find("Camera")->transform_->GetRotation();
+
+            //カメラの向きにプレイヤーを合わせる
+            static DirectX::XMFLOAT4 rota = cameraQuaternion.dxFloat4;
+            DirectX::XMVECTOR CA = DirectX::XMLoadFloat4(&cameraQuaternion.dxFloat4);
+            DirectX::XMStoreFloat4(&rota, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&rota), CA, elapsedTime * 5));
+
+            player_.lock()->GetGameObject()->transform_->SetRotation(rota);
+
+        }
+
+        std::shared_ptr<AnimationCom> picoAnim = player_.lock()->GetGameObject()->GetComponent<AnimationCom>();
+        if (picoAnim->GetCurrentAnimationEvent("trianglePushStop", DirectX::XMFLOAT3(0, 0, 0)))
+        {
+            Graphics::Instance().SetWorldSpeed(0);
+            EnemyManager::Instance().SetIsUpdateFlag(false);
+
+            player_.lock()->GetMovePlayer()->SetIsInputMove(false);
+            player_.lock()->GetAttackPlayer()->SetIsNormalAttack(false);
+            player_.lock()->GetMovePlayer()->SetIsDash(false);
+            player_.lock()->GetMovePlayer()->SetJumpFlag(false);
+
+            std::shared_ptr<WeaponCom> weapon = GameObjectManager::Instance().Find("CandyPush")->GetComponent<WeaponCom>();
+            weapon->SetNodeParent(player_.lock()->GetGameObject());
+            weapon->SetNodeName("RightHandMiddle2");
+            weapon->SetIsForeverUse(true);
+            lockEnemySeconds = 0;
+
+            triangleState_++;
+        }
+    }
+    break;
+    //照準を決める
+    case 2:
+    {
+        //カメラの向きにプレイヤー向かせる
+        QuaternionStruct cameraQuaternion = GameObjectManager::Instance().Find("Camera")->transform_->GetRotation();
+
+        //カメラコントローラー取得
+        std::shared_ptr<PlayerCameraCom> playerCameraCom = player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>();
+
+
+        //指定エネミー取得
+        std::shared_ptr<GameObject> lockEnemy = lockTriangleEnemy_.lock();
+        DirectX::XMFLOAT3 enemyPos = lockEnemy->transform_->GetWorldPosition();
+        //DirectX::XMFLOAT3 enemyPos = justHitEnemy_.lock()->transform_->GetWorldPosition();
+        DirectX::XMFLOAT3 playerPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
+
+        //エネミーからプレイヤーの正規化ベクトル
+        DirectX::XMVECTOR EPNorm = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&playerPos), DirectX::XMLoadFloat3(&enemyPos)));
+
+
+        float len = DirectX::XMVector3Length(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&focusEnemy), DirectX::XMLoadFloat3(&enemyPos))).m128_f32[0];
+
+
+        //カメラ
+        DirectX::XMFLOAT3 cameraPos = GetCameraPos();
+        {
+            float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldFront())), { 0, 1, 0 }));
+            if (len > 1.0f)
+            {
+                DirectX::XMStoreFloat3(&focusEnemy, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&focusEnemy), DirectX::XMLoadFloat3(&enemyPos), elapsedTime * 2));
+
+
+                //同じポジションを見ないように補正
+                if (abs(cameraPos.x - focusEnemy.x) < 0.01f)
+                {
+                    focusEnemy.x += 0.01f;
+                }
+
+                if (abs(cameraPos.z - focusEnemy.z) < 0.01f)
+                {
+                    focusEnemy.z += 0.01f;
+                }
+
+                playerCameraCom->SetForcusPos(focusEnemy);
+            }
+
+            //カメラの向きにプレイヤーを合わせる
+            static DirectX::XMFLOAT4 rota = cameraQuaternion.dxFloat4;
+            DirectX::XMVECTOR CA = DirectX::XMLoadFloat4(&cameraQuaternion.dxFloat4);
+            DirectX::XMStoreFloat4(&rota, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&rota), CA, elapsedTime * 5));
+
+            player_.lock()->GetGameObject()->transform_->SetRotation(rota);
+
+            playerCameraCom->pos = cameraPos;
+        }
+
+        //入力情報を取得
+        GamePad& gamePad = Input::Instance().GetGamePad();
+        float ax = gamePad.GetAxisRX();
+        float ay = gamePad.GetAxisRY();
+
+        //仮で色変える
+        lockTriangleEnemy_.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,5,1,1 });
+
+        //入力されている場合
+        //ロックオン変更
+        lockEnemySeconds += elapsedTime;
+        if (ax * ax + ay * ay > 0.01f && lockEnemySeconds > 0.5f)
+        {
+            //ロックオン中の敵のポス
+            DirectX::XMVECTOR lockEnemyPos = DirectX::XMLoadFloat3(&lockTriangleEnemy_.lock()->transform_->GetWorldPosition());
+
+            //内積して角度見て近い敵をターゲットに
+            DirectX::XMVECTOR PE = DirectX::XMVectorSubtract(lockEnemyPos, DirectX::XMLoadFloat3(&playerPos));
+
+            DirectX::XMVECTOR PEForward = DirectX::XMVector3Normalize(PE);
+            DirectX::XMVECTOR PERight = DirectX::XMVector3Normalize(DirectX::XMVector3Cross({ 0,1,0 }, PEForward));
+
+
+            DirectX::XMVECTOR InputVec = DirectX::XMVector3Normalize({ ax ,0,ay });
+            float len = FLT_MAX;
+            for (auto& enemy : EnemyManager::Instance().GetNearEnemies())
+            {
+                //仮で色変える
+                enemy.enemy.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,1,1,1 });
+
+                if (lockTriangleEnemy_.lock()->GetComponent<EnemyCom>()->GetID()
+                    == enemy.enemy.lock()->GetComponent<EnemyCom>()->GetID())
+                    continue;
+
+                //内積して角度見て近い敵をターゲットに
+                DirectX::XMFLOAT3 nearEnemyPos = enemy.enemy.lock()->transform_->GetWorldPosition();
+                DirectX::XMVECTOR NextEnemyVec = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&nearEnemyPos), lockEnemyPos);
+                DirectX::XMVECTOR NextEnemyVecNorm = DirectX::XMVector3Normalize(NextEnemyVec);
+
+                //入力ベクトルをエネミーの位置からに変換
+                DirectX::XMVECTOR InputEnemyVec = DirectX::XMVectorAdd(DirectX::XMVectorScale(PEForward, ay), DirectX::XMVectorScale(PERight, ax));
+                InputEnemyVec = DirectX::XMVector3Normalize(DirectX::XMVectorSetY(InputEnemyVec, 0));
+
+
+                //内積で角度見る
+                if (DirectX::XMVector3Dot(InputEnemyVec, NextEnemyVecNorm).m128_f32[0] > 0.5f)
+                {
+                    float dist = DirectX::XMVector3Length(NextEnemyVec).m128_f32[0];
+                    if (len > dist)
+                    {
+                        len = dist;
+                        lockTriangleEnemy_ = enemy.enemy;
+                    }
+                }
+            }
+            lockEnemySeconds = 0;
+        }
+
+        //△で次のステート
+        if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+        {
+            Graphics::Instance().SetWorldSpeed(1);
+            EnemyManager::Instance().SetIsUpdateFlag(true);
+
+            triangleState_++;
+
+        }
+    }
+    break;
+    //武器を飛ばす
+    case 3:
+    {
+        //アニメーションを見て武器を投げる
+        std::shared_ptr<AnimationCom> picoAnim = player_.lock()->GetGameObject()->GetComponent<AnimationCom>();
+        if (picoAnim->GetCurrentAnimationEventIsEnd("trianglePushStop"))
+        {
+            DirectX::XMFLOAT3 cameraPos = GetCameraPos();
+
+            std::shared_ptr<GameObject> pushObj = GameObjectManager::Instance().Find("Push");
+            std::shared_ptr<GameObject> candyObj = GameObjectManager::Instance().Find("CandyPush");
+            std::shared_ptr<WeaponCom> weapon = candyObj->GetComponent<WeaponCom>();
+            weapon->SetNodeParent(pushObj);
+            weapon->SetNodeName("");
+            pushObj->transform_->SetWorldPosition(candyObj->transform_->GetWorldPosition());
+            pushObj->GetComponent<PushWeaponCom>()->MoveStart(lockTriangleEnemy_.lock()->transform_->GetWorldPosition(), cameraPos);
+
+            triangleState_++;
+        }
+    }
+    break;
+    //武器の位置にプレイヤー行く、カメラ武器についていく
+    case 4:
+    {
+        DirectX::XMFLOAT3 pos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
+        pos.y = 5;
+        player_.lock()->GetGameObject()->transform_->SetWorldPosition(pos);
+        std::shared_ptr<GameObject> pushObj = GameObjectManager::Instance().Find("Push");
+        //武器が敵に到達した時
+        if (!pushObj->GetComponent<PushWeaponCom>()->IsMove())
+        {
+            JustInisialize();
+
+            //指定エネミー取得
+            std::shared_ptr<GameObject> lockEnemy = lockTriangleEnemy_.lock();
+            DirectX::XMFLOAT3 enemyPos = lockEnemy->transform_->GetWorldPosition();
+            //DirectX::XMFLOAT3 enemyPos = justHitEnemy_.lock()->transform_->GetWorldPosition();
+            DirectX::XMFLOAT3 playerPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
+
+            //エネミーからプレイヤーの正規化ベクトル
+            DirectX::XMVECTOR EPNorm = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&playerPos), DirectX::XMLoadFloat3(&enemyPos)));
+
+
+            player_.lock()->GetMovePlayer()->SetIsInputMove(true);
+            player_.lock()->GetAttackPlayer()->SetIsNormalAttack(true);
+            player_.lock()->GetMovePlayer()->SetIsDash(true);
+            player_.lock()->GetMovePlayer()->SetJumpFlag(true);
+
+            //アタック処理に引き継ぐ
+            player_.lock()->GetAttackPlayer()->SetAnimFlagName("squareIdle");
+            player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
+
+            //プレイヤを敵の前に移動
+            DirectX::XMFLOAT3 movePos;
+            DirectX::XMStoreFloat3(&movePos, EPNorm);
+
+            movePos.x = enemyPos.x + movePos.x * 2;
+            movePos.y = enemyPos.y + movePos.y * 2;
+            movePos.z = enemyPos.z + movePos.z * 2;
+
+            player_.lock()->GetGameObject()->transform_->SetWorldPosition(movePos);
+
+            //プレイヤーからエネミー
+            DirectX::XMFLOAT3 pe;
+            
+            DirectX::XMStoreFloat3(&pe, 
+                DirectX::XMVectorScale(DirectX::XMVector3Normalize(DirectX::XMVectorSetY(EPNorm, 0)), -1));
+
+            player_.lock()->GetGameObject()->transform_->SetRotation(QuaternionStruct::LookRotation(pe));
+
+            //カメラコントローラー取得
+            std::shared_ptr<PlayerCameraCom> playerCameraCom = player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>();
+
+            playerCameraCom->isJust = false;
+
+            std::shared_ptr<GameObject> candyObj = GameObjectManager::Instance().Find("CandyPush");
+            std::shared_ptr<WeaponCom> weapon = candyObj->GetComponent<WeaponCom>();
+            weapon->SetIsForeverUse(false);
+
+            justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
+        }
+    }
+    break;
     }
 }
 

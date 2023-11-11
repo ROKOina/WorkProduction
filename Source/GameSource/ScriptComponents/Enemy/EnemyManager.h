@@ -72,6 +72,16 @@ public:
 	//空の敵を削除
 	void EraseExpiredEnemy();
 
+	//敵のスピードを一括で変更(secondsは何秒かけてもどるか)
+	void SetEnemySpeed(float speed, float seconds);
+
+	//スロー処理しているか
+	bool GetIsSlow() { return isSlow_; }
+
+	//エネミーのアップデート止める
+	bool GetIsUpdateFlag() { return isUpdate_; }
+	void SetIsUpdateFlag(bool flag) { isUpdate_ = flag; }
+
 	//AI関係
 
 private:
@@ -129,6 +139,16 @@ private:
 
 	int currentIndex_ = 0;
 
+	//スロー
+	bool isSlow_ = false;
+	float slowSeconds_;
+	float slowTimer_;
+	float slowSpeed_;
+
+	//エネミーのアップデートするか
+	bool isUpdate_ = true;
+
+	//UI
 	std::unique_ptr<Sprite> enemyCount_;
 	int killCount_;
 	DirectX::XMFLOAT4 killCountSprite_ = { 762.2f,-1.2f,0.5f,70.0f }; //xy:pos z:size w:間隔
