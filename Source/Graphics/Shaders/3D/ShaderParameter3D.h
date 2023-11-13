@@ -70,7 +70,10 @@ struct SunAtmosphere
 	float sunHighlightExponentialFactor = 38.000f; // Affects the area of influence of the sun's highlights.
 	float sunHighlightIntensity = 1.200f;
 
-	DirectX::XMFLOAT3 dummy;
+
+	float enabled = -1;
+
+	DirectX::XMFLOAT2 dummy;
 
 	DirectX::XMFLOAT4X4 view;
 	DirectX::XMFLOAT4X4 inverseProjection;

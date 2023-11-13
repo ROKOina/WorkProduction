@@ -20,7 +20,7 @@
 void SceneTitle::Initialize()
 {
     //スプライト初期化
-    sprite_ = new Sprite("Data/Sprite/Title.png");
+    //sprite_ = new Sprite("Data/Sprite/titleLogo.png");
 
     {   //ピコ
         std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
@@ -65,6 +65,34 @@ void SceneTitle::Initialize()
         obj->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 6, 7));
 
         const char* filename = "Data/Model/stages/title/Donuts/Donuts.mdl";
+        std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+        r->LoadModel(filename);
+        r->SetShaderID(SHADER_ID::UnityChanToon);
+    }
+
+    //logo
+    {
+        std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+        obj->SetName("Logo");
+        obj->transform_->SetScale(DirectX::XMFLOAT3(0.02f, 0.02f, 1));
+        obj->transform_->SetWorldPosition(DirectX::XMFLOAT3(0.7f, 0.96f, -9.6f));
+        obj->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 135, 0));
+
+        const char* filename = "Data/Model/Title/TitleLogo.mdl";
+        std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+        r->LoadModel(filename);
+        r->SetShaderID(SHADER_ID::UnityChanToon);
+    }
+
+    //PushButton
+    {
+        std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+        obj->SetName("PushButton");
+        obj->transform_->SetScale(DirectX::XMFLOAT3(0.003f, 0.003f, 1));
+        obj->transform_->SetWorldPosition(DirectX::XMFLOAT3(-1.2f, 0.86f, -8.5f));
+        obj->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 118, 0));
+
+        const char* filename = "Data/Model/Title/TitlePushButton.mdl";
         std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
         r->LoadModel(filename);
         r->SetShaderID(SHADER_ID::UnityChanToon);
@@ -146,8 +174,6 @@ void SceneTitle::Finalize()
 //更新処理
 void SceneTitle::Update(float elapsedTime)
 {
-
-
     GamePad& gamePad = Input::Instance().GetGamePad();
 
     //何かボタンを押したらゲームシーンへ切りかえ
@@ -218,6 +244,7 @@ void SceneTitle::Update(float elapsedTime)
 
     GameObjectManager::Instance().Update(elapsedTime);
 
+
     if (isSceneEndFlag_)return;
 
     //演出
@@ -241,6 +268,53 @@ void SceneTitle::Update(float elapsedTime)
         res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[8].rate = 0;
     }
 
+
+    //遷移エフェクト
+    {
+        //ビューポート
+        D3D11_VIEWPORT viewport;
+        UINT numViewports = 1;
+        Graphics::Instance().GetDeviceContext()->RSGetViewports(&numViewports, &viewport);
+
+        //変換行列
+        DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&mainCamera_->GetView());
+        DirectX::XMMATRIX Projection = DirectX::XMLoadFloat4x4(&mainCamera_->GetProjection());
+        DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
+
+        //std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
+        //DirectX::XMFLOAT3 effPosition = pico->transform_->GetWorldPosition();
+        //DirectX::XMVECTOR EffPosition = DirectX::XMLoadFloat3(&effPosition);
+
+        ////ワールド座標からスクリーン座標に変換
+        //EffPosition = DirectX::XMVector3Project(
+        //    EffPosition,
+        //    viewport.TopLeftX, viewport.TopLeftY,
+        //    viewport.Width, viewport.Height,
+        //    viewport.MinDepth, viewport.MaxDepth,
+        //    Projection, View, World
+        //);
+
+        DirectX::XMFLOAT3 effPosition;
+        DirectX::XMVECTOR EffPosition;
+        effPosition.x = -100;
+        effPosition.y = -100;
+        effPosition.z = 0.5f;
+        EffPosition = DirectX::XMLoadFloat3(&effPosition);
+
+        //スクリーン座標からワールド座標に変換
+        EffPosition = DirectX::XMVector3Unproject(
+            EffPosition,
+            viewport.TopLeftX, viewport.TopLeftY,
+            viewport.Width, viewport.Height,
+            viewport.MinDepth, viewport.MaxDepth,
+            Projection, View, World
+        );
+
+        DirectX::XMStoreFloat3(&effPosition, EffPosition);
+
+        SceneManager::Instance().GetParticleObj()->transform_->SetWorldPosition(effPosition);
+        SceneManager::Instance().GetParticleObj()->transform_->SetEulerRotation(DirectX::XMFLOAT3(-17, 171, -109));
+    }
 }
 
 //描画処理
@@ -269,21 +343,6 @@ void SceneTitle::Render(float elapsedTime)
     rc.projection = mainCamera_->GetProjection();
     DirectX::XMFLOAT3 cameraPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
     rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
-
-    ////2Dスプライト描画
-    //{
-    //    float screenWidth = static_cast<float>(graphics.GetScreenWidth());
-    //    float screenHeight = static_cast<float>(graphics.GetScreenHeight());
-    //    float textureWidth = static_cast<float>(sprite_->GetTextureWidth());
-    //    float textureHeight = static_cast<float>(sprite_->GetTextureHeight());
-    //    //タイトルスプライト描画
-    //    sprite_->Render(dc,
-    //        0, 0, screenWidth, screenHeight,
-    //        0, 0, textureWidth, textureHeight,
-    //        0,
-    //        1, 1, 1, 1);
-    //}
-
 
     //3D描画
     {
@@ -321,6 +380,20 @@ void SceneTitle::Render(float elapsedTime)
         // デバッグレンダラ描画実行
         graphics.GetDebugRenderer()->Render(dc, mainCamera_->GetView(), mainCamera_->GetProjection());
 
+        ////2Dスプライト描画
+        //{
+        //    float screenWidth = static_cast<float>(graphics.GetScreenWidth());
+        //    float screenHeight = static_cast<float>(graphics.GetScreenHeight());
+        //    float textureWidth = static_cast<float>(sprite_->GetTextureWidth());
+        //    float textureHeight = static_cast<float>(sprite_->GetTextureHeight());
+        //    //タイトルスプライト描画
+        //    sprite_->Render(dc,
+        //        0, 0, screenWidth, screenHeight,
+        //        0, 0, textureWidth, textureHeight,
+        //        0,
+        //        1, 1, 1, 1);
+        //}
+
         //バッファ戻す
         Graphics::Instance().RestoreRenderTargets();
 
@@ -335,6 +408,7 @@ void SceneTitle::Render(float elapsedTime)
         ImGui::DragFloat3("angleCandy", &candyData_[0].angle.x, 0.01f);
         ImGui::DragFloat3("posCandy", &candyData_[0].pos.x, 0.01f);
         ImGui::DragFloat3("angleCandy1", &candyData_[1].angle.x, 0.01f);
+
     ImGui::End();
 }
 
@@ -344,6 +418,8 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
     std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
     std::shared_ptr<AnimationCom> picoAnim = pico->GetComponent<AnimationCom>();
     std::shared_ptr<GameObject> stage = GameObjectManager::Instance().Find("DonutsTitle");
+    std::shared_ptr<GameObject> logo = GameObjectManager::Instance().Find("Logo");
+    std::shared_ptr<GameObject> pushButton = GameObjectManager::Instance().Find("PushButton");
     std::shared_ptr<GameObject> lookCamera = GameObjectManager::Instance().Find("lookCamera");
 
     //ステージ上下に動かす
@@ -353,6 +429,8 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
         static float time = 0;
         static DirectX::XMFLOAT3 picoPos = pico->transform_->GetWorldPosition();
         static DirectX::XMFLOAT3 stagePos = stage->transform_->GetWorldPosition();
+        static DirectX::XMFLOAT3 logoPos = logo->transform_->GetWorldPosition();
+        static DirectX::XMFLOAT3 pushButtonPos = pushButton->transform_->GetWorldPosition();
         time += elapsedTime;
         sinPosY = sin(time) * 0.3f;
 
@@ -360,9 +438,15 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
         pPos.y += sinPosY;
         DirectX::XMFLOAT3 sPos = stagePos;
         sPos.y += sinPosY;
+        DirectX::XMFLOAT3 lPos = logoPos;
+        lPos.y += sinPosY;
+        DirectX::XMFLOAT3 buttonPos = pushButtonPos;
+        buttonPos.y += sinPosY*0.2f;
 
         pico->transform_->SetWorldPosition(pPos);
         stage->transform_->SetWorldPosition(sPos);
+        logo->transform_->SetWorldPosition(lPos);
+        pushButton->transform_->SetWorldPosition(buttonPos);
     }
 
     //ロリポップ角度設定
@@ -505,6 +589,13 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
                 DirectX::XMFLOAT3 cPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
                 DirectX::XMStoreFloat3(&cPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cPos), DirectX::XMLoadFloat3(&lookPos), 0.08f));
                 mainCamera_->GetGameObject()->transform_->SetWorldPosition(cPos);
+
+                //ロゴ回転
+                DirectX::XMFLOAT3 logoRotate = logo->transform_->GetEulerRotation();
+                logoRotate.y += 100*elapsedTime;
+                if (logoRotate.y > 200)
+                    logoRotate.y = 200;
+                logo->transform_->SetEulerRotation(logoRotate);
             }
             else if (picoAnim->GetCurrentAnimationEvent("headFocus", headPos))  //カメラをフォーカス
             {
@@ -603,7 +694,7 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
             isSceneEndFlag_ = true;
 
             //仮処理
-            //if(0)
+            if(0)
             {
                 picoAnim->PlayAnimation(48, true, 0);
                 pico->transform_->SetEulerRotation(DirectX::XMFLOAT3(0, 6, 7));

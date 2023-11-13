@@ -212,4 +212,6 @@ private:
 
 	//スレッド用
 	std::vector<std::future<void>> future;
+
+	std::mutex mutex_;
 };

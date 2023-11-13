@@ -74,17 +74,6 @@ public:
 	//ParticleSystemクラス
 public:
 
-	void Initialize();
-
-	void Render();
-
-	//パーティクルロード
-	void Load(const char* filename);
-	//テクスチャロード
-	void LoadTexture(const char* filename);
-
-public:
-
 	//UV
 	struct UV
 	{
@@ -217,6 +206,18 @@ public:
 	};
 
 public:
+
+		void Initialize();
+
+		void Render();
+
+		//パーティクルロード
+		SaveParticleData Load(const char* filename);
+		SaveParticleData LoadParticle(const char* filename);
+		//テクスチャロード
+		void LoadTexture(const char* filename);
+
+public:
 	//ループ
 	void SetRoop(bool roop) { particleData_.particleData.isRoop = roop; }
 	bool GetRoop() { return particleData_.particleData.isRoop; }
@@ -253,7 +254,6 @@ private:
 	//シリアルでパーティクルを保存
 	void SaveParticle();
 	void LoadFromFileParticle();
-	void LoadParticle(const char* filename);
 
 private:
 	//ループじゃない場合勝手に削除されるか

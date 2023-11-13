@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include <map>
-#include "Graphics\Model\ModelResource.h"
+#include "Graphics\Model\FbxModelResource.h"
 
 #include "Components/ParticleSystemCom.h"
 
@@ -38,33 +38,33 @@ private:
     std::mutex mutex_;
 };
 
-////パーティクルリソースマネジャー
-//class ResourceManagerParticle
-//{
-//private:
-//    ResourceManagerParticle(){}
-//    ~ResourceManagerParticle(){}
-//
-//public:
-//    //唯一のインスタンス取得
-//    static ResourceManagerParticle& Instance()
-//    {
-//        static ResourceManagerParticle instance;
-//        return instance;
-//    }
-//
-//    //パーティクルリソース読み込み
-//    std::shared_ptr<ParticleSystemCom::SaveParticleData> LoadParticleResource(const char* filename);
-//
-//    //パーティクルリソース登録
-//    void RegisterParticle(const char* filename, std::shared_ptr<ParticleSystemCom::SaveParticleData> resource);
-//
-//    //ファイル名で登録確認
-//    bool JudgeParticleFilename(const char* filename);
-//
-//private:
-//    using ParticleMap = std::map<std::string, std::shared_ptr<ParticleSystemCom::SaveParticleData>>;
-//
-//    ParticleMap particleMap_;
-//    std::mutex mutex_;
-//};
+//パーティクルリソースマネジャー
+class ResourceManagerParticle
+{
+private:
+    ResourceManagerParticle(){}
+    ~ResourceManagerParticle(){}
+
+public:
+    //唯一のインスタンス取得
+    static ResourceManagerParticle& Instance()
+    {
+        static ResourceManagerParticle instance;
+        return instance;
+    }
+
+    //パーティクルリソース読み込み
+    std::shared_ptr<ParticleSystemCom::SaveParticleData> LoadParticleResource(const char* filename);
+
+    ////パーティクルリソース登録
+    //void RegisterParticle(const char* filename, std::shared_ptr<ParticleSystemCom::SaveParticleData> resource);
+
+    ////ファイル名で登録確認
+    //bool JudgeParticleFilename(const char* filename);
+
+private:
+    using ParticleMap = std::map<std::string, std::shared_ptr<ParticleSystemCom::SaveParticleData>>;
+
+    ParticleMap particleMap_;
+    std::mutex mutex_;
+};

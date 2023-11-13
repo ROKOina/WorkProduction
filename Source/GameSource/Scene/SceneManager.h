@@ -2,11 +2,13 @@
 
 #include "Scene.h"
 
+class GameObject;
+
 //シーンマネージャー
 class SceneManager
 {
 private:
-    SceneManager() {}
+    SceneManager();
     ~SceneManager(){}
 
 public:
@@ -29,8 +31,19 @@ public:
     //シーン切り替え
     void ChangeScene(Scene* scene);
 
+    void ChangeParticleUpdate(float elapsedTime);
+    void ChangeParticleRender();
+    void ChangeParticleGui();
+
+    std::shared_ptr<GameObject> GetParticleObj()
+    {
+        return changeParticle_;
+    }
+
 private:
     Scene* currentScene_ = nullptr;
     Scene* nextScene_ = nullptr;
 
+    std::shared_ptr<GameObject> changeParticle_;
+    std::shared_ptr<GameObject> changeParticleCamera_;
 };

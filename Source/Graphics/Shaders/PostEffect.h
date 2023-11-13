@@ -26,6 +26,9 @@ public:
     //スカイマップ描画
     void SkymapRender(std::shared_ptr<CameraCom> camera);
 
+    //レンズフレア有効設定
+    void SetSunEnabled(bool enabled) { sun_->SetEnabled(enabled); }
+
 private:
     //ポストエフェクト用構造体
     struct ShaderPost

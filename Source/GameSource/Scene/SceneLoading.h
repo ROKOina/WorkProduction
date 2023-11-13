@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/Sprite/Sprite.h"
+#include "Graphics\Shaders\PostEffect.h"
 #include "Scene.h"
 #include <thread>
 
@@ -29,7 +30,8 @@ private:
 
 private :
     Sprite* sprite_ = nullptr;
-    float angle_ = 0.0f;
+    std::unique_ptr<PostEffect> postEff_;
+
     Scene* nextScene_ = nullptr;
     std::thread* thread_ = nullptr;
 };

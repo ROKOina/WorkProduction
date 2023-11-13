@@ -52,31 +52,33 @@ bool ResourceManager::JudgeModelFilename(const char* filename)
     }
 }
 
-//std::shared_ptr<ParticleSystemCom::SaveParticleData> ResourceManagerParticle::LoadParticleResource(const char* filename)
-//{
-//    std::shared_ptr<ParticleSystemCom::SaveParticleData> particle;
-//
-//    //モデル検索
-//    for (auto& particlemap : particleMap_) {
-//        if (particlemap.first == filename) {
-//            if (particlemap.second) {
-//                particle = std::make_shared<ParticleSystemCom::SaveParticleData>(*particlemap.second.get());
-//            }
-//        }
-//    }
-//
-//    //モデルがない場合
-//    if (!particle) {
-//        //新規モデルリソース作成＆読み込み
-//        ParticleSystemCom* particleCom=new ParticleSystemCom(1000);
-//        std::shared_ptr<ParticleSystemCom::SaveParticleData> resource = std::make_shared<ParticleSystemCom::SaveParticleData>();
-//        particleCom->Load()
-//        resource->Load(Graphics::Instance().GetDevice(), filename);
-//
-//        //マップに登録
-//        particleMap_[filename] = resource;
-//        particle = static_cast<std::shared_ptr<ParticleSystemCom::SaveParticleData>>(particleMap_[filename]);
-//    }
-//
-//    return particle;
-//}
+std::shared_ptr<ParticleSystemCom::SaveParticleData> ResourceManagerParticle::LoadParticleResource(const char* filename)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    std::shared_ptr<ParticleSystemCom::SaveParticleData> particle;
+
+    //モデル検索
+    for (auto& particlemap : particleMap_) {
+        if (particlemap.first == filename) {
+            if (particlemap.second) {
+                particle = std::make_shared<ParticleSystemCom::SaveParticleData>(*particlemap.second.get());
+            }
+        }
+    }
+
+    //モデルがない場合
+    if (!particle) {
+        //新規モデルリソース作成＆読み込み
+        ParticleSystemCom* particleCom=new ParticleSystemCom(1000);
+        std::shared_ptr<ParticleSystemCom::SaveParticleData> resource = std::make_shared<ParticleSystemCom::SaveParticleData>(particleCom->LoadParticle(filename));
+        
+        //マップに登録
+        particleMap_[filename] = resource;
+        particle = static_cast<std::shared_ptr<ParticleSystemCom::SaveParticleData>>(particleMap_[filename]);
+
+        delete particleCom;
+    }
+
+    return particle;
+}

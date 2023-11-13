@@ -136,6 +136,8 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
         PostDepthStencil* ds = graphics.GetPostEffectModelDepthStencilView().get();
         dc->PSSetShaderResources(1, 1, ds->diffuseMap.GetAddressOf());
 
+        //有効にする
+        graphics.shaderParameter3D_.sunAtmosphere.enabled = 1;
 
         //座標送る
         graphics.shaderParameter3D_.sunAtmosphere.view = camera->GetView();
@@ -168,10 +170,45 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
 
         sun_->Draw(drawTexture_.get());
     }
+    else
+    {
+        //描画先を変更
+        ID3D11RenderTargetView* rtv = renderPostSun_->renderTargetView.Get();
+        FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        dc->ClearRenderTargetView(rtv, color);
+        dc->OMSetRenderTargets(1, &rtv, nullptr);
+        D3D11_VIEWPORT	viewport{};
+        viewport.Width = static_cast<float>(renderPostSun_->width);
+        viewport.Height = static_cast<float>(renderPostSun_->height);
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        dc->RSSetViewports(1, &viewport);
+
+        //シェーダーリソースビュー設定
+        PostRenderTarget* ps = graphics.GetPostEffectModelRenderTarget().get();
+        drawTexture_->SetShaderResourceView(
+            ps->diffuseMap, ps->width, ps->height);
+
+        drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+            0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
+            0,
+            1, 1, 1, 1);
+
+        //深度情報送る
+        PostDepthStencil* ds = graphics.GetPostEffectModelDepthStencilView().get();
+        dc->PSSetShaderResources(1, 1, ds->diffuseMap.GetAddressOf());
+
+        //有効にする
+        graphics.shaderParameter3D_.sunAtmosphere.enabled = -1;
+        dc->UpdateSubresource(sunBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.sunAtmosphere, 0, 0);
+        dc->PSSetConstantBuffers(0, 1, sunBuffer_.GetAddressOf());
+
+        sun_->Draw(drawTexture_.get());
+    }
 #pragma endregion
 
 #pragma region ブルーム
-    if(bloomExtract_->IsEnabled()&& !bloomKawaseFilter_->IsEnabled())
+    if(bloomExtract_->IsEnabled() && !bloomKawaseFilter_->IsEnabled())
     {
         //高輝度抽出用バッファ
         {

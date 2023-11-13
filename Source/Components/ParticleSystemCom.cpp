@@ -2,6 +2,7 @@
 
 #include "TransformCom.h"
 #include "Graphics/Graphics.h"
+#include "Graphics/Model/ResourceManager.h"
 #include <imgui.h>
 
 #include "Dialog.h"
@@ -769,6 +770,12 @@ void ParticleSystemCom::Render()
 	ID3D11SamplerState* samplerState = dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP).Get();
 	dc->PSSetSamplers(0, 1, &samplerState);
 
+	//ブレンドステート
+	const float blendFactor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	dc->OMSetBlendState(
+		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA_ATC).Get(),
+		blendFactor, 0xFFFFFFFF);
+
 	//画像
 	dc->PSSetShaderResources(0, 1, particleSprite_.GetAddressOf());
 	
@@ -831,9 +838,11 @@ void ParticleSystemCom::Render()
 }
 
 //ファイルネームでロード
-void ParticleSystemCom::Load(const char* filename)
+ParticleSystemCom::SaveParticleData ParticleSystemCom::Load(const char* filename)
 {
-	LoadParticle(filename);
+	particleData_= *ResourceManagerParticle::Instance().LoadParticleResource(filename);
+	return particleData_;
+	//return LoadParticle(filename);
 }
 
 void ParticleSystemCom::LoadTexture(const char* filename)
@@ -975,7 +984,7 @@ void ParticleSystemCom::LoadFromFileParticle()
 	}
 }
 
-void ParticleSystemCom::LoadParticle(const char* filename)
+ParticleSystemCom::SaveParticleData ParticleSystemCom::LoadParticle(const char* filename)
 {
 	std::ifstream istream(filename, std::ios::binary);
 	if (istream.is_open())
@@ -991,7 +1000,7 @@ void ParticleSystemCom::LoadParticle(const char* filename)
 		catch (...)
 		{
 			LOG("particle deserialize failed.\n%s\n", filename);
-			return;
+			return {};
 		}
 	}
 
@@ -1011,5 +1020,7 @@ void ParticleSystemCom::LoadParticle(const char* filename)
 	{
 		dx11State->load_texture_from_file(device, "Data/Sprite/color.png", particleSprite_.GetAddressOf(), &texture2d_desc);
 	}
+
+	return particleData_;
 
 }

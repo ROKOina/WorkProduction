@@ -139,6 +139,8 @@ void GameObject::EraseExpiredChild()
 // 作成
 std::shared_ptr<GameObject> GameObjectManager::Create()
 {
+	std::lock_guard<std::mutex> lock(mutex_);
+
 	std::shared_ptr<GameObject> obj = std::make_shared<GameObject>();
 	obj->AddComponent<TransformCom>();
 	{
@@ -187,9 +189,11 @@ void GameObjectManager::Update(float elapsedTime)
 {
 	for (std::shared_ptr<GameObject>& obj : startGameObject_)
 	{
+		if (!obj)continue;
+
 		//レンダラーコンポーネントがあればレンダーオブジェに入れる
 		std::shared_ptr<RendererCom> rendererComponent = obj->GetComponent<RendererCom>();
-		if (rendererComponent) 
+		if (rendererComponent)
 		{
 			//モデルをスレッド読み込み
 			rendererComponent->GetModel()->JoinThred();

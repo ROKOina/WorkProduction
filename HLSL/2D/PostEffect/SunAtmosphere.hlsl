@@ -29,7 +29,9 @@ cbuffer ATMOSPHERE_CONSTANTS : register(b0)
     float sun_highlight_exponential_factor; // Affects the area of influence of the sun's highlights.
     float sun_highlight_intensity;
 
-    float3 dummy;
+    float enabled;
+    
+    float2 dummy;
     
     row_major float4x4 view;
     row_major float4x4 invProj;
@@ -197,54 +199,61 @@ float3 cc(float3 color, float factor, float factor2) // color modifier
 float4 main(VS_OUT pin) : SV_TARGET
 {
     //return float4(pin.texcoord.x, pin.texcoord.y, 0, 1);
+ 
+    if(enabled>0)
+    {
+        float3 fragment_color = mainTex.Sample(samplerLiner, pin.texcoord).rgb;
+        float alpha = pin.color.a;
     
-    float3 fragment_color = mainTex.Sample(samplerLiner, pin.texcoord).rgb;
-    float alpha = pin.color.a;
-    
-    uint2 dimensions;
-    uint mip_level = 0, number_of_samples;
-    mainTex.GetDimensions(mip_level, dimensions.x, dimensions.y, number_of_samples);
-    const float aspect = (float) dimensions.y / dimensions.x;
+        uint2 dimensions;
+        uint mip_level = 0, number_of_samples;
+        mainTex.GetDimensions(mip_level, dimensions.x, dimensions.y, number_of_samples);
+        const float aspect = (float) dimensions.y / dimensions.x;
 
     
-    float scene_depth = mainDepthTex.Sample(samplerLiner, pin.texcoord).x;
+        float scene_depth = mainDepthTex.Sample(samplerLiner, pin.texcoord).x;
     
-    float4 ndc_position;
+        float4 ndc_position;
     //texture space to ndc
-    ndc_position.x = pin.texcoord.x * +2 - 1;
-    ndc_position.y = pin.texcoord.y * -2 + 1;
-    ndc_position.z = scene_depth;
-    ndc_position.w = 1;
+        ndc_position.x = pin.texcoord.x * +2 - 1;
+        ndc_position.y = pin.texcoord.y * -2 + 1;
+        ndc_position.z = scene_depth;
+        ndc_position.w = 1;
 
 	//ndc to world space
-    float4 world_position = mul(ndc_position, invViewProj);
-    world_position = world_position / world_position.w;
+        float4 world_position = mul(ndc_position, invViewProj);
+        world_position = world_position / world_position.w;
 
     
 	// Adapt atmosphere effects.
-    fragment_color = atmosphere(fragment_color, mist_color.rgb * lightColor.rgb * lightColor.w, world_position.xyz, viewPosition.xyz);
+        fragment_color = atmosphere(fragment_color, mist_color.rgb * lightColor.rgb * lightColor.w, world_position.xyz, viewPosition.xyz);
 
 	// Lens flare
-    float4 ndc_sun_position = mul(float4(-normalize(lightDirection.xyz) * distance_to_sun, 1), viewProjection);
-    ndc_sun_position /= ndc_sun_position.w;
-    if (saturate(ndc_sun_position.z) == ndc_sun_position.z)
-    {
-        float4 occluder;
-        occluder.xy = ndc_sun_position.xy;
-        occluder.z = mainDepthTex.Sample(samplerLiner, float2(ndc_sun_position.x * 0.5 + 0.5, 0.5 - ndc_sun_position.y * 0.5)).x;
-        occluder = mul(float4(occluder.xyz, 1), invProj);
-        occluder /= occluder.w;
-        float occluded_factor = step(250.0, occluder.z);
+        float4 ndc_sun_position = mul(float4(-normalize(lightDirection.xyz) * distance_to_sun, 1), viewProjection);
+        ndc_sun_position /= ndc_sun_position.w;
+        if (saturate(ndc_sun_position.z) == ndc_sun_position.z)
+        {
+            float4 occluder;
+            occluder.xy = ndc_sun_position.xy;
+            occluder.z = mainDepthTex.Sample(samplerLiner, float2(ndc_sun_position.x * 0.5 + 0.5, 0.5 - ndc_sun_position.y * 0.5)).x;
+            occluder = mul(float4(occluder.xyz, 1), invProj);
+            occluder /= occluder.w;
+            float occluded_factor = step(250.0, occluder.z);
 
 		//const float2 aspect_correct = float2(1.0, aspect);
-        const float2 aspect_correct = float2(1.0 / aspect, 1.0);
+            const float2 aspect_correct = float2(1.0 / aspect, 1.0);
 
-        float sun_highlight_factor = max(0, dot(normalize(mul(world_position - viewPosition, view)).xyz, float3(0, 0, 1)));
-        float3 lens_flare_color = float3(1.4, 1.2, 1.0) * lens_flare(ndc_position.xy * aspect_correct, ndc_sun_position.xy * aspect_correct);
-        lens_flare_color -= noise(ndc_position.xy * 256) * .015;
-        lens_flare_color = cc(lens_flare_color, .5, .1);
-        fragment_color += max(0.0, lens_flare_color) * occluded_factor * lightColor.rgb * 0.5 /* * directional_light_color[0].w*/;
-    }
+            float sun_highlight_factor = max(0, dot(normalize(mul(world_position - viewPosition, view)).xyz, float3(0, 0, 1)));
+            float3 lens_flare_color = float3(1.4, 1.2, 1.0) * lens_flare(ndc_position.xy * aspect_correct, ndc_sun_position.xy * aspect_correct);
+            lens_flare_color -= noise(ndc_position.xy * 256) * .015;
+            lens_flare_color = cc(lens_flare_color, .5, .1);
+            fragment_color += max(0.0, lens_flare_color) * occluded_factor * lightColor.rgb * 0.5 /* * directional_light_color[0].w*/;
+        }
     
-    return float4(fragment_color, alpha);
+        return float4(fragment_color, alpha);
+    }
+    else
+    {
+        return mainTex.Sample(samplerLiner, pin.texcoord);
+    }
 }
