@@ -9,7 +9,7 @@ class SceneManager
 {
 private:
     SceneManager();
-    ~SceneManager(){}
+    ~SceneManager();
 
 public:
     //唯一のインスタンス取得
@@ -31,19 +31,20 @@ public:
     //シーン切り替え
     void ChangeScene(Scene* scene);
 
-    void ChangeParticleUpdate(float elapsedTime);
-    void ChangeParticleRender();
-    void ChangeParticleGui();
 
     std::shared_ptr<GameObject> GetParticleObj()
     {
         return changeParticle_;
     }
 
+    bool GetParticleUpdate() { return isParticleUpdate_; }
+    void SetParticleUpdate(bool particleUpdate) { isParticleUpdate_ = particleUpdate; }
+
 private:
     Scene* currentScene_ = nullptr;
     Scene* nextScene_ = nullptr;
 
+    bool isParticleUpdate_ = true;
     std::shared_ptr<GameObject> changeParticle_;
     std::shared_ptr<GameObject> changeParticleCamera_;
 };

@@ -15,6 +15,9 @@
 #include "Components\CameraCom.h"
 #include "Components\AnimationCom.h"
 #include "Components\ColliderCom.h"
+#include "Components\ParticleSystemCom.h"
+#include "GameSource\Render\Effect\EffectManager.h"
+
 
 //初期化
 void SceneTitle::Initialize()
@@ -158,6 +161,9 @@ void SceneTitle::Initialize()
 
     //瞬き
     eyeTime_ = 3;
+
+    //パーティクル遷移時間
+    transitionTimer_ = 1;
 }
 
 //終了化
@@ -202,18 +208,24 @@ void SceneTitle::Update(float elapsedTime)
 
     if (isSceneEndFlag_)
     {
-        SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame));
-        GameObjectManager::Instance().AllRemove();
+        //パーティクル遷移時間
+        transitionTimer_ -= elapsedTime;
+        if (transitionTimer_ < 0)
+        {
+            SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame));
+            GameObjectManager::Instance().AllRemove();
 
-        //シェイプ設定
-        std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
-        std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
-        res->ShapeReset();
+            //シェイプ設定
+            std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
+            std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+            res->ShapeReset();
+            SceneManager::Instance().SetParticleUpdate(false);
+        }
     }
 
     //Renderを遅らせる
     if (firstFrameSkip_)
-        frameDelayRender = true;
+        frameDelayRender_ = true;
 
     //ロリポップ行列設定
     if (firstFrameSkip_)
@@ -268,60 +280,13 @@ void SceneTitle::Update(float elapsedTime)
         res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[8].rate = 0;
     }
 
-
-    //遷移エフェクト
-    {
-        //ビューポート
-        D3D11_VIEWPORT viewport;
-        UINT numViewports = 1;
-        Graphics::Instance().GetDeviceContext()->RSGetViewports(&numViewports, &viewport);
-
-        //変換行列
-        DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&mainCamera_->GetView());
-        DirectX::XMMATRIX Projection = DirectX::XMLoadFloat4x4(&mainCamera_->GetProjection());
-        DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
-
-        //std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
-        //DirectX::XMFLOAT3 effPosition = pico->transform_->GetWorldPosition();
-        //DirectX::XMVECTOR EffPosition = DirectX::XMLoadFloat3(&effPosition);
-
-        ////ワールド座標からスクリーン座標に変換
-        //EffPosition = DirectX::XMVector3Project(
-        //    EffPosition,
-        //    viewport.TopLeftX, viewport.TopLeftY,
-        //    viewport.Width, viewport.Height,
-        //    viewport.MinDepth, viewport.MaxDepth,
-        //    Projection, View, World
-        //);
-
-        DirectX::XMFLOAT3 effPosition;
-        DirectX::XMVECTOR EffPosition;
-        effPosition.x = -100;
-        effPosition.y = -100;
-        effPosition.z = 0.5f;
-        EffPosition = DirectX::XMLoadFloat3(&effPosition);
-
-        //スクリーン座標からワールド座標に変換
-        EffPosition = DirectX::XMVector3Unproject(
-            EffPosition,
-            viewport.TopLeftX, viewport.TopLeftY,
-            viewport.Width, viewport.Height,
-            viewport.MinDepth, viewport.MaxDepth,
-            Projection, View, World
-        );
-
-        DirectX::XMStoreFloat3(&effPosition, EffPosition);
-
-        SceneManager::Instance().GetParticleObj()->transform_->SetWorldPosition(effPosition);
-        SceneManager::Instance().GetParticleObj()->transform_->SetEulerRotation(DirectX::XMFLOAT3(-17, 171, -109));
-    }
 }
 
 //描画処理
 void SceneTitle::Render(float elapsedTime)
 {
     if (isSceneEndFlag_)return;
-    if (!frameDelayRender)return;
+    if (!frameDelayRender_)return;
 
     Graphics& graphics = Graphics::Instance();
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();
@@ -330,8 +295,6 @@ void SceneTitle::Render(float elapsedTime)
 
     //画面クリア＆レンダーターゲット設定
     FLOAT color[] = { 0.0f,0.0f,0.5f,1.0f };    //RGBA(0.0~1.0)
-    dc->ClearRenderTargetView(rtv, color);
-    dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,1.0f, 0);
     dc->OMSetRenderTargets(1, &rtv, dsv);
 
     // 描画処理
@@ -380,20 +343,6 @@ void SceneTitle::Render(float elapsedTime)
         // デバッグレンダラ描画実行
         graphics.GetDebugRenderer()->Render(dc, mainCamera_->GetView(), mainCamera_->GetProjection());
 
-        ////2Dスプライト描画
-        //{
-        //    float screenWidth = static_cast<float>(graphics.GetScreenWidth());
-        //    float screenHeight = static_cast<float>(graphics.GetScreenHeight());
-        //    float textureWidth = static_cast<float>(sprite_->GetTextureWidth());
-        //    float textureHeight = static_cast<float>(sprite_->GetTextureHeight());
-        //    //タイトルスプライト描画
-        //    sprite_->Render(dc,
-        //        0, 0, screenWidth, screenHeight,
-        //        0, 0, textureWidth, textureHeight,
-        //        0,
-        //        1, 1, 1, 1);
-        //}
-
         //バッファ戻す
         Graphics::Instance().RestoreRenderTargets();
 
@@ -402,14 +351,12 @@ void SceneTitle::Render(float elapsedTime)
 
     }
 
+    //if (ImGui::Begin("A", nullptr, ImGuiWindowFlags_None))
+    //    ImGui::DragFloat3("angleCandy", &candyData_[0].angle.x, 0.01f);
+    //    ImGui::DragFloat3("posCandy", &candyData_[0].pos.x, 0.01f);
+    //    ImGui::DragFloat3("angleCandy1", &candyData_[1].angle.x, 0.01f);
 
-
-    if (ImGui::Begin("A", nullptr, ImGuiWindowFlags_None))
-        ImGui::DragFloat3("angleCandy", &candyData_[0].angle.x, 0.01f);
-        ImGui::DragFloat3("posCandy", &candyData_[0].pos.x, 0.01f);
-        ImGui::DragFloat3("angleCandy1", &candyData_[1].angle.x, 0.01f);
-
-    ImGui::End();
+    //ImGui::End();
 }
 
 //演出
@@ -657,7 +604,19 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
                 DirectX::XMFLOAT3 cPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
                 DirectX::XMStoreFloat3(&cPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cPos), DirectX::XMLoadFloat3(&startAfter_.cameraPos2), 0.08f));
                 mainCamera_->GetGameObject()->transform_->SetWorldPosition(cPos);
+
+                //エフェクト流す
+                std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
+                if (!particle->GetEnabled())
+                {
+                    particle->SetEnabled(true);
+                    particle->GetSaveParticleData().particleData.isRoop = true;
+                    particle->IsRestart();
+                    SceneManager::Instance().SetParticleUpdate(true);
+                }
+
             }
+
         }
 
         //ロリポップサイズ設定

@@ -122,9 +122,7 @@ void SceneLoading::Render(float elapsedTime)
 
         postEff_->Render(mainCamera_);
         postEff_->ImGuiRender();
-
     }
-
 }
 
 

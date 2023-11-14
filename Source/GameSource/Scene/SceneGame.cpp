@@ -90,7 +90,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for(int i = 0;i < 10;++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -105,16 +105,10 @@ void SceneGame::Initialize()
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);
 
-		////発光を消す
-		//std::vector<ModelResource::Material>& materials = r->GetModel()->GetResourceShared()->GetMaterialsEdit();
-		//materials[0].toonStruct._Emissive_Color.w = 0;
-
-
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
 		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-		//a->PlayAnimation(5, true);
 
 		std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
 
@@ -173,6 +167,13 @@ void SceneGame::Initialize()
 			weapon->SetNodeName("RightHand");
 			weapon->SetColliderUpDown({ 1.36f,0 });
 			weapon->SetIsForeverUse(true);
+		}
+
+		//パーティクルを子に
+		{
+			std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::DAMAGE_SWETTS_ENEMY, { 0,0,0 }, obj);
+			particle->transform_->SetScale(DirectX::XMFLOAT3(100, 100, 100));
+			particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
 		}
 	}
 
@@ -604,6 +605,13 @@ void SceneGame::Initialize()
 	//EnemyManagerにプレイヤー登録
 	EnemyManager::Instance().RegisterPlayer(GameObjectManager::Instance().Find("pico"));
 #endif
+	std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
+
+	if (particle->GetSaveParticleData().particleData.isRoop)
+	{
+		particle->GetSaveParticleData().particleData.isRoop = false;
+		SceneManager::Instance().SetParticleUpdate(true);
+	}
 }
 
 // 終了化
@@ -662,8 +670,6 @@ void SceneGame::Render(float elapsedTime)
 
 	// 画面クリア＆レンダーターゲット設定
 	FLOAT color[] = { 0.0f, 0.0f, 0.5f, 1.0f };	// RGBA(0.0～1.0)
-	dc->ClearRenderTargetView(rtv, color);
-	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	dc->OMSetRenderTargets(1, &rtv, dsv);
 
 	// 描画処理

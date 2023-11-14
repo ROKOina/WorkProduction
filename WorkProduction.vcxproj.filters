@@ -624,5 +624,8 @@
     <FxCompile Include="HLSL\compute\ParticleCS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="HLSL\3D\SilhouttePS.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

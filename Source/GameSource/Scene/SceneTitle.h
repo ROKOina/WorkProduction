@@ -63,6 +63,9 @@ private:
     CandyData candyData_[2];
     int candyID_ = 0;
 
+    //遷移パーティクルが画面いっぱいになるまでのタイマー
+    float transitionTimer_ = 1;
+
     //描画最初初期の姿移るので、遅らせる
-    bool frameDelayRender = false;
+    bool frameDelayRender_ = false;
 };

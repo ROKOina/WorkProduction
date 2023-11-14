@@ -50,10 +50,11 @@ public:
     enum class DEPTHSTENCIL_STATE_TYPE {
         DEPTH_ON_3D,   //深度テストON 3Dに設定されていた
         DEPTH_ON_2D,   //深度テストON 2Dに設定されていた
-        DEPTH_OFF,   //深度テストOFF
-        SKYMAP,   //スカイマップ
-        PARTICLE,  //パーティクル
-        DEFALT,           //何もなし（保険）
+        DEPTH_OFF,     //深度テストOFF
+        SKYMAP,        //スカイマップ
+        PARTICLE,     //パーティクル
+        SILHOTTE,     //シルエット
+        DEFALT,       //何もなし（保険）
     };
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> GetDepthStencilState(DEPTHSTENCIL_STATE_TYPE depthStencilType) { return depthStencilState_[static_cast<int>(depthStencilType)].Get(); }
 private:
@@ -88,7 +89,5 @@ public:
     Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerState(SAMPLER_TYPE samplerType) { return samplerState_[static_cast<int>(samplerType)].Get(); }
 private:
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState_[static_cast<int>(SAMPLER_TYPE::DEFALT) + 1];
-
-
 };
 

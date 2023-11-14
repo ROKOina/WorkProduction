@@ -33,5 +33,6 @@ private:
 	bool gameEndFlag_ = false;
 	bool gameStartFlag_ = false;
 
+	//int 
 	std::unique_ptr<PostEffect> postEff_;
 };

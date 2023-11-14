@@ -3,21 +3,64 @@
 #include "Components/System/GameObject.h"
 #include "Components\ParticleSystemCom.h"
 #include "Components\TransformCom.h"
+#include "Components\CameraCom.h"
 #include "Graphics/Graphics.h"
+
+//このふぁいるはわたしがいじりました　ぱそこんをひらいたままほうちすると　こうなります
+//あははははははははははははははははははははははははははははははははははははははははは
+//うふふふふふふふふっふふふふふふふふふふふふふふふふふふうふふっふふふふふふふふふふ
+//おおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおおお
+//あばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばばば
+
+//ぜんかくすぺーすはぜったいにゆるしません
+//たぶすぺーすすきだけどふぉんとでさいずかわるのなぁぜなぁぜ
+
+//けっとうちすぱいくであなたがねむくなる
+//そしてこれすてろーるがけっかんにつまって　しぬ
+
+//特急呪物魔法　「シュウショクオチロー」
+
+//                            「救われる順」
+// 特急呪物魔法 <<<<<< サカバンバスピス <<< (超えられない壁) <<< ひよこ
 
 SceneManager::SceneManager()
 {
-    changeParticle_ = std::make_shared<GameObject>();
-    changeParticle_->AddComponent<TransformCom>();
-    changeParticle_->SetName("changeParticle");
+    //パーティクル
+    {
+        changeParticle_ = std::make_shared<GameObject>();
+        changeParticle_->AddComponent<TransformCom>();
+        changeParticle_->SetName("changeParticle");
+        changeParticle_->transform_->SetWorldPosition(DirectX::XMFLOAT3(-0.5f, 0.3f, 0.6f));
+        changeParticle_->transform_->SetEulerRotation(DirectX::XMFLOAT3(3, 95, -102));
 
-    std::shared_ptr<ParticleSystemCom> c = changeParticle_->AddComponent<ParticleSystemCom>(1000);
-    c->SetSweetsParticle(true);	//お菓子用
-    //c->LoadTexture("./Data/Sprite/sweetsParticle.png");
-    c->Load("Data/Effect/para/TitleParticle.ipff");
+        std::shared_ptr<ParticleSystemCom> c = changeParticle_->AddComponent<ParticleSystemCom>(5000);
+        c->SetSweetsParticle(true);	//お菓子用
+        c->Load("Data/Effect/para/TitleParticle2.ipff");
+        c->SetEnabled(false);
 
-    changeParticle_->Start();
+        changeParticle_->Start();
+    }
+
+    //パーティクルカメラ
+    {
+        changeParticleCamera_ = std::make_shared<GameObject>();
+        changeParticleCamera_->AddComponent<TransformCom>();
+        changeParticleCamera_->SetName("changeParticleCamera");
+
+        Graphics& graphics = Graphics::Instance();
+        std::shared_ptr<CameraCom> c = changeParticleCamera_->AddComponent<CameraCom>();
+        c->SetPerspectiveFov(
+            DirectX::XMConvertToRadians(45),
+            graphics.GetScreenWidth() / graphics.GetScreenHeight(),
+            0.1f, 1000.0f
+        );
+    }
 }
+
+SceneManager::~SceneManager()
+{
+}
+
 
 //更新処理
 void SceneManager::Update(float elapsedTime)
@@ -40,6 +83,14 @@ void SceneManager::Update(float elapsedTime)
     {
         currentScene_->Update(elapsedTime);
     }
+
+    //パーティクル用
+    if(isParticleUpdate_)
+    {
+        changeParticle_->transform_->UpdateTransform();
+        changeParticle_->Update(elapsedTime);
+        changeParticleCamera_->Update(elapsedTime);
+    }
 }
 
 //描画処理
@@ -48,6 +99,29 @@ void SceneManager::Render(float elapsedTime)
     if (currentScene_ != nullptr)
     {
         currentScene_->Render(elapsedTime);
+    }
+
+    Graphics& graphics = Graphics::Instance();
+    ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+    Dx11StateLib* dx11State = graphics.GetDx11State().get();
+
+    //パーティクル用
+    {
+        dc->OMSetDepthStencilState(
+            dx11State->GetDepthStencilState(Dx11StateLib::DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_2D).Get(),
+            0);
+
+        // 描画処理
+        ShaderParameter3D& rc = graphics.shaderParameter3D_;
+        std::shared_ptr<CameraCom> particleCamera = changeParticleCamera_->GetComponent<CameraCom>();
+        //カメラパラメーター設定
+        rc.view = particleCamera->GetView();
+        rc.projection = particleCamera->GetProjection();
+        DirectX::XMFLOAT3 cameraPos = particleCamera->GetGameObject()->transform_->GetWorldPosition();
+        rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
+
+        changeParticle_->GetComponent<ParticleSystemCom>()->Render();
+        changeParticle_->OnGUI();
     }
 }
 
@@ -69,41 +143,3 @@ void SceneManager::ChangeScene(Scene* scene)
     nextScene_ = scene;
 }
 
-void SceneManager::ChangeParticleUpdate(float elapsedTime)
-{
-    changeParticle_->Update(elapsedTime);
-}
-
-void SceneManager::ChangeParticleRender()
-{
-    //Graphics& graphics = Graphics::Instance();
-
-    ////一番最初のシェーダー情報を保存
-    //static DirectX::XMFLOAT4 viewPosition = graphics.shaderParameter3D_.viewPosition;
-    //static DirectX::XMFLOAT4X4 view = graphics.shaderParameter3D_.view;
-    //static DirectX::XMFLOAT4X4 projection = graphics.shaderParameter3D_.projection;
-    //static DirectX::XMFLOAT4 lightDirection = graphics.shaderParameter3D_.lightDirection;
-    //DirectX::XMFLOAT4 saveViewPosition = graphics.shaderParameter3D_.viewPosition;
-    //DirectX::XMFLOAT4X4 saveView = graphics.shaderParameter3D_.view;
-    //DirectX::XMFLOAT4X4 saveProjection = graphics.shaderParameter3D_.projection;
-    //DirectX::XMFLOAT4 saveLightDirection = graphics.shaderParameter3D_.lightDirection;
-
-    ////最初のシェーダー情報を代入
-    //graphics.shaderParameter3D_.viewPosition = viewPosition;
-    //graphics.shaderParameter3D_.view = view;
-    //graphics.shaderParameter3D_.projection = projection;
-    //graphics.shaderParameter3D_.lightDirection = lightDirection;
-
-    changeParticle_->GetComponent<ParticleSystemCom>()->Render();
-
-    ////前の情報に戻す
-    //graphics.shaderParameter3D_.viewPosition = saveViewPosition;
-    //graphics.shaderParameter3D_.view = saveView;
-    //graphics.shaderParameter3D_.projection = saveProjection;
-    //graphics.shaderParameter3D_.lightDirection = saveLightDirection;
-}
-
-void SceneManager::ChangeParticleGui()
-{
-    changeParticle_->OnGUI();
-}

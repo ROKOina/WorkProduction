@@ -209,6 +209,8 @@ public:
 
 		void Initialize();
 
+		void Restart();
+
 		void Render();
 
 		//パーティクルロード
@@ -221,6 +223,9 @@ public:
 	//ループ
 	void SetRoop(bool roop) { particleData_.particleData.isRoop = roop; }
 	bool GetRoop() { return particleData_.particleData.isRoop; }
+
+	//リスタート
+	void IsRestart() { isRestart_ = true; }
 
 	SaveParticleData& GetSaveParticleData() { return particleData_; }
 
@@ -285,9 +290,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer_;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> gameBuffer_;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> sceneBuffer_;
-
-	////パーティクル生成をスレッド化
-	//std::future<void> future;			
 
 	//debug関係
 	bool isRestart_ = false;

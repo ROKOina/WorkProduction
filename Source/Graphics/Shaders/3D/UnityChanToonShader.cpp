@@ -38,7 +38,6 @@ UnityChanToonShader::UnityChanToonShader(ID3D11Device* device)
         dx11State->createConstantBuffer(device, sizeof(UnityChanToonStruct), unityChanToonConstantBuffer_.GetAddressOf());
         dx11State->createConstantBuffer(device, sizeof(CbShape), shapeConstantBuffer_.GetAddressOf());
     }
-
 }
 
 void UnityChanToonShader::Begin(ID3D11DeviceContext* dc, const ShaderParameter3D& rc)

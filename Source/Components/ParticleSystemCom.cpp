@@ -188,8 +188,6 @@ UINT align(UINT num, UINT alignment)
 ParticleSystemCom::ParticleSystemCom(int particleCount, bool isAutoDeleteFlag)
 	: maxParticleCount_(particleCount), isAutoDeleteFlag_(isAutoDeleteFlag)
 {
-	////パーティクル初期化
-	//future = Graphics::Instance().GetThreadPool()->submit([&]() { return Initialize(); });
 }
 
 // 開始処理
@@ -197,7 +195,6 @@ void ParticleSystemCom::Start()
 {
 	//パーティクル初期化
 	Initialize();
-	//future.get();
 }
 
 // 更新処理
@@ -210,7 +207,7 @@ void ParticleSystemCom::Update(float elapsedTime)
 	{
 		isRestart_ = false;
 		lifeLimit_ = 0;
-		Initialize();
+		Restart();
 	}
 
 	//削除判定
@@ -223,8 +220,11 @@ void ParticleSystemCom::Update(float elapsedTime)
 		lifeLimit_ = 0;
 	}
 
+	std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
 
 	dc->CSSetUnorderedAccessViews(0, 1, particleUAV_.GetAddressOf(), NULL);
 
@@ -668,6 +668,30 @@ void ParticleSystemCom::OnGUI()
 
 		ImGui::TreePop();
 	}
+}
+
+void ParticleSystemCom::Restart()
+{
+	std::lock_guard<std::mutex> lock(Graphics::Instance().GetMutex());
+
+	Graphics& graphics = Graphics::Instance();
+	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+	dc->CSSetUnorderedAccessViews(0, 1, particleUAV_.GetAddressOf(), NULL);
+
+	dc->UpdateSubresource(constantBuffer_.Get(), 0, 0, &particleData_.particleData, 0, 0);
+	dc->CSSetConstantBuffers(9, 1, constantBuffer_.GetAddressOf());
+
+	dc->UpdateSubresource(gameBuffer_.Get(), 0, 0, &gameData_, 0, 0);
+	dc->CSSetConstantBuffers(10, 1, gameBuffer_.GetAddressOf());
+
+	dc->CSSetShader(particleInitializerCompute_.Get(), NULL, 0);
+
+	const UINT thread_group_count_x = align(static_cast<UINT>(maxParticleCount_), NUMTHREADS_X) / NUMTHREADS_X;
+	dc->Dispatch(thread_group_count_x, 1, 1);
+
+	ID3D11UnorderedAccessView* null_unordered_access_view{};
+	dc->CSSetUnorderedAccessViews(0, 1, &null_unordered_access_view, NULL);
 }
 
 void ParticleSystemCom::Initialize()

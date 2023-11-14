@@ -65,7 +65,7 @@ private:
 		InializeParticle("Data/Effect/para/combo2.ipff"),
 		InializeParticle("Data/Effect/para/combo3.ipff", true, 1500, true),
 		InializeParticle("Data/Effect/para/damageSweets.ipff", true, 100, true),
-		InializeParticle("Data/Effect/para/damageSweetsEnemy.ipff", true, 10, true),
+		InializeParticle("Data/Effect/para/damageSweetsEnemy.ipff", false, 10, true),
 	};
 
 	struct ParticleDataMove
