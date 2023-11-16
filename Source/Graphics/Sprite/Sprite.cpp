@@ -260,3 +260,11 @@ void Sprite::Render(ID3D11DeviceContext *immediate_context,
 	}
 }
 
+void Sprite::SetShaderResourceView(ID3D11ShaderResourceView* srv, float textureWidth, float textureHeight)
+{
+	shaderResourceView_.Reset();
+	shaderResourceView_ = srv;
+	textureWidth_ = textureWidth;
+	textureHeight_ = textureHeight;
+}
+

@@ -136,5 +136,5 @@ private:
     std::shared_ptr<MovePlayer> movePlayer_;
     std::shared_ptr<JustAvoidPlayer> justAvoidPlayer_;
 
-    std::unique_ptr<Sprite> sprite;
+    std::unique_ptr<Sprite> maskSprite_;
 };

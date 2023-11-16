@@ -186,6 +186,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
     <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
+    <ClInclude Include="Source\Graphics\Shaders\3D\SilhoutteShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\UnityChanToonShader.h" />
     <ClInclude Include="Source\Graphics\DebugRenderer\DebugRenderer.h" />
     <ClInclude Include="Source\Graphics\Dx11StateLib.h" />
@@ -273,6 +274,7 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.cpp" />
     <ClCompile Include="Source\GameSource\Stage\PathSearch.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp" />
+    <ClCompile Include="Source\Graphics\Shaders\3D\SilhoutteShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\UnityChanToonShader.cpp" />
     <ClCompile Include="Source\Graphics\DebugRenderer\DebugRenderer.cpp" />
     <ClCompile Include="Source\Graphics\Dx11StateLib.cpp" />
@@ -329,6 +331,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\2D\PostEffect\GaussianBlur.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\2D\PostEffect\MaskPost.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>

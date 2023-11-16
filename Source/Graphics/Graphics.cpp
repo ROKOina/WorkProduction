@@ -2,6 +2,7 @@
 #include "Graphics/Shaders/3D/LambertShader.h"
 #include "Graphics/Shaders/3D/PhongShader.h"
 #include "Graphics/Shaders/3D/UnityChanToonShader.h"
+#include "Graphics/Shaders/3D/SilhoutteShader.h"
 #include "Graphics/Graphics.h"
 
 Graphics* Graphics::instance_ = nullptr;
@@ -138,6 +139,7 @@ Graphics::Graphics(HWND hWnd)
 		shader_[SHADER_ID::Default] = std::make_unique<LambertShader>(device_.Get());
 		shader_[SHADER_ID::Phong] = std::make_unique<PhongShader>(device_.Get());
 		shader_[SHADER_ID::UnityChanToon] = std::make_unique<UnityChanToonShader>(device_.Get());
+		shader_[SHADER_ID::Silhoutte] = std::make_unique<SilhoutteShader>(device_.Get());
 
 		//パラメーター設定
 		{

@@ -61,6 +61,9 @@ void JustAvoidPlayer::JustInisialize()
     Graphics::Instance().SetWorldSpeed(1);
     //カラーグレーディング戻す
     Graphics::Instance().shaderParameter3D_.colorGradingData.saturation = 1.5f;
+    //シルエット有効に
+    std::shared_ptr<RendererCom> renderCom = player_.lock()->GetGameObject()->GetComponent<RendererCom>();
+    renderCom->SetSilhouetteFlag(true);
 
     for (int i = 0; i < 4; ++i)
     {
@@ -103,9 +106,11 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
 
         //animator->SetAnimationSpeedOffset(0.3f);
 
+        std::shared_ptr<RendererCom> renderCom = player_.lock()->GetGameObject()->GetComponent<RendererCom>();
         //プレイヤー透明に
-        player_.lock()->GetGameObject()->GetComponent<RendererCom>()->
-            GetModel()->SetMaterialColor({ 1,1,1,0 });
+        renderCom->GetModel()->SetMaterialColor({ 1,1,1,0 });
+        //シルエット切る
+        renderCom->SetSilhouetteFlag(false);
 
         bool inputFlag = false;
         if (DirectX::XMVectorGetX(DirectX::XMVector3Length(Input)) > 0.1f)

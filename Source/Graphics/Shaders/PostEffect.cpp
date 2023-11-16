@@ -29,6 +29,8 @@ void CalcGaussianFilter(DirectX::XMFLOAT4* array, int karnel_size, float sigma) 
 
 PostEffect::PostEffect(UINT width, UINT height)
 {
+    lightDirMask_ = { 0,0,1,1 };
+
     Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
     ID3D11Device* device = Graphics::Instance().GetDevice();
     //バッファ作成
@@ -45,6 +47,7 @@ PostEffect::PostEffect(UINT width, UINT height)
     bloomKawaseFilter_ = std::make_unique<ShaderPost>("BloomKawase");
     bloomBlur_ = std::make_unique<ShaderPost>("GaussianBlur");
     sun_ = std::make_unique<ShaderPost>("SunAtmosphere");
+    mask_ = std::make_unique<ShaderPost>("MaskPost");
 
     {
         //スカイマップ
@@ -83,8 +86,8 @@ PostEffect::PostEffect(UINT width, UINT height)
     for (int i = 0; i < BlurCount; ++i)
     {
         renderPost_[i + 1] = std::make_unique<PostRenderTarget>(device, wB, hB, DXGI_FORMAT_R16G16B16A16_FLOAT);
-        wB *= string;
-        hB *= string;
+        wB = static_cast<UINT>(wB*string);
+        hB = static_cast<UINT>(hB*string);
     }
 
     //太陽
@@ -94,6 +97,17 @@ PostEffect::PostEffect(UINT width, UINT height)
     renderPostFull_ = std::make_unique<PostRenderTarget>(device,
         static_cast<UINT>(Graphics::Instance().GetScreenWidth()),
         static_cast<UINT>(Graphics::Instance().GetScreenHeight()), DXGI_FORMAT_R16G16B16A16_FLOAT);
+
+    //2DMask
+    for (int i = 0; i < 3; ++i)
+    {
+        renderPost2D_[i] = std::make_unique<PostRenderTarget>(device,
+            static_cast<UINT>(Graphics::Instance().GetScreenWidth()),
+            static_cast<UINT>(Graphics::Instance().GetScreenHeight()), DXGI_FORMAT_R16G16B16A16_FLOAT);
+    }
+    depthPost2D_ = std::make_unique<PostDepthStencil>(device,
+        static_cast<UINT>(Graphics::Instance().GetScreenWidth()),
+        static_cast<UINT>(Graphics::Instance().GetScreenHeight()));
 }
 
 //描画
@@ -687,6 +701,191 @@ void PostEffect::SkymapRender(std::shared_ptr<CameraCom> camera)
         dc->IASetInputLayout(nullptr);
     }
 
+}
+
+void PostEffect::CacheMaskBuffer(std::shared_ptr<CameraCom> camera)
+{
+    Graphics& graphics = Graphics::Instance();
+    ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+    for (int i = 0; i < 3; ++i)
+    {
+        FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        dc->ClearRenderTargetView(renderPost2D_[i]->renderTargetView.Get(), color);
+    }
+
+    graphics.CacheRenderTargets();
+
+    //描画先を変更
+    ID3D11RenderTargetView* rtv = renderPost2D_[0]->renderTargetView.Get();
+    ID3D11DepthStencilView* dsv = depthPost2D_->depthStencilView.Get();
+
+    FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    dc->ClearRenderTargetView(rtv, color);    
+    dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    dc->OMSetRenderTargets(1, &rtv, dsv);
+    D3D11_VIEWPORT	viewport{};
+    viewport.Width = static_cast<float>(renderPost2D_[0]->width);
+    viewport.Height = static_cast<float>(renderPost2D_[0]->height);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    dc->RSSetViewports(1, &viewport);
+
+
+    // 描画処理
+    ShaderParameter3D& rc = graphics.shaderParameter3D_;
+    //カメラパラメーター設定
+    rc.view = camera->GetView();
+    rc.projection = camera->GetProjection();
+    DirectX::XMFLOAT3 cameraPos = camera->GetGameObject()->transform_->GetWorldPosition();
+    rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
+
+    rc.lightDirection = lightDirMask_;
+}
+
+void PostEffect::StartBeMaskBuffer()
+{
+    Graphics& graphics = Graphics::Instance();
+    ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+    ID3D11DepthStencilView* dsv = depthPost2D_->depthStencilView.Get();
+
+    //描画先を変更
+    ID3D11RenderTargetView* rtv = renderPost2D_[1]->renderTargetView.Get();
+    FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    dc->ClearRenderTargetView(rtv, color);	
+    dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    dc->OMSetRenderTargets(1, &rtv, dsv);
+    D3D11_VIEWPORT	viewport{};
+    viewport.Width = static_cast<float>(renderPost2D_[1]->width);
+    viewport.Height = static_cast<float>(renderPost2D_[1]->height);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    dc->RSSetViewports(1, &viewport);
+}
+
+void PostEffect::RestoreMaskBuffer(DirectX::XMFLOAT2 pos, DirectX::XMFLOAT2 size)
+{
+    Graphics& graphics = Graphics::Instance();
+    ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+    //マスクされる側を動かせるようにスプライトにしてSrvにする
+    {
+        //描画先を変更
+        ID3D11RenderTargetView* rtv = renderPost2D_[2]->renderTargetView.Get();
+        ID3D11DepthStencilView* dsv = depthPost2D_->depthStencilView.Get();
+        FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        dc->ClearRenderTargetView(rtv, color);
+        dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        dc->OMSetRenderTargets(1, &rtv, dsv);
+        D3D11_VIEWPORT	viewport{};
+        viewport.Width = static_cast<float>(renderPost2D_[2]->width);
+        viewport.Height = static_cast<float>(renderPost2D_[2]->height);
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        dc->RSSetViewports(1, &viewport);
+
+        //マスクされる側をspriteで動かせるように
+        maskSprite_->SetShaderResourceView(renderPost2D_[1]->diffuseMap.Get(), 
+            static_cast<float>(renderPost2D_[1]->width), 
+            static_cast<float>(renderPost2D_[1]->height));
+       
+        maskSprite_->Render(dc, pos.x, pos.y,
+            maskSprite_->GetTextureWidth() * size.x, maskSprite_->GetTextureHeight() * size.y
+            , 0, 0, 
+            static_cast<float>(maskSprite_->GetTextureWidth()), 
+            static_cast<float>(maskSprite_->GetTextureHeight())
+            , 0, 1, 1, 1, 1);
+    }
+
+
+    graphics.RestoreRenderTargets();
+
+    //メインカメラに戻す処理
+
+}
+
+void PostEffect::DrawMask()
+{
+    Graphics& graphics = Graphics::Instance();
+    ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+    //マスク処理
+    D3D11_VIEWPORT	viewport{};
+    viewport.Width = static_cast<float>(renderPost2D_[0]->width);
+    viewport.Height = static_cast<float>(renderPost2D_[0]->height);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    dc->RSSetViewports(1, &viewport);
+
+    //マスクをするか（設定時確認用）
+    if (!isMask_)
+    {
+        //シェーダーリソースビュー設定
+        drawTexture_->SetShaderResourceView(
+            renderPost2D_[2]->diffuseMap, renderPost2D_[2]->width, renderPost2D_[2]->height);
+
+        drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+            0, 0, static_cast<float>(renderPost2D_[2]->width), static_cast<float>(renderPost2D_[2]->height),
+            0,
+            1, 1, 1, 1);
+
+        FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        dc->ClearRenderTargetView(renderPost2D_[1]->renderTargetView.Get(), color);
+
+        dc->PSSetShaderResources(1, 1, renderPost2D_[1]->diffuseMap.GetAddressOf());
+
+        mask_->Draw(drawTexture_.get());
+    }
+
+    //シェーダーリソースビュー設定
+    drawTexture_->SetShaderResourceView(
+        renderPost2D_[0]->diffuseMap, renderPost2D_[0]->width, renderPost2D_[0]->height);
+
+    drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+        0, 0, static_cast<float>(renderPost2D_[0]->width), static_cast<float>(renderPost2D_[0]->height),
+        0,
+        1, 1, 1, 1);
+
+    dc->PSSetShaderResources(1, 1, renderPost2D_[2]->diffuseMap.GetAddressOf());
+
+    mask_->Draw(drawTexture_.get());
+
+
+    //解放
+    ID3D11ShaderResourceView* srvs[] = { nullptr };
+    dc->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
+}
+
+void PostEffect::DrawMaskGui()
+{
+    if (ImGui::Begin("Mask", nullptr, ImGuiWindowFlags_None))
+    {
+        ImGui::Checkbox("isMask", &isMask_);
+
+        if (ImGui::DragFloat4("lightDir", &lightDirMask_.x, 0.01f))
+        {
+            DirectX::XMFLOAT3 dir = { lightDirMask_.x,lightDirMask_.y,lightDirMask_.z };
+            DirectX::XMStoreFloat3(&dir,
+                DirectX::XMVector3Normalize(
+                    DirectX::XMLoadFloat3(&dir)));
+            lightDirMask_.x = dir.x;
+            lightDirMask_.y = dir.y;
+            lightDirMask_.z = dir.z;
+        }
+
+        if (ImGui::TreeNode("RenderTargets"))
+        {
+            for (int i = 0; i < 2; ++i)
+            {
+                std::string s = "Post2D" + std::to_string(i);
+                ImGui::Text(s.c_str());
+                ImGui::Image(renderPost2D_[i]->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+            }
+
+            ImGui::TreePop();
+        }
+    }
+    ImGui::End();
 }
 
 

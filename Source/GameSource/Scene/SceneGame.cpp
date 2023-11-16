@@ -90,7 +90,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 0; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -259,6 +259,21 @@ void SceneGame::Initialize()
 		}
 	}
 
+	//マスク用プレイヤー
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("picoMask");
+		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+		obj->transform_->SetWorldPosition({ -0.05, -1.3, 1.2 });
+		obj->transform_->SetEulerRotation({ 0, 180, 0 });
+
+		const char* filename = "Data/Model/pico/picoAnim.mdl";
+		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+		r->LoadModel(filename);
+		r->SetShaderID(SHADER_ID::MaskUnityChan);
+			
+		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+	}
 
 	//プレイヤー
 	{
@@ -271,9 +286,9 @@ void SceneGame::Initialize()
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);
+		r->SetSilhouetteFlag(true);
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-		//a->PlayAnimation(4, true);
 
 		std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
 
@@ -574,6 +589,20 @@ void SceneGame::Initialize()
 		cameraObj->transform_->SetWorldPosition({ 0, 5, -10 });
 	}
 
+	//2Dマスク用カメラを生成
+	{
+		std::shared_ptr<GameObject> cameraMaskObj = GameObjectManager::Instance().Create();
+		cameraMaskObj->SetName("MaskCamera");
+
+		Graphics& graphics = Graphics::Instance();
+		std::shared_ptr<CameraCom> c = cameraMaskObj->AddComponent<CameraCom>();
+		c->SetPerspectiveFov(
+			DirectX::XMConvertToRadians(45),
+			graphics.GetScreenWidth() / graphics.GetScreenHeight(),
+			0.1f, 1000.0f
+		);
+	}
+
 	//メインカメラ設定
 	std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
 	mainCamera_ = camera;
@@ -658,6 +687,9 @@ void SceneGame::Update(float elapsedTime)
 
 	ParticleComManager::Instance().Update(elapsedTime);
 }
+
+DirectX::XMFLOAT4 ppss = { 0,0,1,1 };
+DirectX::XMFLOAT4 ppssCC = { 0,0,0,1 };
 
 // 描画処理
 void SceneGame::Render(float elapsedTime)
@@ -773,6 +805,100 @@ void SceneGame::Render(float elapsedTime)
 		EnemyManager::Instance().Render2D(elapsedTime);
 	}
 
+	//マスク用
+	{
+		//仮処理
+		static bool a = false;
+		if (!a)
+		{
+			a = true;
+			std::shared_ptr<FbxModelResource> res = GameObjectManager::Instance().Find("picoMask")->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+			for (auto& shape : res->GetMeshesEdit()[res->GetShapeIndex()].shapeData)
+			{
+				shape.rate = 0;
+			}
+			res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[5].rate = 1;
+			res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[9].rate = 1;
+			GameObjectManager::Instance().Find("picoMask")->GetComponent<AnimationCom>()
+				->PlayAnimation(ANIMATION_PLAYER::IDEL_2, true);
+
+		}
+
+		std::shared_ptr<CameraCom> maskCamera = GameObjectManager::Instance().Find("MaskCamera")->GetComponent<CameraCom>();
+
+		ImGui::Begin("MAK");
+		ImGui::DragFloat4("ppss", &ppss.x, 0.1f);
+
+		ImGui::DragFloat4("ppssCC", &ppssCC.x, 0.1f);
+		ImGui::End();
+
+		//faceFrameUI_->Render(dc, ppss.x, ppss.y, faceFrameUI_->GetTextureWidth() * ppss.z, faceFrameUI_->GetTextureHeight() * ppss.w
+		//	, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+		//	, 0, ppssCC.x, ppssCC.y, ppssCC.z, ppssCC.w);
+
+
+		//ワイプ枠外
+		faceFrameUI_->Render(dc, 3, 3, faceFrameUI_->GetTextureWidth() * 0.552f, faceFrameUI_->GetTextureHeight() * 0.552f
+			, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+			, 0, 0, 1, 1, 1);
+
+		//HP背景
+		faceFrameUI_->Render(dc, 15.6f,11.7f, faceFrameUI_->GetTextureWidth() * 2, faceFrameUI_->GetTextureHeight() * 0.5f
+			, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+			, 0, 0, 1, 1, 1);
+
+		//HPBar
+		{
+			//マスクする側描画
+			postEff_->CacheMaskBuffer(maskCamera);
+
+			//HPマスク
+			faceFrameUI_->Render(dc, 87.5f, 23.5f, faceFrameUI_->GetTextureWidth() * ppss.z, faceFrameUI_->GetTextureHeight() * 0.4f
+				, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+				, 0, 1, 0.6f, 1, 0.001f);
+
+			//マスクされる側描画
+			postEff_->StartBeMaskBuffer();
+
+			//HP
+			faceFrameUI_->Render(dc, 87.5f, 23.5f, faceFrameUI_->GetTextureWidth() * 1.5f, faceFrameUI_->GetTextureHeight() * 0.4f
+				, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+				, 0, 1, 0.6f, 1, 1);
+
+			sweetsSprite_->Render(dc, 0, 0, sweetsSprite_->GetTextureWidth() , sweetsSprite_->GetTextureHeight() 
+				, 0, 0, sweetsSprite_->GetTextureWidth(), sweetsSprite_->GetTextureHeight()
+				, 0, 1, 1, 1, 1);
+
+			//マスク処理終了処理
+			postEff_->RestoreMaskBuffer();
+
+			postEff_->DrawMask();
+			postEff_->DrawMaskGui();
+		}
+
+		//ワイプ
+		{
+			//マスクする側描画
+			postEff_->CacheMaskBuffer(maskCamera);
+
+			//ワイプ背景
+			faceFrameUI_->Render(dc, 12, 12, faceFrameUI_->GetTextureWidth() * 0.48f, faceFrameUI_->GetTextureHeight() * 0.48f
+				, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+				, 0, 1, 1, 1, 1);
+
+			//マスクされる側描画
+			postEff_->StartBeMaskBuffer();
+
+			//マスクオブジェ描画
+			GameObjectManager::Instance().RenderMask();
+
+			//マスク処理終了処理
+			postEff_->RestoreMaskBuffer({ -154 ,-72 }, { 0.3f,0.3f });
+
+			postEff_->DrawMask();
+			postEff_->DrawMaskGui();
+		}
+	}
 
 }
 

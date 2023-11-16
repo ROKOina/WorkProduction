@@ -34,6 +34,9 @@ public:
 	// テクスチャ高さ取得
 	int GetTextureHeight() const { return textureHeight_; }
 
+	//テクスチャ変更
+	void SetShaderResourceView(ID3D11ShaderResourceView* srv,float textureWidth,float textureHeight);
+
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>			vertexShader_;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>			pixelShader_;

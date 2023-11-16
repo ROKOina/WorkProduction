@@ -33,6 +33,9 @@ private:
 	bool gameEndFlag_ = false;
 	bool gameStartFlag_ = false;
 
-	//int 
 	std::unique_ptr<PostEffect> postEff_;
+
+	std::unique_ptr<Sprite> faceFrameUI_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceFrame.png");
+	std::unique_ptr<Sprite> sweetsSprite_ = std::make_unique<Sprite>("./Data/Sprite/sweetsParticle1.png");
+
 };

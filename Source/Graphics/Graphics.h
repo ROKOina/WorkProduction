@@ -17,7 +17,10 @@ enum SHADER_ID
 {
 	Default,
 	Phong,
+	Silhoutte,
 	UnityChanToon,
+
+	MaskUnityChan,
 
 	MAX,	//Å‘å”‚ğ•Û‚·‚é
 };

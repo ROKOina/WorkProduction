@@ -36,8 +36,14 @@ public:
     const int GetShaderID() const { return shaderID_; }
     void SetShaderID(SHADER_ID shaderID) { shaderID_ = shaderID; }
 
+    //シルエット描画フラグ
+    bool GetSilhouetteFlag() { return isSilhouette_; }
+    void SetSilhouetteFlag(bool flag) { isSilhouette_ = flag; }
+
 private:
     std::unique_ptr<Model>	model_;
+
+    bool isSilhouette_ = false;
 
     int shaderID_ = SHADER_ID::Default;  //シェーダーを決める
 };

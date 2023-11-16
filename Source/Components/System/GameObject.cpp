@@ -595,18 +595,39 @@ void GameObjectManager::Render3D()
 		isChangeShaderID_ = false;
 	}
 
+	//マスクオブジェ初期化
+	renderMaskObject_.clear();
+
 	// 描画
 	int oldShaderID = renderSortObject_[0].lock()->GetShaderID();	//違うシェーダーを使用するため、古いIDを保存
 	Shader* shader = graphics.GetShader(static_cast<SHADER_ID>(oldShaderID));
 	shader->Begin(dc, graphics.shaderParameter3D_);
+
+	//シルエット描画用
+	std::vector<std::weak_ptr<RendererCom>> silhouetteRender;
 
 	for (std::weak_ptr<RendererCom>& renderObj : renderSortObject_)
 	{
 		if (!renderObj.lock()->GetGameObject()->GetEnabled())continue;
 		if (!renderObj.lock()->GetEnabled())continue;
 
-		//シェーダーIDが変化したら、シェーダーを変更
 		int newShaderID = renderObj.lock()->GetShaderID();
+
+		//マスクオブジェ
+		if (newShaderID == static_cast<int>(SHADER_ID::MaskUnityChan))
+		{
+			renderMaskObject_.emplace_back(renderObj.lock());
+			continue;
+		}
+
+		//シルエット描画は最後に行う
+		if (renderObj.lock()->GetSilhouetteFlag())
+		{
+			silhouetteRender.emplace_back(renderObj.lock());
+			continue;
+		}
+
+		//シェーダーIDが変化したら、シェーダーを変更
 		if (oldShaderID != newShaderID)
 		{
 			shader->End(dc);
@@ -624,8 +645,59 @@ void GameObjectManager::Render3D()
 		}
 	}
 
-	shader->End(dc);
+	//シルエット描画
+	for (std::weak_ptr<RendererCom>& silhouette : silhouetteRender)
+	{
+		//シルエット描画
+		shader->End(dc);
 
+		shader = graphics.GetShader(SHADER_ID::Silhoutte);
+		oldShaderID = static_cast<int>(SHADER_ID::Silhoutte);
+
+		shader->Begin(dc, graphics.shaderParameter3D_);
+
+		Model* model = silhouette.lock()->GetModel();
+		if (model != nullptr)
+		{
+			shader->Draw(dc, model);
+		}
+
+		//モデル描画
+		shader->End(dc);
+
+		shader = graphics.GetShader(static_cast<SHADER_ID>(silhouette.lock()->GetShaderID()));
+
+		shader->Begin(dc, graphics.shaderParameter3D_);
+
+		if (model != nullptr)
+		{
+			shader->Draw(dc, model);
+		}
+
+	}
+
+	shader->End(dc);
+}
+
+void GameObjectManager::RenderMask()
+{
+	Graphics& graphics = Graphics::Instance();
+	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+	Shader* shader = graphics.GetShader(SHADER_ID::UnityChanToon);
+
+	shader->Begin(dc, graphics.shaderParameter3D_);
+
+	for (std::weak_ptr<RendererCom>& renderMaskObj : renderMaskObject_)
+	{
+		Model* model = renderMaskObj.lock()->GetModel();
+		if (model != nullptr)
+		{
+			shader->Draw(dc, model);
+		}
+	}
+
+	shader->End(dc);
 }
 
 //トレイル描画

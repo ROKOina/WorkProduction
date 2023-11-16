@@ -6,6 +6,8 @@
 #include "TextureFormat.h"
 #include "Graphics\Shaders\3D\ShaderParameter3D.h"
 
+#include "Graphics\Sprite\Sprite.h"
+
 class CameraCom;
 
 #define BlurCount 6
@@ -28,6 +30,14 @@ public:
 
     //レンズフレア有効設定
     void SetSunEnabled(bool enabled) { sun_->SetEnabled(enabled); }
+
+    //2Dマスク処理
+    void CacheMaskBuffer(std::shared_ptr<CameraCom> camera);     //マスクする側書き込み開始＆初期化
+    void StartBeMaskBuffer();   //マスクされる側書き込み開始
+    void RestoreMaskBuffer(DirectX::XMFLOAT2 pos = { 0,0 }, DirectX::XMFLOAT2 size = { 1,1 });
+    void DrawMask();
+    void DrawMaskGui();
+
 
 private:
     //ポストエフェクト用構造体
@@ -81,6 +91,12 @@ private:
     Microsoft::WRL::ComPtr<ID3D11VertexShader>			skyVertex_;
     Microsoft::WRL::ComPtr<ID3D11PixelShader>			skyPixel_;
 
+    //マスク
+    std::unique_ptr<ShaderPost> mask_;
+    DirectX::XMFLOAT4 lightDirMask_ = { 1,0,0,1 };
+    std::unique_ptr<Sprite> maskSprite_ = std::make_unique<Sprite>();
+    bool isMask_ = true;
+
     std::unique_ptr<ShaderPost> postEffect_;
     std::unique_ptr<ShaderPost> postRender_;
 
@@ -88,5 +104,7 @@ private:
     std::unique_ptr<PostRenderTarget> renderPost_[BloomCount];   //0:輝度、1～:ブラー
     std::unique_ptr<PostRenderTarget> renderPostSun_;
     std::unique_ptr<PostRenderTarget> renderPostFull_;  //フルスクリーン用のレンダーターゲット
+    std::unique_ptr<PostRenderTarget> renderPost2D_[3];  //2DMask用 0:マスクする側　1:マスクされる側 2:マスクされる側をスプライトに
+    std::unique_ptr<PostDepthStencil> depthPost2D_;  //2DMask用深度
 };
 
