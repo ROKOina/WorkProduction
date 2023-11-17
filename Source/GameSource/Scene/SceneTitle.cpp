@@ -163,7 +163,16 @@ void SceneTitle::Initialize()
     eyeTime_ = 3;
 
     //パーティクル遷移時間
-    transitionTimer_ = 1;
+    transitionOutTimer_ = 1.5f;
+    transitionInTimer_ = -1.0f;
+
+    std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
+    if (particle->GetEnabled()) //パーティクル起動していたら
+    {
+        transitionInTimer_ = 2.5f;
+        particle->GetSaveParticleData().particleData.isRoop = false;
+        SceneManager::Instance().SetParticleUpdate(true);
+    }
 }
 
 //終了化
@@ -183,34 +192,37 @@ void SceneTitle::Update(float elapsedTime)
     GamePad& gamePad = Input::Instance().GetGamePad();
 
     //何かボタンを押したらゲームシーンへ切りかえ
-    const GamePadButton anyButton =
-        GamePad::BTN_UP |
-        GamePad::BTN_RIGHT |
-        GamePad::BTN_DOWN |
-        GamePad::BTN_LEFT |
-        GamePad::BTN_A |
-        GamePad::BTN_B |
-        GamePad::BTN_X |
-        GamePad::BTN_Y |
-        GamePad::BTN_START |
-        GamePad::BTN_BACK |
-        GamePad::BTN_LEFT_THUMB |
-        GamePad::BTN_RIGHT_THUMB |
-        GamePad::BTN_LEFT_SHOULDER |
-        GamePad::BTN_RIGHT_SHOULDER |
-        GamePad::BTN_LEFT_TRIGGER |
-        GamePad::BTN_RIGHT_TRIGGER;
+    //const GamePadButton anyButton =
+    //    GamePad::BTN_UP |
+    //    GamePad::BTN_RIGHT |
+    //    GamePad::BTN_DOWN |
+    //    GamePad::BTN_LEFT |
+    //    GamePad::BTN_A |
+    //    GamePad::BTN_B |
+    //    GamePad::BTN_X |
+    //    GamePad::BTN_Y |
+    //    GamePad::BTN_START |
+    //    GamePad::BTN_BACK |
+    //    GamePad::BTN_LEFT_THUMB |
+    //    GamePad::BTN_RIGHT_THUMB |
+    //    GamePad::BTN_LEFT_SHOULDER |
+    //    GamePad::BTN_RIGHT_SHOULDER |
+    //    GamePad::BTN_LEFT_TRIGGER |
+    //    GamePad::BTN_RIGHT_TRIGGER;
+    const GamePadButton anyButton =GamePad::BTN_B ;
 
     if (gamePad.GetButtonDown() & anyButton)
     {
-        startFlag_ = true;
+        std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
+        if (!particle->GetEnabled())
+            startFlag_ = true;
     }
 
     if (isSceneEndFlag_)
     {
         //パーティクル遷移時間
-        transitionTimer_ -= elapsedTime;
-        if (transitionTimer_ < 0)
+        transitionOutTimer_ -= elapsedTime;
+        if (transitionOutTimer_ < 0)
         {
             SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame));
             GameObjectManager::Instance().AllRemove();
@@ -219,6 +231,17 @@ void SceneTitle::Update(float elapsedTime)
             std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
             std::shared_ptr<FbxModelResource> res = pico->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
             res->ShapeReset();
+            SceneManager::Instance().SetParticleUpdate(false);
+        }
+    }
+
+    if (transitionInTimer_ >= 0)
+    {
+        transitionInTimer_ -= elapsedTime;
+        if (transitionInTimer_ <= 0)
+        {
+            std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
+            particle->SetEnabled(false);
             SceneManager::Instance().SetParticleUpdate(false);
         }
     }

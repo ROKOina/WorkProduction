@@ -740,6 +740,7 @@ void PostEffect::CacheMaskBuffer(std::shared_ptr<CameraCom> camera)
     DirectX::XMFLOAT3 cameraPos = camera->GetGameObject()->transform_->GetWorldPosition();
     rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
 
+    saveLightDir_ = rc.lightDirection;
     rc.lightDirection = lightDirMask_;
 }
 
@@ -853,7 +854,10 @@ void PostEffect::DrawMask()
 
     //‰ð•ú
     ID3D11ShaderResourceView* srvs[] = { nullptr };
-    dc->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
+    dc->PSSetShaderResources(1, ARRAYSIZE(srvs), srvs);
+    //‘¾—z•ûŒü–ß‚·
+    ShaderParameter3D& rc = graphics.shaderParameter3D_;
+    rc.lightDirection = saveLightDir_;
 }
 
 void PostEffect::DrawMaskGui()
@@ -970,6 +974,12 @@ void PostEffect::ShaderPost::Draw(TextureFormat* renderTexture)
     {
         dc->VSSetShader(nullptr, nullptr, 0);
         dc->PSSetShader(nullptr, nullptr, 0);
-        dc->IASetInputLayout(nullptr);
+        dc->IASetInputLayout(nullptr);       
+        ID3D11ShaderResourceView* srvs[] =
+        {
+            nullptr
+        };
+        dc->PSSetShaderResources(0, ARRAYSIZE(srvs), srvs);
+
     }
 }

@@ -5,6 +5,7 @@
 #include "Components\MovementCom.h"
 #include "Components\AnimatorCom.h"
 #include "Components\RendererCom.h"
+#include "Components\CameraCom.h"
 #include "Components\ParticleSystemCom.h"
 #include "Components\ParticleComManager.h"
 
@@ -15,18 +16,23 @@
 #include "../Player/PlayerCom.h"
 #include "../CharacterStatusCom.h"
 
+#include "Graphics\Shaders\PostEffect.h"
+
 #include <imgui.h>
 
 
 // 開始処理
 void EnemyCom::Start()
 {
-
 }
 
 // 更新処理
 void EnemyCom::Update(float elapsedTime)
 {
+    //ゲーム開始フラグ
+    if (!GameObjectManager::Instance().GetIsSceneGameStart())
+        return;
+
     //死亡確認
     {
         //ステータス設定
@@ -111,6 +117,132 @@ void EnemyCom::OnGUI()
     DirectX::XMVECTOR Velocity = DirectX::XMLoadFloat3(&move->GetVelocity());
     float speed= DirectX::XMVectorGetX(DirectX::XMVector3Length(Velocity));
     ImGui::DragFloat("moveSpeed", &speed);
+
+    ImGui::DragFloat2("PP", &sP.x);
+    ImGui::DragFloat2("saP", &saP.x,0.01f);
+}
+
+void EnemyCom::Render2D(float elapsedTime)
+{
+    //Graphics& graphics = Graphics::Instance();
+    //ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+    ////ビューポート
+    //D3D11_VIEWPORT viewport;
+    //UINT numViewports = 1;
+    //dc->RSGetViewports(&numViewports, &viewport);
+
+    ////変換行列
+    //DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.view);
+    //DirectX::XMMATRIX Projection = DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.projection);
+    //DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
+
+    //DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
+    //pos.y += 2;
+    //DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&pos);
+
+    ////ワールド座標からスクリーン座標に変換
+    //Pos = DirectX::XMVector3Project(
+    //    Pos,
+    //    viewport.TopLeftX, viewport.TopLeftY,
+    //    viewport.Width, viewport.Height,
+    //    viewport.MinDepth, viewport.MaxDepth,
+    //    Projection, View, World
+    //);
+
+    //DirectX::XMStoreFloat3(&pos, Pos);
+    //DirectX::XMFLOAT2 size{100, 20};
+ 
+    //hpSprite_->Render(dc, pos.x- size.x/2, pos.y - size.y / 2, size.x, size.y
+    //    , 0, 0, hpSprite_->GetTextureWidth(), hpSprite_->GetTextureHeight()
+    //    , 0, 1, 1, 1, 1);
+}
+
+void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCamera)
+{
+    Graphics& graphics = Graphics::Instance();
+    ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+    //ビューポート
+    D3D11_VIEWPORT viewport;
+    UINT numViewports = 1;
+    dc->RSGetViewports(&numViewports, &viewport);
+
+    //変換行列
+    std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+    DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&camera->GetView());
+    DirectX::XMMATRIX Projection = DirectX::XMLoadFloat4x4(&camera->GetProjection());
+    DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
+
+    DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
+
+    //表示カリング
+
+    //カメラの向き
+    DirectX::XMFLOAT3 cameraDir = GameObjectManager::Instance().Find("Camera")->transform_->GetWorldFront();
+    DirectX::XMFLOAT3 cameraPos = GameObjectManager::Instance().Find("Camera")->transform_->GetWorldPosition();
+    DirectX::XMVECTOR CameraToEnemy = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&pos), DirectX::XMLoadFloat3(&cameraPos)));
+    float dot = DirectX::XMVector3Dot(DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&cameraDir)), CameraToEnemy).m128_f32[0];
+    if (dot < 0.5f)return;
+
+    //距離
+    float len = DirectX::XMVector3Length(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&pos), DirectX::XMLoadFloat3(&playerPos))).m128_f32[0];
+    float drawLen = 10; //表示範囲
+    if (len > drawLen)return;
+    len /= drawLen;
+    len = (len - 1.0f) * -1.0f;
+
+    pos.y += 2;
+    DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&pos);
+
+    //ワールド座標からスクリーン座標に変換
+    Pos = DirectX::XMVector3Project(
+        Pos,
+        viewport.TopLeftX, viewport.TopLeftY,
+        viewport.Width, viewport.Height,
+        viewport.MinDepth, viewport.MaxDepth,
+        Projection, View, World
+    );
+
+    DirectX::XMStoreFloat3(&pos, Pos);
+
+    DirectX::XMFLOAT2 size{50 * len, 50 * len};
+    pos.x = pos.x - size.x / 2;
+    pos.y = pos.y - size.y / 2;
+
+    //ワイプ背景
+    hpBackSprite_->Render(dc, pos.x, pos.y, size.x, size.y
+        , 0, 0, hpBackSprite_->GetTextureWidth(), hpBackSprite_->GetTextureHeight()
+        , 0, 1, 1, 1, 1);
+
+    //HP
+    {
+        //マスクする側描画
+        postEff->CacheMaskBuffer(maskCamera);
+
+        std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
+        float hpRatio = float(status->GetHP()) / float(status->GetMaxHP());
+
+
+        //hpmask
+        hpMaskSprite_->Render(dc, pos.x + size.x, pos.y + size.x * 0.98f, size.x, size.y * 0.95f * hpRatio
+            , 0, 0, hpMaskSprite_->GetTextureWidth(), hpMaskSprite_->GetTextureHeight()
+            , 180, 1, 1, 1, 0.001f);
+
+        //マスクされる側描画
+        postEff->StartBeMaskBuffer();
+
+        //hp
+        hpSprite_->Render(dc, pos.x, pos.y, size.x, size.y
+            , 0, 0, hpSprite_->GetTextureWidth(), hpSprite_->GetTextureHeight()
+            , 0, 1, 1, 1, 1);
+
+        //マスク処理終了処理
+        postEff->RestoreMaskBuffer();
+
+        postEff->DrawMask();
+    }
 
 }
 

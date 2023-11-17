@@ -94,6 +94,7 @@ private:
     //É}ÉXÉN
     std::unique_ptr<ShaderPost> mask_;
     DirectX::XMFLOAT4 lightDirMask_ = { 1,0,0,1 };
+    DirectX::XMFLOAT4 saveLightDir_ = { 1,0,0,1 };
     std::unique_ptr<Sprite> maskSprite_ = std::make_unique<Sprite>();
     bool isMask_ = true;
 

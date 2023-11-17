@@ -6,6 +6,9 @@ SamplerState sampler0 : register(s0);
 
 float4 main(VS_OUT pin) : SV_TARGET
 {
-	return texture0.Sample(sampler0, pin.texcoord) * pin.color;
+    float4 color = texture0.Sample(sampler0, pin.texcoord) * pin.color;
+    if (color.a < 0.00001)
+        discard;    //アルファ値がないなら書き込まない
+    return color;
 }
 

@@ -13,6 +13,8 @@
 #include "../Weapon\WeaponCom.h"
 #include "../CharacterStatusCom.h"
 
+#include "Graphics\Shaders\PostEffect.h"
+
 // 開始処理
 void PlayerCom::Start()
 {
@@ -31,23 +33,23 @@ void PlayerCom::Start()
     //武器ステータス初期化
     //Candy
     std::shared_ptr<WeaponCom> weapon = GetGameObject()->GetChildFind("Candy")->GetComponent<WeaponCom>();
-    weapon->SetAttackStatus(BIGSWORD_COM1_01, 1, 15, 0.8f, 0.2f, 1.5f);
-    weapon->SetAttackStatus(BIGSWORD_DASH, 1, 100, 0.9f, 0.1f);
+    weapon->SetAttackStatus(BIGSWORD_COM1_01, 5, 15, 0.8f, 0.2f, 1.5f);
+    weapon->SetAttackStatus(BIGSWORD_DASH, 2, 100, 0.9f, 0.1f);
     //ジャンプ攻撃
-    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 1, 20, 0.0f, 1.0f, 1.5f, ATTACK_SPECIAL_TYPE::JUMP_START | ATTACK_SPECIAL_TYPE::UNSTOP);
-    weapon->SetAttackStatus(JUMP_ATTACK_01, 1, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
-    weapon->SetAttackStatus(JUMP_ATTACK_DOWN_DO, 1, 1, 0.0f, -1.0f);
+    weapon->SetAttackStatus(JUMP_ATTACK_UPPER, 4, 20, 0.0f, 1.0f, 1.5f, ATTACK_SPECIAL_TYPE::JUMP_START | ATTACK_SPECIAL_TYPE::UNSTOP);
+    weapon->SetAttackStatus(JUMP_ATTACK_01, 3, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    weapon->SetAttackStatus(JUMP_ATTACK_DOWN_DO, 8, 1, 0.0f, -1.0f);
 
     //CandyCircle
     weapon = GetGameObject()->GetChildFind("CandyCircle")->GetComponent<WeaponCom>();
-    weapon->SetAttackStatus(BIGSWORD_COM1_02, 1, 15, 0.3f, 0.7f);
-    weapon->SetAttackStatus(BIGSWORD_COM2_02, 1, 10, 1.0f, 0.0f);
-    weapon->SetAttackStatus(JUMP_ATTACK_02, 1, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    weapon->SetAttackStatus(BIGSWORD_COM1_02, 5, 15, 0.3f, 0.7f);
+    weapon->SetAttackStatus(BIGSWORD_COM2_02, 3, 10, 1.0f, 0.0f);
+    weapon->SetAttackStatus(JUMP_ATTACK_02, 3, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
 
     //CandyStick
     weapon = GetGameObject()->GetChildFind("CandyStick")->GetComponent<WeaponCom>();
-    weapon->SetAttackStatus(BIGSWORD_COM1_03, 1, 15, 0.9f, 0.1f, 2.0f);
-    weapon->SetAttackStatus(JUMP_ATTACK_03, 1, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    weapon->SetAttackStatus(BIGSWORD_COM1_03, 5, 15, 0.9f, 0.1f, 2.0f);
+    weapon->SetAttackStatus(JUMP_ATTACK_03, 3, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
 
     std::shared_ptr<PlayerCom> myCom = GetGameObject()->GetComponent<PlayerCom>();
     //攻撃管理を初期化
@@ -62,15 +64,38 @@ void PlayerCom::Start()
 
     //ステータス設定
     std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
-    status->SetMaxHP(10);
-    status->SetHP(10);
+    status->SetMaxHP(8);
+    status->SetHP(8);
 
-    maskSprite_ = std::make_unique<Sprite>("./Data/Sprite/rect.png");
+    //UI初期化
+    startUI_ = false;
+    hpSprite_[0] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonutsOne.png");
+    hpSprite_[1] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonuts2.png");
+    hpSprite_[2] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonuts3.png");
+    hpSprite_[3] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonuts4.png");
+    hpSprite_[4] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonuts5.png");
+    hpSprite_[5] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonuts6.png");
+    hpSprite_[6] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonuts7.png");
+    hpSprite_[7] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonuts8.png");
+
+    hpDonutsPos_[0] = { 48.3f,3.1f };
+    hpDonutsPos_[1] = { 6.0f,44.0f };
+    hpDonutsPos_[2] = { 5.9f,107.3f };
+    hpDonutsPos_[3] = { 49.0f,146.5f };
+    hpDonutsPos_[4] = { 110.9f,145.3f };
+    hpDonutsPos_[5] = { 153.9f,101.4f };
+    hpDonutsPos_[6] = { 153.9f,42.9f };
+    hpDonutsPos_[7] = { 112.2f,7.3f };
+
 }
 
 // 更新処理
 void PlayerCom::Update(float elapsedTime)
 {
+    //ゲーム開始フラグ
+    if (!GameObjectManager::Instance().GetIsSceneGameStart())
+        return;
+
     std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
     //ダメージ時以外
     if (!status->GetDamageAnimation())
@@ -128,6 +153,18 @@ void PlayerCom::Update(float elapsedTime)
         GetGameObject()->transform_->SetWorldPosition(pos);
     }
 
+    //UI更新
+    {
+        if (isHpDirection_)
+        {
+            hpGravity_ += 20 * elapsedTime;
+            hpDir_.x += dirVelo_.x * 200 * elapsedTime;
+            hpDir_.y += dirVelo_.y * 200 * elapsedTime + hpGravity_;
+            hpDir_.z -= elapsedTime * 2;
+            if (hpDir_.z < 0)isHpDirection_ = false;
+        }
+    }
+
 }
 
 // GUI描画
@@ -181,6 +218,100 @@ void PlayerCom::Render2D(float elapsedTime)
     //}
 }
 
+
+void PlayerCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCamera)
+{
+    ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
+
+    //仮処理
+    if (!startUI_)
+    {
+        startUI_ = true;
+        std::shared_ptr<FbxModelResource> res = GameObjectManager::Instance().Find("picoMask")->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
+        for (auto& shape : res->GetMeshesEdit()[res->GetShapeIndex()].shapeData)
+        {
+            shape.rate = 0;
+        }
+        res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[5].rate = 1;
+        res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[9].rate = 1;
+        GameObjectManager::Instance().Find("picoMask")->GetComponent<AnimationCom>()
+            ->PlayAnimation(ANIMATION_PLAYER::IDEL_2, true);
+
+    }
+
+    //皿
+    saraSprite_->Render(dc, -101.8f, -62.6f, saraSprite_->GetTextureWidth() , saraSprite_->GetTextureHeight() 
+        , 0, 0, saraSprite_->GetTextureWidth(), saraSprite_->GetTextureHeight()
+        , 0, 1, 1, 1, 1);
+
+    //HP
+    {
+        int hpIndex = GetGameObject()->GetComponent<CharacterStatusCom>()->GetHP() - 1;
+        if (hpIndex > 0) {
+            hpSprite_[hpIndex]->Render(dc, 1.9f, -9.1f, hpSprite_[hpIndex]->GetTextureWidth() * 0.3f, hpSprite_[hpIndex]->GetTextureHeight() * 0.3f
+                , 0, 0, hpSprite_[hpIndex]->GetTextureWidth(), hpSprite_[hpIndex]->GetTextureHeight()
+                , 0, 1, 1, 1, 1);
+        }
+        if (hpIndex >= 0) {
+            hpSprite_[0]->Render(dc, hpDonutsPos_[hpIndex].x, hpDonutsPos_[hpIndex].y, hpSprite_[0]->GetTextureWidth() * 0.3f, hpSprite_[0]->GetTextureHeight() * 0.3f
+                , 0, 0, hpSprite_[0]->GetTextureWidth(), hpSprite_[0]->GetTextureHeight()
+                , 0, 1, 1, 1, 1);
+        }
+        //演出
+        static int oldHp_ = hpIndex;
+        if (oldHp_ != hpIndex)
+        {
+            isHpDirection_ = true;
+            hpDir_.x = hpDonutsPos_[oldHp_].x;
+            hpDir_.y = hpDonutsPos_[oldHp_].y;
+            hpDir_.z = 1;
+            hpGravity_ = 0;
+            oldHp_ = hpIndex;
+
+            //画像の重心（下の方に置く）を算出
+            static DirectX::XMVECTOR Point = { 1.9f + hpSprite_[1]->GetTextureWidth() / 2 * 0.3f
+            ,-9.1f + hpSprite_[1]->GetTextureHeight() * 0.3f };
+            //重心からのベクトルを移動方向にする
+            DirectX::XMVECTOR HpPoint = { hpDir_.x + hpSprite_[0]->GetTextureWidth() / 2 * 0.3f
+                ,hpDir_.y + hpSprite_[0]->GetTextureHeight() / 2 * 0.3f };
+            DirectX::XMStoreFloat2(&dirVelo_, DirectX::XMVector2Normalize(DirectX::XMVectorSubtract(HpPoint, Point)));
+        }
+        if (isHpDirection_)
+        {
+            hpSprite_[0]->Render(dc, hpDir_.x, hpDir_.y, hpSprite_[0]->GetTextureWidth() * 0.3f, hpSprite_[0]->GetTextureHeight() * 0.3f
+                , 0, 0, hpSprite_[0]->GetTextureWidth(), hpSprite_[0]->GetTextureHeight()
+                , 0, 1, 1, 1, hpDir_.z);
+        }
+    }
+
+    //ワイプ枠外
+    faceFrameUI_->Render(dc, 49.5f, 41.4f, faceFrameUI_->GetTextureWidth() * 0.552f, faceFrameUI_->GetTextureHeight() * 0.552f
+        , 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+        , 0, 0, 1, 1, 1);
+
+    //ワイプ
+    {
+        //マスクする側描画
+        postEff->CacheMaskBuffer(maskCamera);
+
+        //ワイプ背景
+        faceFrameUI_->Render(dc, 49.5f + 9, 41.4f + 9, faceFrameUI_->GetTextureWidth() * 0.48f, faceFrameUI_->GetTextureHeight() * 0.48f
+            , 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+            , 0, 1, 1, 1, 1);
+
+        //マスクされる側描画
+        postEff->StartBeMaskBuffer();
+
+        //マスクオブジェ描画
+        GameObjectManager::Instance().RenderMask();
+
+
+        //マスク処理終了処理
+        postEff->RestoreMaskBuffer({ -154 ,-72 }, { 0.3f,0.3f });
+
+        postEff->DrawMask();
+    }
+}
 
 //アニメーション初期化設定
 void PlayerCom::AnimationInitialize()

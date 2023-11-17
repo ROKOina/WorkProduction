@@ -13,11 +13,14 @@
 #include "Components\AnimatorCom.h"
 #include "Components\ColliderCom.h"
 #include "Components\MovementCom.h"
-#include "GameSource\ScriptComponents\CharacterStatusCom.h"
+#include "Components\CameraCom.h"
+#include "../\CharacterStatusCom.h"
 
 #include "EnemyCom.h"
 #include "EnemyNearCom.h"
 #include "EnemyFarCom.h"
+
+#include "Graphics\Shaders\PostEffect.h"
 
 // XVˆ—
 void EnemyManager::Update(float elapsedTime)
@@ -157,8 +160,11 @@ void EnemyManager::OnGui()
         }
 
     }
+
     ImGui::DragInt("A", &killCount_);
-    ImGui::DragFloat4("killCountSprite_", &killCountSprite_.x, 0.1f);
+    ImGui::DragFloat4("killCountSprite_", &killCountSpritePos_.x, 0.1f);
+    ImGui::DragFloat3("killStringSpritePos_", &killStringSpritePos_.x, 0.1f);
+    ImGui::DragFloat3("saraSpritePos_", &saraSpritePos_.x, 0.1f);
     ImGui::End();
 }
 
@@ -166,29 +172,53 @@ void EnemyManager::Render2D(float elapsedTime)
 {
     ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
 
-    killCount_ = GetEnemyCount();
-
-    //‚PŒ…
-    enemyCount_->Render(dc, killCountSprite_.x, killCountSprite_.y, enemyCount_->GetTextureWidth()*0.1f* killCountSprite_.z, enemyCount_->GetTextureHeight() * killCountSprite_.z
-        , 170* killCount_, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
-        , 0, 1, 1, 1, 1);
-    //‚QŒ…
-    if (killCount_ >= 10)
+    //ŽM
     {
-        int keta = killCount_ / 10 % 10;
-        enemyCount_->Render(dc, killCountSprite_.x - killCountSprite_.w, killCountSprite_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSprite_.z, enemyCount_->GetTextureHeight() * killCountSprite_.z
-            , 170 * keta, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
-            , 0, 1, 1, 1, 1);
-    }
-    //‚RŒ…
-    if (killCount_ >= 100)
-    {
-        int keta = killCount_ / 100 % 10;
-        enemyCount_->Render(dc, killCountSprite_.x - killCountSprite_.w*2, killCountSprite_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSprite_.z, enemyCount_->GetTextureHeight() * killCountSprite_.z
-            , 170 * keta, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+        saraSprite_->Render(dc, saraSpritePos_.x, saraSpritePos_.y, saraSprite_->GetTextureWidth() * saraSpritePos_.z, saraSprite_->GetTextureHeight() * saraSpritePos_.z
+            , 0, 0, saraSprite_->GetTextureWidth(), saraSprite_->GetTextureHeight()
             , 0, 1, 1, 1, 1);
     }
 
+    //“¢”°ƒJƒEƒ“ƒg
+    {
+        killCount_ = GetEnemyCount();
+
+        //‚PŒ…
+        enemyCount_->Render(dc, killCountSpritePos_.x, killCountSpritePos_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSpritePos_.z, enemyCount_->GetTextureHeight() * killCountSpritePos_.z
+            , 170 * killCount_, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+            , 0, 1, 1, 1, 1);
+        //‚QŒ…
+        if (killCount_ >= 10)
+        {
+            int keta = killCount_ / 10 % 10;
+            enemyCount_->Render(dc, killCountSpritePos_.x - killCountSpritePos_.w, killCountSpritePos_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSpritePos_.z, enemyCount_->GetTextureHeight() * killCountSpritePos_.z
+                , 170 * keta, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+                , 0, 1, 1, 1, 1);
+        }
+        //‚RŒ…
+        if (killCount_ >= 100)
+        {
+            int keta = killCount_ / 100 % 10;
+            enemyCount_->Render(dc, killCountSpritePos_.x - killCountSpritePos_.w * 2, killCountSpritePos_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSpritePos_.z, enemyCount_->GetTextureHeight() * killCountSpritePos_.z
+                , 170 * keta, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+                , 0, 1, 1, 1, 1);
+        }
+    }
+
+    //”Žš•¶Žš
+    {
+        killStringSprite_->Render(dc, killStringSpritePos_.x, killStringSpritePos_.y, killStringSprite_->GetTextureWidth()  * killStringSpritePos_.z, killStringSprite_->GetTextureHeight() * killStringSpritePos_.z
+            , 0, 0, killStringSprite_->GetTextureWidth() , killStringSprite_->GetTextureHeight()
+            , 0, 1, 1, 1, 1);
+    }
+}
+
+void EnemyManager::EnemyMaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCamera)
+{
+    for (auto& e : nearEnemies_)
+    {
+        e.enemy.lock()->GetComponent<EnemyCom>()->MaskRender(postEff, maskCamera);
+    }
 }
 
 // “G“o˜^

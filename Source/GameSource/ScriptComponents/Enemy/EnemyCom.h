@@ -2,12 +2,16 @@
 
 #include "Components\System\Component.h"
 
+#include "Graphics/Sprite/Sprite.h"
 
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorData.h"
 #include "BehaviorTree/NodeBase.h"
 
 #include "TelegramEnemy.h"
+
+class PostEffect;
+class CameraCom;
 
 //アニメーションリスト
 enum ANIMATION_ENEMY
@@ -78,7 +82,14 @@ public:
     // GUI描画
     virtual void OnGUI();
 
+    // sprite描画
+    virtual void Render2D(float elapsedTime);
+
     //EnemyComクラス
+public:
+    //mask
+    void MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCamera);
+
 private:
     struct MoveDataEnemy
     {
@@ -188,6 +199,12 @@ protected:
     //移動
     MoveDataEnemy moveDataEnemy_;
 
+    //HPBar
+    std::unique_ptr<Sprite>     hpSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Enemy/enemyHp.png");
+    std::unique_ptr<Sprite>     hpBackSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Enemy/enemyHpGage.png");
+    std::unique_ptr<Sprite>     hpMaskSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Enemy/enemyHpMask.png");
+    DirectX::XMFLOAT2 sP{0,0};
+    DirectX::XMFLOAT3 saP{0,0,0};
     //識別番号
     int enemyId_ = -1;
 };

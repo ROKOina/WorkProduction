@@ -1023,7 +1023,7 @@ void AttackPlayer::SpawnCombo1()
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
         weapon->SetIsForeverUse(true);
-        weapon->SetAttackDefaultStatus(1, 0);
+        weapon->SetAttackDefaultStatus(5, 0);
     }
 
     //‹­UŒ‚“®‚«‰Šú‰»
@@ -1078,7 +1078,7 @@ void AttackPlayer::SpawnCombo2()
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
         weapon->SetIsForeverUse(true);
-        weapon->SetAttackDefaultStatus(1, 0);
+        weapon->SetAttackDefaultStatus(5, 0);
         weapon->SetCircleArc(true);
 
     }
@@ -1126,7 +1126,7 @@ void AttackPlayer::SpawnCombo3()
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
         weapon->SetIsForeverUse(true);
-        weapon->SetAttackDefaultStatus(1, 0);
+        weapon->SetAttackDefaultStatus(3, 0);
 
     }
 

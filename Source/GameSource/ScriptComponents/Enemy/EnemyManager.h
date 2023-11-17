@@ -7,6 +7,8 @@
 #include "Graphics/Sprite/Sprite.h"
 
 class GameObject;
+class PostEffect;
+class CameraCom;
 
 //エネミーマネージャー
 class EnemyManager
@@ -14,7 +16,9 @@ class EnemyManager
 private:
 	EnemyManager() 
 	{
-		enemyCount_ = std::make_unique<Sprite>("./Data/Sprite/suuzi.png");
+		enemyCount_ = std::make_unique<Sprite>("./Data/Sprite/number.png");
+		saraSprite_ = std::make_unique<Sprite>("./Data/Sprite/yokosara.png");
+		killStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/killString.png");
 	}
 	~EnemyManager() {}
 
@@ -35,6 +39,9 @@ public:
 
 	//sprite描画
 	void Render2D(float elapsedTime);
+
+	//マスク描画
+	void EnemyMaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCamera);
 
 	//敵情報
 	enum class EnemyKind
@@ -150,6 +157,10 @@ private:
 
 	//UI
 	std::unique_ptr<Sprite> enemyCount_;
+	std::unique_ptr<Sprite> saraSprite_;
+	DirectX::XMFLOAT3 saraSpritePos_ = { 618.3f,-99.7f,0.4f }; //xy:pos z:size
+	std::unique_ptr<Sprite> killStringSprite_;
+	DirectX::XMFLOAT3 killStringSpritePos_ = { 819.3f,44.0f,0.2f }; //xy:pos z:size
 	int killCount_;
-	DirectX::XMFLOAT4 killCountSprite_ = { 762.2f,-1.2f,0.5f,70.0f }; //xy:pos z:size w:間隔
+	DirectX::XMFLOAT4 killCountSpritePos_ = { 716.7f,-1.2f,0.5f,70.0f }; //xy:pos z:size w:間隔
 };

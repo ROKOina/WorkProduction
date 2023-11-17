@@ -163,6 +163,10 @@ public:
 	//シェーダーIDを変えたら、ソートするために呼び出す
 	void ChangeShaderID() { isChangeShaderID_ = true; }
 
+	//シーンゲーム演出待ちフラグ
+	bool GetIsSceneGameStart() { return isSceneGameStart_; }
+	void SetIsSceneGameStart(bool flag) { isSceneGameStart_ = flag; }
+
 private:
 	void DrawLister();
 	void DrawDetail();
@@ -214,6 +218,9 @@ private:
 
 	bool					isHiddenLister_ = false;
 	bool					isHiddenDetail_ = false;
+
+	//演出待ちフラグ（シーンゲーム）
+	bool isSceneGameStart_ = false;
 
 	//スレッド用
 	std::vector<std::future<void>> future;

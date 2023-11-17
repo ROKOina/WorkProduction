@@ -90,14 +90,14 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for (int i = 0; i < 0; ++i)
+	for (int i = 0; i < 15; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		//obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
-		//	0,  (rand() % (230 * 2) - 230) * 0.1f });
-		obj->transform_->SetWorldPosition({ 0, 0, 5 });
+		obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
+			0,  (rand() % (230 * 2) - 230) * 0.1f });
+		//obj->transform_->SetWorldPosition({ 0, 0, 5 });
 		obj->transform_->SetEulerRotation({ 0,180,0 });
 
 		const char* filename = "Data/Model/picolabo/picolabo.mdl";
@@ -178,7 +178,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyFar
-	for(int i=0;i<0;++i)
+	for (int i = 0; i < 0; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -264,14 +264,14 @@ void SceneGame::Initialize()
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picoMask");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		obj->transform_->SetWorldPosition({ -0.05, -1.3, 1.2 });
+		obj->transform_->SetWorldPosition({ 0.15, -1.4, 1.2 });
 		obj->transform_->SetEulerRotation({ 0, 180, 0 });
 
 		const char* filename = "Data/Model/pico/picoAnim.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::MaskUnityChan);
-			
+
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 	}
 
@@ -353,7 +353,7 @@ void SceneGame::Initialize()
 			weapon->SetNodeName("RightHandMiddle2");
 			weapon->SetColliderUpDown({ 2,0 });
 
-			std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
+			std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();
 			trail->SetEnabled(false);
 			trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
 
@@ -389,7 +389,7 @@ void SceneGame::Initialize()
 			weapon->SetNodeName("RightHandMiddle2");
 			weapon->SetColliderUpDown({ 2,0 });
 
-			std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();			
+			std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();
 			trail->SetEnabled(false);
 			trail->SetHeadTailNodeName("candyCircle", "head");	//トレイル表示ノード指定
 
@@ -533,7 +533,7 @@ void SceneGame::Initialize()
 		c->SetSweetsParticle(true);	//お菓子用
 
 		c->LoadTexture("./Data/Sprite/sweetsParticle.png");
-		
+
 		//c->LoadTexture("Data/Sprite/default_eff.png");
 		//c->LoadTexture("Data/Sprite/smoke_pop.png");
 		//c->Load("Data/Effect/para/honoo.ipff");
@@ -611,7 +611,7 @@ void SceneGame::Initialize()
 	{
 		Graphics& graphics = Graphics::Instance();
 		postEff_ = std::make_unique<PostEffect>(
-			static_cast<UINT>(graphics.GetScreenWidth()) ,
+			static_cast<UINT>(graphics.GetScreenWidth()),
 			static_cast<UINT>(graphics.GetScreenHeight()));
 
 		//ブルーム
@@ -634,13 +634,18 @@ void SceneGame::Initialize()
 	//EnemyManagerにプレイヤー登録
 	EnemyManager::Instance().RegisterPlayer(GameObjectManager::Instance().Find("pico"));
 #endif
-	std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
 
-	if (particle->GetSaveParticleData().particleData.isRoop)
-	{
-		particle->GetSaveParticleData().particleData.isRoop = false;
-		SceneManager::Instance().SetParticleUpdate(true);
-	}
+	//遷移処理
+	startSprite_ = std::make_unique<Sprite>("./Data/Sprite/START.png");
+	std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
+	sceneTransitionTimer_ = 3;	//パーティクル後の演出開始時間
+	startSpriteSize_ = 0;	//開始画像のサイズ
+	particle->GetSaveParticleData().particleData.isRoop = false;
+	SceneManager::Instance().SetParticleUpdate(true);
+	GameObjectManager::Instance().SetIsSceneGameStart(false);
+
+	gameStartFlag_ = false;
+	gameEndFlag_ = false;
 }
 
 // 終了化
@@ -652,17 +657,40 @@ void SceneGame::Finalize()
 // 更新処理
 void SceneGame::Update(float elapsedTime)
 {
+	//遷移処理
+	if (!GameObjectManager::Instance().GetIsSceneGameStart())
+	{
+		sceneTransitionTimer_ -= elapsedTime;
+	}
+
 #if defined(StageEdit)
 
 #else
-	////1フレームは初期化のため待機
-	////終了処理
-	//if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_)	//敵の数0の時
-	//{
-	//	GameObjectManager::Instance().AllRemove();
-	//	SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
-	//	gameEndFlag_ = true;
-	//}
+	//1フレームは初期化のため待機
+	//終了処理
+	if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_ && !gameEndFlag_)	//敵の数0の時
+	{
+		gameEndFlag_ = true;
+
+		std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
+		particle->GetSaveParticleData().particleData.isRoop = true;
+		particle->IsRestart();
+		particle->SetEnabled(true);
+		SceneManager::Instance().SetParticleUpdate(true);
+		transitionOutTimer_ = 2.5f;
+	}
+	//終了演出
+	if(gameEndFlag_)
+	{
+		transitionOutTimer_ -= elapsedTime;
+		if (transitionOutTimer_ < 0)
+		{
+			GameObjectManager::Instance().AllRemove();
+			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
+			SceneManager::Instance().SetParticleUpdate(false);
+		}
+	}
+
 	//一回目通るときにスタートフラグをON
 	if (!gameStartFlag_)
 	{
@@ -687,9 +715,6 @@ void SceneGame::Update(float elapsedTime)
 
 	ParticleComManager::Instance().Update(elapsedTime);
 }
-
-DirectX::XMFLOAT4 ppss = { 0,0,1,1 };
-DirectX::XMFLOAT4 ppssCC = { 0,0,0,1 };
 
 // 描画処理
 void SceneGame::Render(float elapsedTime)
@@ -807,98 +832,42 @@ void SceneGame::Render(float elapsedTime)
 
 	//マスク用
 	{
-		//仮処理
-		static bool a = false;
-		if (!a)
+		//マスク処理
 		{
-			a = true;
-			std::shared_ptr<FbxModelResource> res = GameObjectManager::Instance().Find("picoMask")->GetComponent<RendererCom>()->GetModel()->GetResourceShared();
-			for (auto& shape : res->GetMeshesEdit()[res->GetShapeIndex()].shapeData)
-			{
-				shape.rate = 0;
-			}
-			res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[5].rate = 1;
-			res->GetMeshesEdit()[res->GetShapeIndex()].shapeData[9].rate = 1;
-			GameObjectManager::Instance().Find("picoMask")->GetComponent<AnimationCom>()
-				->PlayAnimation(ANIMATION_PLAYER::IDEL_2, true);
+			std::shared_ptr<CameraCom> maskCamera = GameObjectManager::Instance().Find("MaskCamera")->GetComponent<CameraCom>();
 
-		}
+			EnemyManager::Instance().EnemyMaskRender(postEff_.get(), maskCamera);
 
-		std::shared_ptr<CameraCom> maskCamera = GameObjectManager::Instance().Find("MaskCamera")->GetComponent<CameraCom>();
-
-		ImGui::Begin("MAK");
-		ImGui::DragFloat4("ppss", &ppss.x, 0.1f);
-
-		ImGui::DragFloat4("ppssCC", &ppssCC.x, 0.1f);
-		ImGui::End();
-
-		//faceFrameUI_->Render(dc, ppss.x, ppss.y, faceFrameUI_->GetTextureWidth() * ppss.z, faceFrameUI_->GetTextureHeight() * ppss.w
-		//	, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
-		//	, 0, ppssCC.x, ppssCC.y, ppssCC.z, ppssCC.w);
+			GameObjectManager::Instance().Find("pico")->GetComponent<PlayerCom>()->MaskRender(postEff_.get(), maskCamera);
 
 
-		//ワイプ枠外
-		faceFrameUI_->Render(dc, 3, 3, faceFrameUI_->GetTextureWidth() * 0.552f, faceFrameUI_->GetTextureHeight() * 0.552f
-			, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
-			, 0, 0, 1, 1, 1);
-
-		//HP背景
-		faceFrameUI_->Render(dc, 15.6f,11.7f, faceFrameUI_->GetTextureWidth() * 2, faceFrameUI_->GetTextureHeight() * 0.5f
-			, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
-			, 0, 0, 1, 1, 1);
-
-		//HPBar
-		{
-			//マスクする側描画
-			postEff_->CacheMaskBuffer(maskCamera);
-
-			//HPマスク
-			faceFrameUI_->Render(dc, 87.5f, 23.5f, faceFrameUI_->GetTextureWidth() * ppss.z, faceFrameUI_->GetTextureHeight() * 0.4f
-				, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
-				, 0, 1, 0.6f, 1, 0.001f);
-
-			//マスクされる側描画
-			postEff_->StartBeMaskBuffer();
-
-			//HP
-			faceFrameUI_->Render(dc, 87.5f, 23.5f, faceFrameUI_->GetTextureWidth() * 1.5f, faceFrameUI_->GetTextureHeight() * 0.4f
-				, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
-				, 0, 1, 0.6f, 1, 1);
-
-			sweetsSprite_->Render(dc, 0, 0, sweetsSprite_->GetTextureWidth() , sweetsSprite_->GetTextureHeight() 
-				, 0, 0, sweetsSprite_->GetTextureWidth(), sweetsSprite_->GetTextureHeight()
-				, 0, 1, 1, 1, 1);
-
-			//マスク処理終了処理
-			postEff_->RestoreMaskBuffer();
-
-			postEff_->DrawMask();
-			postEff_->DrawMaskGui();
-		}
-
-		//ワイプ
-		{
-			//マスクする側描画
-			postEff_->CacheMaskBuffer(maskCamera);
-
-			//ワイプ背景
-			faceFrameUI_->Render(dc, 12, 12, faceFrameUI_->GetTextureWidth() * 0.48f, faceFrameUI_->GetTextureHeight() * 0.48f
-				, 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
-				, 0, 1, 1, 1, 1);
-
-			//マスクされる側描画
-			postEff_->StartBeMaskBuffer();
-
-			//マスクオブジェ描画
-			GameObjectManager::Instance().RenderMask();
-
-			//マスク処理終了処理
-			postEff_->RestoreMaskBuffer({ -154 ,-72 }, { 0.3f,0.3f });
-
-			postEff_->DrawMask();
 			postEff_->DrawMaskGui();
 		}
 	}
 
+	//遷移処理
+	if (!GameObjectManager::Instance().GetIsSceneGameStart())
+	{
+		//スタート画像
+		if (sceneTransitionTimer_ < 0)
+		{
+			startSpriteSize_ += elapsedTime;
+			float sinSize = sin(startSpriteSize_);
+			if (sinSize <= 0)
+			{
+				GameObjectManager::Instance().SetIsSceneGameStart(true);
+				std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
+				particle->SetEnabled(false);
+				SceneManager::Instance().SetParticleUpdate(false);
+			}
+			DirectX::XMFLOAT2 size{startSprite_->GetTextureWidth()* sinSize, startSprite_->GetTextureHeight()* sinSize};
+			startSprite_->Render(dc, graphics.GetScreenWidth()/2- size.x / 2.0f, graphics.GetScreenHeight() / 2 - size.y / 2.0f, size.x, size.y
+				, 0, 0, startSprite_->GetTextureWidth(), startSprite_->GetTextureHeight()
+				, 0, 1, 1, 1, 1);
+		}
+	}
+	ImGui::Begin("AHH");
+	ImGui::DragFloat("a", &startSpriteSize_,0.01f);
+	ImGui::End();
 }
 

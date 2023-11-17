@@ -17,6 +17,6 @@ float4 main(VS_OUT pin) : SV_TARGET
     float4 color;
     //ƒ}ƒXƒNˆ—
     color = maskTex.a > 0 ? (mainTex.a > 0 ? maskTex : float4(0, 0, 0, 0)) : mainTex;
-    
+
     return color;
 }

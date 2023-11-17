@@ -64,7 +64,9 @@ private:
     int candyID_ = 0;
 
     //遷移パーティクルが画面いっぱいになるまでのタイマー
-    float transitionTimer_ = 1;
+    float transitionOutTimer_ = 1;
+
+    float transitionInTimer_;
 
     //描画最初初期の姿移るので、遅らせる
     bool frameDelayRender_ = false;

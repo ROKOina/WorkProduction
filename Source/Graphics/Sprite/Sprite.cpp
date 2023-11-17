@@ -169,8 +169,8 @@ void Sprite::Render(ID3D11DeviceContext *immediate_context,
 
 		// スプライトの中心で回転させるために４頂点の中心位置が
 		// 原点(0, 0)になるように一旦頂点を移動させる。
-		float mx = dx + dw * 0.5f;
-		float my = dy + dh * 0.5f;
+		float mx = dx;
+		float my = dy;
 		for (auto& p : positions)
 		{
 			p.x -= mx;

@@ -7,6 +7,9 @@
 
 #include "Graphics/Sprite/Sprite.h"
 
+class PostEffect;
+class CameraCom;
+
 //アニメーションリスト
 enum ANIMATION_PLAYER
 {
@@ -89,7 +92,9 @@ public:
     void Render2D(float elapsedTime) override;
 
     //PlayerComクラス
-
+public:
+    //mask
+    void MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCamera);
 
 private:
     //アニメーション初期化設定
@@ -136,5 +141,18 @@ private:
     std::shared_ptr<MovePlayer> movePlayer_;
     std::shared_ptr<JustAvoidPlayer> justAvoidPlayer_;
 
-    std::unique_ptr<Sprite> maskSprite_;
+
+    //UI
+    //ワイプ背景
+    bool startUI_ = false;
+    std::unique_ptr<Sprite> faceFrameUI_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceFrame.png");
+    //HP
+    std::unique_ptr<Sprite> hpSprite_[8];
+    DirectX::XMFLOAT2 hpDonutsPos_[8];
+    bool isHpDirection_ = false;	//演出フラグ
+    DirectX::XMFLOAT3 hpDir_;	//posと透明値
+    DirectX::XMFLOAT2 dirVelo_;
+    float hpGravity_ = 10;
+    //皿
+    std::unique_ptr<Sprite> saraSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/saraUI.png");
 };
