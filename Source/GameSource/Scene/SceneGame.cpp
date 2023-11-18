@@ -668,7 +668,8 @@ void SceneGame::Update(float elapsedTime)
 #else
 	//1フレームは初期化のため待機
 	//終了処理
-	if (EnemyManager::Instance().GetEnemyCount() <= 0 && gameStartFlag_ && !gameEndFlag_)	//敵の数0の時
+	if ((EnemyManager::Instance().GetEnemyCount() <= 0 || GameObjectManager::Instance().Find("pico")->GetComponent<CharacterStatusCom>()->GetHP() <= 0)
+		&& gameStartFlag_ && !gameEndFlag_)	//敵の数0の時
 	{
 		gameEndFlag_ = true;
 

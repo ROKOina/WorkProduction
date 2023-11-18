@@ -581,7 +581,7 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         float ay = gamePad.GetAxisRY();
 
         //仮で色変える
-        lockTriangleEnemy_.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,5,1,1 });
+        lockTriangleEnemy_.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,15,1,1 });
 
         //入力されている場合
         //ロックオン変更
@@ -637,7 +637,10 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         if (gamePad.GetButtonDown() & GamePad::BTN_Y)
         {
             Graphics::Instance().SetWorldSpeed(1);
-            EnemyManager::Instance().SetIsUpdateFlag(true);
+            EnemyManager::Instance().SetIsUpdateFlag(true);       
+            //仮で色戻す
+            lockTriangleEnemy_.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,1,1,1 });
+
 
             triangleState_++;
 
