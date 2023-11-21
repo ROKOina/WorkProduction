@@ -797,6 +797,7 @@ void ParticleSystemCom::Render()
 	//ブレンドステート
 	const float blendFactor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	dc->OMSetBlendState(
+		//dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ADDITION_ALPHA).Get(),
 		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA_ATC).Get(),
 		blendFactor, 0xFFFFFFFF);
 

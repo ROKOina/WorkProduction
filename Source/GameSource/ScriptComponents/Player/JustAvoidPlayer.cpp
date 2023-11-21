@@ -16,8 +16,23 @@
 #include "../Enemy/EnemyManager.h"
 #include "../Enemy/EnemyCom.h"
 
+#include "Graphics/Sprite/Sprite.h"
+
 #include "Input/Input.h"
 #include <imgui.h>
+
+JustAvoidPlayer::JustAvoidPlayer(std::shared_ptr<PlayerCom> player)
+    :player_(player)
+{
+    justSprite_ = std::make_unique<Sprite>("./Data/Sprite/justBlur.png");
+    justSprite_->SetDissolveSRV("./Data/Sprite/justBlurMask.png");
+    Sprite::DissolveConstans& dissolveData = justSprite_->GetEffectSpriteData().dissolveConstant;
+
+    dissolveData.isDissolve = true;
+    dissolveData.dissolveThreshold = 0;
+    dissolveData.edgeThreshold = 1;
+    dissolveData.edgeColor = { 1,0,1,1 };
+}
 
 void JustAvoidPlayer::Update(float elapsedTime)
 {
@@ -33,6 +48,9 @@ void JustAvoidPlayer::Update(float elapsedTime)
 
     //ジャスト回避演出
     JustAvoidDirection(elapsedTime);
+
+    //ジャスト回避世界色演出
+    JustSpriteUpdate(elapsedTime);
 
     //反撃処理更新
     switch (justAvoidKey_)
@@ -50,12 +68,18 @@ void JustAvoidPlayer::Update(float elapsedTime)
 
 void JustAvoidPlayer::OnGui()
 {
+    Sprite::DissolveConstans& dissolveData = justSprite_->GetEffectSpriteData().dissolveConstant;
+    
+    ImGui::DragFloat("dissolveThreshold", &dissolveData.dissolveThreshold, 0.01f, 0, 1);
+    ImGui::DragFloat("edgeThreshold", &dissolveData.edgeThreshold, 0.01f, 0, 1);
+    ImGui::DragFloat4("edgeColor", &dissolveData.edgeColor.x, 0.01f, 0, 1);
 }
 
 
 //ジャスト回避初期化
 void JustAvoidPlayer::JustInisialize()
 {
+    justAvoidLeadKey_ = JUST_AVOID_KEY::NULL_KEY;
     justAvoidState_ = -1;
     isJustJudge_ = false;
     Graphics::Instance().SetWorldSpeed(1);
@@ -111,6 +135,9 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         renderCom->GetModel()->SetMaterialColor({ 1,1,1,0 });
         //シルエット切る
         renderCom->SetSilhouetteFlag(false);
+
+        //世界色変化演出
+        justSpriteState_ = 0;
 
         bool inputFlag = false;
         if (DirectX::XMVectorGetX(DirectX::XMVector3Length(Input)) > 0.1f)
@@ -174,6 +201,7 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         //ステートエンドフラグ
         bool endFlag = false;
 
+
         //演出用ピコポジション
         DirectX::XMFLOAT3 justPicoPos[4];
         for (int i = 0; i < 4; ++i)
@@ -235,7 +263,6 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         //ステートエンドフラグ
         bool endFlag = false;
 
-
         //徐々に透明に
         for (int i = 0; i < 4; ++i)
         {
@@ -272,6 +299,8 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
             animator->SetAnimationSpeedOffset(1.0f);
 
+            justSpriteState_ = 20;
+
             justAvoidTimer_ = -1;
         }
 
@@ -288,6 +317,7 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         if (justAvoidTimer_ < 0)
         {
             JustInisialize();
+            justSpriteState_ = 20;
             player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::RUN);
             player_.lock()->GetMovePlayer()->SetIsInputMove(true);
             player_.lock()->GetAttackPlayer()->SetIsNormalAttack(true);
@@ -337,15 +367,25 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
 //ジャスト回避反撃入力確認
 void JustAvoidPlayer::JustAvoidanceAttackInput()
 {
-    if (justAvoidState_ < 3)return;
-
-    std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
-
     //ボタンで反撃変える
     GamePad& gamePad = Input::Instance().GetGamePad();
 
+    if (justAvoidState_ < 3)
+    {
+        //先行入力
+        if (gamePad.GetButtonDown() & GamePad::BTN_X)
+            justAvoidLeadKey_ = JUST_AVOID_KEY::SQUARE;
+        if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+            justAvoidLeadKey_ = JUST_AVOID_KEY::TRIANGLE;
+
+        return;
+    }
+
+    std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
+
+
     //□の場合
-    if (gamePad.GetButtonDown() & GamePad::BTN_X)
+    if ((gamePad.GetButtonDown() & GamePad::BTN_X) || (justAvoidLeadKey_ == JUST_AVOID_KEY::SQUARE))
     {
         JustInisialize();
         player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::DASH);
@@ -361,14 +401,19 @@ void JustAvoidPlayer::JustAvoidanceAttackInput()
 
         //敵をスローにする
         EnemyManager::Instance().SetEnemySpeed(0.1f, 5.0f);
-    }
 
+        //世界色演出
+        justSpriteState_ = 10;
+    }
     //△の場合
-    if (gamePad.GetButtonDown() & GamePad::BTN_Y)
+    else if ((gamePad.GetButtonDown() & GamePad::BTN_Y) || (justAvoidLeadKey_ == JUST_AVOID_KEY::TRIANGLE))
     {
         JustInisialize();
         triangleState_ = 0;
         justAvoidKey_ = JUST_AVOID_KEY::TRIANGLE;
+
+        //世界色演出
+        justSpriteState_ = 20;
     }
 }
 
@@ -532,7 +577,6 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         //指定エネミー取得
         std::shared_ptr<GameObject> lockEnemy = lockTriangleEnemy_.lock();
         DirectX::XMFLOAT3 enemyPos = lockEnemy->transform_->GetWorldPosition();
-        //DirectX::XMFLOAT3 enemyPos = justHitEnemy_.lock()->transform_->GetWorldPosition();
         DirectX::XMFLOAT3 playerPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
 
         //エネミーからプレイヤーの正規化ベクトル
@@ -733,6 +777,70 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
     }
 }
 
+void JustAvoidPlayer::JustSpriteUpdate(float elapsedTime)
+{
+    //世界の色変える
+    switch (justSpriteState_)
+    {
+    case 0:
+    {
+        isJustSprite_ = true;
+        Sprite::DissolveConstans& dissolveData = justSprite_->GetEffectSpriteData().dissolveConstant;
+        dissolveData.dissolveThreshold = 0;
+        dissolveData.edgeThreshold = 1;
+
+        justSpriteState_++;
+    }
+    break;
+    case 1:
+    {
+        Sprite::DissolveConstans& dissolveData = justSprite_->GetEffectSpriteData().dissolveConstant;
+        dissolveData.dissolveThreshold += 0.5f * elapsedTime;
+        if (dissolveData.dissolveThreshold > 0.5f)justSpriteState_++;
+    }
+    break;
+    case 2:
+    {
+        //待機用
+    }
+    break;
+    case 10:
+    {
+        //□ジャスト攻撃
+        Sprite::DissolveConstans& dissolveData = justSprite_->GetEffectSpriteData().dissolveConstant;
+        dissolveData.dissolveThreshold += 0.5f * elapsedTime;
+        if (dissolveData.dissolveThreshold > 1)
+        {
+            dissolveData.dissolveThreshold = 1;
+            justSpriteState_++;
+        }
+    }
+    break;
+    case 11:
+    {
+        //時間戻るまで待機
+        if (!EnemyManager::Instance().GetIsSlow())
+            justSpriteState_ = 20;
+    }
+    break;
+    case 20:
+    {
+        //戻す
+        Sprite::DissolveConstans& dissolveData = justSprite_->GetEffectSpriteData().dissolveConstant;
+        dissolveData.dissolveThreshold -= 1.5f * elapsedTime;
+        if (dissolveData.dissolveThreshold < 0)justSpriteState_++;
+    }
+    break;
+    case 21:
+    {
+        //終了処理
+        isJustSprite_ = false;
+        justSpriteState_ = -1;
+    }
+    break;
+    }
+}
+
 //ジャスト回避出来たか判定
 void JustAvoidPlayer::JustAvoidJudge()
 {
@@ -794,4 +902,16 @@ void JustAvoidPlayer::JustAvoidDirection(float elapsedTime)
     if (playerColor.w < 1)playerColor.w = 1;
     player_.lock()->GetGameObject()->GetComponent<RendererCom>()->
         GetModel()->SetMaterialColor(playerColor);
+}
+
+void JustAvoidPlayer::justDirectionRender2D()
+{
+    if (!isJustSprite_)return;
+    Graphics& graphics = Graphics::Instance();
+    ID3D11DeviceContext* dc= graphics.GetDeviceContext();
+
+    justSprite_->Render(dc, 0, 0, graphics.GetScreenWidth(), graphics.GetScreenHeight()
+        , 0, 0, justSprite_->GetTextureWidth(), justSprite_->GetTextureHeight()
+        , 0, 1, 0.89f, 0, 1
+    );
 }

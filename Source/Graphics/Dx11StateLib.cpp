@@ -107,21 +107,31 @@ HRESULT Dx11StateLib::load_texture_from_file(ID3D11Device* device, const char* f
 	HRESULT hr{ S_OK };
 	Microsoft::WRL::ComPtr<ID3D11Resource> resource;
 
-	std::filesystem::path dds_filename(filename);
-	dds_filename.replace_extension("dds");
-	if (std::filesystem::exists(dds_filename.c_str()))
+	//ダミーテクスチャを作るか
+	bool dummy = false;
+
+	if (filename != nullptr)
 	{
-		Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediate_context;
-		device->GetImmediateContext(immediate_context.GetAddressOf());
-		hr = DirectX::CreateDDSTextureFromFile(device, immediate_context.Get(), dds_filename.c_str(), resource.GetAddressOf(), shader_resource_view);
+		std::filesystem::path dds_filename(filename);
+		dds_filename.replace_extension("dds");
+		if (std::filesystem::exists(dds_filename.c_str()))
+		{
+			Microsoft::WRL::ComPtr<ID3D11DeviceContext> immediate_context;
+			device->GetImmediateContext(immediate_context.GetAddressOf());
+			hr = DirectX::CreateDDSTextureFromFile(device, immediate_context.Get(), dds_filename.c_str(), resource.GetAddressOf(), shader_resource_view);
+		}
+		else
+		{
+			wchar_t wfilename[256];
+			::MultiByteToWideChar(CP_ACP, 0, filename, -1, wfilename, 256);
+
+			hr = DirectX::CreateWICTextureFromFile(device, wfilename, resource.GetAddressOf(), shader_resource_view);
+
+		}
 	}
 	else
 	{
-		wchar_t wfilename[256];
-		::MultiByteToWideChar(CP_ACP, 0, filename, -1, wfilename, 256);
-
-		hr = DirectX::CreateWICTextureFromFile(device, wfilename, resource.GetAddressOf(), shader_resource_view);
-
+		dummy = true;
 	}
 
 	//読み込み失敗時
@@ -162,38 +172,43 @@ HRESULT Dx11StateLib::load_texture_from_file(ID3D11Device* device, const char* f
 		}
 		else
 		{
-			// 読み込み失敗したらダミーテクスチャを作る
-			LOG("load failed : %s\n", filename);
-
-			const int width = 8;
-			const int height = 8;
-			UINT pixels[width * height];
-			::memset(pixels, 0xFF, sizeof(pixels));
-
-			D3D11_TEXTURE2D_DESC desc = { 0 };
-			desc.Width = width;
-			desc.Height = height;
-			desc.MipLevels = 1;
-			desc.ArraySize = 1;
-			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			desc.SampleDesc.Count = 1;
-			desc.SampleDesc.Quality = 0;
-			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-			desc.CPUAccessFlags = 0;
-			desc.MiscFlags = 0;
-			D3D11_SUBRESOURCE_DATA data;
-			::memset(&data, 0, sizeof(data));
-			data.pSysMem = pixels;
-			data.SysMemPitch = width;
-
-			Microsoft::WRL::ComPtr<ID3D11Texture2D>	texture;
-			HRESULT hr = device->CreateTexture2D(&desc, &data, texture.GetAddressOf());
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-			hr = device->CreateShaderResourceView(texture.Get(), nullptr, shader_resource_view);
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			dummy = true;
 		}
+	}
+
+	// 読み込み失敗したらダミーテクスチャを作る
+	if (dummy)
+	{
+		LOG("load failed : %s\n", filename);
+
+		const int width = 8;
+		const int height = 8;
+		UINT pixels[width * height];
+		::memset(pixels, 0xFF, sizeof(pixels));
+
+		D3D11_TEXTURE2D_DESC desc = { 0 };
+		desc.Width = width;
+		desc.Height = height;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = 0;
+		D3D11_SUBRESOURCE_DATA data;
+		::memset(&data, 0, sizeof(data));
+		data.pSysMem = pixels;
+		data.SysMemPitch = width;
+
+		Microsoft::WRL::ComPtr<ID3D11Texture2D>	texture;
+		HRESULT hr = device->CreateTexture2D(&desc, &data, texture.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+		hr = device->CreateShaderResourceView(texture.Get(), nullptr, shader_resource_view);
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
@@ -329,6 +344,11 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 		{ //ON_2D
 			depthStencilDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
 			HRESULT hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilState_[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_2D)].GetAddressOf());
+			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		}
+		{ //DEPTH_ON_2D_EQUAL
+			depthStencilDesc.DepthFunc = D3D11_COMPARISON_EQUAL;
+			HRESULT hr = device->CreateDepthStencilState(&depthStencilDesc, depthStencilState_[static_cast<int>(DEPTHSTENCIL_STATE_TYPE::DEPTH_ON_2D_EQUAL)].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 		{ //ON_PARTICLE

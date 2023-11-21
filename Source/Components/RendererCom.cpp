@@ -57,7 +57,7 @@ void RendererCom::OnGUI()
         {
             if (ImGui::TreeNode(mat.name.c_str()))
             {
-                if (shaderID_ == 2)
+                if (shaderID_ == SHADER_ID::UnityChanToon)
                 {
                     DirectX::XMFLOAT4 w = mat.toonStruct._Emissive_Color;
                     if (ImGui::DragFloat4("emissivePower", &w.x, 0.01f, 0, 3))

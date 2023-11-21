@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "Misc.h"
 #include "Graphics/Graphics.h"
+#include <imgui.h>
 
 // コンストラクタ
 Sprite::Sprite()
@@ -75,62 +76,17 @@ Sprite::Sprite(const char* filename)
 		dx11State->createPsFromCso(device, "Shader\\SpritePS.cso", pixelShader_.GetAddressOf());
 	}
 
-	// テクスチャの生成
-	if (filename != nullptr)
+	// テクスチャの生成		
+	D3D11_TEXTURE2D_DESC desc;
+	dx11State->load_texture_from_file(device, filename, shaderResourceView_.GetAddressOf(), &desc);
+	textureWidth_ = desc.Width;
+	textureHeight_ = desc.Height;
+
+
+
+	//効果初期化
 	{
-		// マルチバイト文字からワイド文字へ変換
-		wchar_t wfilename[256];
-		::MultiByteToWideChar(CP_ACP, 0, filename, -1, wfilename, 256);
-
-		// テクスチャファイル読み込み
-		// テクスチャ読み込み
-		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
-		HRESULT hr = DirectX::CreateWICTextureFromFile(device, wfilename, resource.GetAddressOf(), shaderResourceView_.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-		// テクスチャ情報の取得
-		D3D11_TEXTURE2D_DESC desc;
-		Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
-		hr = resource->QueryInterface<ID3D11Texture2D>(texture2d.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-		texture2d->GetDesc(&desc);
-
-		textureWidth_ = desc.Width;
-		textureHeight_ = desc.Height;
-	}
-	else
-	{
-		const int width = 8;
-		const int height = 8;
-		UINT pixels[width * height];
-		::memset(pixels, 0xFF, sizeof(pixels));
-
-		D3D11_TEXTURE2D_DESC desc = { 0 };
-		desc.Width = width;
-		desc.Height = height;
-		desc.MipLevels = 1;
-		desc.ArraySize = 1;
-		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		desc.SampleDesc.Count = 1;
-		desc.SampleDesc.Quality = 0;
-		desc.Usage = D3D11_USAGE_DEFAULT;
-		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		desc.CPUAccessFlags = 0;
-		desc.MiscFlags = 0;
-		D3D11_SUBRESOURCE_DATA data;
-		::memset(&data, 0, sizeof(data));
-		data.pSysMem = pixels;
-		data.SysMemPitch = width;
-
-		Microsoft::WRL::ComPtr<ID3D11Texture2D>	texture;
-		HRESULT hr = device->CreateTexture2D(&desc, &data, texture.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-		hr = device->CreateShaderResourceView(texture.Get(), nullptr, shaderResourceView_.GetAddressOf());
-		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-		textureWidth_ = desc.Width;
-		textureHeight_ = desc.Height;
+		dx11State->createConstantBuffer(device, sizeof(Effect2DConstans), effectBuffer_.GetAddressOf());
 	}
 }
 
@@ -141,7 +97,7 @@ void Sprite::Render(ID3D11DeviceContext *immediate_context,
 	float sx, float sy,
 	float sw, float sh,
 	float angle,
-	float r, float g, float b, float a) const
+	float r, float g, float b, float a)
 {
 	{
 		// 現在設定されているビューポートからスクリーンサイズを取得する。
@@ -242,7 +198,17 @@ void Sprite::Render(ID3D11DeviceContext *immediate_context,
 		immediate_context->VSSetShader(vertexShader_.Get(), nullptr, 0);
 		immediate_context->PSSetShader(pixelShader_.Get(), nullptr, 0);
 
+		//効果情報
+		ID3D11Buffer* constantBuffers[] =
+		{
+			effectBuffer_.Get()
+		};
+		immediate_context->PSSetConstantBuffers(0, ARRAYSIZE(constantBuffers), constantBuffers);
+		immediate_context->UpdateSubresource(effectBuffer_.Get(), 0, 0, &effectConstans_, 0, 0);
+
+
 		immediate_context->PSSetShaderResources(0, 1, shaderResourceView_.GetAddressOf());
+		immediate_context->PSSetShaderResources(1, 1, dissolveSRV_.GetAddressOf());
 
 		const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		
@@ -266,5 +232,15 @@ void Sprite::SetShaderResourceView(ID3D11ShaderResourceView* srv, float textureW
 	shaderResourceView_ = srv;
 	textureWidth_ = textureWidth;
 	textureHeight_ = textureHeight;
+}
+
+void Sprite::SetDissolveSRV(const char* filename)
+{
+	ID3D11Device* device = Graphics::Instance().GetDevice();
+	Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();
+
+	D3D11_TEXTURE2D_DESC desc;
+	dissolveSRV_.Reset();
+	dx11State->load_texture_from_file(device, filename, dissolveSRV_.GetAddressOf(), &desc);
 }
 

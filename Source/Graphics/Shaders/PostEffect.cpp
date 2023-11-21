@@ -35,8 +35,8 @@ PostEffect::PostEffect(UINT width, UINT height)
     ID3D11Device* device = Graphics::Instance().GetDevice();
     //バッファ作成
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::colorGradingData), colorGradingBuffer_.GetAddressOf());
-    dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomData), bloomBuffer_.GetAddressOf());
-    dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomData2), bloomExBuffer_.GetAddressOf());
+    dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomBlur), bloomBuffer_.GetAddressOf());
+    dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomLuminance), bloomExBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::sunAtmosphere), sunBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(CbScene), sceneBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(SkymapData), skymapBuffer_.GetAddressOf());
@@ -249,7 +249,7 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
                 1, 1, 1, 1);
 
 
-            dc->UpdateSubresource(bloomExBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.bloomData2, 0, 0);
+            dc->UpdateSubresource(bloomExBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.bloomLuminance, 0, 0);
             dc->PSSetConstantBuffers(0, 1, bloomExBuffer_.GetAddressOf());
 
 
@@ -259,13 +259,13 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
 
         //暈しバッファ更新
         {
-            BloomData bloomData;
-            CalcGaussianFilter(bloomData.Weight, KARNEL_SIZE, 50.0f);//ガウスフィルター作成 
+            BloomBlur bloomBlur;
+            CalcGaussianFilter(bloomBlur.Weight, KARNEL_SIZE, 50.0f);//ガウスフィルター作成 
             //コンスタントバッファ更新
-            bloomData.KarnelSize = KARNEL_SIZE;
-            bloomData.texel.x = 1.0f / renderPost_[3]->width;
-            bloomData.texel.y = 1.0f / renderPost_[3]->height;
-            dc->UpdateSubresource(bloomBuffer_.Get(), 0, NULL, &bloomData, 0, 0);
+            bloomBlur.KarnelSize = KARNEL_SIZE;
+            bloomBlur.texel.x = 1.0f / renderPost_[3]->width;
+            bloomBlur.texel.y = 1.0f / renderPost_[3]->height;
+            dc->UpdateSubresource(bloomBuffer_.Get(), 0, NULL, &bloomBlur, 0, 0);
             dc->PSSetConstantBuffers(7, 1, bloomBuffer_.GetAddressOf());        
         }
 
@@ -333,7 +333,7 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
                     1, 1, 1, 1);
 
 
-                dc->UpdateSubresource(bloomExBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.bloomData2, 0, 0);
+                dc->UpdateSubresource(bloomExBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.bloomLuminance, 0, 0);
                 dc->PSSetConstantBuffers(0, 1, bloomExBuffer_.GetAddressOf());
 
 
@@ -347,13 +347,13 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
                 int index = i + 1;
                 //暈しバッファ更新
                 {
-                    BloomData bloomData;
-                    CalcGaussianFilter(bloomData.Weight, KARNEL_SIZE, 50.0f);//ガウスフィルター作成 
+                    BloomBlur bloomBlur;
+                    CalcGaussianFilter(bloomBlur.Weight, KARNEL_SIZE, 50.0f);//ガウスフィルター作成 
                     //コンスタントバッファ更新
-                    bloomData.KarnelSize = KARNEL_SIZE;
-                    bloomData.texel.x = 1.0f / renderPost_[index]->width;
-                    bloomData.texel.y = 1.0f / renderPost_[index]->height;
-                    dc->UpdateSubresource(bloomBuffer_.Get(), 0, NULL, &bloomData, 0, 0);
+                    bloomBlur.KarnelSize = KARNEL_SIZE;
+                    bloomBlur.texel.x = 1.0f / renderPost_[index]->width;
+                    bloomBlur.texel.y = 1.0f / renderPost_[index]->height;
+                    dc->UpdateSubresource(bloomBuffer_.Get(), 0, NULL, &bloomBlur, 0, 0);
                     dc->PSSetConstantBuffers(7, 1, bloomBuffer_.GetAddressOf());
                 }
 
@@ -609,8 +609,8 @@ void PostEffect::ImGuiRender()
                 bloomKawaseFilter_->SetEnabled(enabledKawase);
             }
             ImGui::Separator();
-            ImGui::SliderFloat("intensity", &graphics.shaderParameter3D_.bloomData2.intensity, 0, 100);
-            ImGui::SliderFloat("threshold", &graphics.shaderParameter3D_.bloomData2.threshold, 0, 1);
+            ImGui::SliderFloat("intensity", &graphics.shaderParameter3D_.bloomLuminance.intensity, 0, 100);
+            ImGui::SliderFloat("threshold", &graphics.shaderParameter3D_.bloomLuminance.threshold, 0, 1);
 
            
             ImGui::TreePop();

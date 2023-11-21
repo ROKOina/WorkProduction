@@ -165,6 +165,7 @@ private:
         struct ObjData
         {
             std::weak_ptr<GameObject> obj;
+            bool isMove;
             float speed;    //移動スピード
             DirectX::XMFLOAT3 velocity; //移動方向
         };

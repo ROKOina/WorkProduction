@@ -465,12 +465,7 @@ void EnemyCom::DamageProcess(float elapsedTime)
         //エフェクト
         if (damageEffTimer_ < 0)
         {
-            //DirectX::XMFLOAT3 effPos = GetGameObject()->transform_->GetWorldPosition();
-            //effPos.y += 1;
             GetGameObject()->GetChildFind("Particle")->GetComponent<ParticleSystemCom>()->Restart();
-            //std::shared_ptr<GameObject> effObj = ParticleComManager::Instance().SetEffect(ParticleComManager::DAMAGE_SWETTS_ENEMY, effPos
-            //    , nullptr, GetGameObject(), { 0,1,0 });
-            //effObj->transform_->SetScale(DirectX::XMFLOAT3(100, 100, 100));
             damageEffTimer_ = 0.5f;
         }
     }

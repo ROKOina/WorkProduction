@@ -1,16 +1,18 @@
 #pragma once
 
 #include <memory>
+#include <DirectXMath.h>
 
 //前方宣言
 class PlayerCom;
 class GameObject;
+class Sprite;
 
 //プレイヤーのジャスト回避を管理
 class JustAvoidPlayer
 {
 public:
-    JustAvoidPlayer(std::shared_ptr<PlayerCom> player) : player_(player) {}
+    JustAvoidPlayer(std::shared_ptr<PlayerCom> player);
     ~JustAvoidPlayer() {}
 
     void Update(float elapsedTime);
@@ -31,6 +33,9 @@ private:
     //△反撃
     void JustAvoidanceTriangle(float elapsedTime);
 
+    //ジャスト回避世界色演出
+    void JustSpriteUpdate(float elapsedTime);
+
 public:
     //ジャスト回避出来たか判定
     void JustAvoidJudge();
@@ -45,6 +50,9 @@ public:
 
     //ジャスト回避中演出用
     void JustAvoidDirection(float elapsedTime);
+
+    //ジャスト回避演出描画
+    void justDirectionRender2D();
 
 private:
     //ジャスト回避判定
@@ -66,8 +74,14 @@ private:
         NULL_KEY,
     };
     JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
+    JUST_AVOID_KEY justAvoidLeadKey_ = JUST_AVOID_KEY::NULL_KEY;    //先行入力用
     int triangleState_ = 0;
     std::weak_ptr<GameObject> lockTriangleEnemy_;
+
+    //ジャスト回避演出用
+    bool isJustSprite_ = false;
+    int justSpriteState_ = -1;
+    std::unique_ptr<Sprite> justSprite_;
 
 private:
     std::weak_ptr<PlayerCom> player_;

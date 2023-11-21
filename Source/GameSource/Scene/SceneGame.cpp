@@ -90,14 +90,16 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for (int i = 0; i < 15; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
-			0,  (rand() % (230 * 2) - 230) * 0.1f });
-		//obj->transform_->SetWorldPosition({ 0, 0, 5 });
+
+		//obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
+		//	0,  (rand() % (230 * 2) - 230) * 0.1f });
+		obj->transform_->SetWorldPosition({ 0, 0, 5 });
+
 		obj->transform_->SetEulerRotation({ 0,180,0 });
 
 		const char* filename = "Data/Model/picolabo/picolabo.mdl";
@@ -474,6 +476,15 @@ void SceneGame::Initialize()
 			col->SetPushBackObj(obj);
 			col->SetWeight(10.0f);
 		}
+
+	}
+	//プレイヤーの手にパーティクル
+	{
+		std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect
+		(ParticleComManager::COMBO_TAME, {0,0,0},nullptr
+			,GameObjectManager::Instance().Find("pico"), "RightHand");
+		particle->SetName("playerHandParticle");
+		particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
 	}
 
 	//移動用剣
@@ -522,53 +533,17 @@ void SceneGame::Initialize()
 
 
 	//particle
-	for (int i = 0; i < 0; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
 		std::string n = "Particle" + std::to_string(i);
 		p->SetName(n.c_str());
 		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
 
-		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(1000);
+		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(5000);
 		c->SetSweetsParticle(true);	//お菓子用
 
 		c->LoadTexture("./Data/Sprite/sweetsParticle.png");
-
-		//c->LoadTexture("Data/Sprite/default_eff.png");
-		//c->LoadTexture("Data/Sprite/smoke_pop.png");
-		//c->Load("Data/Effect/para/honoo.ipff");
-
-		//p->AddComponent<SphereColliderCom>();
-
-		//std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::COMBO_1);
-
-
-		//{
-		//	std::shared_ptr<GameObject> pChild = p->AddChildObject();
-		//	pChild->SetName("ParticleChild");
-
-		//	std::shared_ptr<ParticleSystemCom> c1 = pChild->AddComponent<ParticleSystemCom>(10000);
-		//	c1->LoadTexture("Data/Sprite/smoke_pop.png");
-		//}
-
-
-		//	//攻撃オブジェ
-		//{
-		//	//std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-		//	std::shared_ptr<GameObject> obj = particle->AddChildObject();
-		//	obj->SetName("attack");
-
-		//	std::shared_ptr<SphereColliderCom> attackCol = obj->AddComponent<SphereColliderCom>();
-		//	attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
-		//	attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
-		//	attackCol->SetRadius(2.3f);
-
-		//	std::shared_ptr<WeaponCom> weapon = obj->AddComponent<WeaponCom>();
-		//	weapon->SetObject(GameObjectManager::Instance().Find("pico"));
-		//	weapon->SetNodeParent(particle);
-		//	weapon->SetIsForeverUse();
-		//	weapon->SetAttackDefaultStatus(1, 0);
-		//}
 
 	}
 
@@ -615,13 +590,12 @@ void SceneGame::Initialize()
 			static_cast<UINT>(graphics.GetScreenHeight()));
 
 		//ブルーム
-		graphics.shaderParameter3D_.bloomData2.intensity = 5;
-		graphics.shaderParameter3D_.bloomData2.threshold = 1;
+		graphics.shaderParameter3D_.bloomLuminance.intensity = 5;
+		graphics.shaderParameter3D_.bloomLuminance.threshold = 1;
 
 		//太陽
 		graphics.shaderParameter3D_.lightDirection = { 0.626f,-0.55f,-0.533f,0 };
 	}
-
 
 #if defined(StageEdit)
 
@@ -700,15 +674,17 @@ void SceneGame::Update(float elapsedTime)
 #endif
 
 	GameObjectManager::Instance().Update(elapsedTime);
-	
+
+	if (gameEndFlag_)return;
+
 	EnemyManager::Instance().Update(elapsedTime);
 
 #if defined(StageEdit)
 	
 #else
-	if (!gameEndFlag_)
+	
 		//経路探査
-		SeachGraph::Instance().UpdatePath();
+	SeachGraph::Instance().UpdatePath();
 #endif
 
 	//エフェクト更新処理
@@ -789,6 +765,7 @@ void SceneGame::Render(float elapsedTime)
 	}
 
 	// 3Dデバッグ描画
+	if(1)
 	{
 		//経路探査
 		if (1)
@@ -827,6 +804,10 @@ void SceneGame::Render(float elapsedTime)
 
 	// 2Dスプライト描画
 	{
+		//プレイヤージャスト回避演出
+		std::shared_ptr<PlayerCom> pico = GameObjectManager::Instance().Find("pico")->GetComponent<PlayerCom>();
+		pico->GetJustAvoidPlayer()->justDirectionRender2D();
+
 		GameObjectManager::Instance().Render2D(elapsedTime);
 		EnemyManager::Instance().Render2D(elapsedTime);
 	}
@@ -867,8 +848,5 @@ void SceneGame::Render(float elapsedTime)
 				, 0, 1, 1, 1, 1);
 		}
 	}
-	ImGui::Begin("AHH");
-	ImGui::DragFloat("a", &startSpriteSize_,0.01f);
-	ImGui::End();
 }
 

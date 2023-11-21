@@ -371,13 +371,18 @@ void AttackPlayer::TriangleInput()
     }
     else if (comboSquareCount_ <= 3&& comboTriangleCount_<3)
     {
-        if (DoComboAttack())
+        if (DoComboAttack() && player_.lock()->GetPlayerStatus() != PlayerCom::PLAYER_STATUS::ATTACK_DASH)
         {
             animator->ResetParameterList();
             animator->SetTriggerOn("triangle");
 
             NormalAttack();
             player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
+
+            //パーティクル
+            GameObjectManager::Instance().Find("playerHandParticle")
+                ->GetComponent<ParticleSystemCom>()->Restart();
+
             comboTriangleCount_++;
         }
     }
@@ -967,10 +972,12 @@ void AttackPlayer::SquareAttackDirection(float elapsedTime)
             //エフェクト終了処理
             std::shared_ptr<ParticleSystemCom> particle = squDir.objData[index].obj.lock()->GetComponent<ParticleSystemCom>();
             if (!squDir.enable)
+            {
                 particle->SetRoop(false);
+            }
 
             //エフェクトループ中のみ
-            if (particle->GetRoop())
+            if (particle->GetRoop()&& squDir.objData[index].isMove)
             {
                 //動かす
                 DirectX::XMFLOAT3 pos = squDir.objData[index].obj.lock()->transform_->GetWorldPosition();
@@ -1007,10 +1014,10 @@ void AttackPlayer::SpawnCombo1()
     //obj生成
     std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::COMBO_1);
     particle->transform_->SetWorldPosition(player->transform_->GetWorldPosition());
+    particle->transform_->SetRotation(QuaternionStruct::LookRotation(player->transform_->GetWorldFront()).dxFloat4);
 
     //子に当たり判定
     {
-        //std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
         std::shared_ptr<GameObject> obj = particle->AddChildObject();
         obj->SetName("attack");
 
@@ -1026,6 +1033,20 @@ void AttackPlayer::SpawnCombo1()
         weapon->SetAttackDefaultStatus(5, 0);
     }
 
+    //炎パーティクル
+    std::shared_ptr<GameObject> fireP1 = ParticleComManager::Instance().SetEffect(ParticleComManager::COMBO_1_FIRE, { 0,0,0 }, particle);
+    {
+        fireP1->SetName("fireParR");
+        fireP1->transform_->SetLocalPosition(DirectX::XMFLOAT3(0, 0.2f, 0));
+        fireP1->transform_->SetScale(DirectX::XMFLOAT3(2, 1, 2));
+    }
+    std::shared_ptr<GameObject> fireP2 = ParticleComManager::Instance().SetEffect(ParticleComManager::COMBO_1_FIRE, { 0,0,0 }, particle);
+    {
+        fireP2->SetName("fireParL");
+        fireP2->transform_->SetLocalPosition(DirectX::XMFLOAT3(0, 0.2f, 0));
+        fireP2->transform_->SetScale(DirectX::XMFLOAT3(-2, 1, 2));
+    }
+
     //強攻撃動き初期化
     {
         squareAttackMove_[0].enable = true;
@@ -1035,8 +1056,19 @@ void AttackPlayer::SpawnCombo1()
         //加速を指定
         SquareAttackMove::ObjData oData;
         oData.obj = particle;
+        oData.isMove = true;
         oData.velocity = player->transform_->GetWorldFront();
         oData.speed = 20;
+        squareAttackMove_[0].objData.emplace_back(oData);
+        oData.obj = fireP1;
+        oData.isMove = false;
+        oData.velocity = { 0,0,0 };
+        oData.speed = 0;
+        squareAttackMove_[0].objData.emplace_back(oData);
+        oData.obj = fireP2;
+        oData.isMove = false;
+        oData.velocity = { 0,0,0 };
+        oData.speed = 0;
         squareAttackMove_[0].objData.emplace_back(oData);
     }
 
@@ -1093,6 +1125,7 @@ void AttackPlayer::SpawnCombo2()
         //加速を指定
         SquareAttackMove::ObjData oData;
         oData.obj = particle;
+        oData.isMove = true;
         oData.velocity = { 0,0,0 };
         oData.speed = 0;
         squareAttackMove_[1].objData.emplace_back(oData);
@@ -1140,6 +1173,7 @@ void AttackPlayer::SpawnCombo3()
         //加速を指定
         SquareAttackMove::ObjData oData;
         oData.obj = particle;
+        oData.isMove = true;
         oData.velocity = { 0,0,0 };
         oData.speed = 0;
         squareAttackMove_[2].objData.emplace_back(oData);

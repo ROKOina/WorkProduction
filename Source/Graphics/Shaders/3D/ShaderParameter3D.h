@@ -31,7 +31,7 @@ struct ColorGradingData
 static constexpr u_int KARNEL_SIZE = 17;
 static constexpr float PI_ANGLE = 3.141592f;
 static constexpr u_int BUFFER_SIZE = KARNEL_SIZE * KARNEL_SIZE;
-struct BloomData
+struct BloomBlur
 {
 	DirectX::XMFLOAT4 Weight[BUFFER_SIZE]; //ガウシアンフィルタ X,Y オフセット、Z 重み、W 未使用
 	float KarnelSize;
@@ -39,7 +39,7 @@ struct BloomData
 	float dummy;
 };
 
-struct BloomData2
+struct BloomLuminance
 {
 	float threshold; // 高輝度抽出のための閾値
 	float intensity; // ブルームの強度
@@ -79,7 +79,6 @@ struct SunAtmosphere
 	DirectX::XMFLOAT4X4 inverseProjection;
 	DirectX::XMFLOAT4X4 inverseViewProjection;
 };
-
 
 //ユニティちゃんトゥーン
 struct UnityChanToonStruct
@@ -141,8 +140,8 @@ struct ShaderParameter3D
 	ColorGradingData colorGradingData;
 
 	//ブルーム
-	BloomData bloomData;
-	BloomData2 bloomData2;
+	BloomBlur bloomBlur;
+	BloomLuminance bloomLuminance;
 
 	//太陽周り
 	SunAtmosphere sunAtmosphere;

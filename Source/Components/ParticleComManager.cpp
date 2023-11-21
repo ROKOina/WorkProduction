@@ -4,6 +4,7 @@
 #include "System/GameObject.h"
 #include "ColliderCom.h"
 #include "TransformCom.h"
+#include "RendererCom.h"
 #include <imgui.h>
 
 void ParticleComManager::Update(float elapsedTime)
@@ -25,11 +26,23 @@ void ParticleComManager::Update(float elapsedTime)
         //追従処理
         if (particles_[index].posObj.lock())
         {
-            DirectX::XMFLOAT3 pos = particles_[index].posObj.lock()->transform_->GetWorldPosition();
-            pos.x += particles_[index].offsetPos.x;
-            pos.y += particles_[index].offsetPos.y;
-            pos.z += particles_[index].offsetPos.z;
-            particles_[index].particle.lock()->transform_->SetWorldPosition(pos);
+            if (particles_[index].boneName.empty()) //ボーンない場合
+            {
+                DirectX::XMFLOAT3 pos = particles_[index].posObj.lock()->transform_->GetWorldPosition();
+                pos.x += particles_[index].offsetPos.x;
+                pos.y += particles_[index].offsetPos.y;
+                pos.z += particles_[index].offsetPos.z;
+                particles_[index].particle.lock()->transform_->SetWorldPosition(pos);
+            }
+            else
+            {
+                DirectX::XMFLOAT4X4 boneTransform = particles_[index].posObj.lock()->GetComponent<RendererCom>()->GetModel()->FindNode(particles_[index].boneName.c_str())->worldTransform;
+                DirectX::XMFLOAT3 pos = { boneTransform._41,boneTransform._42,boneTransform._43 };
+                pos.x += particles_[index].offsetPos.x;
+                pos.y += particles_[index].offsetPos.y;
+                pos.z += particles_[index].offsetPos.z;
+                particles_[index].particle.lock()->transform_->SetWorldPosition(pos);
+            }
         }
 
         index++;
@@ -37,7 +50,7 @@ void ParticleComManager::Update(float elapsedTime)
 }
 
 std::shared_ptr<GameObject> ParticleComManager::SetEffect(EFFECT_ID id, DirectX::XMFLOAT3 pos
-    , std::shared_ptr<GameObject> parent, std::shared_ptr<GameObject> posObj, DirectX::XMFLOAT3 offsetPos)
+    , std::shared_ptr<GameObject> parent, std::shared_ptr<GameObject> posObj, std::string boneName, DirectX::XMFLOAT3 offsetPos)
 {
     ParticleDataMove obj;
     if (parent)
@@ -59,6 +72,13 @@ std::shared_ptr<GameObject> ParticleComManager::SetEffect(EFFECT_ID id, DirectX:
     p->Load(iniParticle_[id].particleName.c_str());
 
     obj.posObj = posObj;
+    if (posObj)
+    {
+        if (!boneName.empty())  //ボーン指定されていたら
+        {
+            obj.boneName = boneName;
+        }
+    }
     obj.offsetPos = offsetPos;
 
     particles_.emplace_back(obj);

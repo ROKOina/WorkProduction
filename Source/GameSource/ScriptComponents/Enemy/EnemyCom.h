@@ -43,23 +43,23 @@ enum class AI_TREE
     ROOT,
 
     //2層
-    //ROOT 
+    //親：ROOT 
     BATTLE,
     SCOUT,
 
     //3層
-    //SCOUT 
+    //親：SCOUT 
     WANDER,
     IDLE,
 
-    //BATTLE
+    //親：BATTLE
     ATTACK,
     ROUTE,
     ATTACK_IDLE,
     PURSUIT,
 
     //4層
-    //ATTACK
+    //親：ATTACK
     NORMAL,
 };
 

@@ -128,8 +128,8 @@ void SceneTitle::Initialize()
             static_cast<UINT>(graphics.GetScreenHeight()));
 
         //ƒuƒ‹[ƒ€
-        graphics.shaderParameter3D_.bloomData2.intensity = 5;
-        graphics.shaderParameter3D_.bloomData2.threshold = 1;
+        graphics.shaderParameter3D_.bloomLuminance.intensity = 5;
+        graphics.shaderParameter3D_.bloomLuminance.threshold = 1;
 
         //‘¾—z
         graphics.shaderParameter3D_.lightDirection = { -0.972198129f,-0.0744780228f,-0.222000003f,0 };

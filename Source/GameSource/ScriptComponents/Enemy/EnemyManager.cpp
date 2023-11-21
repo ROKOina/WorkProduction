@@ -28,19 +28,24 @@ void EnemyManager::Update(float elapsedTime)
     //スロー戻り処理
     if (isSlow_)
     {
+        float ratio = slowTimer_ / slowSeconds_;
+        float speed = Expo::easeIn(ratio, slowSpeed_, 1, 1);
+        for (auto& nearEnemy : nearEnemies_)
+        {
+            nearEnemy.enemy.lock()->SetObjSpeed(speed);
+        }
+
         //イージングで戻りかたを決める
         slowTimer_ += elapsedTime;
         if (slowTimer_ >= slowSeconds_)
         {
             slowTimer_ = slowSeconds_;
             isSlow_ = false;
-        }
 
-        float ratio = slowTimer_ / slowSeconds_;
-        float speed = Expo::easeIn(ratio, slowSpeed_, 1, 1);
-        for (auto& nearEnemy : nearEnemies_)
-        {
-            nearEnemy.enemy.lock()->SetObjSpeed(speed);
+            for (auto& nearEnemy : nearEnemies_)
+            {
+                nearEnemy.enemy.lock()->SetObjSpeed(1);
+            }
         }
 
         //プレイヤー無敵に
@@ -76,87 +81,6 @@ void EnemyManager::OnGui()
         //敵追加
         if (ImGui::Button("Add"))
         {
-            std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-            obj->SetName("picolabo");
-            obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-            obj->transform_->SetWorldPosition({ -10.0f , 0, 5 });
-            obj->transform_->SetEulerRotation({ 0,180,0 });
-
-            const char* filename = "Data/Model/picolabo/picolabo.mdl";
-            std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
-            r->LoadModel(filename);
-            r->SetShaderID(SHADER_ID::UnityChanToon);
-
-            ////発光を消す
-            //std::vector<ModelResource::Material>& materials = r->GetModel()->GetResourceShared()->GetMaterialsEdit();
-            //materials[0].toonStruct._Emissive_Color.w = 0;
-
-
-            std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
-            std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
-
-            std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-            //a->PlayAnimation(5, true);
-
-            std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
-
-            std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
-            c->SetMyTag(COLLIDER_TAG::Enemy);
-            c->SetJudgeTag(COLLIDER_TAG::Player | COLLIDER_TAG::Wall);
-            c->SetSize(DirectX::XMFLOAT3(0.5f, 1.2f, 0.5f));
-            c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.9f, 0));
-
-            std::shared_ptr<EnemyNearCom> e = obj->AddComponent<EnemyNearCom>();
-
-            //ジャスト回避用
-            {
-                std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
-                justAttack->SetName("picolaboAttackJust");
-                std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
-                justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
-                justCol->SetJudgeTag(COLLIDER_TAG::Player);
-                justCol->SetSize({ 1.3f,1,1.3f });
-
-                justAttack->transform_->SetLocalPosition({ -1.569f ,0 ,95.493f });
-            }
-
-            //押し出し用当たり判定
-            {
-                std::shared_ptr<GameObject> pushBack = obj->AddChildObject();
-                pushBack->SetName("PushBackObj");
-                std::shared_ptr<SphereColliderCom> col = pushBack->AddComponent<SphereColliderCom>();
-                col->SetMyTag(COLLIDER_TAG::EnemyPushBack);
-                col->SetJudgeTag(COLLIDER_TAG::PlayerPushBack | COLLIDER_TAG::EnemyPushBack);
-                col->SetPushBack(true);
-                col->SetPushBackObj(obj);
-            }
-
-            //剣("RightHand")
-            {
-                std::shared_ptr<GameObject> sword = obj->AddChildObject();
-                sword->SetName("Banana");
-                sword->transform_->SetScale(DirectX::XMFLOAT3(3, 3, 3));
-                sword->transform_->SetEulerRotation(DirectX::XMFLOAT3(7, -85, 108));
-                sword->transform_->SetLocalPosition(DirectX::XMFLOAT3(11, -6, -15));
-
-                const char* filename = "Data/Model/Swords/banana/banana.mdl";
-                std::shared_ptr<RendererCom> r = sword->AddComponent<RendererCom>();
-                r->LoadModel(filename);
-                r->SetShaderID(SHADER_ID::UnityChanToon);
-
-                std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
-                attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
-                attackCol->SetJudgeTag(COLLIDER_TAG::Player);
-                attackCol->SetRadius(0.19f);
-
-                std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
-                weapon->SetObject(sword->GetParent());
-                weapon->SetNodeParent(sword->GetParent());
-                weapon->SetNodeName("RightHand");
-                weapon->SetColliderUpDown({ 1.36f,0 });
-                weapon->SetIsForeverUse(true);
-            }
-
         }
 
     }

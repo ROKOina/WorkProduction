@@ -50,6 +50,7 @@ public:
     enum class DEPTHSTENCIL_STATE_TYPE {
         DEPTH_ON_3D,   //深度テストON 3Dに設定されていた
         DEPTH_ON_2D,   //深度テストON 2Dに設定されていた
+        DEPTH_ON_2D_EQUAL,  
         DEPTH_OFF,     //深度テストOFF
         SKYMAP,        //スカイマップ
         PARTICLE,     //パーティクル
