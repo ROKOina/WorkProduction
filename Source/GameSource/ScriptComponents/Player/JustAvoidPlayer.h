@@ -34,7 +34,10 @@ private:
     void JustAvoidanceTriangle(float elapsedTime);
 
     //ジャスト回避世界色演出
-    void JustSpriteUpdate(float elapsedTime);
+    void JustDirectionUpdate(float elapsedTime);
+
+    //ジャスト回避パーティクルセット
+    void SetJustUnderParticle(bool flag);
 
 public:
     //ジャスト回避出来たか判定
@@ -49,7 +52,7 @@ public:
     const bool& GetIsJustJudge() const { return isJustJudge_; }
 
     //ジャスト回避中演出用
-    void JustAvoidDirection(float elapsedTime);
+    void JustAvoidDirectionEnd(float elapsedTime);
 
     //ジャスト回避演出描画
     void justDirectionRender2D();

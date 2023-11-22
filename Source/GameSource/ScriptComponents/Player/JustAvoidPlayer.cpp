@@ -11,6 +11,8 @@
 #include "Components\RendererCom.h"
 #include "Components\ColliderCom.h"
 #include "Components\CameraCom.h"
+#include "Components\ParticleSystemCom.h"
+#include "Components\ParticleComManager.h"
 #include "../CharacterStatusCom.h"
 
 #include "../Enemy/EnemyManager.h"
@@ -47,10 +49,10 @@ void JustAvoidPlayer::Update(float elapsedTime)
     }
 
     //ジャスト回避演出
-    JustAvoidDirection(elapsedTime);
+    JustAvoidDirectionEnd(elapsedTime);
 
     //ジャスト回避世界色演出
-    JustSpriteUpdate(elapsedTime);
+    JustDirectionUpdate(elapsedTime);
 
     //反撃処理更新
     switch (justAvoidKey_)
@@ -404,6 +406,8 @@ void JustAvoidPlayer::JustAvoidanceAttackInput()
 
         //世界色演出
         justSpriteState_ = 10;
+        //パーティクル演出起動
+        SetJustUnderParticle(true);
     }
     //△の場合
     else if ((gamePad.GetButtonDown() & GamePad::BTN_Y) || (justAvoidLeadKey_ == JUST_AVOID_KEY::TRIANGLE))
@@ -481,6 +485,30 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         return cameraPos;
     };
 
+    //カメラポスからプレイヤーポスを逆算
+    auto GetCameraFromPlayerPos = [&]()
+    {
+        std::shared_ptr<GameObject> camera = GameObjectManager::Instance().Find("Camera");
+        DirectX::XMFLOAT3 cameraPos = camera->transform_->GetWorldPosition();
+
+        DirectX::XMFLOAT3 playerPos;
+        DirectX::XMVECTOR f = DirectX::XMLoadFloat3(&camera->transform_->GetWorldFront());
+        DirectX::XMVECTOR r = DirectX::XMLoadFloat3(&camera->transform_->GetWorldRight());
+        DirectX::XMVECTOR u = DirectX::XMLoadFloat3(&camera->transform_->GetWorldUp());
+
+        DirectX::XMStoreFloat3(&playerPos,
+            DirectX::XMVectorAdd(
+                DirectX::XMLoadFloat3(&cameraPos), DirectX::XMVectorAdd(
+                    DirectX::XMVectorScale(r, -0.2f),
+                    DirectX::XMVectorAdd(
+                        DirectX::XMVectorScale(u, -1.1f),
+                        DirectX::XMVectorScale(f, 0.5f)
+                    )
+                )));
+
+        return playerPos;
+    };
+
     static float pushSeconds = 0;   //アニメーションイベントまでの時間
     static float lockEnemySeconds = 0;  //ロックオン変更時に使う
     static DirectX::XMFLOAT3 focusEnemy{0, 0, 0};
@@ -513,18 +541,21 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         {
             //カメラコントローラー取得
             std::shared_ptr<PlayerCameraCom> playerCameraCom = player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>();
-            playerCameraCom->isJust = true;
+            playerCameraCom->SetIsJust(true);
 
-            //補間して移動
+            //補間してカメラ移動
             DirectX::XMVECTOR CameraPos = DirectX::XMLoadFloat3(&GameObjectManager::Instance().Find("Camera")->transform_->GetWorldPosition());
-            DirectX::XMStoreFloat3(&playerCameraCom->pos, DirectX::XMVectorLerp(CameraPos, DirectX::XMLoadFloat3(&GetCameraPos()), startRatio));
+            DirectX::XMFLOAT3 cameraPos;
+            DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorLerp(CameraPos, DirectX::XMLoadFloat3(&GetCameraPos()), startRatio));
+            playerCameraCom->SetJustPos(cameraPos);
 
+            //補間してカメラフォーカスポス移動
             DirectX::XMVECTOR FocusPos = DirectX::XMLoadFloat3(&playerCameraCom->GetForcusPos());
             DirectX::XMFLOAT3 focus;
             DirectX::XMStoreFloat3(&focus, DirectX::XMVectorLerp(FocusPos, DirectX::XMLoadFloat3(&focusEnemy), startRatio));
-
             playerCameraCom->SetForcusPos(focus);
 
+            //補間してプレイヤーポス移動
             DirectX::XMFLOAT3 pPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
             DirectX::XMVECTOR PPos = DirectX::XMLoadFloat3(&pPos);
             pPos.y = 5;
@@ -543,6 +574,7 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
 
         }
 
+        //アニメーションイベントを見て次のステートへ
         std::shared_ptr<AnimationCom> picoAnim = player_.lock()->GetGameObject()->GetComponent<AnimationCom>();
         if (picoAnim->GetCurrentAnimationEvent("trianglePushStop", DirectX::XMFLOAT3(0, 0, 0)))
         {
@@ -579,45 +611,18 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         DirectX::XMFLOAT3 enemyPos = lockEnemy->transform_->GetWorldPosition();
         DirectX::XMFLOAT3 playerPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
 
-        //エネミーからプレイヤーの正規化ベクトル
-        DirectX::XMVECTOR EPNorm = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&playerPos), DirectX::XMLoadFloat3(&enemyPos)));
-
-
-        float len = DirectX::XMVector3Length(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&focusEnemy), DirectX::XMLoadFloat3(&enemyPos))).m128_f32[0];
-
-
         //カメラ
-        DirectX::XMFLOAT3 cameraPos = GetCameraPos();
-        {
-            float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldFront())), { 0, 1, 0 }));
-            if (len > 1.0f)
-            {
-                DirectX::XMStoreFloat3(&focusEnemy, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&focusEnemy), DirectX::XMLoadFloat3(&enemyPos), elapsedTime * 2));
+        DirectX::XMFLOAT3 cameraPos = GetCameraFromPlayerPos();
+        DirectX::XMStoreFloat3(&focusEnemy, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&focusEnemy), DirectX::XMLoadFloat3(&enemyPos), elapsedTime * 2));
+        playerCameraCom->SetForcusPos(focusEnemy);
 
+        //カメラの向きにプレイヤーを合わせる
+        static DirectX::XMFLOAT4 rota = cameraQuaternion.dxFloat4;
+        DirectX::XMVECTOR CA = DirectX::XMLoadFloat4(&cameraQuaternion.dxFloat4);
+        DirectX::XMStoreFloat4(&rota, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&rota), CA, elapsedTime * 5));
 
-                //同じポジションを見ないように補正
-                if (abs(cameraPos.x - focusEnemy.x) < 0.01f)
-                {
-                    focusEnemy.x += 0.01f;
-                }
-
-                if (abs(cameraPos.z - focusEnemy.z) < 0.01f)
-                {
-                    focusEnemy.z += 0.01f;
-                }
-
-                playerCameraCom->SetForcusPos(focusEnemy);
-            }
-
-            //カメラの向きにプレイヤーを合わせる
-            static DirectX::XMFLOAT4 rota = cameraQuaternion.dxFloat4;
-            DirectX::XMVECTOR CA = DirectX::XMLoadFloat4(&cameraQuaternion.dxFloat4);
-            DirectX::XMStoreFloat4(&rota, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&rota), CA, elapsedTime * 5));
-
-            player_.lock()->GetGameObject()->transform_->SetRotation(rota);
-
-            playerCameraCom->pos = cameraPos;
-        }
+        player_.lock()->GetGameObject()->transform_->SetRotation(rota);
+        player_.lock()->GetGameObject()->transform_->SetWorldPosition(cameraPos);
 
         //入力情報を取得
         GamePad& gamePad = Input::Instance().GetGamePad();
@@ -681,13 +686,11 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         if (gamePad.GetButtonDown() & GamePad::BTN_Y)
         {
             Graphics::Instance().SetWorldSpeed(1);
-            EnemyManager::Instance().SetIsUpdateFlag(true);       
+            EnemyManager::Instance().SetIsUpdateFlag(true);
             //仮で色戻す
             lockTriangleEnemy_.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,1,1,1 });
 
-
             triangleState_++;
-
         }
     }
     break;
@@ -764,7 +767,7 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
             //カメラコントローラー取得
             std::shared_ptr<PlayerCameraCom> playerCameraCom = player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>();
 
-            playerCameraCom->isJust = false;
+            playerCameraCom->SetIsJust(false);
 
             std::shared_ptr<GameObject> candyObj = GameObjectManager::Instance().Find("CandyPush");
             std::shared_ptr<WeaponCom> weapon = candyObj->GetComponent<WeaponCom>();
@@ -777,7 +780,7 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
     }
 }
 
-void JustAvoidPlayer::JustSpriteUpdate(float elapsedTime)
+void JustAvoidPlayer::JustDirectionUpdate(float elapsedTime)
 {
     //世界の色変える
     switch (justSpriteState_)
@@ -820,7 +823,11 @@ void JustAvoidPlayer::JustSpriteUpdate(float elapsedTime)
     {
         //時間戻るまで待機
         if (!EnemyManager::Instance().GetIsSlow())
+        {
+            //パーティクル演出終了
+            SetJustUnderParticle(false);
             justSpriteState_ = 20;
+        }
     }
     break;
     case 20:
@@ -834,10 +841,31 @@ void JustAvoidPlayer::JustSpriteUpdate(float elapsedTime)
     case 21:
     {
         //終了処理
+        //パーティクル
+        std::shared_ptr<ParticleSystemCom> particle = GameObjectManager::Instance().Find("justUnderParticle")->GetComponent<ParticleSystemCom>();
+        particle->GetGameObject()->SetEnabled(false);
+
+        //スプライト
         isJustSprite_ = false;
         justSpriteState_ = -1;
     }
     break;
+    }
+}
+
+void JustAvoidPlayer::SetJustUnderParticle(bool flag)
+{
+    std::shared_ptr<ParticleSystemCom> particle = GameObjectManager::Instance().Find("justUnderParticle")->GetComponent<ParticleSystemCom>();
+
+    if (flag)
+    {
+        particle->GetGameObject()->SetEnabled(true);
+        particle->SetRoop(true);
+        particle->Restart();
+    }
+    else
+    {
+        particle->SetRoop(false);
     }
 }
 
@@ -885,9 +913,20 @@ void JustAvoidPlayer::StartJustAvoid()
         ->SetInvincibleNonDamage(2);
     isJustJudge_ = true;
     justAvoidState_ = 0;
+
+    //エフェクト
+    std::shared_ptr<GameObject> particleSpark = ParticleComManager::Instance().SetEffect(ParticleComManager::JUST_SPARK
+        , player_.lock()->GetGameObject()->transform_->GetWorldPosition());
+    particleSpark->SetName("particleSpark");
+    particleSpark->GetComponent<ParticleSystemCom>()->SetIsWorldSpeed(false);
+    //エフェクト
+    particleSpark = ParticleComManager::Instance().SetEffect(ParticleComManager::JUST_SPARK
+        , player_.lock()->GetGameObject()->transform_->GetWorldPosition());
+    particleSpark->SetName("particleSpark1");
+    particleSpark->GetComponent<ParticleSystemCom>()->SetIsWorldSpeed(false);
 }
 
-void JustAvoidPlayer::JustAvoidDirection(float elapsedTime)
+void JustAvoidPlayer::JustAvoidDirectionEnd(float elapsedTime)
 {
     if (!playerDirection_)return;
 

@@ -21,8 +21,8 @@ void PlayerCameraCom::Update(float elapsedTime)
     {
         //ƒJƒƒ‰‚É’l‚ğ‘ã“ü
         std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
-        cameraObj->transform_->SetWorldPosition(pos);
-        oldCameraPos_ = pos;
+        cameraObj->transform_->SetWorldPosition(justPos_);
+        oldCameraPos_ = justPos_;
         cameraObj->transform_->LookAtTransform(lerpFocusPos_);
         return;
     }

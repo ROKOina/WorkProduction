@@ -33,16 +33,20 @@ public:
     void SetForcusPos(DirectX::XMFLOAT3 focus) { lerpFocusPos_ = focus; }
     DirectX::XMFLOAT3 GetForcusPos() { return lerpFocusPos_; }
 
-    bool isJust = false;
-    DirectX::XMFLOAT3 pos;
+    void SetIsJust(bool flag) { isJust = flag; }
+    void SetJustPos(DirectX::XMFLOAT3 pos) { justPos_ = pos; }
 
 private:
     float angleX_ = 0, angleY_ = 0;
     float range_ = 4;   //カメラ距離
-    float angleLimit_ = 55;   //カメラ角度制限
+    float angleLimit_ = 22;   //カメラ角度制限
     DirectX::XMFLOAT3 oldCameraPos_;
 
     DirectX::XMFLOAT3 lerpFocusPos_;
     float lerpSpeed_ = 1;
     DirectX::XMFLOAT3 Eye_;
+
+    //ジャスト回避中演出よう
+    bool isJust = false;
+    DirectX::XMFLOAT3 justPos_;
 };

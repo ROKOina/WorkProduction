@@ -34,6 +34,8 @@ public:
 		COMBO_TAME,
 		DAMAGE_SWETTS,
 		DAMAGE_SWETTS_ENEMY,
+		JUST_SPARK,
+		JUST_UNDER,
 
 		MAX_EFFECT,
 	};
@@ -70,6 +72,8 @@ private:
 		InializeParticle("Data/Effect/para/combotame.ipff", false),
 		InializeParticle("Data/Effect/para/damageSweets.ipff", true, 100, true),
 		InializeParticle("Data/Effect/para/damageSweetsEnemy.ipff", false, 10, true),
+		InializeParticle("Data/Effect/para/justSpark.ipff",true,100),
+		InializeParticle("Data/Effect/para/justSpawnUnder.ipff", false, 500, true),
 	};
 
 	struct ParticleDataMove

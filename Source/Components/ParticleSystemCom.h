@@ -235,6 +235,10 @@ public:
 	//削除判定
 	bool DeleteFlag();
 
+	//世界のスピードに合わせるか
+	void SetIsWorldSpeed(bool flag) { isWorldSpeed_ = flag; }
+	bool GetIsWorldSpeed() { return isWorldSpeed_; }
+
 public:
 	//お菓子をだすパーティクル用
 	struct SweetsParticleData
@@ -264,12 +268,16 @@ private:
 	//ループじゃない場合勝手に削除されるか
 	bool isAutoDeleteFlag_ = true;
 
+	float lifeLimit_ = 0;	//ゲームオブジェクトを消すよう
+
+	//世界のスピードと合わせるか(標準はtrue)
+	bool isWorldSpeed_ = true;
+
 	const size_t maxParticleCount_;
 
 	SaveParticleData particleData_;
 	GameParticleData gameData_;
 
-	float lifeLimit_ = 0;	//ゲームオブジェクトを消すよう
 
 	//画像
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleSprite_;

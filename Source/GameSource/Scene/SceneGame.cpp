@@ -90,7 +90,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
@@ -531,16 +531,24 @@ void SceneGame::Initialize()
 		}
 	}
 
+	//ジャスト回避用パーティクル
+	{
+		std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::JUST_UNDER, { 0,0,0 });
+		particle->SetName("justUnderParticle");
+		particle->SetEnabled(false);
+		particle->GetComponent<ParticleSystemCom>()->SetIsWorldSpeed(false);
+	}
+
 
 	//particle
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 0; ++i)
 	{
 		std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
 		std::string n = "Particle" + std::to_string(i);
 		p->SetName(n.c_str());
 		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
 
-		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(5000);
+		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(100000);
 		c->SetSweetsParticle(true);	//お菓子用
 
 		c->LoadTexture("./Data/Sprite/sweetsParticle.png");

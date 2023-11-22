@@ -201,6 +201,8 @@ void ParticleSystemCom::Start()
 void ParticleSystemCom::Update(float elapsedTime)
 {
 	float worldElapsedTime = Graphics::Instance().GetWorldSpeed() * elapsedTime;
+	//世界のスピードに合わせない場合
+	if (!isWorldSpeed_)worldElapsedTime = elapsedTime;
 
 	//リスタート
 	if (isRestart_)
@@ -313,6 +315,9 @@ void ParticleSystemCom::OnGUI()
 		ImGui::TreePop();
 	}
 
+	//世界のスピードに合わせるか
+	ImGui::Checkbox("isWorldSpeed", &isWorldSpeed_);
+
 	//デバッグ用
 	ImGui::Checkbox("Restart", &isRestart_);
 
@@ -324,10 +329,10 @@ void ParticleSystemCom::OnGUI()
 		else particleData_.particleData.isRoop = 0;
 	}
 
-	bool world = particleData_.particleData.isWorld;
-	if (ImGui::Checkbox("isWorld", &world))
+	bool worldTransform = particleData_.particleData.isWorld;
+	if (ImGui::Checkbox("isWorldTransform", &worldTransform))
 	{
-		if (world)  particleData_.particleData.isWorld = 1;
+		if (worldTransform)  particleData_.particleData.isWorld = 1;
 		else  particleData_.particleData.isWorld = 0;
 	}
 
@@ -797,7 +802,7 @@ void ParticleSystemCom::Render()
 	//ブレンドステート
 	const float blendFactor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	dc->OMSetBlendState(
-		//dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ADDITION_ALPHA).Get(),
+		//dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ADDITION).Get(),
 		dx11State->GetBlendState(Dx11StateLib::BLEND_STATE_TYPE::ALPHA_ATC).Get(),
 		blendFactor, 0xFFFFFFFF);
 
