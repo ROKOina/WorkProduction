@@ -240,21 +240,21 @@ void PlayerCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskC
     }
 
     //皿
-    saraSprite_->Render(dc, -101.8f, -62.6f, saraSprite_->GetTextureWidth() , saraSprite_->GetTextureHeight() 
-        , 0, 0, saraSprite_->GetTextureWidth(), saraSprite_->GetTextureHeight()
+    saraSprite_->Render(dc, -101.8f, -62.6f, static_cast<float>(saraSprite_->GetTextureWidth()), static_cast<float>(saraSprite_->GetTextureHeight())
+        , 0, 0, static_cast<float>(saraSprite_->GetTextureWidth()), static_cast<float>(saraSprite_->GetTextureHeight())
         , 0, 1, 1, 1, 1);
 
     //HP
     {
         int hpIndex = GetGameObject()->GetComponent<CharacterStatusCom>()->GetHP() - 1;
         if (hpIndex > 0) {
-            hpSprite_[hpIndex]->Render(dc, 1.9f, -9.1f, hpSprite_[hpIndex]->GetTextureWidth() * 0.3f, hpSprite_[hpIndex]->GetTextureHeight() * 0.3f
-                , 0, 0, hpSprite_[hpIndex]->GetTextureWidth(), hpSprite_[hpIndex]->GetTextureHeight()
+            hpSprite_[hpIndex]->Render(dc, 1.9f, -9.1f, static_cast<float>(hpSprite_[hpIndex]->GetTextureWidth()) * 0.3f, static_cast<float>(hpSprite_[hpIndex]->GetTextureHeight()) * 0.3f
+                , 0, 0, static_cast<float>(hpSprite_[hpIndex]->GetTextureWidth()), static_cast<float>(hpSprite_[hpIndex]->GetTextureHeight())
                 , 0, 1, 1, 1, 1);
         }
         if (hpIndex >= 0) {
-            hpSprite_[0]->Render(dc, hpDonutsPos_[hpIndex].x, hpDonutsPos_[hpIndex].y, hpSprite_[0]->GetTextureWidth() * 0.3f, hpSprite_[0]->GetTextureHeight() * 0.3f
-                , 0, 0, hpSprite_[0]->GetTextureWidth(), hpSprite_[0]->GetTextureHeight()
+            hpSprite_[0]->Render(dc, hpDonutsPos_[hpIndex].x, hpDonutsPos_[hpIndex].y, static_cast<float>(hpSprite_[0]->GetTextureWidth()) * 0.3f, static_cast<float>(hpSprite_[0]->GetTextureHeight()) * 0.3f
+                , 0, 0, static_cast<float>(hpSprite_[0]->GetTextureWidth()), static_cast<float>(hpSprite_[0]->GetTextureHeight())
                 , 0, 1, 1, 1, 1);
         }
         //演出
@@ -278,15 +278,15 @@ void PlayerCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskC
         }
         if (isHpDirection_)
         {
-            hpSprite_[0]->Render(dc, hpDir_.x, hpDir_.y, hpSprite_[0]->GetTextureWidth() * 0.3f, hpSprite_[0]->GetTextureHeight() * 0.3f
-                , 0, 0, hpSprite_[0]->GetTextureWidth(), hpSprite_[0]->GetTextureHeight()
+            hpSprite_[0]->Render(dc, hpDir_.x, hpDir_.y, static_cast<float>(hpSprite_[0]->GetTextureWidth()) * 0.3f, static_cast<float>(hpSprite_[0]->GetTextureHeight()) * 0.3f
+                , 0, 0, static_cast<float>(hpSprite_[0]->GetTextureWidth()), static_cast<float>(hpSprite_[0]->GetTextureHeight())
                 , 0, 1, 1, 1, hpDir_.z);
         }
     }
 
     //ワイプ枠外
-    faceFrameUI_->Render(dc, 49.5f, 41.4f, faceFrameUI_->GetTextureWidth() * 0.552f, faceFrameUI_->GetTextureHeight() * 0.552f
-        , 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+    faceFrameUI_->Render(dc, 49.5f, 41.4f, static_cast<float>(faceFrameUI_->GetTextureWidth()) * 0.552f, static_cast<float>(faceFrameUI_->GetTextureHeight()) * 0.552f
+        , 0, 0, static_cast<float>(faceFrameUI_->GetTextureWidth()), static_cast<float>(faceFrameUI_->GetTextureHeight())
         , 0, 0, 1, 1, 1);
 
     //ワイプ
@@ -295,8 +295,8 @@ void PlayerCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskC
         postEff->CacheMaskBuffer(maskCamera);
 
         //ワイプ背景
-        faceFrameUI_->Render(dc, 49.5f + 9, 41.4f + 9, faceFrameUI_->GetTextureWidth() * 0.48f, faceFrameUI_->GetTextureHeight() * 0.48f
-            , 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
+        faceFrameUI_->Render(dc, 49.5f + 9, 41.4f + 9, static_cast<float>(faceFrameUI_->GetTextureWidth()) * 0.48f, static_cast<float>(faceFrameUI_->GetTextureHeight()) * 0.48f
+            , 0, 0, static_cast<float>(faceFrameUI_->GetTextureWidth()), static_cast<float>(faceFrameUI_->GetTextureHeight())
             , 0, 1, 1, 1, 1);
 
         //マスクされる側描画

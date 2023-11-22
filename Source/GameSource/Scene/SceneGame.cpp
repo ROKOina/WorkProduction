@@ -90,15 +90,15 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 15; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picolabo");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
 
-		//obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
-		//	0,  (rand() % (230 * 2) - 230) * 0.1f });
-		obj->transform_->SetWorldPosition({ 0, 0, 5 });
+		obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
+			0,  (rand() % (230 * 2) - 230) * 0.1f });
+		//obj->transform_->SetWorldPosition({ 0, 0, 5 });
 
 		obj->transform_->SetEulerRotation({ 0,180,0 });
 
@@ -266,7 +266,7 @@ void SceneGame::Initialize()
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("picoMask");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		obj->transform_->SetWorldPosition({ 0.15, -1.4, 1.2 });
+		obj->transform_->SetWorldPosition({ 0.15f, -1.4f, 1.2f });
 		obj->transform_->SetEulerRotation({ 0, 180, 0 });
 
 		const char* filename = "Data/Model/pico/picoAnim.mdl";
@@ -478,6 +478,7 @@ void SceneGame::Initialize()
 		}
 
 	}
+
 	//プレイヤーの手にパーティクル
 	{
 		std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect
@@ -852,7 +853,7 @@ void SceneGame::Render(float elapsedTime)
 			}
 			DirectX::XMFLOAT2 size{startSprite_->GetTextureWidth()* sinSize, startSprite_->GetTextureHeight()* sinSize};
 			startSprite_->Render(dc, graphics.GetScreenWidth()/2- size.x / 2.0f, graphics.GetScreenHeight() / 2 - size.y / 2.0f, size.x, size.y
-				, 0, 0, startSprite_->GetTextureWidth(), startSprite_->GetTextureHeight()
+				, 0, 0, static_cast<float>(startSprite_->GetTextureWidth()), static_cast<float>(startSprite_->GetTextureHeight())
 				, 0, 1, 1, 1, 1);
 		}
 	}

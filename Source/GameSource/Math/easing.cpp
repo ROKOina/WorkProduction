@@ -45,15 +45,15 @@
 //ó·Åj
 // Sine
 float Sine::easeIn(float t, float b, float c, float d) {
-    return -c * cosf(t / d * (DirectX::XM_PI / 2)) + c + b;
+    return static_cast<float>(-c * cosf(t / d * (DirectX::XM_PI / 2)) + c + b);
 }
 
 float Sine::easeOut(float t, float b, float c, float d) {
-    return c * sinf(t / d * (DirectX::XM_PI / 2)) + b;
+    return static_cast<float>(c * sinf(t / d * (DirectX::XM_PI / 2)) + b);
 }
 
 float Sine::easeInOut(float t, float b, float c, float d) {
-    return -c / 2 * (cosf(DirectX::XM_PI*t / d) - 1) + b;
+    return static_cast<float>(-c / 2 * (cosf(DirectX::XM_PI * t / d) - 1) + b);
 }
 
 // Quad
@@ -117,30 +117,30 @@ float Quint::easeInOut(float t, float b, float c, float d) {
 
 // Expo
 float Expo::easeIn(float t, float b, float c, float d) {
-    return (t == 0) ? b : c * pow(2, 10 * (t / d - 1)) + b;
+    return static_cast<float>((t == 0) ? b : c * pow(2, 10 * (t / d - 1)) + b);
 }
 float Expo::easeOut(float t, float b, float c, float d) {
-    return (t == d) ? b + c : c * (-pow(2, -10 * t / d) + 1) + b;
+    return static_cast<float>((t == d) ? b + c : c * (-pow(2, -10 * t / d) + 1) + b);
 }
 
 float Expo::easeInOut(float t, float b, float c, float d) {
     if (t == 0) return b;
     if (t == d) return b + c;
-    if ((t /= d / 2) < 1) return c / 2 * pow(2, 10 * (t - 1)) + b;
-    return c / 2 * (-pow(2, -10 * --t) + 2) + b;
+    if ((t /= d / 2) < 1) return static_cast<float>(c / 2 * pow(2, 10 * (t - 1)) + b);
+    return static_cast<float>(c / 2 * (-pow(2, -10 * --t) + 2) + b);
 }
 
 // Circ
 float Circ::easeIn(float t, float b, float c, float d) {
-    return -c * (sqrt(1 - (t /= d) * t) - 1) + b;
+    return static_cast<float>(-c * (sqrt(1 - (t /= d) * t) - 1) + b);
 }
 float Circ::easeOut(float t, float b, float c, float d) {
-    return c * sqrt(1 - (t = t / d - 1) * t) + b;
+    return static_cast<float>(c * sqrt(1 - (t = t / d - 1) * t) + b);
 }
 
 float Circ::easeInOut(float t, float b, float c, float d) {
-    if ((t /= d / 2) < 1) return -c / 2 * (sqrt(1 - t * t) - 1) + b;
-    return c / 2 * (sqrt(1 - t * (t -= 2)) + 1) + b;
+    if ((t /= d / 2) < 1) return static_cast<float>(-c / 2 * (sqrt(1 - t * t) - 1) + b);
+    return static_cast<float>(c / 2 * (sqrt(1 - t * (t -= 2)) + 1) + b);
 }
 
 // Back
@@ -168,8 +168,8 @@ float Elastic::easeIn(float t, float b, float c, float d) {
     float p = d * .3f;
     float a = c;
     float s = p / 4;
-    float postFix = a * pow(2, 10 * (t -= 1)); // this is a fix, again, with post-increment operators
-    return -(postFix * sin((t * d - s) * (2 * PI) / p)) + b;
+    float postFix = static_cast<float>(a * pow(2, 10 * (t -= 1))); // this is a fix, again, with post-increment operators
+    return static_cast<float>(-(postFix * sin((t * d - s) * (2 * PI) / p)) + b);
 }
 
 float Elastic::easeOut(float t, float b, float c, float d) {
@@ -177,7 +177,7 @@ float Elastic::easeOut(float t, float b, float c, float d) {
     float p = d * .3f;
     float a = c;
     float s = p / 4;
-    return (a * pow(2, -10 * t) * sin((t * d - s) * (2 * PI) / p) + c + b);
+    return static_cast<float>((a * pow(2, -10 * t) * sin((t * d - s) * (2 * PI) / p) + c + b));
 }
 
 float Elastic::easeInOut(float t, float b, float c, float d) {
@@ -187,11 +187,11 @@ float Elastic::easeInOut(float t, float b, float c, float d) {
     float s = p / 4;
 
     if (t < 1) {
-        float postFix = a * pow(2, 10 * (t -= 1)); // postIncrement is evil
-        return -.5f * (postFix * sin((t * d - s) * (2 * PI) / p)) + b;
+        float postFix = static_cast<float>(a * pow(2, 10 * (t -= 1))); // postIncrement is evil
+        return static_cast<float>(-.5f * (postFix * sin((t * d - s) * (2 * PI) / p)) + b);
     }
-    float postFix = a * pow(2, -10 * (t -= 1)); // postIncrement is evil
-    return postFix * sin((t * d - s) * (2 * PI) / p) * .5f + c + b;
+    float postFix = static_cast<float>(a * pow(2, -10 * (t -= 1))); // postIncrement is evil
+    return static_cast<float>(postFix * sin((t * d - s) * (2 * PI) / p) * .5f + c + b);
 }
 
 // Bounce

@@ -98,8 +98,8 @@ void EnemyManager::Render2D(float elapsedTime)
 
     //ŽM
     {
-        saraSprite_->Render(dc, saraSpritePos_.x, saraSpritePos_.y, saraSprite_->GetTextureWidth() * saraSpritePos_.z, saraSprite_->GetTextureHeight() * saraSpritePos_.z
-            , 0, 0, saraSprite_->GetTextureWidth(), saraSprite_->GetTextureHeight()
+        saraSprite_->Render(dc, saraSpritePos_.x, saraSpritePos_.y, static_cast<float>(saraSprite_->GetTextureWidth()) * saraSpritePos_.z, static_cast<float>(saraSprite_->GetTextureHeight()) * saraSpritePos_.z
+            , 0, 0, static_cast<float>(saraSprite_->GetTextureWidth()), static_cast<float>(saraSprite_->GetTextureHeight())
             , 0, 1, 1, 1, 1);
     }
 
@@ -108,31 +108,31 @@ void EnemyManager::Render2D(float elapsedTime)
         killCount_ = GetEnemyCount();
 
         //‚PŒ…
-        enemyCount_->Render(dc, killCountSpritePos_.x, killCountSpritePos_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSpritePos_.z, enemyCount_->GetTextureHeight() * killCountSpritePos_.z
-            , 170 * killCount_, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+        enemyCount_->Render(dc, killCountSpritePos_.x, killCountSpritePos_.y, static_cast<float>(enemyCount_->GetTextureWidth()) * 0.1f * killCountSpritePos_.z, static_cast<float>(enemyCount_->GetTextureHeight()) * killCountSpritePos_.z
+            , 170.0f * killCount_, 0, static_cast<float>(enemyCount_->GetTextureWidth()) * 0.1f, static_cast<float>(enemyCount_->GetTextureHeight())
             , 0, 1, 1, 1, 1);
         //‚QŒ…
         if (killCount_ >= 10)
         {
             int keta = killCount_ / 10 % 10;
-            enemyCount_->Render(dc, killCountSpritePos_.x - killCountSpritePos_.w, killCountSpritePos_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSpritePos_.z, enemyCount_->GetTextureHeight() * killCountSpritePos_.z
-                , 170 * keta, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+            enemyCount_->Render(dc, killCountSpritePos_.x - killCountSpritePos_.w, killCountSpritePos_.y, static_cast<float>(enemyCount_->GetTextureWidth()) * 0.1f * killCountSpritePos_.z, static_cast<float>(enemyCount_->GetTextureHeight()) * killCountSpritePos_.z
+                , 170.0f * keta, 0, static_cast<float>(enemyCount_->GetTextureWidth()) * 0.1f, static_cast<float>(enemyCount_->GetTextureHeight())
                 , 0, 1, 1, 1, 1);
         }
         //‚RŒ…
         if (killCount_ >= 100)
         {
             int keta = killCount_ / 100 % 10;
-            enemyCount_->Render(dc, killCountSpritePos_.x - killCountSpritePos_.w * 2, killCountSpritePos_.y, enemyCount_->GetTextureWidth() * 0.1f * killCountSpritePos_.z, enemyCount_->GetTextureHeight() * killCountSpritePos_.z
-                , 170 * keta, 0, enemyCount_->GetTextureWidth() * 0.1f, enemyCount_->GetTextureHeight()
+            enemyCount_->Render(dc, killCountSpritePos_.x - killCountSpritePos_.w * 2, killCountSpritePos_.y, static_cast<float>(enemyCount_->GetTextureWidth()) * 0.1f * killCountSpritePos_.z, static_cast<float>(enemyCount_->GetTextureHeight()) * killCountSpritePos_.z
+                , 170.0f * keta, 0, static_cast<float>(enemyCount_->GetTextureWidth()) * 0.1f, static_cast<float>(enemyCount_->GetTextureHeight())
                 , 0, 1, 1, 1, 1);
         }
     }
 
     //”Žš•¶Žš
     {
-        killStringSprite_->Render(dc, killStringSpritePos_.x, killStringSpritePos_.y, killStringSprite_->GetTextureWidth()  * killStringSpritePos_.z, killStringSprite_->GetTextureHeight() * killStringSpritePos_.z
-            , 0, 0, killStringSprite_->GetTextureWidth() , killStringSprite_->GetTextureHeight()
+        killStringSprite_->Render(dc, killStringSpritePos_.x, killStringSpritePos_.y, static_cast<float>(killStringSprite_->GetTextureWidth()) * killStringSpritePos_.z, static_cast<float>(killStringSprite_->GetTextureHeight()) * killStringSpritePos_.z
+            , 0, 0, static_cast<float>(killStringSprite_->GetTextureWidth()), static_cast<float>(killStringSprite_->GetTextureHeight())
             , 0, 1, 1, 1, 1);
     }
 }
@@ -283,7 +283,7 @@ bool EnemyManager::OnMessage(const Telegram& telegram)
 int EnemyManager::GetEnemyCount()
 {
     int enemyCount = 0;
-    enemyCount += nearEnemies_.size();
+    enemyCount += static_cast<int>(nearEnemies_.size());
     return enemyCount;
 }
 

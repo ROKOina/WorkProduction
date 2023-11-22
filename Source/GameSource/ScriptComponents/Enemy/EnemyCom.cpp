@@ -213,7 +213,7 @@ void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCa
 
     //ワイプ背景
     hpBackSprite_->Render(dc, pos.x, pos.y, size.x, size.y
-        , 0, 0, hpBackSprite_->GetTextureWidth(), hpBackSprite_->GetTextureHeight()
+        , 0, 0, static_cast<float>(hpBackSprite_->GetTextureWidth()), static_cast<float>(hpBackSprite_->GetTextureHeight())
         , 0, 1, 1, 1, 1);
 
     //HP
@@ -227,7 +227,7 @@ void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCa
 
         //hpmask
         hpMaskSprite_->Render(dc, pos.x + size.x, pos.y + size.x * 0.98f, size.x, size.y * 0.95f * hpRatio
-            , 0, 0, hpMaskSprite_->GetTextureWidth(), hpMaskSprite_->GetTextureHeight()
+            , 0, 0, static_cast<float>(hpMaskSprite_->GetTextureWidth()), static_cast<float>(hpMaskSprite_->GetTextureHeight())
             , 180, 1, 1, 1, 0.001f);
 
         //マスクされる側描画
@@ -235,7 +235,7 @@ void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCa
 
         //hp
         hpSprite_->Render(dc, pos.x, pos.y, size.x, size.y
-            , 0, 0, hpSprite_->GetTextureWidth(), hpSprite_->GetTextureHeight()
+            , 0, 0, static_cast<float>(hpSprite_->GetTextureWidth()), static_cast<float>(hpSprite_->GetTextureHeight())
             , 0, 1, 1, 1, 1);
 
         //マスク処理終了処理

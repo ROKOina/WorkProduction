@@ -949,8 +949,8 @@ void JustAvoidPlayer::justDirectionRender2D()
     Graphics& graphics = Graphics::Instance();
     ID3D11DeviceContext* dc= graphics.GetDeviceContext();
 
-    justSprite_->Render(dc, 0, 0, graphics.GetScreenWidth(), graphics.GetScreenHeight()
-        , 0, 0, justSprite_->GetTextureWidth(), justSprite_->GetTextureHeight()
+    justSprite_->Render(dc, 0, 0, static_cast<float>(graphics.GetScreenWidth()), static_cast<float>(graphics.GetScreenHeight())
+        , 0, 0, static_cast<float>(justSprite_->GetTextureWidth()), static_cast<float>(justSprite_->GetTextureHeight())
         , 0, 1, 0.89f, 0, 1
     );
 }

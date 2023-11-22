@@ -230,8 +230,8 @@ void Sprite::SetShaderResourceView(ID3D11ShaderResourceView* srv, float textureW
 {
 	shaderResourceView_.Reset();
 	shaderResourceView_ = srv;
-	textureWidth_ = textureWidth;
-	textureHeight_ = textureHeight;
+	textureWidth_ = static_cast<int>(textureWidth);
+	textureHeight_ = static_cast<int>(textureHeight);
 }
 
 void Sprite::SetDissolveSRV(const char* filename)

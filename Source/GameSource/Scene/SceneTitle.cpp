@@ -148,7 +148,7 @@ void SceneTitle::Initialize()
     candyData_[0].nodeName = "Head";
     std::shared_ptr<GameObject> candy = GameObjectManager::Instance().Find("CandyTitle");
     candyData_[0].pos = { 0.18f,3.91f,2.37f };
-    candyData_[0].angle = { -1.15f,0,0.15 };
+    candyData_[0].angle = { -1.15f,0,0.15f };
     candyData_[0].scale = { 0.2f,0.2f,0.2f };
     candy->transform_->SetScale(candyData_[0].scale);
 
@@ -424,7 +424,7 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
     {
         //Xの往復をみて、Zを動かす
         static int roundCount = 0;
-        static int roundRand = Mathf::RandomRange(2, 6);
+        static int roundRand = static_cast<int>(Mathf::RandomRange(2.0f, 6.0f));
 
         //Xの動き
         static float dirX = 1;
@@ -450,7 +450,7 @@ void SceneTitle::TitleProductionUpdate(float elapsedTime)
         if (roundCount >= roundRand)    //往復カウントが設定した値になったら
         {
             roundCount = 0;
-            roundRand = Mathf::RandomRange(2, 6);
+            roundRand = static_cast<int>(Mathf::RandomRange(2.0f, 6.0f));
             moveZ = true;
         }
 

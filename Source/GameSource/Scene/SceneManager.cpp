@@ -104,7 +104,7 @@ void SceneManager::Render(float elapsedTime)
         rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
 
         changeParticle_->GetComponent<ParticleSystemCom>()->Render();
-        changeParticle_->OnGUI();
+        //changeParticle_->OnGUI();
     }
 }
 
