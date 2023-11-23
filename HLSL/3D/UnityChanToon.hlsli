@@ -1,3 +1,4 @@
+#include "ShadowMapCasterFunctions.hlsli"
 
 struct VertexOutput
 {
@@ -8,6 +9,7 @@ struct VertexOutput
     float3 binormal : BINORMAL;
     float2 texcoord : TEXCOORD;
     float4 color : COLOR;
+    float3 shadowTexcoord : TEXCOORD1; //	シャドウマップから情報を取得するためのUV座標＋深度値
 };
 
 cbuffer CbScene : register(b0)
@@ -36,6 +38,11 @@ cbuffer CbShadowmap : register(b3)
     row_major float4x4 lightViewProjection; // ライトビュープロジェクション行列
     float3 shadowColor; // 影の色
     float shadowBias; // 深度値比較時のオフセット
+    
+    //影を描画するか
+    float shadowFall;
+    
+    float3 dummyShadow;
 };
 
 cbuffer UnityChanToon : register(b4)

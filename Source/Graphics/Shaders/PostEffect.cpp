@@ -624,6 +624,24 @@ void PostEffect::ImGuiRender()
             ImGui::TreePop();
         }
 
+        //‰e
+        if (ImGui::TreeNode("shadow"))
+        {
+
+            ImGui::ColorEdit4("shadowColor", &graphics.shaderParameter3D_.shadowMapData.shadowColor.x);
+            ImGui::DragFloat("bias", &graphics.shaderParameter3D_.shadowMapData.shadowBias, 0.1f);
+            ImGui::DragFloat("rect", &graphics.shaderParameter3D_.shadowMapData.shadowRect, 0.1f);
+            if (ImGui::TreeNode("shadowRenderTargets"))
+            {
+                ImGui::Image(graphics.shaderParameter3D_.shadowMapData.shadowmapDepthStencil->diffuseMap.Get(), { 256, 256 }, { 0, 0 }, { 1, 1 }, { 1, 1, 1, 1 });
+
+
+            ImGui::TreePop();
+            }
+
+            ImGui::TreePop();
+        }
+
         if (ImGui::TreeNode("RenderTargets"))
         {
             ImGui::Text("Color");

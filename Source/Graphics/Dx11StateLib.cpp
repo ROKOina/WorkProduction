@@ -505,6 +505,7 @@ void Dx11StateLib::Dx11StateInit(ID3D11Device* device)
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 		{ //TEXTURE_ADDRESS_BORDER_POINT
+			samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 			samplerDesc.BorderColor[0] = FLT_MAX;
 			samplerDesc.BorderColor[1] = FLT_MAX;
 			samplerDesc.BorderColor[2] = FLT_MAX;

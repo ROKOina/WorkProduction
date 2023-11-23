@@ -376,7 +376,7 @@ void GameObjectManager::UpdateTransform()
 void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection)
 {
 	//影描画
-
+	RenderShadowmap();
 
 	//3D描画
 	Render3D();
@@ -535,7 +535,7 @@ void GameObjectManager::RenderShadowmap()
 	ID3D11RenderTargetView* rtv = nullptr;
 	ShaderParameter3D* sp = &graphics.shaderParameter3D_;
 	ShadowMapData* shadowData = &sp->shadowMapData;
-	ID3D11DepthStencilView* dsv = shadowData->shadowDsvMap.Get();
+	ID3D11DepthStencilView* dsv = shadowData->shadowmapDepthStencil->depthStencilView.Get();
 
 	// 画面クリア
 	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -543,8 +543,8 @@ void GameObjectManager::RenderShadowmap()
 	dc->OMSetRenderTargets(0, &rtv, dsv);
 	// ビューポートの設定
 	D3D11_VIEWPORT	vp = {};
-	vp.Width = static_cast<float>(shadowData->width);
-	vp.Height = static_cast<float>(shadowData->height);
+	vp.Width = static_cast<float>(shadowData->shadowmapDepthStencil->width);
+	vp.Height = static_cast<float>(shadowData->shadowmapDepthStencil->height);
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	dc->RSSetViewports(1, &vp);
@@ -555,14 +555,17 @@ void GameObjectManager::RenderShadowmap()
 	{
 		// 平行光源からカメラ位置を作成し、そこから原点の位置を見るように視線行列を生成
 		DirectX::XMVECTOR LightPosition =
-			DirectX::XMLoadFloat3(
-				&DirectX::XMFLOAT3(
-					sp->lightDirection.x,
-					sp->lightDirection.y,
-					sp->lightDirection.z));
+			//DirectX::XMLoadFloat3(
+			//	&DirectX::XMFLOAT3(
+			//		sp->lightDirection.x,
+			//		sp->lightDirection.y,
+			//		sp->lightDirection.z));
+			{ 0.0f, -1.0f, 0.0f };
+
 		LightPosition = DirectX::XMVectorScale(LightPosition, -250.0f);
 		DirectX::XMMATRIX V = DirectX::XMMatrixLookAtLH(LightPosition,
-			DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f),
+			//DirectX::XMVectorSet(0.0f, 0.0f, -10.0f, 0.0f),
+			DirectX::XMLoadFloat4(&shadowData->shadowCameraPos),
 			DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 
 		// シャドウマップに描画したい範囲の射影行列を生成
@@ -576,7 +579,24 @@ void GameObjectManager::RenderShadowmap()
 
 	//描画
 	{
+		Shader* shader = graphics.GetShader(SHADER_ID::Shadow);
+		shader->Begin(dc, graphics.shaderParameter3D_);
 
+		for (std::weak_ptr<RendererCom>& renderObj : renderSortObject_)
+		{
+			if (!renderObj.lock()->GetGameObject()->GetEnabled())continue;
+			if (!renderObj.lock()->GetEnabled())continue;
+
+			//影を落とすか
+			if (!renderObj.lock()->GetIsShadowFall())continue;
+
+			Model* model = renderObj.lock()->GetModel();
+			if (model != nullptr)
+			{
+				shader->Draw(dc, model);
+			}
+		}
+		shader->End(dc);
 	}
 }
 
@@ -587,6 +607,26 @@ void GameObjectManager::Render3D()
 
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+
+	//ポストエフェクト用切り替え
+	PostRenderTarget* ps = Graphics::Instance().GetPostEffectModelRenderTarget().get();
+	PostDepthStencil* ds = Graphics::Instance().GetPostEffectModelDepthStencilView().get();
+
+	ID3D11RenderTargetView* rtv = ps->renderTargetView.Get();
+	ID3D11DepthStencilView* dsv = ds->depthStencilView.Get();
+
+	// 画面クリア＆レンダーターゲット設定
+	FLOAT color[] = { 0.0f, 0.0f, 0.5f, 1.0f };	// RGBA(0.0～1.0)
+	dc->OMSetRenderTargets(1, &rtv, dsv);
+
+	// ビューポートの設定
+	D3D11_VIEWPORT	vp = {};
+	vp.Width = static_cast<float>(ps->width);
+	vp.Height = static_cast<float>(ps->height);
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	dc->RSSetViewports(1, &vp);
+
 
 	//シェーダーIDが変更された時に呼ぶ
 	if (isChangeShaderID_)

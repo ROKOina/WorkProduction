@@ -2,11 +2,13 @@
 
 Texture2D _MainTex : register(t0);
 Texture2D _NormalMap : register(t1);
+Texture2D shadowMap : register(t2);
 
 Texture2D _1st_ShadeMap : register(t5);
 Texture2D EmissiveMap : register(t6);
 
 SamplerState samplerState : register(s0);
+SamplerState shadowState : register(s1);
 
 inline float3 UnpackNormalDXT5nm(float4 packednormal)
 {
@@ -72,6 +74,14 @@ float4 main(VertexOutput i) : SV_TARGET
     
     float3 _HighColor_var = (_Set_HighColorMask.rgb * Set_LightColor * _MainTex_var.rgb) * _TweakHighColorMask_var;
     
+    if(shadowFall > 0.1f)
+    {
+        // 平行光源の影なので、平行光源に対して影を適応
+        float3 shadow = CalcShadowColor(shadowMap, shadowState, i.shadowTexcoord, shadowColor, shadowBias);
+        Set_FinalBaseColor *= shadow;
+        _HighColor_var *= shadow;
+    }
+
     
     float3 Set_HighColor =
     (

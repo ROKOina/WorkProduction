@@ -36,6 +36,7 @@ void SceneTitle::Initialize()
         std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
         r->LoadModel(filename);
         r->SetShaderID(SHADER_ID::UnityChanToon);
+        r->SetIsShadowFall(true);
 
         std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 
@@ -71,6 +72,7 @@ void SceneTitle::Initialize()
         std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
         r->LoadModel(filename);
         r->SetShaderID(SHADER_ID::UnityChanToon);
+        r->SetIsShadowDraw(true);
     }
 
     //logo
@@ -329,6 +331,12 @@ void SceneTitle::Render(float elapsedTime)
     rc.projection = mainCamera_->GetProjection();
     DirectX::XMFLOAT3 cameraPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
     rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
+
+    //âeê›íË   
+    std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("picoTitle");
+    DirectX::XMFLOAT3  pPos = pico->transform_->GetWorldPosition();
+    rc.shadowMapData.shadowCameraPos = { pPos.x,pPos.y,pPos.z,0 };
+    rc.shadowMapData.shadowRect = 13;
 
     //3Dï`âÊ
     {

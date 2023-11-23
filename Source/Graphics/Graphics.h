@@ -19,6 +19,7 @@ enum SHADER_ID
 	Phong,
 	Silhoutte,
 	UnityChanToon,
+	Shadow,
 
 	MaskUnityChan,
 

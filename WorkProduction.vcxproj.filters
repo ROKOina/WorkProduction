@@ -262,6 +262,7 @@
     <ClInclude Include="Source\Components\ParticleComManager.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\SilhoutteShader.h" />
+    <ClInclude Include="Source\Graphics\Shaders\3D\ShadowMapCasterShader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -504,6 +505,9 @@
     <ClCompile Include="Source\Graphics\Shaders\3D\SilhoutteShader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Graphics\Shaders\3D\ShadowMapCasterShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\Debugs\Debug.hlsli">
@@ -537,6 +541,12 @@
       <Filter>HLSL</Filter>
     </None>
     <None Include="HLSL\Rand.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="HLSL\3D\ShadowMapCaster.hlsli">
+      <Filter>HLSL</Filter>
+    </None>
+    <None Include="HLSL\3D\ShadowMapCasterFunctions.hlsli">
       <Filter>HLSL</Filter>
     </None>
   </ItemGroup>
@@ -632,6 +642,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="HLSL\2D\PostEffect\MaskPost.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\ShadowMapCasterVS.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

@@ -44,7 +44,13 @@ VertexOutput main(
     o.world_position = p;
     o.position = mul(float4(p, 1.0f), viewProjection);
     o.color = color * materialColor;
-
+    
+    if (shadowFall > 0.1f)
+    {
+        // シャドウマップで使用する情報を算出
+        o.shadowTexcoord = CalcShadowTexcoord(p, lightViewProjection);
+    }
+    
     return o;
 }
  

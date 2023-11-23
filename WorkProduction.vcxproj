@@ -186,6 +186,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
     <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\PhongShader.h" />
+    <ClInclude Include="Source\Graphics\Shaders\3D\ShadowMapCasterShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\SilhoutteShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\UnityChanToonShader.h" />
     <ClInclude Include="Source\Graphics\DebugRenderer\DebugRenderer.h" />
@@ -274,6 +275,7 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.cpp" />
     <ClCompile Include="Source\GameSource\Stage\PathSearch.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\PhongShader.cpp" />
+    <ClCompile Include="Source\Graphics\Shaders\3D\ShadowMapCasterShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\SilhoutteShader.cpp" />
     <ClCompile Include="Source\Graphics\Shaders\3D\UnityChanToonShader.cpp" />
     <ClCompile Include="Source\Graphics\DebugRenderer\DebugRenderer.cpp" />
@@ -304,6 +306,8 @@
     <None Include="HLSL\2D\PostEffect\FullScreen.hlsli" />
     <None Include="HLSL\3D\Lambert.hlsli" />
     <None Include="HLSL\3D\Phong.hlsli" />
+    <None Include="HLSL\3D\ShadowMapCaster.hlsli" />
+    <None Include="HLSL\3D\ShadowMapCasterFunctions.hlsli" />
     <None Include="HLSL\3D\SwordTrail.hlsli" />
     <None Include="HLSL\3D\UnityChanToon.hlsli" />
     <None Include="HLSL\compute\Particle.hlsli" />
@@ -371,6 +375,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="HLSL\3D\PhongVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\3D\ShadowMapCasterVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

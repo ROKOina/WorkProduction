@@ -49,12 +49,18 @@ public:
 
 	void JoinThred() { future.get(); }
 
+	//影を描画するか
+	void SetIsShadowDraw(bool flag) { isShadowDraw_ = flag; }
+	const bool GetIsShadowDraw() const { return isShadowDraw_; }
+
 private:
 	//std::shared_ptr<ModelResource>	resource;
 	std::shared_ptr<FbxModelResource>	modelResource_;	//fbx用
 	std::vector<Node>				nodes_;
 
 	DirectX::XMFLOAT4 materialColor_ = { 1,1,1,1 };
+
+	bool isShadowDraw_ = false;
 
 	//モデル読み込みをスレッド化
 	std::future<void> future;

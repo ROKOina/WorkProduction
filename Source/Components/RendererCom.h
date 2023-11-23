@@ -40,10 +40,21 @@ public:
     bool GetSilhouetteFlag() { return isSilhouette_; }
     void SetSilhouetteFlag(bool flag) { isSilhouette_ = flag; }
 
+    //‰e•`‰æƒtƒ‰ƒO
+    void SetIsShadowFall(bool flag) { isShadowFall_ = flag; }
+    bool GetIsShadowFall() { return isShadowFall_; }
+
+    //‰e‚ğ•`‰æ‚·‚é‚©
+    void SetIsShadowDraw(bool flag) { model_->SetIsShadowDraw(flag); }
+    bool GetIsShadowDraw() { return model_->GetIsShadowDraw(); }
+
 private:
     std::unique_ptr<Model>	model_;
 
     bool isSilhouette_ = false;
 
     int shaderID_ = SHADER_ID::Default;  //ƒVƒF[ƒ_[‚ğŒˆ‚ß‚é
+
+    //‰eİ’è
+    bool isShadowFall_ = false; //‰e‚ğ—‚Æ‚·‚©
 };

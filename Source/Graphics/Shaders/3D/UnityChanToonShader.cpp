@@ -92,15 +92,28 @@ void UnityChanToonShader::Begin(ID3D11DeviceContext* dc, const ShaderParameter3D
     cbScene.ambientLightColor = { 1,1,1,1 };
 
     dc->UpdateSubresource(sceneConstantBuffer_.Get(), 0, 0, &cbScene, 0, 0);
-
-    dc->UpdateSubresource(shadowMapConstantBuffer_.Get(), 0, 0, &rc.shadowMapData, 0, 0);
-    //	シャドウマップ設定
-    dc->PSSetShaderResources(2, 1, rc.shadowMapData.shadowSrvMap.GetAddressOf());
-
 }
 
 void UnityChanToonShader::Draw(ID3D11DeviceContext* dc, const Model* model)
 {
+    ShaderParameter3D& rc = Graphics::Instance().shaderParameter3D_;
+    //	シャドウマップ設定
+    CbShadowMap shadowMapData;
+    shadowMapData.lightViewProjection = rc.shadowMapData.lightViewProjection;
+    shadowMapData.shadowBias = rc.shadowMapData.shadowBias;
+    shadowMapData.shadowColor = rc.shadowMapData.shadowColor;
+    if (model->GetIsShadowDraw())
+    {
+        shadowMapData.isShadowFall = 1;
+    }
+    else
+    {
+        shadowMapData.isShadowFall = 0;
+    }
+    dc->UpdateSubresource(shadowMapConstantBuffer_.Get(), 0, 0, &shadowMapData, 0, 0);
+    dc->PSSetShaderResources(2, 1, rc.shadowMapData.shadowmapDepthStencil->diffuseMap.GetAddressOf());
+
+
     const ModelResource* resource = model->GetResource();
     const std::vector<Model::Node>& nodes = model->GetNodes();
     Dx11StateLib* dx11State = Graphics::Instance().GetDx11State().get();

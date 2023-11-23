@@ -54,6 +54,7 @@ void SceneGame::Initialize()
 		r->LoadModel(filename);
 		r->GetModel()->SetMaterialColor({ 0.82f, 1.19f, 0.15f, 1 });
 		r->SetShaderID(SHADER_ID::UnityChanToon);
+		r->SetIsShadowDraw(true);
 	}
 	//壁
 	{
@@ -106,6 +107,7 @@ void SceneGame::Initialize()
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);
+		r->SetIsShadowFall(true);
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
 		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
@@ -289,6 +291,7 @@ void SceneGame::Initialize()
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);
 		r->SetSilhouetteFlag(true);
+		r->SetIsShadowFall(true);
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
 
@@ -725,6 +728,11 @@ void SceneGame::Render(float elapsedTime)
 	DirectX::XMFLOAT3 cameraPos = mainCamera_->GetGameObject()->transform_->GetWorldPosition();
 	rc.viewPosition = { cameraPos.x,cameraPos.y,cameraPos.z,1 };
 
+	//影設定   
+	std::shared_ptr<GameObject> pico = GameObjectManager::Instance().Find("pico");
+	DirectX::XMFLOAT3  pPos = pico->transform_->GetWorldPosition();
+	rc.shadowMapData.shadowCameraPos = { pPos.x,pPos.y,pPos.z,0 };
+	rc.shadowMapData.shadowRect = 50;
 
 	//バッファ避難
 	Graphics::Instance().CacheRenderTargets();

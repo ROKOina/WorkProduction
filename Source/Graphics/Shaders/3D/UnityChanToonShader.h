@@ -46,6 +46,10 @@ private:
         DirectX::XMFLOAT4X4	lightViewProjection;	//	ライトビュープロジェクション行列
         DirectX::XMFLOAT3	shadowColor;			//	影の色
         float				shadowBias;				//	深度比較用のオフセット値
+
+        float isShadowFall;
+
+        DirectX::XMFLOAT3 dummyShadow;
     };
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer_;
