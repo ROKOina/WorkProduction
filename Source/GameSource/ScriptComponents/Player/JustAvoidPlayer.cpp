@@ -72,6 +72,14 @@ void JustAvoidPlayer::OnGui()
 {
     Sprite::DissolveConstans& dissolveData = justSprite_->GetEffectSpriteData().dissolveConstant;
     
+    bool isD = false;
+    if(dissolveData.isDissolve>0.1f)isD = true;
+    if (ImGui::Checkbox("isDissolve", &isD))
+    {
+        if (isD)dissolveData.isDissolve = 1;
+        else dissolveData.isDissolve = 0;
+    }
+
     ImGui::DragFloat("dissolveThreshold", &dissolveData.dissolveThreshold, 0.01f, 0, 1);
     ImGui::DragFloat("edgeThreshold", &dissolveData.edgeThreshold, 0.01f, 0, 1);
     ImGui::DragFloat4("edgeColor", &dissolveData.edgeColor.x, 0.01f, 0, 1);
@@ -187,6 +195,9 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             ->HitStop(0.2f);
         hitStopEnd_ = false;
 
+        //カメラを近づける
+        player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(0.5f, NearRange);
+
         justAvoidState_++;
     }
     break;
@@ -252,6 +263,9 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             player_.lock()->GetGameObject()->GetComponent<RendererCom>()->
                 GetModel()->SetMaterialColor({ 1,2.0f,1,1.5f });
             playerDirection_ = true;    //戻す処理をJustAvoidDirection関数でする
+
+            //カメラを引く
+            player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(1.0f, FarRange);
 
             justAvoidState_++;
         }
@@ -848,8 +862,17 @@ void JustAvoidPlayer::JustDirectionUpdate(float elapsedTime)
         //スプライト
         isJustSprite_ = false;
         justSpriteState_ = -1;
+
+        //カメラを戻す
+        player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(0.1f, DefaultRange);
     }
     break;
+    }
+
+    if (justSpriteState_ > 1 && justSpriteState_ <= 20)
+    {
+        //カメラを引く
+        player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(10.0f, FarRange - 1.0f);
     }
 }
 

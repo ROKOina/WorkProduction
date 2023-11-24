@@ -73,6 +73,10 @@ private:
     std::unique_ptr<ShaderPost> sun_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> sunBuffer_;
 
+    //放射線ブラー
+    std::unique_ptr<ShaderPost> radial_;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> radialBuffer_;
+
     struct CbScene
     {
         DirectX::XMFLOAT4		viewPosition;
@@ -104,6 +108,7 @@ private:
     std::unique_ptr<TextureFormat> drawTexture_;
     std::unique_ptr<PostRenderTarget> renderPost_[BloomCount];   //0:輝度、1～:ブラー
     std::unique_ptr<PostRenderTarget> renderPostSun_;
+    std::unique_ptr<PostRenderTarget> renderPostRadial_;
     std::unique_ptr<PostRenderTarget> renderPostFull_;  //フルスクリーン用のレンダーターゲット
     std::unique_ptr<PostRenderTarget> renderPost2D_[3];  //2DMask用 0:マスクする側　1:マスクされる側 2:マスクされる側をスプライトに
     std::unique_ptr<PostDepthStencil> depthPost2D_;  //2DMask用深度

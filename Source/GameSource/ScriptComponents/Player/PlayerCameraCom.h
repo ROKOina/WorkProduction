@@ -2,6 +2,10 @@
 
 #include "Components\System\Component.h"
 
+#define DefaultRange 4.0f
+#define NearRange 2.0f
+#define FarRange 7.0f
+
 class PlayerCameraCom :public Component
 {
     //コンポーネントオーバーライド
@@ -29,6 +33,10 @@ public:
 
     void SetRange(float range) { range_ = range; }
     float GetRange() { return range_; }
+    void SetChangeRange(float time, float range) {
+        rangeTimer_ = time;
+        rangeDir_ = range;
+    }
 
     void SetForcusPos(DirectX::XMFLOAT3 focus) { lerpFocusPos_ = focus; }
     DirectX::XMFLOAT3 GetForcusPos() { return lerpFocusPos_; }
@@ -39,6 +47,8 @@ public:
 private:
     float angleX_ = 0, angleY_ = 0;
     float range_ = 4;   //カメラ距離
+    float rangeTimer_;  //カメラの距離を変える時間
+    float rangeDir_;    //カメラの距離を指定
     float angleLimit_ = 22;   //カメラ角度制限
     DirectX::XMFLOAT3 oldCameraPos_;
 

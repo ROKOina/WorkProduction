@@ -1,6 +1,7 @@
 #include "MovePlayer.h"
 
 #include "PlayerCom.h"
+#include "PlayerCameraCom.h"
 #include "../Enemy/EnemyManager.h"
 #include "Components/MovementCom.h"
 #include "Components/AnimatorCom.h"
@@ -198,6 +199,9 @@ bool MovePlayer::IsMove(float elapsedTime)
 
                 //空中ダッシュリセット
                 jumpDashCount_ = 1;
+
+                //カメラを引く
+                player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(0.2f, FarRange);
 
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUMP);
             }

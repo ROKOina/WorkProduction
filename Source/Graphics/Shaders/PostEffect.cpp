@@ -38,6 +38,7 @@ PostEffect::PostEffect(UINT width, UINT height)
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomBlur), bloomBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomLuminance), bloomExBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::sunAtmosphere), sunBuffer_.GetAddressOf());
+    dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::radialBlur), radialBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(CbScene), sceneBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(SkymapData), skymapBuffer_.GetAddressOf());
 
@@ -47,6 +48,7 @@ PostEffect::PostEffect(UINT width, UINT height)
     bloomKawaseFilter_ = std::make_unique<ShaderPost>("BloomKawase");
     bloomBlur_ = std::make_unique<ShaderPost>("GaussianBlur");
     sun_ = std::make_unique<ShaderPost>("SunAtmosphere");
+    radial_ = std::make_unique<ShaderPost>("RadialBlur");
     mask_ = std::make_unique<ShaderPost>("MaskPost");
 
     {
@@ -92,6 +94,9 @@ PostEffect::PostEffect(UINT width, UINT height)
 
     //太陽
     renderPostSun_ = std::make_unique<PostRenderTarget>(device, width, height, DXGI_FORMAT_R16G16B16A16_FLOAT);
+
+    //放射線ブラー
+    renderPostRadial_ = std::make_unique<PostRenderTarget>(device, width, height, DXGI_FORMAT_R16G16B16A16_FLOAT);
 
     //フルスクリーン用
     renderPostFull_ = std::make_unique<PostRenderTarget>(device,
@@ -220,6 +225,76 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
         sun_->Draw(drawTexture_.get());
     }
 #pragma endregion
+
+#pragma region 放射線ブラー
+    if (radial_->IsEnabled())
+    {
+        //描画先を変更
+        ID3D11RenderTargetView* rtv = renderPostRadial_->renderTargetView.Get();
+        FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        dc->ClearRenderTargetView(rtv, color);
+        dc->OMSetRenderTargets(1, &rtv, nullptr);
+        D3D11_VIEWPORT	viewport{};
+        viewport.Width = static_cast<float>(renderPostRadial_->width);
+        viewport.Height = static_cast<float>(renderPostRadial_->height);
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        dc->RSSetViewports(1, &viewport);
+
+        //シェーダーリソースビュー設定
+        drawTexture_->SetShaderResourceView(
+            renderPostSun_->diffuseMap, renderPostSun_->width, renderPostSun_->height);
+
+        drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+            0, 0, static_cast<float>(renderPostSun_->width), static_cast<float>(renderPostSun_->height),
+            0,
+            1, 1, 1, 1);
+
+        //有効にする
+        graphics.shaderParameter3D_.radialBlur.enabled = 1;
+
+
+        dc->UpdateSubresource(radialBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.radialBlur, 0, 0);
+        dc->PSSetConstantBuffers(0, 1, radialBuffer_.GetAddressOf());
+
+
+        radial_->Draw(drawTexture_.get());
+    }
+    else
+    {
+        //描画先を変更
+        ID3D11RenderTargetView* rtv = renderPostRadial_->renderTargetView.Get();
+        FLOAT color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        dc->ClearRenderTargetView(rtv, color);
+        dc->OMSetRenderTargets(1, &rtv, nullptr);
+        D3D11_VIEWPORT	viewport{};
+        viewport.Width = static_cast<float>(renderPostRadial_->width);
+        viewport.Height = static_cast<float>(renderPostRadial_->height);
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        dc->RSSetViewports(1, &viewport);
+
+        //シェーダーリソースビュー設定
+        drawTexture_->SetShaderResourceView(
+            renderPostSun_->diffuseMap, renderPostSun_->width, renderPostSun_->height);
+
+        drawTexture_->Update(0, 0, viewport.Width, viewport.Height,
+            0, 0, static_cast<float>(renderPostSun_->width), static_cast<float>(renderPostSun_->height),
+            0,
+            1, 1, 1, 1);
+
+        //有効にする
+        graphics.shaderParameter3D_.radialBlur.enabled = -1;
+
+
+        //有効にする
+        dc->UpdateSubresource(radialBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.radialBlur, 0, 0);
+        dc->PSSetConstantBuffers(0, 1, radialBuffer_.GetAddressOf());
+
+        radial_->Draw(drawTexture_.get());
+    }
+#pragma endregion
+
 
 #pragma region ブルーム
     if(bloomExtract_->IsEnabled() && !bloomKawaseFilter_->IsEnabled())
@@ -445,7 +520,7 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
 
         //シェーダーリソースビュー設定
         drawTexture_->SetShaderResourceView(
-            renderPostSun_->diffuseMap, ps->width, ps->height);
+            renderPostRadial_->diffuseMap, ps->width, ps->height);
 
         drawTexture_->Update(0, 0, graphics.GetScreenWidth(), graphics.GetScreenHeight(),
             0, 0, static_cast<float>(ps->width), static_cast<float>(ps->height),
@@ -530,7 +605,6 @@ void PostEffect::ImGuiRender()
 
     Graphics& graphics = Graphics::Instance();
 
-    //仮太陽方向
     if (ImGui::Begin("3DShaderParamerter", nullptr, ImGuiWindowFlags_None))
     {
         if (ImGui::TreeNode("Sun"))
@@ -576,6 +650,22 @@ void PostEffect::ImGuiRender()
             }
             ImGui::TreePop();
         }
+
+        //放射線ブラー
+        if (ImGui::TreeNode("Radial"))
+        {
+            bool enabled = radial_->IsEnabled();
+            if (ImGui::Checkbox("enabled", &enabled))
+            {
+                radial_->SetEnabled(enabled);
+            }
+
+            ImGui::DragFloat2("blurPos", &graphics.shaderParameter3D_.radialBlur.blurPos.x, 0.1f);
+            ImGui::DragFloat("power", &graphics.shaderParameter3D_.radialBlur.power, 0.1f);
+
+            ImGui::TreePop();
+        }
+
 
         //ポストエフェクト
         //カラーグレーディング
@@ -970,6 +1060,7 @@ void PostEffect::ShaderPost::Draw(TextureFormat* renderTexture)
             dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_BORDER_POINT).Get(),
             dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP_ANISO).Get(),
             dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_BORDER_LINER).Get(),
+            dx11State->GetSamplerState(Dx11StateLib::SAMPLER_TYPE::TEXTURE_ADDRESS_WRAP_POINT).Get(),
         };
         dc->PSSetSamplers(0, ARRAYSIZE(samplerStates), samplerStates);
     }

@@ -182,6 +182,14 @@ struct SunAtmosphere
 	DirectX::XMFLOAT4X4 inverseViewProjection;
 };
 
+//放射線ブラー
+struct RadialBlur
+{
+	DirectX::XMFLOAT2 blurPos = { (1920 * 0.8f) * 0.5f,(1080 * 0.8f) * 0.5f };
+	float power = 5;
+	float enabled = -1;
+};
+
 //ユニティちゃんトゥーン
 struct UnityChanToonStruct
 {
@@ -247,5 +255,8 @@ struct ShaderParameter3D
 
 	//太陽周り
 	SunAtmosphere sunAtmosphere;
+
+	//放射線ブラー
+	RadialBlur radialBlur;
 };
 

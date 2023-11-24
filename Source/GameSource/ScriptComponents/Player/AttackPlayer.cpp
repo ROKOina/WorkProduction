@@ -1,6 +1,7 @@
 #include "AttackPlayer.h"
 
 #include "PlayerCom.h"
+#include "PlayerCameraCom.h"
 #include "Components\ColliderCom.h"
 #include "Components\RendererCom.h"
 #include "Components\TransformCom.h"
@@ -341,6 +342,9 @@ void AttackPlayer::TriangleInput()
             player_.lock()->GetMovePlayer()->SetIsInputTurn(false);
             player_.lock()->GetMovePlayer()->DashEndFlag();
             isJumpFall_ = true;
+
+            //カメラを引く
+            player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(0.4f, FarRange);
         }
     }
 
@@ -363,6 +367,9 @@ void AttackPlayer::TriangleInput()
 
             //ジャンプカウント減らす
             player_.lock()->GetMovePlayer()->SetJumpCount(player_.lock()->GetMovePlayer()->GetJumpCount() - 1);
+
+            //カメラを引く
+            player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(0.4f, FarRange);
 
             comboTriangleCount_++;
         }
@@ -574,6 +581,9 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
             //強攻撃３
             if (animCom->GetCurrentAnimationEvent("AutoCollisionTriangleAttack03", DirectX::XMFLOAT3()))
             {
+                //カメラを引く
+                player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(1.0f, FarRange);
+
                 SpawnCombo3();
             }
         }
@@ -681,6 +691,9 @@ int AttackPlayer::NormalAttackUpdate(float elapsedTime)
         animator->SetTriggerOn("dash");
         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_DASH);
         isComboJudge_ = false;
+
+        //カメラを引く
+        player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(1.0f, FarRange);
 
         state_++;
     }
@@ -969,11 +982,18 @@ void AttackPlayer::SquareAttackDirection(float elapsedTime)
                 continue;
             }
 
-            //エフェクト終了処理
+            //エフェクト終了処理 & 判定消す
             std::shared_ptr<ParticleSystemCom> particle = squDir.objData[index].obj.lock()->GetComponent<ParticleSystemCom>();
             if (!squDir.enable)
             {
                 particle->SetRoop(false);
+
+                std::shared_ptr<GameObject> colObj = squDir.objData[index].obj.lock()->GetChildFind("attack");
+                if (colObj)
+                {
+                    std::shared_ptr<Collider> col = colObj->GetComponent<Collider>();
+                    col->SetEnabled(false);
+                }
             }
 
             //エフェクトループ中のみ

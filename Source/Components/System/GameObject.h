@@ -152,7 +152,6 @@ public:
 	void Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection);
 
 	//マスクオブジェクト描画
-	void RenderNonMask();
 	void RenderMask();
 	//sprite描画
 	void Render2D(float elapsedTime);

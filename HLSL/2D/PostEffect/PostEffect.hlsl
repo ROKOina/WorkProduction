@@ -5,18 +5,20 @@ struct VS_OUT
     float2 texcoord : TEXCOORD;
 };
 
-Texture2D mainTexture : register(t0);
+Texture2D sunTexture : register(t0);
 SamplerState samplerLiner : register(s0);
 
 Texture2D bloomTexture : register(t1);
+Texture2D radialTexture : register(t2);
 float4 main(VS_OUT pin) : SV_TARGET
 {
-    float4 tex = mainTexture.Sample(samplerLiner, pin.texcoord) * pin.color;
+    float4 sunTex = sunTexture.Sample(samplerLiner, pin.texcoord) * pin.color;
+    float4 radialTex = radialTexture.Sample(samplerLiner, pin.texcoord) * pin.color;
     float4 bloomTex = bloomTexture.Sample(samplerLiner, pin.texcoord) * pin.color;
     
     //ÉuÉãÅ[ÉÄÇ∆âÊñ Çë´Ç∑
     float4 color = float4(0, 0, 0, 1);
-    color.rgb = tex.rgb + bloomTex.rgb;
+    color.rgb = sunTex.rgb + radialTex.rgb + bloomTex.rgb;
     
     //äiéq
     //color.rgb *= step(abs(sin(pin.texcoord.x * 50)), 0.8);

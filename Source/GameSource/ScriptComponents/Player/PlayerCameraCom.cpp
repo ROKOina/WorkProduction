@@ -27,6 +27,14 @@ void PlayerCameraCom::Update(float elapsedTime)
         return;
     }
 
+    if (rangeTimer_ > 0)
+    {
+        rangeTimer_ -= elapsedTime;
+
+        range_ = rangeDir_;
+        if (rangeTimer_ <= 0)range_ = DefaultRange;
+    }
+
     //入力情報を取得
     GamePad& gamePad = Input::Instance().GetGamePad();
     angleY_ += gamePad.GetAxisRX() * 180.0f * elapsedTime;
@@ -67,15 +75,9 @@ void PlayerCameraCom::Update(float elapsedTime)
     DirectX::XMFLOAT3 cameraPos;
     //注視点から後ろベクトル方向に一定距離離れたカメラ視点を求める
     DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&lerpFocusPos_), DirectX::XMVectorScale(Front, range)));
-    //DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range_)));
 
-    //// スムーズなカメラ移動
-    //{
-        DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorLerp(XMLoadFloat3(&oldCameraPos_), DirectX::XMLoadFloat3(&cameraPos), 0.1f * lerpSpeed_));
-
-    //    // 新しい目標の Target を計算
-    //    DirectX::XMStoreFloat3(&focusPos, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&cameraPos), DirectX::XMLoadFloat3(&focusPos), 1.0f - 0.09f));
-    //}
+    // スムーズなカメラ移動
+    DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorLerp(XMLoadFloat3(&oldCameraPos_), DirectX::XMLoadFloat3(&cameraPos), 0.1f * lerpSpeed_));
 
     //カメラめり込み回避処理
     {
@@ -91,42 +93,38 @@ void PlayerCameraCom::Update(float elapsedTime)
         {
             range -= 0.01f;
             DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&lerpFocusPos_), DirectX::XMVectorScale(Front, range)));
-
-            //DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range)));
-            //DirectX::XMStoreFloat3(&oldCameraPos_, DirectX::XMVectorLerp(XMLoadFloat3(&cameraPos), DirectX::XMLoadFloat3(&oldCameraPos_), 1.0f - 0.08f));
+            DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorLerp(XMLoadFloat3(&oldCameraPos_), DirectX::XMLoadFloat3(&cameraPos), 0.1f * lerpSpeed_));
 
             if (range <= 0.1f)break;
         }
     }
 
     //プレイヤーより前にカメラが行かない処理
-    if (angleX_ < -30)
     {
-        while (1)
+        DirectX::XMVECTOR cmDir = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&lerpFocusPos_), DirectX::XMLoadFloat3(&cameraPos)));
+        DirectX::XMVECTOR cmPlayerDir = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(FocusPos, DirectX::XMLoadFloat3(&cameraPos)));
+
+        float dot = DirectX::XMVector3Dot(cmDir, cmPlayerDir).m128_f32[0];
+        if (dot < 0.9f)
         {
-            //ラープなしのカメラの位置
-            DirectX::XMVECTOR C = DirectX::XMVectorSubtract(FocusPos, DirectX::XMVectorScale(Front, range));
-
-            //ラープなしのカメラとプレイヤーのベクトル
-            DirectX::XMVECTOR NonLVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(C, FocusPos));
-            //ラープありのカメラとプレイヤーのベクトル
-            DirectX::XMVECTOR LVec = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&cameraPos), FocusPos));
-
-            float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(NonLVec, LVec));
-            if (dot > 0.9f) //前に行っていないのでOK
-                break;
-
             //補正
             DirectX::XMStoreFloat3(&lerpFocusPos_, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&lerpFocusPos_), FocusPos, 0.1f * lerpSpeed_));
             DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&lerpFocusPos_), DirectX::XMVectorScale(Front, range)));
+            DirectX::XMStoreFloat3(&cameraPos, DirectX::XMVectorLerp(XMLoadFloat3(&oldCameraPos_), DirectX::XMLoadFloat3(&cameraPos), 0.1f * lerpSpeed_));
+
+            float cross = DirectX::XMVector3Cross(cmDir, cmPlayerDir).m128_f32[1];
+            if (cross > 0)
+                angleY_ += 1000 * elapsedTime;
+            else
+                angleY_ -= 1000 * elapsedTime;
         }
     }
+
     oldCameraPos_ = cameraPos;
 
     //カメラに値を代入
     std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
     cameraObj->transform_->SetWorldPosition(cameraPos);
-    //cameraObj->transform_->SetWorldPosition(oldCameraPos_);
     cameraObj->transform_->LookAtTransform(lerpFocusPos_);
 }
 
