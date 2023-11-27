@@ -26,6 +26,14 @@ public:
 	ActionBase::State Run(float elapsedTime);
 };
 
+//逃走行動
+class BackMoveAction : public ActionBase
+{
+public:
+	BackMoveAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
+	ActionBase::State Run(float elapsedTime);
+};
+
 // 攻撃出来ないときはプレイヤーを囲むように移動
 class RoutePathAction : public ActionBase
 {
@@ -35,18 +43,18 @@ public:
 
 private:		
 	//四方のどこに近くの敵がいるか見る
-	bool quad_[4];	//0:左上 1:左下 2:右上 3:右下
+	bool quad_[4] = {};	//0:左上 1:左下 2:右上 3:右下
 
 	//経路探査用変数
 	float pathTimer_ = 1;
-	std::vector<DirectX::XMFLOAT3> routePos_;
+	std::vector<DirectX::XMFLOAT3> routePos_ = {};
 };
 
 // 近接通常攻撃
-class NearAttackAction : public ActionBase
+class AttackAction : public ActionBase
 {
 public:
-	NearAttackAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
+	AttackAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
 	ActionBase::State Run(float elapsedTime);
 
 private:
@@ -54,10 +62,10 @@ private:
 };
 
 // 戦闘待機行動
-class NearAttackIdleAction : public ActionBase
+class AttackIdleAction : public ActionBase
 {
 public:
-	NearAttackIdleAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
+	AttackIdleAction(std::shared_ptr<EnemyCom> enemy) :ActionBase(enemy) {}
 	ActionBase::State Run(float elapsedTime);
 };
 

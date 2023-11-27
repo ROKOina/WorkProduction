@@ -63,6 +63,7 @@ private:
     int justAvoidState_ = -1;   //ジャスト回避の遷移
     float justAvoidTime_ = 1;   //ジャスト回避時間
     float justAvoidTimer_ = 0;
+    bool onGroundAvoid_ = true; //地上のジャスト回避か
     std::weak_ptr<GameObject> justHitEnemy_;   //ジャスト回避時の敵保存
 
     bool hitStopEnd_ = false;  //ヒットストップ演出判定

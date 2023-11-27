@@ -132,6 +132,19 @@ public:
     std::shared_ptr<AttackPlayer> GetAttackPlayer() { return attackPlayer_; }
     std::shared_ptr<JustAvoidPlayer> GetJustAvoidPlayer() { return justAvoidPlayer_; }
 
+    //放射線ブラーをプレイヤー中心に
+    void BlurStartPlayer(float power, float time
+        , std::string boneName = "", DirectX::XMFLOAT2 pos = { (1920.0f * 0.8f) / 2.0f ,(1080.0f * 0.8f) / 2.0f }
+        , std::shared_ptr<GameObject> posObj = nullptr
+    );
+    //ブラー中か
+    bool IsBlurPlay() {
+        if (blurTimer_ < blurTime_)
+            return true;
+
+        return false;
+    }
+
 private:
     PLAYER_STATUS playerStatus_ = PLAYER_STATUS::IDLE;
     PLAYER_STATUS playerStatusOld_ = PLAYER_STATUS::IDLE;
@@ -141,6 +154,12 @@ private:
     std::shared_ptr<MovePlayer> movePlayer_;
     std::shared_ptr<JustAvoidPlayer> justAvoidPlayer_;
 
+    //ブラー
+    float blurTimer_;
+    float blurTime_;
+    float blurPower_;
+    std::string blurBoneName_;
+    std::weak_ptr<GameObject> blurPosObj_;
 
     //UI
     //ワイプ背景
@@ -155,4 +174,7 @@ private:
     float hpGravity_ = 10;
     //皿
     std::unique_ptr<Sprite> saraSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/saraUI.png");
+
+    //ロックオン
+    std::unique_ptr<Sprite> lockSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/lookOn.png");
 };

@@ -84,7 +84,7 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
         else
             p.startAngle = startAngle.xyz;
 
-        p.angle = startAngle;
+        p.angle = startAngle.xyz;
         
         //ライフタイム
         if (rotationLifeTime.rotationRand.w > 0.5f)

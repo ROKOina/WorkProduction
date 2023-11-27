@@ -75,6 +75,7 @@ particle ResetParticle(uint id)
     
     //サイズ
     {
+        p.size = 0;
         if (startSize.w > 0.5f)
         {
             p.startSize = lerp(startSize.x, startSize.y, f1);
@@ -83,10 +84,11 @@ particle ResetParticle(uint id)
             p.startSize = startSize.x;
         
         //カーブ使用時
+        p.randSizeCurve = 0;
         if (scaleLifeTimeRand[0].keyTime >= 0)
         {
             //補間値保存
-            p.randSizeCurve = XOrShift32(id) % 100 * 0.01f;
+            p.randSizeCurve = float(XOrShift32(id) % 100 * 0.01f);
         }
     }
     
@@ -100,8 +102,9 @@ particle ResetParticle(uint id)
         p.angle = p.startAngle;
         
         //ライフタイム
+        p.randAngle = float3(0, 0, 0);
         if (rotationLifeTime.rotationRand.w > 0.5f)
-            p.randAngle = lerp(rotationLifeTime.rotation.xyz, rotationLifeTime.rotationRand.xyz, f1);        
+            p.randAngle = lerp(rotationLifeTime.rotation.xyz, rotationLifeTime.rotationRand.xyz, float3(f1, f1, f1));
     }
     
     p.color = color;
@@ -122,6 +125,14 @@ particle ResetParticle(uint id)
 
     }
     
+    p.startFlag = 1;
+    p.lifeTime = lifeTime;
+    
+    p.age = lifeTime * f0;
+    p.saveModel = modelMat;
+    
+    p.downPP = float4(0, 0, 0, 0);
+    
     return p;
 }
 
@@ -131,7 +142,7 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
     uint id = dtid.x;
     
     //出現数を縛る
-    if (rateTime*lifeTime < id)
+    if (uint(rateTime * lifeTime) < id)
         return;
     
     particle p = particleBuffer[id];
@@ -317,8 +328,6 @@ void main(uint3 dtid : SV_DISPATCHTHREADID)
     {
         //生成処理
         p = ResetParticle(id);
-        p.startFlag = 1;
-        p.lifeTime = lifeTime;
     }
     
     if (p.lifeTime < 0)

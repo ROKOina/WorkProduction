@@ -29,10 +29,14 @@ void EnemyManager::Update(float elapsedTime)
     if (isSlow_)
     {
         float ratio = slowTimer_ / slowSeconds_;
-        float speed = Expo::easeIn(ratio, slowSpeed_, 1, 1);
+        slowNowSpeed_ = Expo::easeIn(ratio, slowSpeed_, 1, 1);
         for (auto& nearEnemy : nearEnemies_)
         {
-            nearEnemy.enemy.lock()->SetObjSpeed(speed);
+            nearEnemy.enemy.lock()->SetObjSpeed(slowNowSpeed_);
+        }
+        for (auto& farEnemy : farEnemies_)
+        {
+            farEnemy.enemy.lock()->SetObjSpeed(slowNowSpeed_);
         }
 
         //ƒC[ƒWƒ“ƒO‚Å–ß‚è‚©‚½‚ğŒˆ‚ß‚é
@@ -45,6 +49,10 @@ void EnemyManager::Update(float elapsedTime)
             for (auto& nearEnemy : nearEnemies_)
             {
                 nearEnemy.enemy.lock()->SetObjSpeed(1);
+            }
+            for (auto& farEnemy : farEnemies_)
+            {
+                farEnemy.enemy.lock()->SetObjSpeed(1);
             }
         }
 
@@ -143,6 +151,10 @@ void EnemyManager::EnemyMaskRender(PostEffect* postEff, std::shared_ptr<CameraCo
     {
         e.enemy.lock()->GetComponent<EnemyCom>()->MaskRender(postEff, maskCamera);
     }
+    for (auto& e : farEnemies_)
+    {
+        e.enemy.lock()->GetComponent<EnemyCom>()->MaskRender(postEff, maskCamera);
+    }
 }
 
 // “G“o˜^
@@ -211,6 +223,20 @@ int EnemyManager::GetCurrentNearPathCount()
     return nearPathCount;
 }
 
+//‰“‹——£“G‚ÌUŒ‚ƒJƒEƒ“ƒgæ“¾
+int EnemyManager::GetCurrentFarAttackCount()
+{
+    int attackCount = 0;
+    for (auto& e : farEnemies_)
+    {
+        if (e.enemy.expired())continue;
+        if (e.enemy.lock()->GetComponent<EnemyCom>()->GetIsAttackFlag())
+            attackCount++;
+    }
+
+    return attackCount;
+}
+
 
 /////   AIŠÖŒW   /////
 
@@ -271,7 +297,16 @@ bool EnemyManager::OnMessage(const Telegram& telegram)
         //‰“Šu“Iˆ—
         else
         {
+            attackCount = GetCurrentFarAttackCount();
 
+            //“¯UŒ‚‰Â”\”
+            if (attackCount < farEnemyLevel_.togetherAttackCount)
+            {
+                //UŒ‚‹–‰Â‚ğ‘—‚é
+                SendMessaging(static_cast<int>(AI_ID::AI_INDEX), telegram.sender, MESSAGE_TYPE::MsgGiveAttackRight);
+                return true;
+            }
+            break;
         }
 
     }
@@ -284,6 +319,7 @@ int EnemyManager::GetEnemyCount()
 {
     int enemyCount = 0;
     enemyCount += static_cast<int>(nearEnemies_.size());
+    enemyCount += static_cast<int>(farEnemies_.size());
     return enemyCount;
 }
 
@@ -313,6 +349,14 @@ void EnemyManager::EraseExpiredEnemy()
     {
         if (nearEnemies_[i].enemy.expired())
             nearEnemies_.erase(nearEnemies_.begin() + i);
+        else
+            i++;
+    }
+    //‰“‹——£
+    for (int i = 0; i < farEnemies_.size();)
+    {
+        if (farEnemies_[i].enemy.expired())
+            farEnemies_.erase(farEnemies_.begin() + i);
         else
             i++;
     }

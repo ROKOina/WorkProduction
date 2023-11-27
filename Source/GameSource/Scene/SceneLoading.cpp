@@ -118,10 +118,11 @@ void SceneLoading::Render(float elapsedTime)
         }
 
         //バッファ戻す
-        Graphics::Instance().RestoreRenderTargets();
+        graphics.RestoreRenderTargets();
 
         postEff_->Render(mainCamera_);
-        postEff_->ImGuiRender();
+        if (graphics.IsDebugGUI())
+            postEff_->ImGuiRender();
     }
 }
 

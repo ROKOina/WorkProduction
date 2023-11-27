@@ -156,6 +156,7 @@
     <ClInclude Include="Source\Dialog.h" />
     <ClInclude Include="Source\GameSource\Math\easing.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyAppleNearCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyFarCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionBase.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionDerived.h" />
@@ -165,6 +166,7 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\NodeBase.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyGrapeFarCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyManager.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyNearCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\TelegramEnemy.h" />
@@ -254,8 +256,10 @@
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\BehaviorTree.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\JudgmentDerived.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\NodeBase.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyAppleNearCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyFarCom.cpp" />
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyGrapeFarCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyNearCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Player\AttackPlayer.cpp" />

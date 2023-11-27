@@ -13,6 +13,29 @@
 
 #include <imgui.h>
 
+//アニメーションリスト
+enum ANIMATION_ENEMY
+{
+    WALK,
+    RUN,
+    RUN_BACK,
+    JUMP,
+    IDEL,
+    KICK,
+    DAMAGE,
+    RIGHT_STRAIGHT01,
+    LEFT_UPPER01,
+    DAMAGE_FALL,
+    DAMAGE_IN_AIR,
+    DAMAGE_GO_FLY,
+    FALL_STAND_UP,
+    DAMAGE_FALL_END,
+    ATTACK01_SWORD,
+    RUN_SWORD,
+    IDLE_SWORD,
+    WALK_SWORD,
+};
+
 // 開始処理
 void EnemyNearCom::Start()
 {
@@ -38,13 +61,13 @@ void EnemyNearCom::Start()
     aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::WANDER, 1, BehaviorTree::SelectRule::Non, std::make_shared<WanderJudgment>(myShared), std::make_shared<WanderAction>(myShared));
     aiTree_->AddNode(AI_TREE::SCOUT, AI_TREE::IDLE, 2, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<IdleAction>(myShared));
 
-    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ATTACK, 1, BehaviorTree::SelectRule::Priority, std::make_shared<NearAttackJudgment>(myShared), nullptr);
+    aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ATTACK, 1, BehaviorTree::SelectRule::Priority, std::make_shared<AttackJudgment>(myShared), nullptr);
     aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::ROUTE, 2, BehaviorTree::SelectRule::Non, std::make_shared<RoutePathJudgment>(myShared), std::make_shared<RoutePathAction>(myShared));
     aiTree_->AddNode(AI_TREE::BATTLE, AI_TREE::PURSUIT, 3, BehaviorTree::SelectRule::Non, nullptr, std::make_shared<PursuitAction>(myShared));
 
     //4層
-    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::ATTACK_IDLE, 1, BehaviorTree::SelectRule::Non, std::make_shared<AttackIdleJudgment>(myShared), std::make_shared<NearAttackIdleAction>(myShared));
-    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 2, BehaviorTree::SelectRule::Non, std::make_shared<NearAttackJudgment>(myShared), std::make_shared<NearAttackAction>(myShared));
+    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::ATTACK_IDLE, 1, BehaviorTree::SelectRule::Non, std::make_shared<AttackIdleJudgment>(myShared), std::make_shared<AttackIdleAction>(myShared));
+    aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 2, BehaviorTree::SelectRule::Non, std::make_shared<AttackJudgment>(myShared), std::make_shared<AttackAction>(myShared));
 
     SetRandomTargetPosition();
 
@@ -64,6 +87,9 @@ void EnemyNearCom::Start()
     //発光を消す
     std::vector<ModelResource::Material>& materials = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResourceShared()->GetMaterialsEdit();
     materials[0].toonStruct._Emissive_Color.w = 0;
+
+    //起き上がりモーション保存
+    getUpAnim_ = static_cast<int>(FALL_STAND_UP);
 }
 
 // 更新処理

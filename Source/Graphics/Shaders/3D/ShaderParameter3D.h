@@ -186,7 +186,7 @@ struct SunAtmosphere
 struct RadialBlur
 {
 	DirectX::XMFLOAT2 blurPos = { (1920 * 0.8f) * 0.5f,(1080 * 0.8f) * 0.5f };
-	float power = 5;
+	float power = 0;
 	float enabled = -1;
 };
 

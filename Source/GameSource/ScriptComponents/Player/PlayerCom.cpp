@@ -50,6 +50,7 @@ void PlayerCom::Start()
     weapon = GetGameObject()->GetChildFind("CandyStick")->GetComponent<WeaponCom>();
     weapon->SetAttackStatus(BIGSWORD_COM1_03, 5, 15, 0.9f, 0.1f, 2.0f);
     weapon->SetAttackStatus(JUMP_ATTACK_03, 3, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
+    weapon->SetAttackStatus(JUMP_ATTACK_06, 3, 20, 0.0f, 1.0f, 1.0f, ATTACK_SPECIAL_TYPE::JUMP_NOW);
 
     std::shared_ptr<PlayerCom> myCom = GetGameObject()->GetComponent<PlayerCom>();
     //攻撃管理を初期化
@@ -151,6 +152,52 @@ void PlayerCom::Update(float elapsedTime)
             pos.z = kabeMinas.z;
 
         GetGameObject()->transform_->SetWorldPosition(pos);
+    }
+
+    //ブラー
+    {
+        if (blurTimer_ < blurTime_)
+        {
+            blurTimer_ += elapsedTime;
+            ShaderParameter3D& sp = Graphics::Instance().shaderParameter3D_;
+
+            //時間比率
+            float ratio = sin(DirectX::XM_PI * (blurTimer_ / blurTime_));
+
+            //パワー代入
+            sp.radialBlur.power = blurPower_ * ratio;
+
+            //ポジション設定
+            if (!blurBoneName_.empty()) //ボーン設定されている場合
+            {
+                Model::Node* n = GetGameObject()->GetComponent<RendererCom>()->GetModel()->FindNode(blurBoneName_.c_str());
+                DirectX::XMFLOAT3 worldPos ={ n->worldTransform._41,n->worldTransform._42,n->worldTransform._43 };
+                DirectX::XMFLOAT3 screenPos = {};
+                //スクリーン座標にする
+                std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+                screenPos = Graphics::Instance().WorldToScreenPos(worldPos, camera);
+                sp.radialBlur.blurPos = { screenPos.x,screenPos.y };
+            }
+            else
+            {
+                if (!blurPosObj_.expired()) //オブジェクト指定されている場合
+                {
+                    DirectX::XMFLOAT3 worldPos = blurPosObj_.lock()->transform_->GetWorldPosition();
+                    DirectX::XMFLOAT3 screenPos = {};
+                    //スクリーン座標にする
+                    std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+                    screenPos = Graphics::Instance().WorldToScreenPos(worldPos, camera);
+                    sp.radialBlur.blurPos = { screenPos.x,screenPos.y };
+                }
+            }
+
+            //終了化
+            if (blurTimer_ >= blurTime_)
+            {
+                sp.radialBlur.power = 0;
+            }
+        }
+
     }
 
     //UI更新
@@ -347,6 +394,7 @@ void PlayerCom::AnimationInitialize()
 
         //ジャスト時
         animator->AddTriggerParameter("squareJust");
+        animator->AddTriggerParameter("squareJustSky");
         animator->AddTriggerParameter("triangleJust");
         //ジャスト回避
         animator->AddTriggerParameter("justBack");
@@ -539,10 +587,21 @@ void PlayerCom::AnimationInitialize()
 
         //ジャンプ攻撃
         {
+            //ジャスト空中回避時□
+            animator->AddAnimatorTransition(JUMP_ATTACK_06);
+            animator->SetTriggerTransition(JUMP_ATTACK_06, "squareJustSky");
+
             animator->AddAnimatorTransition(JUMP_ATTACK_01);
             animator->SetTriggerTransition(JUMP_ATTACK_01, "squareJump");
             animator->AddAnimatorTransition(JUMP_ATTACK_01, IDEL_2);
             animator->SetTriggerTransition(JUMP_ATTACK_01, IDEL_2, "idle");
+
+            //ジャストからのコンボ
+            animator->AddAnimatorTransition(JUMP_ATTACK_06, JUMP_ATTACK_01);
+            animator->SetTriggerTransition(JUMP_ATTACK_06, JUMP_ATTACK_01, "square");
+            animator->AddAnimatorTransition(JUMP_ATTACK_06, IDEL_2,true);
+            animator->SetTriggerTransition(JUMP_ATTACK_06, IDEL_2, "idle");
+
 
             animator->AddAnimatorTransition(JUMP_ATTACK_01, JUMP_ATTACK_02);
             animator->SetTriggerTransition(JUMP_ATTACK_01, JUMP_ATTACK_02, "square");
@@ -553,6 +612,7 @@ void PlayerCom::AnimationInitialize()
             animator->SetTriggerTransition(JUMP_ATTACK_02, JUMP_ATTACK_03, "square");
             animator->AddAnimatorTransition(JUMP_ATTACK_03, IDEL_2);
             animator->SetTriggerTransition(JUMP_ATTACK_03, IDEL_2, "idle");
+
         }
 
         //ダメージ
@@ -562,4 +622,22 @@ void PlayerCom::AnimationInitialize()
             animator->AddAnimatorTransition(DAMAGE_FRONT, IDEL_2, true);
         }
     }
+}
+
+//ラジアルブラーの設定
+void PlayerCom::BlurStartPlayer(float power, float time, std::string boneName, DirectX::XMFLOAT2 pos, std::shared_ptr<GameObject> posObj)
+{
+    ShaderParameter3D& sp = Graphics::Instance().shaderParameter3D_;
+
+    blurPosObj_.lock().reset();
+    if (posObj)
+    {
+        blurPosObj_ = posObj;
+    }
+
+    blurBoneName_ = boneName;
+    sp.radialBlur.blurPos = pos;
+    blurPower_ = power;
+    blurTime_ = time;
+    blurTimer_ = 0;
 }

@@ -378,7 +378,8 @@ void SceneTitle::Render(float elapsedTime)
         Graphics::Instance().RestoreRenderTargets();
 
         postEff_->Render(mainCamera_);
-        postEff_->ImGuiRender();
+        if (graphics.IsDebugGUI())
+            postEff_->ImGuiRender();
 
     }
 

@@ -69,6 +69,10 @@ public:
     //名前をセット
     void SetNodeName(const char* name) { nodeName_ = name; }
 
+    //親オブジェクトのアニメーションを考慮するか
+    void SetIsParentAnimUse(bool flag) { isParentAnimUse_ = flag; }
+    bool GetIsParentAnimUse() { return isParentAnimUse_; }
+
     //攻撃のステータス構造体
     struct AttackStatus
     {
@@ -81,13 +85,16 @@ public:
         //攻撃時のアニメーションスピード
         float animSpeed = 1;
 
+        //無敵時間（与えた側）
+        float weaponInvTime = -1;
+
         //特殊な攻撃か（ジャンプなど）
         ATTACK_SPECIAL_TYPE specialType = ATTACK_SPECIAL_TYPE::NORMAL;
     };
     //アニメーションとステータスを紐づける
     void SetAttackStatus(int animIndex, int damage, float impactPower, float front = 1, float up = 0, float animSpeed = 1, ATTACK_SPECIAL_TYPE specialAttack = ATTACK_SPECIAL_TYPE::NORMAL);
     //デフォルトステータスを紐づける
-    void SetAttackDefaultStatus(int damage, float impactPower, float front = 1, float up = 0, float animSpeed = 1, ATTACK_SPECIAL_TYPE specialAttack = ATTACK_SPECIAL_TYPE::NORMAL);
+    void SetAttackDefaultStatus(int damage, float impactPower, float front = 1, float up = 0, float animSpeed = 1, ATTACK_SPECIAL_TYPE specialAttack = ATTACK_SPECIAL_TYPE::NORMAL, float invincibleTime = -1.0f);
 
     //ヒット確認
     bool GetOnHit() { return onHit_; }
@@ -113,7 +120,7 @@ private:
     void ParentSetting();
 
     //攻撃処理
-    void AttackProcess(std::shared_ptr<GameObject> damageObj, bool useAnim = true, float invincibleTime = -1.0f);
+    void AttackProcess(std::shared_ptr<GameObject> damageObj, bool useAnim = true);
 
     //アニメイベント名から当たり判定を付けるか判断("AutoCollision"から始まるイベントを自動で取得)
     bool CollsionFromEventJudge();
@@ -131,6 +138,9 @@ private:
 
     //攻撃のヒット確認
     bool onHit_ = false;
+
+    //親オブジェクトのアニメーションを考慮するか(sphereコライダー限定)(標準は使用しない)
+    bool isParentAnimUse_ = false;  
 
     //アニメーション速度を変更したフラグ
     bool isAnimSetting_ = false;

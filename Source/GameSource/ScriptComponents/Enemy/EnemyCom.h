@@ -13,28 +13,6 @@
 class PostEffect;
 class CameraCom;
 
-//アニメーションリスト
-enum ANIMATION_ENEMY
-{
-    WALK,
-    RUN,
-    RUN_BACK,
-    JUMP,
-    IDEL,
-    KICK,
-    DAMAGE,
-    RIGHT_STRAIGHT01,
-    LEFT_UPPER01,
-    DAMAGE_FALL,
-    DAMAGE_IN_AIR,
-    DAMAGE_GO_FLY,
-    FALL_STAND_UP,
-    DAMAGE_FALL_END,
-    ATTACK01_SWORD,
-    RUN_SWORD,
-    IDLE_SWORD,
-    WALK_SWORD,
-};
 
 //AI遷移
 enum class AI_TREE
@@ -55,6 +33,7 @@ enum class AI_TREE
     //親：BATTLE
     ATTACK,
     ROUTE,
+    BACK_MOVE,
     ATTACK_IDLE,
     PURSUIT,
 
@@ -125,6 +104,10 @@ public:
     void SetIsAttackFlag(bool falg) { isAttackFlag_ = falg; }
     bool GetIsAttackFlag() { return isAttackFlag_; }
 
+    //攻撃前待機フラグ
+    bool GetIsAttackIdleFlag() { return isAttackIdle_; }
+    void SetIsAttackIdleFlag(bool flag) { isAttackIdle_ = flag; }
+
     //被弾ー＞立ち上がりモーション
     void SetStandUpMotion();
     void StandUpUpdate();
@@ -150,7 +133,7 @@ private:    //これだけ何故か派生クラスで使えないので、派生クラスでも作成する
 
 protected:
     //アニメーション初期化設定
-    virtual void AnimationInitialize(){}
+    virtual void AnimationInitialize() {}
 
     //ダメージ処理
     void DamageProcess(float elapsedTime);
@@ -190,11 +173,15 @@ protected:
     bool isSetGravity_ = false;
 
     //起き上がりモーション中
+    int getUpAnim_;
     bool isStandUpMotion_ = false;
     bool playStandUp_ = false;
 
     //攻撃フラグ
     bool isAttackFlag_ = false;
+
+    //攻撃前待機
+    bool isAttackIdle_ = false;
 
     //移動
     MoveDataEnemy moveDataEnemy_;

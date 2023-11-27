@@ -17,7 +17,7 @@ bool BattleJudgment::Judgment()
 }
 
 // AttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-bool NearAttackJudgment::Judgment()
+bool AttackJudgment::Judgment()
 {
 	std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
 
@@ -54,10 +54,43 @@ bool NearAttackJudgment::Judgment()
 	return false;
 }
 
+// BackMoveNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+bool BackMoveJudgment::Judgment()
+{
+	//UŒ‚ƒtƒ‰ƒO‚ª‚È‚¢
+	if (!owner_.lock()->GetIsAttackFlag())
+	{
+		//‹——£‚ğŒ©‚é
+		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
+
+		// ‘ÎÛ‚Æ‚Ì‹——£‚ğZo
+		DirectX::XMFLOAT3 pos = myTransform->GetWorldPosition();
+		DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
+
+		float vx = playerPos.x - pos.x;
+		float vy = playerPos.y - pos.y;
+		float vz = playerPos.z - pos.z;
+		float dist = sqrtf(vx * vx + vy * vy + vz * vz);
+
+		std::shared_ptr<EnemyFarCom> farEnemy = owner_.lock()->GetGameObject()->GetComponent<EnemyFarCom>();
+		if (dist < farEnemy->GetBackMoveRange())	//‹ß‚·‚¬‚éê‡
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 // WanderNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
 bool WanderJudgment::Judgment()
 {
-	if (owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsPathFlag())return false;
+	//‹ß‹——£“G‚Ìê‡
+	std::shared_ptr<EnemyNearCom> nearEnemy = owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>();
+	if (nearEnemy)
+	{
+		if (nearEnemy->GetIsPathFlag())return false;
+	}
 
 	// –Ú“I’n“_‚Ü‚Å‚ÌXZ•½–Ê‚Å‚Ì‹——£”»’è
 	std::shared_ptr<GameObject> ownerObj = owner_.lock()->GetGameObject();
@@ -116,10 +149,11 @@ bool RoutePathJudgment::Judgment()
 
 bool AttackIdleJudgment::Judgment()
 {
-	if (!owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->GetIsAttackIdleFlag())
+	if (!owner_.lock()->GetGameObject()->GetComponent<EnemyCom>()->GetIsAttackIdleFlag())
 	{
 		return true;
 	}
 
 	return false;
 }
+

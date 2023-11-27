@@ -11,11 +11,20 @@ public:
 	bool Judgment();
 };
 
-// NearAttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
-class NearAttackJudgment : public JudgmentBase
+// AttackNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class AttackJudgment : public JudgmentBase
 {
 public:
-	NearAttackJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
+	AttackJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
+	// ”»’è
+	bool Judgment();
+};
+
+// BackMoveNode‚É‘JˆÚ‚Å‚«‚é‚©”»’è
+class BackMoveJudgment : public JudgmentBase
+{
+public:
+	BackMoveJudgment(std::shared_ptr<EnemyCom> enemy) :JudgmentBase(enemy) {};
 	// ”»’è
 	bool Judgment();
 };

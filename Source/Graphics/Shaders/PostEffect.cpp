@@ -171,7 +171,7 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
                 * DirectX::XMLoadFloat4x4(&camera->GetProjection())));
 
         //シーン情報
-        CbScene cb;
+        CbScene cb = {};
         cb.lightColor = graphics.shaderParameter3D_.lightColor;
         cb.lightDirection = graphics.shaderParameter3D_.lightDirection;
         DirectX::XMFLOAT3 cP = camera->GetGameObject()->transform_->GetWorldPosition();
@@ -334,7 +334,7 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
 
         //暈しバッファ更新
         {
-            BloomBlur bloomBlur;
+            BloomBlur bloomBlur = {};
             CalcGaussianFilter(bloomBlur.Weight, KARNEL_SIZE, 50.0f);//ガウスフィルター作成 
             //コンスタントバッファ更新
             bloomBlur.KarnelSize = KARNEL_SIZE;
@@ -422,7 +422,7 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
                 int index = i + 1;
                 //暈しバッファ更新
                 {
-                    BloomBlur bloomBlur;
+                    BloomBlur bloomBlur = {};
                     CalcGaussianFilter(bloomBlur.Weight, KARNEL_SIZE, 50.0f);//ガウスフィルター作成 
                     //コンスタントバッファ更新
                     bloomBlur.KarnelSize = KARNEL_SIZE;
@@ -779,7 +779,7 @@ void PostEffect::SkymapRender(std::shared_ptr<CameraCom> camera)
     dc->PSSetShader(skyPixel_.Get(), 0, 0);
 
     //コンスタントバッファ
-    SkymapData skymapData;
+    SkymapData skymapData = {};
 
     DirectX::XMStoreFloat4x4(&skymapData.invMat,
         DirectX::XMMatrixInverse(nullptr, 

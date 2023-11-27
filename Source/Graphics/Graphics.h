@@ -13,6 +13,10 @@
 
 #include <mutex>
 
+#define DEBUG_GUI_ true
+
+class CameraCom;
+
 enum SHADER_ID
 {
 	Default,
@@ -76,6 +80,9 @@ public:
 	// 描画ターゲットを戻す
 	void RestoreRenderTargets();
 
+	//ワールド座標からスクリーン座標にする
+	DirectX::XMFLOAT3 WorldToScreenPos(DirectX::XMFLOAT3 worldPos, std::shared_ptr<CameraCom> camera);
+
 	//ポストエフェクト
 	std::unique_ptr<PostRenderTarget>& GetPostEffectModelRenderTarget() { return postEffectModelRenderTarget; }
 	std::unique_ptr<PostDepthStencil>& GetPostEffectModelDepthStencilView() { return postEffectModelDepthStencil; }
@@ -86,6 +93,9 @@ public:
 
 	//ミューテックス取得
 	std::mutex& GetMutex() { return mutex_; }
+
+	//デバッグ表示するか
+	bool IsDebugGUI() { return isDebugGui_; }
 
 	//スレッドプール取得
 	ThreadPool* GetThreadPool() { return threadPool_.get(); }
@@ -123,12 +133,16 @@ private:
 	std::unique_ptr<PostRenderTarget> postEffectModelRenderTarget;
 	std::unique_ptr<PostDepthStencil> postEffectModelDepthStencil;
 
+
 private:
 	float	screenWidth_;
 	float	screenHeight_;
 
 	float fps_;
 	std::mutex	mutex_;
+
+	//デバッグ表示
+	bool isDebugGui_ = DEBUG_GUI_;
 
 	//スレッドプール
 	std::unique_ptr<ThreadPool> threadPool_;

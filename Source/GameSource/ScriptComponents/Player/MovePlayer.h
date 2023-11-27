@@ -77,6 +77,9 @@ public:
     const bool& GetJumpFlag()const { return isJump_; }
     void SetJumpFlag(bool flag) { isJump_ = flag; }
 
+    const int& GetJumpDashCount()const { return jumpDashCount_; }
+    void SetJumpDashCount(int  count) { jumpDashCount_ = count; }
+
 private:
     struct
     {

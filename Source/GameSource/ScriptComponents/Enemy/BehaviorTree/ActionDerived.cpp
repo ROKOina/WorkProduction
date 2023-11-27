@@ -137,13 +137,7 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 	{
 	case 0:
 	{
-		// 目標地点をプレイヤー位置に設定
-		owner_.lock()->SetTargetPosition(GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
 		runTimer_ = 2;
-
-		//移動
-		std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
-		move->SetMoveMaxSpeed(owner_.lock()->GetMoveDataEnemy().runMaxSpeed);
 
 		step_++;
 	}
@@ -153,6 +147,7 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
 
 		runTimer_ -= elapsedTime;
+
 		// 目標地点をプレイヤー位置に設定
 		owner_.lock()->SetTargetPosition(GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition());
 
@@ -168,32 +163,109 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 		float vz = targetPosition.z - position.z;
 		float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 
-		//接近エリアに入ったら
-		if (dist < EnemyManager::Instance().GetNearEnemyLevel().radius)
+		//近接敵の場合
+		std::shared_ptr<EnemyNearCom> enemyNear = owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>();
+		if (enemyNear)
 		{
-			std::shared_ptr<EnemyNearCom> enemyNear = owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>();
-			//接近フラグを持っていない場合
-			if (!enemyNear->GetIsNearFlag())
+		//接近エリアに入ったら
+			if (dist < EnemyManager::Instance().GetNearEnemyLevel().radius)
 			{
-				//フラグ関係なく接近しすぎた場合
-				if (dist < 3)
-					enemyNear->SetIsNearFlag(true);
+				//接近フラグを持っていない場合
+				if (!enemyNear->GetIsNearFlag())
+				{
+					//フラグ関係なく接近しすぎた場合
+					if (dist < 3)
+						enemyNear->SetIsNearFlag(true);
 
-				//接近申請
-				EnemyManager::Instance().SendMessaging(owner_.lock()->GetID(), EnemyManager::AI_ID::AI_INDEX, MESSAGE_TYPE::MsgAskNearRight);
+					//接近申請
+					EnemyManager::Instance().SendMessaging(owner_.lock()->GetID(), EnemyManager::AI_ID::AI_INDEX, MESSAGE_TYPE::MsgAskNearRight);
 
-				//一旦加速停止
-				std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
-				move->ZeroVelocity();
+					//一旦加速停止
+					std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
+					move->ZeroVelocity();
 
-				// 待機する
-				step_ = 1;
-				return ActionBase::State::Run;
+					// 待機する
+					step_ = 1;
+					return ActionBase::State::Run;
+				}
 			}
 		}
 
 		// 攻撃範囲にいるとき
 		if (dist < owner_.lock()->GetAttackRange())
+		{					
+			//一旦加速停止
+			std::shared_ptr<MovementCom> move = owner_.lock()->GetGameObject()->GetComponent<MovementCom>();
+			move->ZeroVelocity();
+
+			step_ = 0;
+			// 追跡成功を返す
+			return ActionBase::State::Complete;
+		}
+
+		// 行動時間が過ぎた時
+		if (runTimer_ <= 0.0f)
+		{
+			step_ = 0;
+			// 追跡失敗を返す
+			return ActionBase::State::Failed;
+		}
+
+
+
+	}
+	break;
+	//強制終了
+	case  Action::END_STEP:
+	{
+		step_ = 0;
+	}
+	break;
+	}
+	return ActionBase::State::Run;
+}
+
+//逃走行動
+ActionBase::State BackMoveAction::Run(float elapsedTime)
+{
+	switch (step_)
+	{
+	case 0:
+	{
+		runTimer_ = 2;
+
+		step_++;
+	}
+	break;
+	case 1:
+	{
+		runTimer_ -= elapsedTime;
+		
+		//プレイヤーとは逆方向のベクトルを作る
+		std::shared_ptr<TransformCom> myTransform = owner_.lock()->GetGameObject()->transform_;
+
+		DirectX::XMFLOAT3 myPos = myTransform->GetWorldPosition();
+		DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
+
+		DirectX::XMFLOAT3 targetPos;
+
+		DirectX::XMStoreFloat3(&targetPos, DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&myPos), DirectX::XMLoadFloat3(&playerPos)));
+
+		// 目標地点をプレイヤー位置に設定
+		owner_.lock()->SetTargetPosition(targetPos);
+
+		//ターゲットポジションに移動
+		owner_.lock()->GoTargetMove();
+
+		// 目的地点までのXZ平面での距離判定
+		float vx = playerPos.x - myPos.x;
+		float vy = playerPos.y - myPos.y;
+		float vz = playerPos.z - myPos.z;
+		float dist = sqrtf(vx * vx + vy * vy + vz * vz);
+
+		// 逃走範囲よりも大きい場合は終了
+		std::shared_ptr<EnemyFarCom> farEnemy = owner_.lock()->GetGameObject()->GetComponent<EnemyFarCom>();
+		if (dist > farEnemy->GetBackMoveRange() + 1)
 		{
 			step_ = 0;
 			// 追跡成功を返す
@@ -207,6 +279,9 @@ ActionBase::State PursuitAction::Run(float elapsedTime)
 			// 追跡失敗を返す
 			return ActionBase::State::Failed;
 		}
+
+
+
 	}
 	break;
 	//強制終了
@@ -474,7 +549,7 @@ ActionBase::State RoutePathAction::Run(float elapsedTime)
 }
 
 // 近接通常攻撃行動
-ActionBase::State NearAttackAction::Run(float elapsedTime)
+ActionBase::State AttackAction::Run(float elapsedTime)
 {
 	switch (step_)
 	{
@@ -548,7 +623,7 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 		{
 			//攻撃フラグを切る
 			owner_.lock()->SetIsAttackFlag(false);
-			owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsAttackIdleFlag(false);
+			owner_.lock()->GetGameObject()->GetComponent<EnemyCom>()->SetIsAttackIdleFlag(false);
 			owner_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetAttackNonMove(false);
 
 			step_ = 0;
@@ -563,7 +638,7 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 	{
 		//攻撃フラグを切る
 		owner_.lock()->SetIsAttackFlag(false);
-		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsAttackIdleFlag(false);
+		owner_.lock()->GetGameObject()->GetComponent<EnemyCom>()->SetIsAttackIdleFlag(false);
 		owner_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()->SetAttackNonMove(false);
 
 		std::shared_ptr<AnimatorCom> animator = owner_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
@@ -582,13 +657,13 @@ ActionBase::State NearAttackAction::Run(float elapsedTime)
 	return ActionBase::State::Run;
 }
 
-ActionBase::State NearAttackIdleAction::Run(float elapsedTime)
+ActionBase::State AttackIdleAction::Run(float elapsedTime)
 {
 	switch (step_)
 	{
 	case 0:
 	{
-		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsAttackIdleFlag(true);
+		owner_.lock()->GetGameObject()->GetComponent<EnemyCom>()->SetIsAttackIdleFlag(true);
 		runTimer_ = rand() % 200 * 0.01f;
 
 		step_++;
@@ -610,7 +685,7 @@ ActionBase::State NearAttackIdleAction::Run(float elapsedTime)
 	case  Action::END_STEP:
 	{
 		owner_.lock()->SetIsAttackFlag(false);
-		owner_.lock()->GetGameObject()->GetComponent<EnemyNearCom>()->SetIsAttackIdleFlag(false);
+		owner_.lock()->GetGameObject()->GetComponent<EnemyCom>()->SetIsAttackIdleFlag(false);
 
 		step_ = 0;
 	}
@@ -619,3 +694,4 @@ ActionBase::State NearAttackIdleAction::Run(float elapsedTime)
 	}
 	return ActionBase::State::Run;
 }
+

@@ -263,6 +263,8 @@
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\SilhoutteShader.h" />
     <ClInclude Include="Source\Graphics\Shaders\3D\ShadowMapCasterShader.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyAppleNearCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyGrapeFarCom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -506,6 +508,12 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\Shaders\3D\ShadowMapCasterShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyAppleNearCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyGrapeFarCom.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

@@ -23,6 +23,8 @@
 #include "GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyNearCom.h"
 #include "GameSource\ScriptComponents\Enemy\EnemyFarCom.h"
+#include "GameSource\ScriptComponents\Enemy\EnemyAppleNearCom.h"
+#include "GameSource\ScriptComponents\Enemy\EnemyGrapeFarCom.h"
 //#include "GameSource\ScriptComponents\Enemy\EnemyCom.h"
 #include "GameSource\ScriptComponents\Weapon\WeaponCom.h"
 #include "GameSource\ScriptComponents\Weapon\SwordTrailCom.h"
@@ -91,10 +93,10 @@ void SceneGame::Initialize()
 	}
 
 	//enemyNear
-	for (int i = 0; i < 7; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-		obj->SetName("picolabo");
+		obj->SetName("picolaboNear");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
 
 		obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
@@ -127,7 +129,7 @@ void SceneGame::Initialize()
 		//ジャスト回避用
 		{
 			std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
-			justAttack->SetName("picolaboAttackJust");
+			justAttack->SetName("attackJust");
 			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
 			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
 			justCol->SetJudgeTag(COLLIDER_TAG::Player);
@@ -185,7 +187,7 @@ void SceneGame::Initialize()
 	for (int i = 0; i < 0; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-		obj->SetName("picolabo");
+		obj->SetName("picolaboFar");
 		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
 		obj->transform_->SetWorldPosition({ 3, 0, 5 });
 		obj->transform_->SetEulerRotation({ 0,180,0 });
@@ -194,13 +196,13 @@ void SceneGame::Initialize()
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
 		r->SetShaderID(SHADER_ID::UnityChanToon);
+		r->SetIsShadowFall(true);
 
 
 		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
 		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
-		//a->PlayAnimation(5, true);
 
 		std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
 
@@ -215,7 +217,7 @@ void SceneGame::Initialize()
 		//ジャスト回避用
 		{
 			std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
-			justAttack->SetName("picolaboAttackJust");
+			justAttack->SetName("attackJust");
 			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
 			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
 			justCol->SetJudgeTag(COLLIDER_TAG::Player);
@@ -255,28 +257,230 @@ void SceneGame::Initialize()
 
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(sword->GetParent());
+			weapon->SetNodeParent(sword->GetParent());
 			weapon->SetNodeName("RightHand");
 			weapon->SetColliderUpDown({ 1.36f,0 });
+			weapon->SetIsForeverUse(true);
+		}
 
-			//std::shared_ptr<SwordTrailCom>  trail = sword->AddComponent<SwordTrailCom>();
-			//trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
+		//パーティクルを子に
+		{
+			std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::DAMAGE_SWETTS_ENEMY, { 0,0,0 }, obj);
+			particle->transform_->SetScale(DirectX::XMFLOAT3(100, 100, 100));
+			particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
 		}
 	}
 
-	//マスク用プレイヤー
+	//enemyAppleNear
+	for (int i = 0; i < 5; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
-		obj->SetName("picoMask");
-		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
-		obj->transform_->SetWorldPosition({ 0.15f, -1.4f, 1.2f });
-		obj->transform_->SetEulerRotation({ 0, 180, 0 });
+		obj->SetName("appleNear");
+		obj->transform_->SetScale({ 0.1f, 0.1f, 0.1f });
 
-		const char* filename = "Data/Model/pico/picoAnim.mdl";
+		obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
+			0,  (rand() % (230 * 2) - 230) * 0.1f });
+		//obj->transform_->SetWorldPosition({ 0, 0, 5 });
+
+		obj->transform_->SetEulerRotation({ 0,180,0 });
+
+		const char* filename = "Data/Model/enemies/apple/appleEnemy.mdl";
 		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
 		r->LoadModel(filename);
-		r->SetShaderID(SHADER_ID::MaskUnityChan);
+		r->SetShaderID(SHADER_ID::UnityChanToon);
+		r->SetIsShadowFall(true);
+
+		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
+		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
 
 		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+
+		std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
+
+		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
+		c->SetMyTag(COLLIDER_TAG::Enemy);
+		c->SetJudgeTag(COLLIDER_TAG::Player | COLLIDER_TAG::Wall);
+		c->SetSize(DirectX::XMFLOAT3(0.5f, 1.2f, 0.5f));
+		c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.9f, 0));
+
+		std::shared_ptr<EnemyAppleNearCom> e = obj->AddComponent<EnemyAppleNearCom>();
+
+		//ジャスト回避用
+		{
+			std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
+			justAttack->SetName("attackJust");
+			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
+			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
+			justCol->SetJudgeTag(COLLIDER_TAG::Player);
+			justCol->SetSize({ 1.3f,1,1.3f });
+
+			justAttack->transform_->SetLocalPosition({ 0 ,5.5f ,11.8f });
+		}
+
+		//押し出し用当たり判定
+		{
+			std::shared_ptr<GameObject> pushBack = obj->AddChildObject();
+			pushBack->SetName("PushBackObj");
+			std::shared_ptr<SphereColliderCom> col = pushBack->AddComponent<SphereColliderCom>();
+			col->SetMyTag(COLLIDER_TAG::EnemyPushBack);
+			col->SetJudgeTag(COLLIDER_TAG::PlayerPushBack | COLLIDER_TAG::EnemyPushBack);
+			col->SetPushBack(true);
+			col->SetPushBackObj(obj);
+		}
+
+		//攻撃用オブジェクト
+		{
+			std::shared_ptr<GameObject> attackObj = obj->AddChildObject();
+			attackObj->SetName("attack");
+
+			std::shared_ptr<SphereColliderCom> attackCol = attackObj->AddComponent<SphereColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Player);
+			attackCol->SetRadius(1);
+
+			std::shared_ptr<WeaponCom> weapon = attackObj->AddComponent<WeaponCom>();
+			weapon->SetObject(attackObj->GetParent());
+			weapon->SetNodeParent(attackObj->GetParent());
+			weapon->SetNodeName("mixamorig:Hips");
+			weapon->SetIsParentAnimUse(true);
+			weapon->SetIsForeverUse(true);
+		}
+
+		//ダメージパーティクルを子に
+		{
+			std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::DAMAGE_SWETTS_ENEMY, { 0,0,0 }, obj);
+			particle->transform_->SetScale(DirectX::XMFLOAT3(1, 1, 1));
+			particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
+		}
+	}
+
+	//EnemyGrapeFar
+	for (int i = 0; i < 5; ++i)
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("grapeFar");
+		obj->transform_->SetScale({ 0.05f, 0.05f, 0.05f });
+
+		obj->transform_->SetWorldPosition({ (rand() % (230 * 2) - 230) * 0.1f,
+			0,  (rand() % (230 * 2) - 230) * 0.1f });
+		//obj->transform_->SetWorldPosition({ 0, 0, 5 });
+
+		obj->transform_->SetEulerRotation({ 0,180,0 });
+
+		const char* filename = "Data/Model/enemies/grape/grapeEnemy.mdl";
+		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+		r->LoadModel(filename);
+		r->SetShaderID(SHADER_ID::UnityChanToon);
+		r->SetIsShadowFall(true);
+
+		std::shared_ptr<MovementCom> m = obj->AddComponent<MovementCom>();
+		std::shared_ptr<CharacterStatusCom> status = obj->AddComponent<CharacterStatusCom>();
+
+		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+
+		std::shared_ptr<AnimatorCom> animator = obj->AddComponent<AnimatorCom>();
+
+		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
+		c->SetMyTag(COLLIDER_TAG::Enemy);
+		c->SetJudgeTag(COLLIDER_TAG::Player | COLLIDER_TAG::Wall);
+		c->SetSize(DirectX::XMFLOAT3(0.5f, 1.2f, 0.5f));
+		c->SetOffsetPosition(DirectX::XMFLOAT3(0, 0.9f, 0));
+
+		std::shared_ptr<EnemyGrapeFarCom> e = obj->AddComponent<EnemyGrapeFarCom>();
+
+		//ジャスト回避用
+		{
+			std::shared_ptr<GameObject> justAttack = obj->AddChildObject();
+			justAttack->SetName("attackJust");
+			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
+			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
+			justCol->SetJudgeTag(COLLIDER_TAG::Player);
+			justCol->SetSize({ 1.3f,1,1.3f });
+
+			justAttack->transform_->SetLocalPosition({ 0 ,5.5f ,11.8f });
+		}
+
+		//押し出し用当たり判定
+		{
+			std::shared_ptr<GameObject> pushBack = obj->AddChildObject();
+			pushBack->SetName("PushBackObj");
+			std::shared_ptr<SphereColliderCom> col = pushBack->AddComponent<SphereColliderCom>();
+			col->SetMyTag(COLLIDER_TAG::EnemyPushBack);
+			col->SetJudgeTag(COLLIDER_TAG::PlayerPushBack | COLLIDER_TAG::EnemyPushBack);
+			col->SetPushBack(true);
+			col->SetPushBackObj(obj);
+		}
+
+		//攻撃用オブジェクト
+		{
+			std::shared_ptr<GameObject> attackObj = obj->AddChildObject();
+			attackObj->SetName("attack");
+
+			std::shared_ptr<SphereColliderCom> attackCol = attackObj->AddComponent<SphereColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Player);
+			attackCol->SetRadius(1);
+
+			std::shared_ptr<WeaponCom> weapon = attackObj->AddComponent<WeaponCom>();
+			weapon->SetObject(attackObj->GetParent());
+			weapon->SetNodeParent(attackObj->GetParent());
+			weapon->SetNodeName("mixamorig:Hips");
+			weapon->SetIsParentAnimUse(true);
+			weapon->SetIsForeverUse(true);
+		}
+
+		//ダメージパーティクルを子に
+		{
+			std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::DAMAGE_SWETTS_ENEMY, { 0,0,0 }, obj);
+			particle->transform_->SetScale(DirectX::XMFLOAT3(20, 20, 20));
+			particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
+		}
+	}
+
+	//グレープ玉デバッグ用
+	if(0)
+	{
+		std::shared_ptr<GameObject> grapeBall = GameObjectManager::Instance().Create();
+		grapeBall->SetName("grapeBall");
+
+		grapeBall->transform_->SetScale(DirectX::XMFLOAT3(0.01f, 0.01f, 0.01f));
+
+		const char* filename = "Data/Model/enemies/grape/grapeBall.mdl";
+		std::shared_ptr<RendererCom> r = grapeBall->AddComponent<RendererCom>();
+		r->LoadModel(filename);
+		r->SetShaderID(SHADER_ID::UnityChanToon);
+		r->SetIsShadowFall(true);
+
+		grapeBall->AddComponent<GrapeBallCom>()->SetEnabled(false);
+
+		//当たり判定
+		{
+			std::shared_ptr<GameObject> attack = grapeBall->AddChildObject();
+			attack->SetName("attack");
+
+			std::shared_ptr<SphereColliderCom> attackCol = attack->AddComponent<SphereColliderCom>();
+			attackCol->SetMyTag(COLLIDER_TAG::EnemyAttack);
+			attackCol->SetJudgeTag(COLLIDER_TAG::Player);
+			attackCol->SetRadius(0.4f);
+
+			std::shared_ptr<WeaponCom> weapon = attack->AddComponent<WeaponCom>();
+			weapon->SetObject(grapeBall);
+			weapon->SetNodeParent(grapeBall);
+			weapon->SetIsForeverUse(true);
+			weapon->SetAttackDefaultStatus(1, 0);
+		}
+
+		//ジャスト回避用
+		{
+			std::shared_ptr<GameObject> justAttack = grapeBall->AddChildObject();
+			justAttack->SetName("attackJust");
+			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
+			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
+			justCol->SetJudgeTag(COLLIDER_TAG::Player);
+			justCol->SetSize({ 2.0f,1,2.0f });
+
+			justAttack->transform_->SetLocalPosition({ 0 ,0 ,119.5f });
+		}
 	}
 
 	//プレイヤー
@@ -544,20 +748,20 @@ void SceneGame::Initialize()
 	}
 
 
-	//particle
-	for (int i = 0; i < 0; ++i)
-	{
-		std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
-		std::string n = "Particle" + std::to_string(i);
-		p->SetName(n.c_str());
-		p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
+	////particle
+	//for (int i = 0; i < 0; ++i)
+	//{
+	//	std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
+	//	std::string n = "Particle" + std::to_string(i);
+	//	p->SetName(n.c_str());
+	//	p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
 
-		std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(100000);
-		c->SetSweetsParticle(true);	//お菓子用
+	//	std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(100000);
+	//	c->SetSweetsParticle(true);	//お菓子用
 
-		c->LoadTexture("./Data/Sprite/sweetsParticle.png");
+	//	c->LoadTexture("./Data/Sprite/sweetsParticle.png");
 
-	}
+	//}
 
 #endif
 
@@ -589,6 +793,24 @@ void SceneGame::Initialize()
 			0.1f, 1000.0f
 		);
 	}
+
+	//マスク用プレイヤー
+	{
+		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
+		obj->SetName("picoMask");
+		obj->transform_->SetScale({ 0.01f, 0.01f, 0.01f });
+		obj->transform_->SetWorldPosition({ 0.15f, -1.4f, 1.2f });
+		obj->transform_->SetEulerRotation({ 0, 180, 0 });
+
+		const char* filename = "Data/Model/pico/picoAnim.mdl";
+		std::shared_ptr<RendererCom> r = obj->AddComponent<RendererCom>();
+		r->LoadModel(filename);
+		r->SetShaderID(SHADER_ID::MaskUnityChan);
+
+		std::shared_ptr<AnimationCom> a = obj->AddComponent<AnimationCom>();
+	}
+
+
 
 	//メインカメラ設定
 	std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
@@ -773,7 +995,8 @@ void SceneGame::Render(float elapsedTime)
 	Graphics::Instance().RestoreRenderTargets();
 
 	postEff_->Render(mainCamera_);
-	postEff_->ImGuiRender();
+	if (graphics.IsDebugGUI())
+		postEff_->ImGuiRender();
 	
 
 	//3Dエフェクト描画
@@ -782,7 +1005,7 @@ void SceneGame::Render(float elapsedTime)
 	}
 
 	// 3Dデバッグ描画
-	if(1)
+	if(graphics.IsDebugGUI())
 	{
 		//経路探査
 		if (1)
@@ -829,6 +1052,7 @@ void SceneGame::Render(float elapsedTime)
 		EnemyManager::Instance().Render2D(elapsedTime);
 	}
 
+
 	//マスク用
 	{
 		//マスク処理
@@ -839,8 +1063,8 @@ void SceneGame::Render(float elapsedTime)
 
 			GameObjectManager::Instance().Find("pico")->GetComponent<PlayerCom>()->MaskRender(postEff_.get(), maskCamera);
 
-
-			postEff_->DrawMaskGui();
+			if (graphics.IsDebugGUI())
+				postEff_->DrawMaskGui();
 		}
 	}
 

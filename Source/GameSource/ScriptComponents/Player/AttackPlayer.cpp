@@ -584,6 +584,9 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
                 //カメラを引く
                 player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(1.0f, FarRange);
 
+                //ブラー
+                player_.lock()->BlurStartPlayer(2.5f, 1);
+
                 SpawnCombo3();
             }
         }
@@ -620,6 +623,11 @@ void AttackPlayer::AttackComboCountReset()
         if (DoComboAttack())
         comboSquareCount_ = 0;
     }
+
+    if (currentAnimIndex == ANIMATION_PLAYER::JUMP_ATTACK_06)
+    {
+        isJumpSquareInput_ = false;
+    }
 }
 
 
@@ -653,7 +661,7 @@ int AttackPlayer::NormalAttackUpdate(float elapsedTime)
             {
                 //中距離でも敵を探す
                 enemyCopy_ = AssistGetMediumEnemy();
-                if (enemyCopy_.lock()) //敵がいない場合
+                if (enemyCopy_.lock()) //敵がいる場合
                 {
                     state_ = 5;
                     break;
@@ -694,6 +702,9 @@ int AttackPlayer::NormalAttackUpdate(float elapsedTime)
 
         //カメラを引く
         player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(1.0f, FarRange);
+
+        //ブラー
+        player_.lock()->BlurStartPlayer(2.5f, 1, "Head");
 
         state_++;
     }
@@ -1050,7 +1061,7 @@ void AttackPlayer::SpawnCombo1()
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
         weapon->SetIsForeverUse(true);
-        weapon->SetAttackDefaultStatus(5, 0);
+        weapon->SetAttackDefaultStatus(5, 0, 0, 0, 1, ATTACK_SPECIAL_TYPE::NORMAL, 0.2f);
     }
 
     //炎パーティクル
@@ -1130,7 +1141,7 @@ void AttackPlayer::SpawnCombo2()
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
         weapon->SetIsForeverUse(true);
-        weapon->SetAttackDefaultStatus(5, 0);
+        weapon->SetAttackDefaultStatus(5, 0, 0, 0, 1, ATTACK_SPECIAL_TYPE::NORMAL, 0.2f);
         weapon->SetCircleArc(true);
 
     }
@@ -1179,7 +1190,7 @@ void AttackPlayer::SpawnCombo3()
         weapon->SetObject(GameObjectManager::Instance().Find("pico"));
         weapon->SetNodeParent(particle);
         weapon->SetIsForeverUse(true);
-        weapon->SetAttackDefaultStatus(3, 0);
+        weapon->SetAttackDefaultStatus(3, 0, 0, 0, 1, ATTACK_SPECIAL_TYPE::NORMAL, 0.2f);
 
     }
 

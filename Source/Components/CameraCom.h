@@ -63,8 +63,8 @@ public:
 
 private:
     //座標系
-    DirectX::XMFLOAT4X4 view_;
-    DirectX::XMFLOAT4X4 projection_;
+    DirectX::XMFLOAT4X4 view_ = {};
+    DirectX::XMFLOAT4X4 projection_ = {};
 
     DirectX::XMFLOAT3 focus_ = {0,0,0};
 
@@ -77,9 +77,9 @@ private:
 
     //演出系
     //カメラシェイク
-    float shakeSec_;    //秒数
-    float shakePower_;  //強さ
-    DirectX::XMFLOAT3 shakePos_;
+    float shakeSec_ = {};    //秒数
+    float shakePower_ = {};  //強さ
+    DirectX::XMFLOAT3 shakePos_ = {};
 
     //ヒットストップ
     float hitTimer_ = 0;

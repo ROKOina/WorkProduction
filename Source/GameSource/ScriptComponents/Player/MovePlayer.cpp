@@ -134,7 +134,7 @@ DirectX::XMFLOAT3 MovePlayer::GetMoveVec()
     //スティックの水平入力値をカメラ右方向に反映し、
     //スティックの垂直入力値をカメラ前方向に反映し、
     //進行ベクトルを計算する
-    DirectX::XMFLOAT3 vec;
+    DirectX::XMFLOAT3 vec = {};
     //XZ軸方向に移動
     vec.x = cameraFrontX * ay + cameraRightX * ax;
     vec.z = cameraFrontZ * ay + cameraRightZ * ax;
@@ -404,6 +404,10 @@ void MovePlayer::DashMove(float elapsedTime)
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::DASH);
 
             animator->SetTriggerOn("dash");
+
+            //ダッシュ時ブラー
+            if (!player_.lock()->IsBlurPlay())
+                player_.lock()->BlurStartPlayer(0.1f, 0.5f, "Head");
         }
         else
         {

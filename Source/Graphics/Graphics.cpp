@@ -6,6 +6,8 @@
 #include "Graphics/Shaders/3D/ShadowMapCasterShader.h"
 #include "Graphics/Graphics.h"
 
+#include "Components/CameraCom.h"
+
 Graphics* Graphics::instance_ = nullptr;
 
 // コンストラクタ
@@ -193,4 +195,34 @@ void Graphics::RestoreRenderTargets()
 {
 	immediateContext_->RSSetViewports(cachedViewportCount_, cachedViewports_);
 	immediateContext_->OMSetRenderTargets(1, cachedRenderTargetView_.GetAddressOf(), cachedDepthStencilView_.Get());
+}
+
+DirectX::XMFLOAT3 Graphics::WorldToScreenPos(DirectX::XMFLOAT3 worldPos, std::shared_ptr<CameraCom> camera)
+{
+	//ビューポート
+	D3D11_VIEWPORT viewport;
+	UINT numViewports = 1;
+	immediateContext_->RSGetViewports(&numViewports, &viewport);
+
+	//変換行列
+	DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&camera->GetView());
+	DirectX::XMMATRIX Projection = DirectX::XMLoadFloat4x4(&camera->GetProjection());
+	DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
+
+	DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&worldPos);
+
+	//ワールド座標からスクリーン座標に変換
+	Pos = DirectX::XMVector3Project(
+		Pos,
+		viewport.TopLeftX, viewport.TopLeftY,
+		viewport.Width, viewport.Height,
+		viewport.MinDepth, viewport.MaxDepth,
+		Projection, View, World
+	);
+
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMStoreFloat3(&pos, Pos);
+
+
+	return pos;
 }

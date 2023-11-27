@@ -124,38 +124,6 @@ void EnemyCom::OnGUI()
 
 void EnemyCom::Render2D(float elapsedTime)
 {
-    //Graphics& graphics = Graphics::Instance();
-    //ID3D11DeviceContext* dc = graphics.GetDeviceContext();
-
-    ////ビューポート
-    //D3D11_VIEWPORT viewport;
-    //UINT numViewports = 1;
-    //dc->RSGetViewports(&numViewports, &viewport);
-
-    ////変換行列
-    //DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.view);
-    //DirectX::XMMATRIX Projection = DirectX::XMLoadFloat4x4(&graphics.shaderParameter3D_.projection);
-    //DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
-
-    //DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
-    //pos.y += 2;
-    //DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&pos);
-
-    ////ワールド座標からスクリーン座標に変換
-    //Pos = DirectX::XMVector3Project(
-    //    Pos,
-    //    viewport.TopLeftX, viewport.TopLeftY,
-    //    viewport.Width, viewport.Height,
-    //    viewport.MinDepth, viewport.MaxDepth,
-    //    Projection, View, World
-    //);
-
-    //DirectX::XMStoreFloat3(&pos, Pos);
-    //DirectX::XMFLOAT2 size{100, 20};
- 
-    //hpSprite_->Render(dc, pos.x- size.x/2, pos.y - size.y / 2, size.x, size.y
-    //    , 0, 0, hpSprite_->GetTextureWidth(), hpSprite_->GetTextureHeight()
-    //    , 0, 1, 1, 1, 1);
 }
 
 void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCamera)
@@ -163,16 +131,7 @@ void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCa
     Graphics& graphics = Graphics::Instance();
     ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
-    //ビューポート
-    D3D11_VIEWPORT viewport;
-    UINT numViewports = 1;
-    dc->RSGetViewports(&numViewports, &viewport);
-
-    //変換行列
-    std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
-    DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&camera->GetView());
-    DirectX::XMMATRIX Projection = DirectX::XMLoadFloat4x4(&camera->GetProjection());
-    DirectX::XMMATRIX World = DirectX::XMMatrixIdentity();
+    std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
 
     DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
     DirectX::XMFLOAT3 playerPos = GameObjectManager::Instance().Find("pico")->transform_->GetWorldPosition();
@@ -180,8 +139,8 @@ void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCa
     //表示カリング
 
     //カメラの向き
-    DirectX::XMFLOAT3 cameraDir = GameObjectManager::Instance().Find("Camera")->transform_->GetWorldFront();
-    DirectX::XMFLOAT3 cameraPos = GameObjectManager::Instance().Find("Camera")->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 cameraDir = cameraObj->transform_->GetWorldFront();
+    DirectX::XMFLOAT3 cameraPos = cameraObj->transform_->GetWorldPosition();
     DirectX::XMVECTOR CameraToEnemy = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&pos), DirectX::XMLoadFloat3(&cameraPos)));
     float dot = DirectX::XMVector3Dot(DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&cameraDir)), CameraToEnemy).m128_f32[0];
     if (dot < 0.5f)return;
@@ -194,18 +153,10 @@ void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCa
     len = (len - 1.0f) * -1.0f;
 
     pos.y += 2;
-    DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&pos);
 
-    //ワールド座標からスクリーン座標に変換
-    Pos = DirectX::XMVector3Project(
-        Pos,
-        viewport.TopLeftX, viewport.TopLeftY,
-        viewport.Width, viewport.Height,
-        viewport.MinDepth, viewport.MaxDepth,
-        Projection, View, World
-    );
-
-    DirectX::XMStoreFloat3(&pos, Pos);
+    //ワールド座標からスクリーン座標に
+    std::shared_ptr<CameraCom> camera = cameraObj->GetComponent<CameraCom>();
+    pos=graphics.WorldToScreenPos(pos, camera);
 
     DirectX::XMFLOAT2 size{50 * len, 50 * len};
     pos.x = pos.x - size.x / 2;
@@ -326,7 +277,7 @@ void EnemyCom::StandUpUpdate()
     {
         std::shared_ptr<AnimationCom> animation = GetGameObject()->GetComponent<AnimationCom>();
         int index = animation->GetCurrentAnimationIndex();
-        if (index == FALL_STAND_UP) //起き上がりモーション時
+        if (index == getUpAnim_) //起き上がりモーション時
         {
             playStandUp_ = true;
         }
@@ -477,7 +428,7 @@ void EnemyCom::justColliderProcess()
     //ジャスト回避当たり判定を切り、アタック当たり判定をしている
     DirectX::XMFLOAT3 pos;
     //ジャスト
-    std::shared_ptr<GameObject> justChild = GetGameObject()->GetChildFind("picolaboAttackJust");
+    std::shared_ptr<GameObject> justChild = GetGameObject()->GetChildFind("attackJust");
 
     //ジャスト当たり判定を切っておく
     justChild->GetComponent<Collider>()->SetEnabled(false);

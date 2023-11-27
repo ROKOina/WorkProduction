@@ -93,7 +93,7 @@ float4 main(VertexOutput i) : SV_TARGET
     //リムライト（境界線にやわらかい色をつける）
     float3 _Is_LightColor_RimLight_var = _RimLightColor.rgb;
     float _RimArea_var = (1.0 - dot(i.normal, viewDirection));
-    float _RimLightPower_var = pow(_RimArea_var, exp2(lerp(3, 0, _RimLight_Power)));
+    float _RimLightPower_var = pow(abs(_RimArea_var), exp2(lerp(3.0, 0.0, _RimLight_Power)));
     float _RimLight_InsideMask = 0.0001;
     float _Rimlight_InsideMask_var = saturate((0.0 + ((_RimLightPower_var - _RimLight_InsideMask) * (1.0 - 0.0)) / (1.0 - _RimLight_InsideMask)));
     float _VertHalfLambert_var = 0.5 * dot(i.normal, lightDirection.xyz) + 0.5;

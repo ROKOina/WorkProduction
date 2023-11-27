@@ -388,7 +388,7 @@ void GameObjectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::X
 	SwordTrailRender();
 
 	//debug
-	if(1)
+	if(Graphics::Instance().IsDebugGUI())
 	{
 		//当たり判定用デバッグ描画
 		for (auto& col : colliderObject_)

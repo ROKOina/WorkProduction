@@ -69,6 +69,8 @@ public:
 	//近接敵の経路探査カウント取得
 	int GetCurrentNearPathCount();
 
+	//遠距離敵の攻撃カウント取得
+	int GetCurrentFarAttackCount();
 
 	//敵の数取得
 	int GetEnemyCount();
@@ -84,6 +86,8 @@ public:
 
 	//スロー処理しているか
 	bool GetIsSlow() { return isSlow_; }
+	//スロー時スピード
+	float GetSlowSpeed() { return slowNowSpeed_; }
 
 	//エネミーのアップデート止める
 	bool GetIsUpdateFlag() { return isUpdate_; }
@@ -118,7 +122,7 @@ struct NearEnemyLevel	//近接敵の集まり方のデザイン
 
 struct FarEnemyLevel	//遠隔敵の集まり方のデザイン
 {
-
+	int togetherAttackCount = 2;	//同時に攻撃できる回数
 };
 
 	const NearEnemyLevel& GetNearEnemyLevel()const { return nearEnemyLevel_; }
@@ -151,6 +155,7 @@ private:
 	float slowSeconds_;
 	float slowTimer_;
 	float slowSpeed_;
+	float slowNowSpeed_;	//スロー時のスピード
 
 	//エネミーのアップデートするか
 	bool isUpdate_ = true;

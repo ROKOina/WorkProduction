@@ -99,6 +99,9 @@ void JustAvoidPlayer::JustInisialize()
     std::shared_ptr<RendererCom> renderCom = player_.lock()->GetGameObject()->GetComponent<RendererCom>();
     renderCom->SetSilhouetteFlag(true);
 
+    std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
+    move->SetGravity(GRAVITY_NORMAL);
+
     for (int i = 0; i < 4; ++i)
     {
         std::string s = "picoJust" + std::to_string(i);
@@ -149,6 +152,7 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         //世界色変化演出
         justSpriteState_ = 0;
 
+        //入力によりアニメーションを変える
         bool inputFlag = false;
         if (DirectX::XMVectorGetX(DirectX::XMVector3Length(Input)) > 0.1f)
         {
@@ -177,9 +181,23 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
                 justAnim->PlayAnimation(ANIMATION_PLAYER::DODGE_BACK, false);
         }
 
+        //空中回避の場合は重力0に
+        onGroundAvoid_ = true;
+        if (player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::JUMP_DASH
+            || player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::JUMP_BACK_DASH)
+        {
+            move->SetGravity(GRAVITY_ZERO);
+            move->ZeroVelocityY();
+            onGroundAvoid_ = false;
+        }
+
         //敵の方を向く
         if (!justHitEnemy_.expired())
-            player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_.lock()->transform_->GetWorldPosition());
+        {
+            DirectX::XMFLOAT3 enemyPos = justHitEnemy_.lock()->transform_->GetWorldPosition();
+            enemyPos.y = player_.lock()->GetGameObject()->transform_->GetWorldPosition().y;
+            player_.lock()->GetGameObject()->transform_->LookAtTransform(enemyPos);
+        }
 
         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUST);
 
@@ -315,6 +333,7 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
             std::shared_ptr<AnimatorCom> animator = player_.lock()->GetGameObject()->GetComponent<AnimatorCom>();
             animator->SetAnimationSpeedOffset(1.0f);
 
+            //世界の色戻す
             justSpriteState_ = 20;
 
             justAvoidTimer_ = -1;
@@ -333,6 +352,8 @@ void JustAvoidPlayer::JustAvoidanceMove(float elapsedTime)
         if (justAvoidTimer_ < 0)
         {
             JustInisialize();
+
+            //世界の色戻す
             justSpriteState_ = 20;
             player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::RUN);
             player_.lock()->GetMovePlayer()->SetIsInputMove(true);
@@ -413,7 +434,9 @@ void JustAvoidPlayer::JustAvoidanceAttackInput()
         player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK);
 
         //敵の方を向く
-        player_.lock()->GetGameObject()->transform_->LookAtTransform(justHitEnemy_.lock()->transform_->GetWorldPosition());
+        DirectX::XMFLOAT3 enemyPos = justHitEnemy_.lock()->transform_->GetWorldPosition();
+        enemyPos.y = player_.lock()->GetGameObject()->transform_->GetWorldPosition().y;
+        player_.lock()->GetGameObject()->transform_->LookAtTransform(enemyPos);
 
         //敵をスローにする
         EnemyManager::Instance().SetEnemySpeed(0.1f, 5.0f);
@@ -442,6 +465,12 @@ void JustAvoidPlayer::JustAvoidanceSquare(float elapsedTime)
     {
         std::shared_ptr<MovementCom> move = player_.lock()->GetGameObject()->GetComponent<MovementCom>();
 
+        //空中の場合
+        if (!onGroundAvoid_)
+        {
+            move->SetGravity(GRAVITY_ZERO);
+        }
+
         DirectX::XMVECTOR Pos = DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldPosition());
         DirectX::XMVECTOR EnemyPos = Pos;
         if (!justHitEnemy_.expired())
@@ -449,7 +478,7 @@ void JustAvoidPlayer::JustAvoidanceSquare(float elapsedTime)
         DirectX::XMVECTOR PE = DirectX::XMVectorSubtract(EnemyPos, Pos);
         float length = DirectX::XMVectorGetX(DirectX::XMVector3Length(PE));
         //敵の近くまで移動する
-        if (length < 1.5f)
+        if (length < 1.5f || length > 5)
         {
             JustInisialize();
             player_.lock()->GetMovePlayer()->SetMoveParamType(MovePlayer::MOVE_PARAM::RUN);
@@ -459,7 +488,15 @@ void JustAvoidPlayer::JustAvoidanceSquare(float elapsedTime)
             player_.lock()->GetMovePlayer()->SetIsDash(true);
 
             //アタック処理に引き継ぐ
-            player_.lock()->GetAttackPlayer()->SetAnimFlagName("squareJust");
+            if (onGroundAvoid_)
+                player_.lock()->GetAttackPlayer()->SetAnimFlagName("squareJust");
+            else
+            {
+                player_.lock()->GetAttackPlayer()->SetAnimFlagName("squareJustSky");
+                player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::ATTACK_JUMP);
+                player_.lock()->GetMovePlayer()->SetJumpDashCount(player_.lock()->GetMovePlayer()->GetJumpDashCount() + 1);
+                player_.lock()->GetMovePlayer()->SetJumpCount(1);
+            }
         }
 
         DirectX::XMVECTOR Dir = DirectX::XMVector3Normalize(PE);
@@ -476,6 +513,11 @@ void JustAvoidPlayer::JustAvoidanceSquare(float elapsedTime)
 //△反撃
 void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
 {
+    //無敵時間
+    player_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()
+        ->SetInvincibleNonDamage(0.5f);
+
+
     //指定のカメラポスを返す
     auto GetCameraPos = [&]()
     {
@@ -626,7 +668,6 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         DirectX::XMFLOAT3 playerPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
 
         //カメラ
-        DirectX::XMFLOAT3 cameraPos = GetCameraFromPlayerPos();
         DirectX::XMStoreFloat3(&focusEnemy, DirectX::XMVectorLerp(DirectX::XMLoadFloat3(&focusEnemy), DirectX::XMLoadFloat3(&enemyPos), elapsedTime * 2));
         playerCameraCom->SetForcusPos(focusEnemy);
 
@@ -636,7 +677,7 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         DirectX::XMStoreFloat4(&rota, DirectX::XMQuaternionSlerp(DirectX::XMLoadFloat4(&rota), CA, elapsedTime * 5));
 
         player_.lock()->GetGameObject()->transform_->SetRotation(rota);
-        player_.lock()->GetGameObject()->transform_->SetWorldPosition(cameraPos);
+        player_.lock()->GetGameObject()->transform_->SetWorldPosition(GetCameraFromPlayerPos());
 
         //入力情報を取得
         GamePad& gamePad = Input::Instance().GetGamePad();
@@ -663,6 +704,9 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
 
             DirectX::XMVECTOR InputVec = DirectX::XMVector3Normalize({ ax ,0,ay });
             float len = FLT_MAX;
+            std::shared_ptr<GameObject> enemyNear;
+            std::shared_ptr<GameObject> enemyFar;
+
             for (auto& enemy : EnemyManager::Instance().GetNearEnemies())
             {
                 //仮で色変える
@@ -689,10 +733,73 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
                     if (len > dist)
                     {
                         len = dist;
-                        lockTriangleEnemy_ = enemy.enemy;
+                        enemyNear = enemy.enemy.lock();
                     }
                 }
             }
+
+            for (auto& enemy : EnemyManager::Instance().GetFarEnemies())
+            {
+                //仮で色変える
+                enemy.enemy.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,1,1,1 });
+
+                if (lockTriangleEnemy_.lock()->GetComponent<EnemyCom>()->GetID()
+                    == enemy.enemy.lock()->GetComponent<EnemyCom>()->GetID())
+                    continue;
+
+                //内積して角度見て近い敵をターゲットに
+                DirectX::XMFLOAT3 farEnemyPos = enemy.enemy.lock()->transform_->GetWorldPosition();
+                DirectX::XMVECTOR NextEnemyVec = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&farEnemyPos), lockEnemyPos);
+                DirectX::XMVECTOR NextEnemyVecNorm = DirectX::XMVector3Normalize(NextEnemyVec);
+
+                //入力ベクトルをエネミーの位置からに変換
+                DirectX::XMVECTOR InputEnemyVec = DirectX::XMVectorAdd(DirectX::XMVectorScale(PEForward, ay), DirectX::XMVectorScale(PERight, ax));
+                InputEnemyVec = DirectX::XMVector3Normalize(DirectX::XMVectorSetY(InputEnemyVec, 0));
+
+
+                //内積で角度見る
+                if (DirectX::XMVector3Dot(InputEnemyVec, NextEnemyVecNorm).m128_f32[0] > 0.5f)
+                {
+                    float dist = DirectX::XMVector3Length(NextEnemyVec).m128_f32[0];
+                    if (len > dist)
+                    {
+                        len = dist;
+                        enemyFar = enemy.enemy.lock();
+                    }
+                }
+            }
+
+            //nearとfarで判定
+            {
+                if (enemyNear || enemyFar)
+                {
+                    bool endJudge = false;
+                    //どちらかが入っていないとき
+                    if (!enemyNear)
+                    {
+                        lockTriangleEnemy_ = enemyFar;
+                        endJudge = true;
+                    }
+                    if (!enemyFar)
+                    {
+                        lockTriangleEnemy_ = enemyNear;
+                        endJudge = true;
+                    }
+
+                    if (!endJudge)
+                    {
+                        //近い方を入れる
+                        float nearLen = DirectX::XMVector3Length(DirectX::XMVectorSubtract(lockEnemyPos, DirectX::XMLoadFloat3(&enemyNear->transform_->GetWorldPosition()))).m128_f32[0];
+                        float farLen = DirectX::XMVector3Length(DirectX::XMVectorSubtract(lockEnemyPos, DirectX::XMLoadFloat3(&enemyFar->transform_->GetWorldPosition()))).m128_f32[0];
+
+                        if (nearLen < farLen)
+                            lockTriangleEnemy_ = enemyNear;
+                        else
+                            lockTriangleEnemy_ = enemyFar;
+                    }
+                }
+            }
+            
             lockEnemySeconds = 0;
         }
 
@@ -725,6 +832,9 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
             pushObj->transform_->SetWorldPosition(candyObj->transform_->GetWorldPosition());
             pushObj->GetComponent<PushWeaponCom>()->MoveStart(lockTriangleEnemy_.lock()->transform_->GetWorldPosition(), cameraPos);
 
+            //ブラー
+            player_.lock()->BlurStartPlayer(2.5f, 1, "", {}, lockTriangleEnemy_.lock());
+
             triangleState_++;
         }
     }
@@ -732,9 +842,8 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
     //武器の位置にプレイヤー行く、カメラ武器についていく
     case 4:
     {
-        DirectX::XMFLOAT3 pos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
-        pos.y = 5;
-        player_.lock()->GetGameObject()->transform_->SetWorldPosition(pos);
+        player_.lock()->GetGameObject()->transform_->SetWorldPosition(GetCameraFromPlayerPos());
+
         std::shared_ptr<GameObject> pushObj = GameObjectManager::Instance().Find("Push");
         //武器が敵に到達した時
         if (!pushObj->GetComponent<PushWeaponCom>()->IsMove())
@@ -895,6 +1004,38 @@ void JustAvoidPlayer::SetJustUnderParticle(bool flag)
 //ジャスト回避出来たか判定
 void JustAvoidPlayer::JustAvoidJudge()
 {
+    //一番近い敵を探すラムダ式
+    auto SearchMostNearEnemy = [&]()
+    {
+        std::shared_ptr<GameObject> obj;
+        float len = FLT_MAX;
+        DirectX::XMVECTOR PPos = DirectX::XMLoadFloat3(&player_.lock()->GetGameObject()->transform_->GetWorldPosition());
+
+        for (auto& nearEnemy : EnemyManager::Instance().GetNearEnemies())
+        {
+            DirectX::XMVECTOR EPos = DirectX::XMLoadFloat3(&nearEnemy.enemy.lock()->transform_->GetWorldPosition());
+            float dist = DirectX::XMVector3Length(DirectX::XMVectorSubtract(PPos, EPos)).m128_f32[0];
+            if (len > dist)
+            {
+                len = dist;
+                obj = nearEnemy.enemy.lock();
+            }
+        }
+
+        for (auto& farEnemy : EnemyManager::Instance().GetFarEnemies())
+        {
+            DirectX::XMVECTOR EPos = DirectX::XMLoadFloat3(&farEnemy.enemy.lock()->transform_->GetWorldPosition());
+            float dist = DirectX::XMVector3Length(DirectX::XMVectorSubtract(PPos, EPos)).m128_f32[0];
+            if (len > dist)
+            {
+                len = dist;
+                obj = farEnemy.enemy.lock();
+            }
+        }
+
+        return obj;
+    };
+
     //ジャスト回避の当たり判定
     std::vector<HitObj> hitGameObj = player_.lock()->GetGameObject()->GetComponent<Collider>()->OnHitGameObject();
     //ジャスト回避したエネミーを保存
@@ -902,6 +1043,14 @@ void JustAvoidPlayer::JustAvoidJudge()
     for (auto& hitObj : hitGameObj)
     {
         if (COLLIDER_TAG::JustAvoid != hitObj.gameObject.lock()->GetComponent<Collider>()->GetMyTag())continue;
+
+        //今のところ弾だけEnemyComがないので弾用
+        if (!hitObj.gameObject.lock()->GetParent()->GetComponent<EnemyCom>())
+        {
+            if (!enemy.lock())
+                enemy = SearchMostNearEnemy();
+            continue;
+        }
 
         //最初だけそのまま入れる
         if (!enemy.lock()) {
@@ -947,6 +1096,9 @@ void JustAvoidPlayer::StartJustAvoid()
         , player_.lock()->GetGameObject()->transform_->GetWorldPosition());
     particleSpark->SetName("particleSpark1");
     particleSpark->GetComponent<ParticleSystemCom>()->SetIsWorldSpeed(false);
+
+    //ブラー
+    player_.lock()->BlurStartPlayer(2.5f, 1, "Head");
 }
 
 void JustAvoidPlayer::JustAvoidDirectionEnd(float elapsedTime)

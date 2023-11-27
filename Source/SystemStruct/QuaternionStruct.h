@@ -7,8 +7,8 @@ struct QuaternionStruct
 	QuaternionStruct() :dxFloat4({ 0,0,0,1 }) {}
     QuaternionStruct(DirectX::XMFLOAT4 q) :
         QuaternionStruct(q.x, q.y, q.z, q.w) {}
-    QuaternionStruct(float x, float y, float z, float w) :
-        x(x), y(y), z(z), w(w) {}
+	QuaternionStruct(float x, float y, float z, float w) :
+		x(x), y(y), z(z), w(w), dxFloat4({ x,y,z,w }) {}
 
 	//directX‚É‚à‘Î‰ž‰Â”\‚É‚·‚é
 	union {
@@ -19,7 +19,7 @@ struct QuaternionStruct
 			float z;
 			float w;
 		};
-		DirectX::XMFLOAT4 dxFloat4;
+		DirectX::XMFLOAT4 dxFloat4 = {};
 	};
 
 
