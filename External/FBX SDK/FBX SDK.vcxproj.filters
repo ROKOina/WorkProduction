@@ -1,0 +1,718 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ヘッダー ファイル">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="2019.0\include\fbxsdk\core\arch\fbxalloc.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\arch\fbxarch.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\arch\fbxdebug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\arch\fbxnew.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\arch\fbxstdcompliant.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\arch\fbxtypes.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxarray.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxbitset.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxcharptrset.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxcontainerallocators.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxdynamicarray.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxfile.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxfolder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxhashmap.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxintrusivelist.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxmap.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxmemorypool.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxmultimap.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxpair.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxredblacktree.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxset.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxstatus.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxstring.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxstringlist.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxtime.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxtimecode.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\base\fbxutils.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\math\fbxaffinematrix.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\math\fbxdualquaternion.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\math\fbxmath.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\math\fbxmatrix.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\math\fbxquaternion.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\math\fbxtransforms.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\math\fbxvector2.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\math\fbxvector4.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\sync\fbxatomic.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\sync\fbxclock.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\sync\fbxsync.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\sync\fbxthread.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxclassid.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxconnectionpoint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxdatatypes.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxemitter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxevent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxeventhandler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxlistener.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxloadingstrategy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxmanager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxmodule.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxobject.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxperipheral.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxplugin.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxplugincontainer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxproperty.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxpropertydef.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxpropertyhandle.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxpropertypage.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxpropertytypes.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxquery.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxqueryevent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxscopedloadingdirectory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxscopedloadingfilename.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxstream.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxsymbol.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxsystemunit.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\core\fbxxref.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\collada\fbxcolladaanimationelement.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\collada\fbxcolladaelement.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\collada\fbxcolladaiostream.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\collada\fbxcolladanamespace.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\collada\fbxcolladatokens.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\collada\fbxcolladautils.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\collada\fbxreadercollada14.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\collada\fbxwritercollada14.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbx\fbxio.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbx\fbxreaderfbx5.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbx\fbxreaderfbx6.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbx\fbxreaderfbx7.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbx\fbxwriterfbx5.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbx\fbxwriterfbx6.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbx\fbxwriterfbx7.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxbase64coder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxexporter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxexternaldocreflistener.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxfiletokens.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxglobalcamerasettings.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxgloballightsettings.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxglobalsettings.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxgobo.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbximporter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxiobase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxiopluginregistry.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxiosettings.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxiosettingspath.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxprogress.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxreader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxstatistics.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxstatisticsfbx.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fileio\fbxwriter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimcurve.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimcurvebase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimcurvefilters.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimcurvenode.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimevalclassic.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimevalstate.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimevaluator.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimlayer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimstack.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\animation\fbxanimutilities.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxcharacter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxcharacternodename.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxcharacterpose.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraintaim.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraintcustom.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraintparent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraintposition.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraintrotation.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraintscale.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraintsinglechainik.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxconstraintutils.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxcontrolset.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\constraint\fbxhik2fbxcharacter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxblendshape.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxblendshapechannel.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxcache.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxcachedeffect.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxcamera.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxcamerastereo.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxcameraswitcher.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxcluster.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxdeformer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxgenericnode.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxgeometry.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxgeometrybase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxgeometryweightedmap.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxlayer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxlayercontainer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxlight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxlimitsutilities.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxline.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxlodgroup.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxmarker.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxmesh.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxnode.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxnodeattribute.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxnull.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxnurbs.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxnurbscurve.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxnurbssurface.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxopticalreference.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxpatch.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxproceduralgeometry.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxshape.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxskeleton.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxskin.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxsubdeformer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxsubdiv.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxtrimnurbssurface.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxvertexcachedeformer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\geometry\fbxweightedmapping.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxbindingoperator.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxbindingsentryview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxbindingtable.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxbindingtablebase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxbindingtableentry.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxconstantentryview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxentryview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxfiletexture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbximplementation.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbximplementationfilter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbximplementationutils.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxlayeredtexture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxlayerentryview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxoperatorentryview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxproceduraltexture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxpropertyentryview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxsemanticentryview.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxshadingconventions.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxsurfacelambert.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxsurfacematerial.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxsurfacephong.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\shading\fbxtexture.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxaudio.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxaudiolayer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxaxissystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxcollection.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxcollectionexclusive.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxcontainer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxcontainertemplate.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxdisplaylayer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxdocument.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxdocumentinfo.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxenvironment.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxgroupname.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxlibrary.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxmediaclip.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxobjectfilter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxobjectmetadata.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxobjectscontainer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxpose.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxreference.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxscene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxselectionnode.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxselectionset.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxtakeinfo.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxthumbnail.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\scene\fbxvideo.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxclonemanager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxdeformationsevaluator.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxembeddedfilesaccumulator.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxgeometryconverter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxmanipulators.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxmaterialconverter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxnamehandler.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxprocessor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxprocessorshaderdependency.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxprocessorxref.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxprocessorxrefuserlib.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxrenamingstrategy.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxrenamingstrategybase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxrenamingstrategyfbx5.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxrenamingstrategyfbx6.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxrenamingstrategyfbx7.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxrenamingstrategyutilities.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxrootnodeutility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxscenecheckutility.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\utils\fbxusernotification.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fbxsdk_def.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fbxsdk_nsbegin.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fbxsdk_nsend.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk\fbxsdk_version.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="2019.0\include\fbxsdk.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

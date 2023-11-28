@@ -63,6 +63,16 @@ void AttackPlayer::Update(float elapsedTime)
 
     //攻撃中の動き
     AttackMoveUpdate(elapsedTime);
+
+    //UI
+    {
+
+        //ロックオンする敵を探す
+        lockOnUIEnemy_.reset();
+        lockOnUIEnemy_ = AssistGetNearEnemy();
+        if (!lockOnUIEnemy_.lock())
+            lockOnUIEnemy_ = AssistGetMediumEnemy();
+    }
 }
 
 void AttackPlayer::OnGui()
@@ -74,6 +84,33 @@ void AttackPlayer::OnGui()
     ImGui::Checkbox("isSquareAttack", &isSquareAttack_);
     ImGui::Checkbox("isJumpSquareInput_", &isJumpSquareInput_);
     ImGui::DragFloat("jumpAttackComboWaitTimer_", &jumpAttackComboWaitTimer_);
+}
+
+void AttackPlayer::Render2D(float elapsedTime)
+{
+    ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
+
+    //ロックオンがノーマルの時
+    if (player_.lock()->GetLockOn() == PlayerCom::LOCK_TARGET::NORMAL_LOCK)
+    {
+        //ロックオン画像出す
+        Sprite* lockOnSprite = player_.lock()->GetLockOnSprite();
+
+
+        if (!lockOnUIEnemy_.expired())
+        {
+            DirectX::XMFLOAT3 enemyPos = lockOnUIEnemy_.lock()->transform_->GetWorldPosition();
+            enemyPos.y += 1;
+            std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+            enemyPos = Graphics::Instance().WorldToScreenPos(enemyPos, camera);
+
+            float size = 150;
+            lockOnSprite->Render(dc, enemyPos.x - size / 2.0f, enemyPos.y - size / 2.0f
+                , size, size
+                , 0, 0, static_cast<float>(lockOnSprite->GetTextureWidth()), static_cast<float>(lockOnSprite->GetTextureHeight())
+                , 0, 1, 1, 1, 1);
+        }
+    }
 }
 
 //コンボ継続確認処理
@@ -354,9 +391,9 @@ void AttackPlayer::TriangleInput()
         attackLeadInputKey_ = ATTACK_KEY::NULL_KEY;
 
         //切り上げ攻撃
-        if(player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::IDLE
-            || player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::MOVE
-            || player_.lock()->GetPlayerStatus() == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
+        if(playerStatus == PlayerCom::PLAYER_STATUS::IDLE
+            || playerStatus == PlayerCom::PLAYER_STATUS::MOVE
+            || playerStatus == PlayerCom::PLAYER_STATUS::ATTACK_DASH)
         {
             animator->ResetParameterList();
             animator->SetTriggerOn("triangleJump");
@@ -378,7 +415,7 @@ void AttackPlayer::TriangleInput()
     }
     else if (comboSquareCount_ <= 3&& comboTriangleCount_<3)
     {
-        if (DoComboAttack() && player_.lock()->GetPlayerStatus() != PlayerCom::PLAYER_STATUS::ATTACK_DASH)
+        if (DoComboAttack() && playerStatus != PlayerCom::PLAYER_STATUS::ATTACK_DASH)
         {
             animator->ResetParameterList();
             animator->SetTriggerOn("triangle");
@@ -876,6 +913,10 @@ std::shared_ptr<GameObject> AttackPlayer::AssistGetMediumEnemy()
     std::shared_ptr<GameObject> playerObj = player_.lock()->GetGameObject();
     std::shared_ptr<GameObject> enemyNearObj;   //一番近い敵を入れる
 
+    std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
+    DirectX::XMVECTOR CameraPos = DirectX::XMLoadFloat3(&cameraObj->transform_->GetWorldPosition());
+    DirectX::XMVECTOR CameraForward = DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&cameraObj->GetComponent<CameraCom>()->GetFront()));
+
     //アシスト判定取得
     std::shared_ptr<Collider> assistColl = playerObj->GetChildFind("attackAssistMedium")->GetComponent<Collider>();
     std::vector<HitObj> hitGameObj = assistColl->OnHitGameObject();
@@ -883,6 +924,13 @@ std::shared_ptr<GameObject> AttackPlayer::AssistGetMediumEnemy()
     {
         if (COLLIDER_TAG::Enemy == hitObj.gameObject.lock()->GetComponent<Collider>()->GetMyTag())
         {
+            //カメラ角度で判定
+            DirectX::XMVECTOR CameraEnemy = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&hitObj.gameObject.lock()->transform_->GetWorldPosition()), CameraPos);
+
+            float dot=DirectX::XMVector3Dot(CameraForward, DirectX::XMVector3Normalize(CameraEnemy)).m128_f32[0];
+
+            if (dot < 0.8f)continue;
+
             //最初はそのまま入れる
             if (!enemyNearObj)enemyNearObj = hitObj.gameObject.lock();
             //一番近い敵を見つける

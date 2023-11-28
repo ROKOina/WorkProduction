@@ -39,6 +39,7 @@ PostEffect::PostEffect(UINT width, UINT height)
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::bloomLuminance), bloomExBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::sunAtmosphere), sunBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::radialBlur), radialBuffer_.GetAddressOf());
+    dx11State->createConstantBuffer(device, sizeof(ShaderParameter3D::vignette), vignetteBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(CbScene), sceneBuffer_.GetAddressOf());
     dx11State->createConstantBuffer(device, sizeof(SkymapData), skymapBuffer_.GetAddressOf());
 
@@ -543,6 +544,13 @@ void PostEffect::Render(std::shared_ptr<CameraCom> camera)
             );
         }
 
+        //ビネットバッファ更新
+        {
+            dc->UpdateSubresource(vignetteBuffer_.Get(), 0, NULL, &graphics.shaderParameter3D_.vignette, 0, 0);
+            dc->PSSetConstantBuffers(0, 1, vignetteBuffer_.GetAddressOf());
+        }
+
+
         postEffect_->Draw(drawTexture_.get());
     }
 #pragma endregion
@@ -662,6 +670,24 @@ void PostEffect::ImGuiRender()
 
             ImGui::DragFloat2("blurPos", &graphics.shaderParameter3D_.radialBlur.blurPos.x, 0.1f);
             ImGui::DragFloat("power", &graphics.shaderParameter3D_.radialBlur.power, 0.1f);
+
+            ImGui::TreePop();
+        }
+
+        //ビネット
+        if (ImGui::TreeNode("Vignette"))
+        {
+            bool enabled = false;
+            if (graphics.shaderParameter3D_.vignette.enabled > 0.1f)enabled = true;
+            if (ImGui::Checkbox("enabled", &enabled))
+            {
+                if (enabled)
+                    graphics.shaderParameter3D_.vignette.enabled = 1;
+                else
+                    graphics.shaderParameter3D_.vignette.enabled = -1;
+            }
+
+            ImGui::SliderFloat("power", &graphics.shaderParameter3D_.vignette.power, 0, 1);
 
             ImGui::TreePop();
         }

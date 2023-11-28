@@ -77,6 +77,9 @@ private:
     std::unique_ptr<ShaderPost> radial_;
     Microsoft::WRL::ComPtr<ID3D11Buffer> radialBuffer_;
 
+    //ビネット
+    Microsoft::WRL::ComPtr<ID3D11Buffer> vignetteBuffer_;
+
     struct CbScene
     {
         DirectX::XMFLOAT4		viewPosition;

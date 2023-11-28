@@ -79,7 +79,7 @@ void SceneGame::Initialize()
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("kabePlus");
-		obj->transform_->SetWorldPosition({ 28.5f, 0, 23.0f });
+		obj->transform_->SetWorldPosition({ 28.5f, 0, 22.4f });
 
 		std::shared_ptr<BoxColliderCom> c = obj->AddComponent<BoxColliderCom>();
 	}

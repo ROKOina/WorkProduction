@@ -99,8 +99,8 @@ public:
     //相手を指定して判定
     void ColliderVSOther(std::shared_ptr<Collider> otherSide);
 
-    void SetOffsetPosition(DirectX::XMFLOAT3& offsetPos) { offsetPos_ = offsetPos; }
-    DirectX::XMFLOAT3 const GetOffsetPosition() { return offsetPos_; }
+    void SetOffsetPosition(DirectX::XMFLOAT3& offsetPos) { offsetButtonPos_ = offsetPos; }
+    DirectX::XMFLOAT3 const GetOffsetPosition() { return offsetButtonPos_; }
 
 private:
     //当たり判定をする(当たっていたらtrue)
@@ -130,7 +130,7 @@ protected:
     //形を保存
     int colliderType_;
     //オフセット位置
-    DirectX::XMFLOAT3 offsetPos_ = { 0,0,0 };
+    DirectX::XMFLOAT3 offsetButtonPos_ = { 0,0,0 };
 
 
 };

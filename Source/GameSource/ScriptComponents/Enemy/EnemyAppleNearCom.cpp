@@ -66,8 +66,8 @@ void EnemyAppleNearCom::Start()
 
     //ステータス設定
     std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
-    status->SetMaxHP(100);
-    status->SetHP(100);
+    status->SetMaxHP(50);
+    status->SetHP(50);
 
     //発光を消す
     std::vector<ModelResource::Material>& materials = GetGameObject()->GetComponent<RendererCom>()->GetModel()->GetResourceShared()->GetMaterialsEdit();

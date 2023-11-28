@@ -19,6 +19,8 @@ public:
 
     void OnGui();
 
+    void Render2D(float elapsedTime);
+
 private:
     //ジャスト回避初期化
     void JustInisialize();
@@ -57,6 +59,16 @@ public:
     //ジャスト回避演出描画
     void justDirectionRender2D();
 
+    //ジャスト回避反撃
+    enum class JUST_AVOID_KEY   //入力を判定
+    {
+        SQUARE,     //□
+        TRIANGLE,   //△
+
+        NULL_KEY,
+    };
+    JUST_AVOID_KEY GetJustAvoidKey() { return justAvoidKey_; }
+
 private:
     //ジャスト回避判定
     bool isJustJudge_ = false;  //ジャスト回避判定
@@ -69,14 +81,6 @@ private:
     bool hitStopEnd_ = false;  //ヒットストップ演出判定
     bool playerDirection_ = false;  //プレイヤー演出
 
-    //ジャスト回避反撃
-    enum class JUST_AVOID_KEY   //入力を判定
-    {
-        SQUARE,     //□
-        TRIANGLE,   //△
-
-        NULL_KEY,
-    };
     JUST_AVOID_KEY justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
     JUST_AVOID_KEY justAvoidLeadKey_ = JUST_AVOID_KEY::NULL_KEY;    //先行入力用
     int triangleState_ = 0;

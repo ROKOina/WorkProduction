@@ -190,6 +190,14 @@ struct RadialBlur
 	float enabled = -1;
 };
 
+//ビネット
+struct Vignette
+{
+	float power = 0;	//0~1
+	float enabled = -1;
+	DirectX::XMFLOAT2 dummyV;
+};
+
 //ユニティちゃんトゥーン
 struct UnityChanToonStruct
 {
@@ -258,5 +266,8 @@ struct ShaderParameter3D
 
 	//放射線ブラー
 	RadialBlur radialBlur;
+
+	//ビネット
+	Vignette vignette;
 };
 

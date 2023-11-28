@@ -168,6 +168,10 @@ void SceneTitle::Initialize()
     transitionOutTimer_ = 1.5f;
     transitionInTimer_ = -1.0f;
 
+    //初期ビネット設定
+    Vignette& vignette = Graphics::Instance().shaderParameter3D_.vignette;
+    vignette.enabled = -1;
+
     std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
     if (particle->GetEnabled()) //パーティクル起動していたら
     {

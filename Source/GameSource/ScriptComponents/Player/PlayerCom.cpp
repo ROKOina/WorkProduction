@@ -14,6 +14,7 @@
 #include "../CharacterStatusCom.h"
 
 #include "Graphics\Shaders\PostEffect.h"
+#include  "GameSource/Math/easing.h"
 
 // 開始処理
 void PlayerCom::Start()
@@ -68,6 +69,22 @@ void PlayerCom::Start()
     status->SetMaxHP(8);
     status->SetHP(8);
 
+    //ダメージビネット
+    vignetteDamageTimer_ = -1;
+    vignetteDamageTime_ = 0;
+    vignetteDamagePower_ = 0;
+    //瀕死時
+    vignetteHPPower_[0].power = 0.25f;
+    vignetteHPPower_[0].speed = 4;
+    vignetteHPPower_[0].powerOffset = 0.3f;
+    vignetteHPPower_[1].power = 0.18f;
+    vignetteHPPower_[1].speed = 3;
+    vignetteHPPower_[1].powerOffset = 0.3f;
+    vignetteHPPower_[2].power = 0.0f;
+    vignetteHPPower_[2].speed = 2;
+    vignetteHPPower_[2].powerOffset = 0.3f;
+    vignetteLowHP_ = 0;
+
     //UI初期化
     startUI_ = false;
     hpSprite_[0] = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/faceDonuts/faceDonutsOne.png");
@@ -88,6 +105,19 @@ void PlayerCom::Start()
     hpDonutsPos_[6] = { 153.9f,42.9f };
     hpDonutsPos_[7] = { 112.2f,7.3f };
 
+    buttonPos_ = { 1270.0f,769.0f };
+    offsetButtonPos_[0] = { -45.0f,0.0f };
+    offsetButtonPos_[1] = { 0.0f,-45.0f };
+    offsetButtonPos_[2] = { 0.0f,45.0f };
+    offsetButtonPos_[3] = { 45.0f,0.0f };
+    offsetButtonPos_[4] = { 48.0f,-116.0f };
+
+    //文字配置
+    spriteRightPost_[0] = false;
+    spriteRightPost_[1] = false;
+    spriteRightPost_[2] = true;
+    spriteRightPost_[3] = true;
+    spriteRightPost_[4] = false;
 }
 
 // 更新処理
@@ -121,6 +151,9 @@ void PlayerCom::Update(float elapsedTime)
         std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
         attackPlayer_->AttackFlagEnd();
         movePlayer_->DashEndFlag(true);
+
+        //ビネットスタート
+        VignetteStart(0.7f, 1.0f);
     }
 
     //カプセル当たり判定設定
@@ -200,6 +233,50 @@ void PlayerCom::Update(float elapsedTime)
 
     }
 
+    //ビネット
+    {
+        //ダメージ時
+        if (vignetteDamageTimer_ > 0)
+        {
+            Vignette& vignette = Graphics::Instance().shaderParameter3D_.vignette;
+            vignetteDamageTimer_ -= elapsedTime;
+
+            float ratio = vignetteDamageTimer_ / vignetteDamageTime_;
+            float powerRatio = Expo::easeOut(ratio, 0, 1, 1);
+            vignette.power = vignetteDamagePower_ * powerRatio;
+
+            if (vignetteDamageTimer_ <= 0)
+            {
+                vignette.enabled = -1;
+            }
+
+            if (status->GetHP() <= 3)
+            {
+                float timePower = sin(vignetteLowHP_) * 0.5f + 0.5f;
+                timePower = vignetteHPPower_[status->GetHP() - 1].power + vignetteHPPower_[status->GetHP() - 1].powerOffset * timePower;
+
+                if (timePower > vignette.power)
+                {
+                    vignetteDamageTimer_ = -1;
+                }
+            }
+        }
+        //瀕死時   
+        else if(status->GetHP() <= 3 && status->GetHP() != 0) 
+        {
+            Vignette& vignette = Graphics::Instance().shaderParameter3D_.vignette;
+
+            //波でビネット
+            vignetteLowHP_ += vignetteHPPower_[status->GetHP() - 1].speed * elapsedTime;  //速さ
+
+            float timePower = sin(vignetteLowHP_) * 0.5f + 0.5f;
+            timePower = vignetteHPPower_[status->GetHP() - 1].power + vignetteHPPower_[status->GetHP() - 1].powerOffset * timePower;
+
+            vignette.enabled = 1;
+            vignette.power = timePower;
+        }
+    }
+
     //UI更新
     {
         if (isHpDirection_)
@@ -246,23 +323,102 @@ void PlayerCom::OnGUI()
         movePlayer_->OnGui();
         ImGui::TreePop();
     }
+
+    ////ボタン配置用
+    //ImGui::DragFloat2("buttonPos_", &buttonPos_.x);
+    //for (int i = 0; i < 5; ++i)
+    //{
+    //    std::string s = "offsetPos_" + std::to_string(i);
+    //    ImGui::DragFloat2(s.c_str(), &offsetButtonPos_[i].x);
+    //}
 }
 
 void PlayerCom::Render2D(float elapsedTime)
 {
+    attackPlayer_->Render2D(elapsedTime);
+    justAvoidPlayer_->Render2D(elapsedTime);
+
     ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
-    ////hp
-    //{
-    //    faceFrameUI_->Render(dc, 10, 10, faceFrameUI_->GetTextureWidth() * 1.8f, faceFrameUI_->GetTextureHeight() * 0.2f
-    //        , 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
-    //        , 0, 0.0f, 0.5f, 0.9f, 1);
-    //    std::shared_ptr<CharacterStatusCom> stats = GetGameObject()->GetComponent<CharacterStatusCom>();
-    //    float hpRatio = float(stats->GetHP()) / float(stats->GetMaxHP());
-    //    faceFrameUI_->Render(dc, 22.5f, 22.5f, faceFrameUI_->GetTextureWidth() * 1.7f * hpRatio
-    //        , faceFrameUI_->GetTextureHeight() * 0.1f
-    //        , 0, 0, faceFrameUI_->GetTextureWidth(), faceFrameUI_->GetTextureHeight()
-    //        , 0, 1, 0.9f, 0, 1);
-    //}
+
+    //ボタン
+    {
+        //特殊攻撃の切り替え
+        std::shared_ptr<MovementCom> move = GetGameObject()->GetComponent<MovementCom>();
+        Sprite* Y = YSprite_.get();
+        Sprite* YString = attackJumpStringSprite_.get();
+        if (attackPlayer_->GetComboSquareCount() > 0
+            && playerStatus_ != PLAYER_STATUS::ATTACK_DASH
+            && playerStatus_ != PLAYER_STATUS::ATTACK_JUMP_FALL
+            && move->OnGround())
+        {
+            Y = YTuyoSprite_.get();
+            YString = attackRangeStringSprite_.get();
+        }
+
+        //ジャスト攻撃の切り替え
+        Sprite* X = XSprite_.get();
+        Sprite* XString = attackStringSprite_.get();
+
+        //ジャスト回避成功時
+        if (justAvoidPlayer_->GetIsJustJudge())
+        {
+            YString = sniperStringSprite_.get();
+            XString = slowStringSprite_.get();
+        }
+
+        Sprite* s[5] =
+        {
+            X,
+            Y,
+            ASprite_.get(),
+            BSprite_.get(),
+            RTSprite_.get()
+        };
+        Sprite* sString[5] =
+        {
+            XString,
+            YString,
+            jumpStringSprite_.get(),
+            nullptr,
+            dashStringSprite_.get()
+        };
+        //スナイパージャスト回避中は表示を制限
+        if (justAvoidPlayer_->GetJustAvoidKey() == JustAvoidPlayer::JUST_AVOID_KEY::TRIANGLE)
+        {
+            for (int i = 0; i < 5; ++i)
+            {
+                //Y以外はnullに
+                if (i == 1)continue;
+                sString[i] = nullptr;
+            }
+        }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            float size = 50 + buttonSize_[i];
+            s[i]->Render(dc, buttonPos_.x + offsetButtonPos_[i].x - size / 2.0f, buttonPos_.y + offsetButtonPos_[i].y - size / 2.0f
+                , size, size
+                , 0, 0, static_cast<float>(s[i]->GetTextureWidth()), static_cast<float>(s[i]->GetTextureHeight())
+                , 0, 1, 1, 1, 1);
+
+            //文字
+            if (sString[i])
+            {
+                float stringRatio = 0.1f;   //比率で大きさを決める
+                float xSize = static_cast<float>(sString[i]->GetTextureWidth()) * stringRatio;
+                float ySize = static_cast<float>(sString[i]->GetTextureHeight()) * stringRatio;
+
+                float x = buttonPos_.x + offsetButtonPos_[i].x - xSize / 2.0f;
+                if (spriteRightPost_[i])x += xSize / 2 + 50;
+                else x -= xSize / 2 + 50;
+
+                sString[i]->Render(dc, x, buttonPos_.y + offsetButtonPos_[i].y - ySize / 2.0f
+                    , xSize, ySize
+                    , 0, 0, static_cast<float>(sString[i]->GetTextureWidth()), static_cast<float>(sString[i]->GetTextureHeight())
+                    , 0, 1, 1, 1, 1);
+            }
+        }
+    }
 }
 
 
@@ -640,4 +796,13 @@ void PlayerCom::BlurStartPlayer(float power, float time, std::string boneName, D
     blurPower_ = power;
     blurTime_ = time;
     blurTimer_ = 0;
+}
+
+void PlayerCom::VignetteStart(float power, float time)
+{
+    Vignette& vignette = Graphics::Instance().shaderParameter3D_.vignette;
+    vignette.enabled = 1;
+    vignetteDamageTime_ = time;
+    vignetteDamageTimer_ = time;
+    vignetteDamagePower_ = power;
 }

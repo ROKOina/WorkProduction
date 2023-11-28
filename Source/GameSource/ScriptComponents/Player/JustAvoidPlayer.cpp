@@ -85,6 +85,35 @@ void JustAvoidPlayer::OnGui()
     ImGui::DragFloat4("edgeColor", &dissolveData.edgeColor.x, 0.01f, 0, 1);
 }
 
+void JustAvoidPlayer::Render2D(float elapsedTime)
+{
+    ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
+
+    //ロックオンがノーマルの時
+    if (player_.lock()->GetLockOn() == PlayerCom::LOCK_TARGET::JUST_LOCK)
+    {
+        //ロックオン画像出す
+        Sprite* lockOnSprite = player_.lock()->GetLockOnSprite();
+
+        //ロックオンする敵を探す
+        std::shared_ptr<GameObject> enemy = lockTriangleEnemy_.lock();
+
+        if (enemy)
+        {
+            DirectX::XMFLOAT3 enemyPos = enemy->transform_->GetWorldPosition();
+            enemyPos.y += 1;
+            std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
+            enemyPos = Graphics::Instance().WorldToScreenPos(enemyPos, camera);
+
+            float size = 150;
+            lockOnSprite->Render(dc, enemyPos.x - size / 2.0f, enemyPos.y - size / 2.0f
+                , size, size
+                , 0, 0, static_cast<float>(lockOnSprite->GetTextureWidth()), static_cast<float>(lockOnSprite->GetTextureHeight())
+                , 0, 1, 1, 1, 1);
+        }
+    }
+}
+
 
 //ジャスト回避初期化
 void JustAvoidPlayer::JustInisialize()
@@ -517,7 +546,6 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
     player_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()
         ->SetInvincibleNonDamage(0.5f);
 
-
     //指定のカメラポスを返す
     auto GetCameraPos = [&]()
     {
@@ -578,6 +606,9 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
 
         lockTriangleEnemy_ = justHitEnemy_;
         pushSeconds = 0.0f;
+
+        //ロックオンターゲット変える
+        player_.lock()->SetLockOn(PlayerCom::LOCK_TARGET::JUST_LOCK);
 
         triangleState_++;
     }
@@ -684,9 +715,6 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         float ax = gamePad.GetAxisRX();
         float ay = gamePad.GetAxisRY();
 
-        //仮で色変える
-        lockTriangleEnemy_.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,15,1,1 });
-
         //入力されている場合
         //ロックオン変更
         lockEnemySeconds += elapsedTime;
@@ -709,9 +737,6 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
 
             for (auto& enemy : EnemyManager::Instance().GetNearEnemies())
             {
-                //仮で色変える
-                enemy.enemy.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,1,1,1 });
-
                 if (lockTriangleEnemy_.lock()->GetComponent<EnemyCom>()->GetID()
                     == enemy.enemy.lock()->GetComponent<EnemyCom>()->GetID())
                     continue;
@@ -740,9 +765,6 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
 
             for (auto& enemy : EnemyManager::Instance().GetFarEnemies())
             {
-                //仮で色変える
-                enemy.enemy.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,1,1,1 });
-
                 if (lockTriangleEnemy_.lock()->GetComponent<EnemyCom>()->GetID()
                     == enemy.enemy.lock()->GetComponent<EnemyCom>()->GetID())
                     continue;
@@ -808,8 +830,6 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         {
             Graphics::Instance().SetWorldSpeed(1);
             EnemyManager::Instance().SetIsUpdateFlag(true);
-            //仮で色戻す
-            lockTriangleEnemy_.lock()->GetComponent<RendererCom>()->GetModel()->SetMaterialColor({ 1,1,1,1 });
 
             triangleState_++;
         }
@@ -895,6 +915,9 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
             std::shared_ptr<GameObject> candyObj = GameObjectManager::Instance().Find("CandyPush");
             std::shared_ptr<WeaponCom> weapon = candyObj->GetComponent<WeaponCom>();
             weapon->SetIsForeverUse(false);
+
+            //ロックオンターゲット変える
+            player_.lock()->SetLockOn(PlayerCom::LOCK_TARGET::NORMAL_LOCK);
 
             justAvoidKey_ = JUST_AVOID_KEY::NULL_KEY;
         }

@@ -145,6 +145,19 @@ public:
         return false;
     }
 
+    //ビネットスタート（ダメージ時）
+    void VignetteStart(float power, float time);
+
+    //ロックオン画像ゲット
+    Sprite* GetLockOnSprite() { return lockSprite_.get(); }
+    enum LOCK_TARGET    //ロックオン変更用
+    {
+        NORMAL_LOCK,
+        JUST_LOCK,
+    };
+    void SetLockOn(LOCK_TARGET target) { lockOnTarget_ = target; }
+    LOCK_TARGET GetLockOn() { return lockOnTarget_; }
+
 private:
     PLAYER_STATUS playerStatus_ = PLAYER_STATUS::IDLE;
     PLAYER_STATUS playerStatusOld_ = PLAYER_STATUS::IDLE;
@@ -161,6 +174,19 @@ private:
     std::string blurBoneName_;
     std::weak_ptr<GameObject> blurPosObj_;
 
+    //ダメージビネット
+    float vignetteDamageTime_;
+    float vignetteDamageTimer_;
+    float vignetteDamagePower_;
+    //瀕死時ビネット
+    struct VignetteLowHP
+    {
+        float power;
+        float speed;
+        float powerOffset;
+    } vignetteHPPower_[3];
+    float vignetteLowHP_;
+
     //UI
     //ワイプ背景
     bool startUI_ = false;
@@ -176,5 +202,26 @@ private:
     std::unique_ptr<Sprite> saraSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/saraUI.png");
 
     //ロックオン
+    LOCK_TARGET lockOnTarget_ = LOCK_TARGET::NORMAL_LOCK;
     std::unique_ptr<Sprite> lockSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/lookOn.png");
+
+    //ボタン
+    std::unique_ptr<Sprite> XSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/XButton.png");
+    std::unique_ptr<Sprite> YSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/YButton.png");
+    std::unique_ptr<Sprite> YTuyoSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/YTuyoButton.png");
+    std::unique_ptr<Sprite> ASprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/AButton.png");
+    std::unique_ptr<Sprite> BSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/BButton.png");
+    std::unique_ptr<Sprite> RTSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/RTButton.png");
+    DirectX::XMFLOAT2 buttonPos_ = {};
+    DirectX::XMFLOAT2 offsetButtonPos_[5] = {};
+    float buttonSize_[5] = {};  //演出用サイズ
+    //文字
+    std::unique_ptr<Sprite> attackStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/attackString.png");
+    std::unique_ptr<Sprite> attackJumpStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/attackJumpString.png");
+    std::unique_ptr<Sprite> attackRangeStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/attackRangeString.png");
+    std::unique_ptr<Sprite> jumpStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/jumpString.png");
+    std::unique_ptr<Sprite> dashStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/dashString.png");
+    std::unique_ptr<Sprite> sniperStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/sniperAttackString.png");
+    std::unique_ptr<Sprite> slowStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/slowAttackString.png");
+    bool spriteRightPost_[5];    //ボタンの右側に置くか
 };

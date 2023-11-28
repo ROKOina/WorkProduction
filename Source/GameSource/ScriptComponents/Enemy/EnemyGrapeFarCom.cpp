@@ -17,6 +17,7 @@
 
 
 #pragma region 敵本体
+
 enum GRAPE_ANIMATION
 {
     AIR_DAMAGE,
@@ -64,10 +65,6 @@ void EnemyGrapeFarCom::Start()
     aiTree_->AddNode(AI_TREE::ATTACK, AI_TREE::NORMAL, 2, BehaviorTree::SelectRule::Non, std::make_shared<AttackJudgment>(myShared), std::make_shared<AttackAction>(myShared));
 
     SetRandomTargetPosition();
-
-    ////攻撃判定ステータス
-    //std::shared_ptr<WeaponCom> weapon = GetGameObject()->GetChildFind("attack")->GetComponent<WeaponCom>();
-    //weapon->SetAttackStatus(ATTACK_RUSH, 1, 30, 1.0f, 0.0f);
 
     //ステータス設定
     {
@@ -224,7 +221,7 @@ void EnemyGrapeFarCom::SpawnGrapeBall()
         weapon->SetObject(grapeBall);
         weapon->SetNodeParent(grapeBall);
         weapon->SetIsForeverUse(true);
-        weapon->SetAttackDefaultStatus(1, 0);
+        weapon->SetAttackDefaultStatus(1, 30,1,0);
     }
 
     //ジャスト回避用

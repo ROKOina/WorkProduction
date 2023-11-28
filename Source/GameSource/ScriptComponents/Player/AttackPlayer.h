@@ -26,6 +26,8 @@ public:
 
     void OnGui();
 
+    void Render2D(float elapsedTime);
+
 private:
 
     //コンボ継続確認処理
@@ -205,6 +207,9 @@ private:
 
     //攻撃の動きを管理
     int state_ = -1;
+
+    //ロックオンUI用
+    std::weak_ptr<GameObject> lockOnUIEnemy_;
 
 private:
     std::weak_ptr<PlayerCom> player_;
