@@ -12,7 +12,7 @@ public:
 	~AudioSource();
 
 	// çƒê∂
-	void Play(bool loop);
+	void Play(bool loop, float volume = 1.0f);
 
 	// í‚é~
 	void Stop();

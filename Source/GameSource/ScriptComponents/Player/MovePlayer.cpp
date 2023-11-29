@@ -204,6 +204,10 @@ bool MovePlayer::IsMove(float elapsedTime)
                 player_.lock()->GetGameObject()->GetComponent<PlayerCameraCom>()->SetChangeRange(0.2f, FarRange);
 
                 player_.lock()->SetPlayerStatus(PlayerCom::PLAYER_STATUS::JUMP);
+
+                //SE
+                jumpSE_->Stop();
+                jumpSE_->Play(false);
             }
         }
     }
@@ -421,6 +425,9 @@ void MovePlayer::DashMove(float elapsedTime)
             animator->SetTriggerOn("dashBack");
         }
 
+        //SE
+        dashSE_->Stop();
+        dashSE_->Play(false, 0.5f);
     }
 
     //ダッシュ時の更新

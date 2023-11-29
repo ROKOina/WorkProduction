@@ -36,6 +36,10 @@ JustAvoidPlayer::JustAvoidPlayer(std::shared_ptr<PlayerCom> player)
     dissolveData.edgeColor = { 1,0,1,1 };
 }
 
+JustAvoidPlayer::~JustAvoidPlayer()
+{
+}
+
 void JustAvoidPlayer::Update(float elapsedTime)
 {
     //ジャスト回避判定時
@@ -470,6 +474,10 @@ void JustAvoidPlayer::JustAvoidanceAttackInput()
         //敵をスローにする
         EnemyManager::Instance().SetEnemySpeed(0.1f, 5.0f);
 
+        //SE
+        squareSlowInOutSE_->Play(false,3.0f);
+        squareSlowSE_->Play(true, 3.0f);
+
         //世界色演出
         justSpriteState_ = 10;
         //パーティクル演出起動
@@ -609,6 +617,8 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
 
         //ロックオンターゲット変える
         player_.lock()->SetLockOn(PlayerCom::LOCK_TARGET::JUST_LOCK);
+
+        dashSE_->Play(false);
 
         triangleState_++;
     }
@@ -823,6 +833,10 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
             }
             
             lockEnemySeconds = 0;
+
+            //SE
+            triangleCursorSE_->Stop();
+            triangleCursorSE_->Play(false);
         }
 
         //△で次のステート
@@ -830,6 +844,9 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
         {
             Graphics::Instance().SetWorldSpeed(1);
             EnemyManager::Instance().SetIsUpdateFlag(true);
+
+            //SE
+            triangleJustAttackSE_->Play(false,2.0f);
 
             triangleState_++;
         }
@@ -873,7 +890,6 @@ void JustAvoidPlayer::JustAvoidanceTriangle(float elapsedTime)
             //指定エネミー取得
             std::shared_ptr<GameObject> lockEnemy = lockTriangleEnemy_.lock();
             DirectX::XMFLOAT3 enemyPos = lockEnemy->transform_->GetWorldPosition();
-            //DirectX::XMFLOAT3 enemyPos = justHitEnemy_.lock()->transform_->GetWorldPosition();
             DirectX::XMFLOAT3 playerPos = player_.lock()->GetGameObject()->transform_->GetWorldPosition();
 
             //エネミーからプレイヤーの正規化ベクトル
@@ -973,6 +989,10 @@ void JustAvoidPlayer::JustDirectionUpdate(float elapsedTime)
             //パーティクル演出終了
             SetJustUnderParticle(false);
             justSpriteState_ = 20;
+
+            //SE
+            squareSlowInOutSE_->Play(false, 3.0f);
+            squareSlowSE_->Stop();
         }
     }
     break;
@@ -1122,6 +1142,10 @@ void JustAvoidPlayer::StartJustAvoid()
 
     //ブラー
     player_.lock()->BlurStartPlayer(2.5f, 1, "Head");
+
+    //SE
+    justSE_->Stop();
+    justSE_->Play(false);
 }
 
 void JustAvoidPlayer::JustAvoidDirectionEnd(float elapsedTime)

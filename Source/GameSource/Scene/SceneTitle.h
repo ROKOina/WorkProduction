@@ -4,12 +4,16 @@
 #include "Graphics\Shaders\PostEffect.h"
 #include "Scene.h"
 
+#include "Audio\AudioSource.h"
+#include "Audio\Audio.h"
+
 //タイトルシーン
 class SceneTitle :public Scene
 {
 public:
     SceneTitle(){}
-    ~SceneTitle()override{}
+    ~SceneTitle()override
+    { }
 
     //初期化
     void Initialize()override;
@@ -70,4 +74,9 @@ private:
 
     //描画最初初期の姿移るので、遅らせる
     bool frameDelayRender_ = false;
+
+    //BGM
+    std::unique_ptr<AudioSource> BGM_ = Audio::Instance().LoadAudioSource("Data/Audio/titleBGM2.wav");
+    //SE
+    std::unique_ptr<AudioSource> pushSE_ = Audio::Instance().LoadAudioSource("Data/Audio/push.wav");
 };

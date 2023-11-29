@@ -5,6 +5,9 @@
 #include <vector>
 #include <DirectXMath.h>
 
+#include "Audio\AudioSource.h"
+#include "Audio\Audio.h"
+
 //前方宣言
 class PlayerCom;
 class GameObject;
@@ -13,14 +16,8 @@ class GameObject;
 class AttackPlayer
 {
 public:
-    AttackPlayer(std::shared_ptr<PlayerCom> player) : player_(player) 
-    {
-        squareAttackMove_.resize(squareAttackKindCount_);
-        squareAttackMove_[0].directionTime = 2;
-        squareAttackMove_[1].directionTime = 2;
-        squareAttackMove_[2].directionTime = 2;
-    }
-    ~AttackPlayer(){}
+    AttackPlayer(std::shared_ptr<PlayerCom> player);
+    ~AttackPlayer();
 
     void Update(float elapsedTime);
 
@@ -210,6 +207,14 @@ private:
 
     //ロックオンUI用
     std::weak_ptr<GameObject> lockOnUIEnemy_;
+
+    //SE
+    std::unique_ptr<AudioSource> triangleChargeSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/attackCharge2.wav");
+    std::unique_ptr<AudioSource> triangle12SE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/triangle12.wav");
+    std::unique_ptr<AudioSource> triangle3BombSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/triangle3Bomb.wav");
+    std::unique_ptr<AudioSource> triangle3SE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/triangle3_1.wav");
+    std::unique_ptr<AudioSource> dashSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/dash.wav");
+    std::unique_ptr<AudioSource> haSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/haVoice.wav");
 
 private:
     std::weak_ptr<PlayerCom> player_;

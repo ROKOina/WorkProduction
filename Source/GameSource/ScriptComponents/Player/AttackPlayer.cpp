@@ -19,6 +19,19 @@
 #include "Input/Input.h"
 #include <imgui.h>
 
+AttackPlayer::AttackPlayer(std::shared_ptr<PlayerCom> player) 
+    : player_(player)
+{
+    squareAttackMove_.resize(squareAttackKindCount_);
+    squareAttackMove_[0].directionTime = 2;
+    squareAttackMove_[1].directionTime = 2;
+    squareAttackMove_[2].directionTime = 2;
+}
+
+AttackPlayer::~AttackPlayer()
+{
+}
+
 void AttackPlayer::Update(float elapsedTime)
 {
     //コンボ継続確認処理
@@ -31,7 +44,6 @@ void AttackPlayer::Update(float elapsedTime)
         if (DoComboAttack())
             isLeadInput = true;
     }
-
 
     //入力を見て処理をする
     if (IsAttackInput(elapsedTime) || isLeadInput)
@@ -55,7 +67,6 @@ void AttackPlayer::Update(float elapsedTime)
         case AttackPlayer::ATTACK_KEY::NULL_KEY:
             break;
         }
-
     }
 
     //コンボ処理
@@ -66,7 +77,6 @@ void AttackPlayer::Update(float elapsedTime)
 
     //UI
     {
-
         //ロックオンする敵を探す
         lockOnUIEnemy_.reset();
         lockOnUIEnemy_ = AssistGetNearEnemy();
@@ -276,7 +286,6 @@ void AttackPlayer::SquareInput()
                 comboTriangleCount_ = 0;
             }
         }
-
         comboSquareCount_++;
 
         //ダッシュ終了フラグ
@@ -426,6 +435,10 @@ void AttackPlayer::TriangleInput()
             //パーティクル
             GameObjectManager::Instance().Find("playerHandParticle")
                 ->GetComponent<ParticleSystemCom>()->Restart();
+
+            //SE
+            triangleChargeSE_->Stop();
+            triangleChargeSE_->Play(false);
 
             comboTriangleCount_++;
         }
@@ -608,11 +621,19 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
             //強攻撃１
             if (animCom->GetCurrentAnimationEvent("AutoCollisionTriangleAttack01", DirectX::XMFLOAT3()))
             {
+                //SE
+                triangle12SE_->Stop();
+                triangle12SE_->Play(false);
+                //生成
                 SpawnCombo1();
             }
             //強攻撃２
             if (animCom->GetCurrentAnimationEvent("AutoCollisionTriangleAttack02", DirectX::XMFLOAT3()))
             {
+                //SE
+                triangle12SE_->Stop();
+                triangle12SE_->Play(false);
+                //生成
                 SpawnCombo2();
             }
             //強攻撃３
@@ -624,7 +645,21 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
                 //ブラー
                 player_.lock()->BlurStartPlayer(2.5f, 1);
 
+                //SE
+                triangle3BombSE_->Stop();
+                triangle3BombSE_->Play(false);
+                triangle3SE_->Stop();
+                triangle3SE_->Play(false);
+
+                //生成
                 SpawnCombo3();
+            }
+
+            if (isSquareDirection_)
+            {
+                //チャージSE切る
+                //triangleChargeSE_->Stop();
+                haSE_->Play(false);
             }
         }
     }
@@ -742,6 +777,10 @@ int AttackPlayer::NormalAttackUpdate(float elapsedTime)
 
         //ブラー
         player_.lock()->BlurStartPlayer(2.5f, 1, "Head");
+
+        //SE
+        dashSE_->Stop();
+        dashSE_->Play(false, 0.5f);
 
         state_++;
     }

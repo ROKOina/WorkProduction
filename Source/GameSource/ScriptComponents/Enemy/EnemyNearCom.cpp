@@ -90,6 +90,10 @@ void EnemyNearCom::Start()
 
     //起き上がりモーション保存
     getUpAnim_ = static_cast<int>(FALL_STAND_UP);
+
+    //アニメーションイベントSE初期化
+    animSE.emplace_back("SEDanger", "Data/Audio/Enemy/attackDanger.wav");
+    animSE.emplace_back("SEAttack", "Data/Audio/Enemy/appleAttack.wav");
 }
 
 // 更新処理

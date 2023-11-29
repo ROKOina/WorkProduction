@@ -3,6 +3,9 @@
 #include <memory>
 #include <DirectXMath.h>
 
+#include "Audio\AudioSource.h"
+#include "Audio\Audio.h"
+
 //ëOï˚êÈåæ
 class PlayerCom;
 class GameObject;
@@ -13,7 +16,7 @@ class JustAvoidPlayer
 {
 public:
     JustAvoidPlayer(std::shared_ptr<PlayerCom> player);
-    ~JustAvoidPlayer() {}
+    ~JustAvoidPlayer();
 
     void Update(float elapsedTime);
 
@@ -90,6 +93,14 @@ private:
     bool isJustSprite_ = false;
     int justSpriteState_ = -1;
     std::unique_ptr<Sprite> justSprite_;
+
+    //SE
+    std::unique_ptr<AudioSource> justSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/just.wav");
+    std::unique_ptr<AudioSource> dashSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/dash.wav");
+    std::unique_ptr<AudioSource> triangleJustAttackSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/triangleJustAttack.wav");
+    std::unique_ptr<AudioSource> triangleCursorSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/triangleCursor.wav");
+    std::unique_ptr<AudioSource> squareSlowSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/squareSlow.wav");
+    std::unique_ptr<AudioSource> squareSlowInOutSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/squareSlowInOut.wav");
 
 private:
     std::weak_ptr<PlayerCom> player_;

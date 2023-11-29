@@ -81,6 +81,9 @@ void EnemyCom::Update(float elapsedTime)
     //アニメーション設定
     AnimationSetting();
 
+    //アニメーションイベントでSE
+    PlayAnimationSE();
+
     //壁判定
     {
         DirectX::XMFLOAT3 kabePlus = GameObjectManager::Instance().Find("kabePlus")->transform_->GetWorldPosition();
@@ -200,9 +203,22 @@ void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCa
 // ターゲット位置をランダム設定
 void EnemyCom::SetRandomTargetPosition()
 {
+    DirectX::XMFLOAT3 kabePlus = GameObjectManager::Instance().Find("kabePlus")->transform_->GetWorldPosition();
+    DirectX::XMFLOAT3 kabeMinas = GameObjectManager::Instance().Find("kabeMinas")->transform_->GetWorldPosition();
+
     DirectX::XMFLOAT3 pos = GetGameObject()->transform_->GetWorldPosition();
     pos.x += Mathf::RandomRange(-3, 3);
     pos.z += Mathf::RandomRange(-3, 3);
+
+    if (pos.x > kabePlus.x)
+        pos.x = kabePlus.x;
+    if (pos.x < kabeMinas.x)
+        pos.x = kabeMinas.x;
+    if (pos.z > kabePlus.z)
+        pos.z = kabePlus.z;
+    if (pos.z < kabeMinas.z)
+        pos.z = kabeMinas.z;
+
     targetPosition_ = pos;
 }
 
@@ -289,6 +305,31 @@ void EnemyCom::StandUpUpdate()
                 isStandUpMotion_ = false;
                 GetGameObject()->GetComponent<CharacterStatusCom>()->SetAttackNonMove(false);
             }
+        }
+    }
+}
+
+void EnemyCom::PlayAnimationSE()
+{
+    std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
+
+    for (auto& se : animSE)
+    {
+        if (se.isPlay && se.saveAnimIndex > 0)
+        {
+            if (anim->GetCurrentAnimationIndex() != se.saveAnimIndex)
+            {
+                se.saveAnimIndex = -1;
+                se.isPlay = false;
+            }
+            continue;
+        }
+        if (anim->GetCurrentAnimationEvent(se.animEventName.c_str(), DirectX::XMFLOAT3()))
+        {
+            se.isPlay = true;
+            se.saveAnimIndex = anim->GetCurrentAnimationIndex();
+            se.SE->Stop();
+            se.SE->Play(false, se.volumeSE);
         }
     }
 }
@@ -413,11 +454,14 @@ void EnemyCom::DamageProcess(float elapsedTime)
             }
         }
 
-        //エフェクト
+        //エフェクト&SE
         if (damageEffTimer_ < 0)
         {
             GetGameObject()->GetChildFind("Particle")->GetComponent<ParticleSystemCom>()->Restart();
             damageEffTimer_ = 0.5f;
+
+            damageSE_->Stop();
+            damageSE_->Play(false);
         }
     }
 }

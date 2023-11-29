@@ -159,6 +159,10 @@ public:
     LOCK_TARGET GetLockOn() { return lockOnTarget_; }
 
 private:
+    //アニメーションイベントでSE再生
+    void PlayAnimationSE();
+
+private:
     PLAYER_STATUS playerStatus_ = PLAYER_STATUS::IDLE;
     PLAYER_STATUS playerStatusOld_ = PLAYER_STATUS::IDLE;
 
@@ -224,4 +228,25 @@ private:
     std::unique_ptr<Sprite> sniperStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/sniperAttackString.png");
     std::unique_ptr<Sprite> slowStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/slowAttackString.png");
     bool spriteRightPost_[5];    //ボタンの右側に置くか
+
+    //SE
+    struct AnimSetSE
+    {
+        AnimSetSE(std::string eventName, const char* filename,float volume=1.0f)
+        {
+            animEventName = eventName;
+            SE = Audio::Instance().LoadAudioSource(filename);
+            isPlay = false;
+            saveAnimIndex = -1;
+            volumeSE = volume;
+        }
+        bool isPlay;            //アニメーション中一回鳴らすため
+        int saveAnimIndex;      //アニメーション中一回鳴らすため
+        std::string animEventName;
+        float volumeSE;
+        std::unique_ptr<AudioSource> SE;
+    };
+    std::vector<AnimSetSE> animSE;
+
+    std::unique_ptr<AudioSource> aSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/aVoice.wav");
 };

@@ -272,7 +272,7 @@ void SceneGame::Initialize()
 	}
 
 	//enemyAppleNear
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("appleNear");
@@ -355,7 +355,7 @@ void SceneGame::Initialize()
 	}
 
 	//EnemyGrapeFar
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
 		obj->SetName("grapeFar");
@@ -854,6 +854,10 @@ void SceneGame::Initialize()
 
 	gameStartFlag_ = false;
 	gameEndFlag_ = false;
+
+	//BGM
+	BGM_->Stop();
+	BGM_->Play(true);
 }
 
 // èIóπâª

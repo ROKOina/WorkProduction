@@ -3,6 +3,9 @@
 #include <memory>
 #include <DirectXMath.h>
 
+#include "Audio\AudioSource.h"
+#include "Audio\Audio.h"
+
 //前方宣言
 class PlayerCom;
 class GameObject;
@@ -121,6 +124,10 @@ private:
     float dashStopTimer_;
     float dashCoolTime_ = 0.6f;       //ダッシュのクールタイム
     float dashCoolTimer_;
+
+    //SE
+    std::unique_ptr<AudioSource> jumpSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/jump.wav");
+    std::unique_ptr<AudioSource> dashSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/dash.wav");
 
 private:
     std::weak_ptr<PlayerCom> player_;

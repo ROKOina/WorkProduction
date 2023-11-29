@@ -118,6 +118,12 @@ void PlayerCom::Start()
     spriteRightPost_[2] = true;
     spriteRightPost_[3] = true;
     spriteRightPost_[4] = false;
+
+
+    //アニメーションイベントSE初期化
+    animSE.emplace_back("SEAttack", "Data/Audio/Player/attackNormal.wav");
+    animSE.emplace_back("SEAttack", "Data/Audio/Player/yaVoice.wav");
+
 }
 
 // 更新処理
@@ -154,6 +160,9 @@ void PlayerCom::Update(float elapsedTime)
 
         //ビネットスタート
         VignetteStart(0.7f, 1.0f);
+
+        //ダメージボイス
+        aSE_->Play(false);
     }
 
     //カプセル当たり判定設定
@@ -289,6 +298,8 @@ void PlayerCom::Update(float elapsedTime)
         }
     }
 
+    //アニメーションイベントでSE
+    PlayAnimationSE();
 }
 
 // GUI描画
@@ -805,4 +816,29 @@ void PlayerCom::VignetteStart(float power, float time)
     vignetteDamageTime_ = time;
     vignetteDamageTimer_ = time;
     vignetteDamagePower_ = power;
+}
+
+void PlayerCom::PlayAnimationSE()
+{
+    std::shared_ptr<AnimationCom> anim = GetGameObject()->GetComponent<AnimationCom>();
+
+    for (auto& se : animSE)
+    {
+        if (se.isPlay && se.saveAnimIndex > 0)
+        {
+            if (anim->GetCurrentAnimationIndex() != se.saveAnimIndex)
+            {
+                se.saveAnimIndex = -1;
+                se.isPlay = false;
+            }
+            continue;
+        }
+        if (anim->GetCurrentAnimationEvent(se.animEventName.c_str(), DirectX::XMFLOAT3()))
+        {
+            se.isPlay = true;
+            se.saveAnimIndex = anim->GetCurrentAnimationIndex();
+            se.SE->Stop();
+            se.SE->Play(false, se.volumeSE);
+        }
+    }
 }

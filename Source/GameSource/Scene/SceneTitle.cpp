@@ -179,6 +179,10 @@ void SceneTitle::Initialize()
         particle->GetSaveParticleData().particleData.isRoop = false;
         SceneManager::Instance().SetParticleUpdate(true);
     }
+
+    //BGM
+    BGM_->Stop();
+    BGM_->Play(true);
 }
 
 //I—¹‰»
@@ -190,6 +194,9 @@ void SceneTitle::Finalize()
         delete sprite_;
         sprite_ = nullptr;
     }       
+
+    //BGM_->Stop();
+    //pushSE_->Stop();
 }
 
 //XVˆ—
@@ -221,7 +228,10 @@ void SceneTitle::Update(float elapsedTime)
     {
         std::shared_ptr<ParticleSystemCom> particle = SceneManager::Instance().GetParticleObj()->GetComponent<ParticleSystemCom>();
         if (!particle->GetEnabled())
+        {
             startFlag_ = true;
+            pushSE_->Play(false);
+        }
     }
 
     if (isSceneEndFlag_)

@@ -84,6 +84,9 @@ void EnemyGrapeFarCom::Start()
 
     //起き上がりモーション保存
     getUpAnim_ = static_cast<int>(GET_UP);
+
+    ////アニメーションイベントSE初期化
+    //animSE.emplace_back("SEDamage", "Data/Audio/Enemy/damageEnemy.wav");
 }
 
 // 更新処理

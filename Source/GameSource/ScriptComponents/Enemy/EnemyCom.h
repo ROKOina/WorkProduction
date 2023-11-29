@@ -8,6 +8,9 @@
 #include "BehaviorTree/BehaviorData.h"
 #include "BehaviorTree/NodeBase.h"
 
+#include "Audio\AudioSource.h"
+#include "Audio\Audio.h"
+
 #include "TelegramEnemy.h"
 
 class PostEffect;
@@ -131,6 +134,9 @@ private:    //これだけ何故か派生クラスで使えないので、派生クラスでも作成する
     template<typename... Args>
     void OnDamageAnimAI_TREE(Args... args);
 
+    //アニメーションイベントでSE再生
+    void PlayAnimationSE();
+
 protected:
     //アニメーション初期化設定
     virtual void AnimationInitialize() {}
@@ -192,6 +198,29 @@ protected:
     std::unique_ptr<Sprite>     hpMaskSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Enemy/enemyHpMask.png");
     DirectX::XMFLOAT2 sP{0,0};
     DirectX::XMFLOAT3 saP{0,0,0};
+
+    //SE
+    struct AnimSetSE
+    {
+        AnimSetSE(std::string eventName, const char* filename, float volume = 1.0f)
+        {
+            animEventName = eventName;
+            SE = Audio::Instance().LoadAudioSource(filename);
+            isPlay = false;
+            saveAnimIndex = -1;
+            volumeSE = volume;
+        }
+        bool isPlay;            //アニメーション中一回鳴らすため
+        int saveAnimIndex;      //アニメーション中一回鳴らすため
+        std::string animEventName;
+        float volumeSE;
+        std::unique_ptr<AudioSource> SE;
+    };
+    std::vector<AnimSetSE> animSE;
+
+    std::unique_ptr<AudioSource> damageSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Enemy/damageEnemy.wav");
+
+
     //識別番号
     int enemyId_ = -1;
 };

@@ -28,7 +28,6 @@ public:
 
 
 private:
-	std::unique_ptr<AudioSource> bgm_=Audio::Instance().LoadAudioSource("Data/Audio/BGM.wav");
 
 	float transitionOutTimer_;
 
@@ -41,4 +40,7 @@ private:
 	//ŠJŽn‰æ‘œ
 	std::unique_ptr<Sprite> startSprite_;
 	float startSpriteSize_;
+
+	//BGM
+	std::unique_ptr<AudioSource> BGM_ = Audio::Instance().LoadAudioSource("Data/Audio/gameBGM2.wav");
 };
