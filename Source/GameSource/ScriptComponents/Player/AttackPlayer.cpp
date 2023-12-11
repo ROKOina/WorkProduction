@@ -123,6 +123,16 @@ void AttackPlayer::Render2D(float elapsedTime)
     }
 }
 
+void AttackPlayer::AudioRelease()
+{
+    triangleChargeSE_->AudioRelease();
+    triangle12SE_->AudioRelease();
+    triangle3BombSE_->AudioRelease();
+    triangle3SE_->AudioRelease();
+    dashSE_->AudioRelease();
+    haSE_->AudioRelease();
+}
+
 //コンボ継続確認処理
 void AttackPlayer::ComboJudge()
 {
@@ -422,7 +432,7 @@ void AttackPlayer::TriangleInput()
 
         return;
     }
-    else if (comboSquareCount_ <= 3&& comboTriangleCount_<3)
+    else if (comboSquareCount_ <= 3 && comboTriangleCount_ < 3)
     {
         if (DoComboAttack() && playerStatus != PlayerCom::PLAYER_STATUS::ATTACK_DASH)
         {

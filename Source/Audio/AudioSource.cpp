@@ -15,11 +15,11 @@ AudioSource::AudioSource(IXAudio2* xaudio, std::shared_ptr<AudioResource>& resou
 // デストラクタ
 AudioSource::~AudioSource()
 {
-	if (sourceVoice_ != nullptr)
-	{
-		sourceVoice_->DestroyVoice();
-		sourceVoice_ = nullptr;
-	}
+	//if (sourceVoice_ != nullptr)
+	//{
+	//	sourceVoice_->DestroyVoice();
+	//	sourceVoice_ = nullptr;
+	//}
 }
 
 // 再生
@@ -46,4 +46,13 @@ void AudioSource::Stop()
 {
 	sourceVoice_->FlushSourceBuffers();
 	sourceVoice_->Stop();
+}
+
+void AudioSource::AudioRelease()
+{
+	if (sourceVoice_ != nullptr)
+	{
+		sourceVoice_->DestroyVoice();
+		sourceVoice_ = nullptr;
+	}
 }

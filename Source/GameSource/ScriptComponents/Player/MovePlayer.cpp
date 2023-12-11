@@ -94,6 +94,12 @@ void MovePlayer::OnGui()
     ImGui::Checkbox("isInputTurn", &isInputTurn_);
 }
 
+void MovePlayer::AudioRelease()
+{
+    jumpSE_->AudioRelease();
+    dashSE_->AudioRelease();
+}
+
 //スティック入力値から移動ベクトルを取得
 DirectX::XMFLOAT3 MovePlayer::GetMoveVec()
 {

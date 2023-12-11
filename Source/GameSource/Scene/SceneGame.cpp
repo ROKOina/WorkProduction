@@ -716,26 +716,10 @@ void SceneGame::Initialize()
 			r->SetShaderID(SHADER_ID::UnityChanToon);
 			r->SetEnabled(false);
 
-			//std::shared_ptr<CapsuleColliderCom> attackCol = sword->AddComponent<CapsuleColliderCom>();
-			//attackCol->SetMyTag(COLLIDER_TAG::PlayerAttack);
-			//attackCol->SetJudgeTag(COLLIDER_TAG::Enemy);
-			//attackCol->SetRadius(0.19f);
-			//attackCol->SetEnabled(false);
-
 			std::shared_ptr<WeaponCom> weapon = sword->AddComponent<WeaponCom>();
 			weapon->SetObject(GameObjectManager::Instance().Find("pico"));
 			weapon->SetNodeParent(moveObj);
 			weapon->SetNodeName("");
-
-			//std::shared_ptr<SwordTrailCom>  trail= sword->AddComponent<SwordTrailCom>();
-			//trail->SetHeadTailNodeName("candy", "head");	//トレイル表示ノード指定
-
-			//{
-			//	//パーティクルを子に
-			//	std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::SWORD_SWEETS, { 0,0,0 }, sword);
-			//	particle->GetComponent<ParticleSystemCom>()->SetRoop(false);
-			//}
-
 		}
 	}
 
@@ -863,7 +847,7 @@ void SceneGame::Initialize()
 // 終了化
 void SceneGame::Finalize()
 {
-
+	BGM_->AudioRelease();
 }
 
 // 更新処理

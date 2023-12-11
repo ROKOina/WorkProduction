@@ -195,6 +195,8 @@ void SceneTitle::Finalize()
         sprite_ = nullptr;
     }       
 
+    BGM_->AudioRelease();
+    pushSE_->AudioRelease();
     //BGM_->Stop();
     //pushSE_->Stop();
 }

@@ -25,6 +25,8 @@ public:
 
     void Render2D(float elapsedTime);
 
+    //音解放
+    void AudioRelease();
 private:
 
     //コンボ継続確認処理

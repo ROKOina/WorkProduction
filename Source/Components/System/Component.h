@@ -24,6 +24,9 @@ public:
 	//sprite描画用
 	virtual void Render2D(float elapsedTime){}
 
+	//音解放
+	virtual void AudioRelease() {}
+
 	// ゲームオブジェクト設定
 	void SetGameObject(std::shared_ptr<GameObject> obj) { this->gameObject_ = obj; }
 

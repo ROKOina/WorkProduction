@@ -67,6 +67,9 @@ public:
     // sprite•`‰æ
     virtual void Render2D(float elapsedTime);
 
+    //‰¹‰ð•ú
+    virtual void AudioRelease()override;
+
     //EnemyComƒNƒ‰ƒX
 public:
     //mask

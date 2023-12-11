@@ -118,6 +118,16 @@ void JustAvoidPlayer::Render2D(float elapsedTime)
     }
 }
 
+void JustAvoidPlayer::AudioRelease()
+{
+    justSE_->AudioRelease();
+    dashSE_->AudioRelease();
+    triangleJustAttackSE_->AudioRelease();
+    triangleCursorSE_->AudioRelease();
+    squareSlowSE_->AudioRelease();
+    squareSlowInOutSE_->AudioRelease();
+}
+
 
 //ƒWƒƒƒXƒg‰ñ”ğ‰Šú‰»
 void JustAvoidPlayer::JustInisialize()

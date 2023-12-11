@@ -129,6 +129,14 @@ void GameObject::EraseExpiredChild()
 	}
 }
 
+void GameObject::AudioRelease()
+{
+	for (auto& com : components_)
+	{
+		com->AudioRelease();
+	}
+}
+
 #pragma endregion	endGameObject
 
 
@@ -783,6 +791,7 @@ void GameObjectManager::EraseObject(std::vector<std::shared_ptr<GameObject>>& ob
 	std::vector<std::shared_ptr<GameObject>>::iterator it = std::find(objs.begin(), objs.end(), removeObj);
 	if (it != objs.end())
 	{
+		removeObj->AudioRelease();
 		objs.erase(it);
 	}
 }

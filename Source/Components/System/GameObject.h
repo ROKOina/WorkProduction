@@ -100,6 +100,9 @@ public:
 	const float GetObjSpeed() const { return objSpeed_; }
 	void SetObjSpeed(float speed) { objSpeed_ = speed; }
 
+	//‰¹‰ð•ú
+	void AudioRelease();
+
 public:
 	std::shared_ptr<TransformCom> transform_;
 

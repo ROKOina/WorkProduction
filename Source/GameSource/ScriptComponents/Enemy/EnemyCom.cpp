@@ -129,6 +129,15 @@ void EnemyCom::Render2D(float elapsedTime)
 {
 }
 
+void EnemyCom::AudioRelease()
+{
+    damageSE_->AudioRelease();
+    for (auto& se : animSE)
+    {
+        se.SE->AudioRelease();
+    }
+}
+
 void EnemyCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskCamera)
 {
     Graphics& graphics = Graphics::Instance();

@@ -162,7 +162,7 @@ void PlayerCom::Update(float elapsedTime)
         VignetteStart(0.7f, 1.0f);
 
         //ダメージボイス
-        aSE_->Play(false);
+        damageSE_->Play(false);
     }
 
     //カプセル当たり判定設定
@@ -430,6 +430,18 @@ void PlayerCom::Render2D(float elapsedTime)
             }
         }
     }
+}
+
+void PlayerCom::AudioRelease()
+{
+    damageSE_->AudioRelease();
+    for (auto& se : animSE)
+    {
+        se.SE->AudioRelease();
+    }
+    attackPlayer_->AudioRelease();
+    movePlayer_->AudioRelease();
+    justAvoidPlayer_->AudioRelease();
 }
 
 

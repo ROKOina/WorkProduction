@@ -24,6 +24,9 @@ public:
 
     void Render2D(float elapsedTime);
 
+    //‰¹‰ğ•ú
+    void AudioRelease();
+
 private:
     //ƒWƒƒƒXƒg‰ñ”ğ‰Šú‰»
     void JustInisialize();

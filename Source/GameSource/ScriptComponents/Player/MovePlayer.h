@@ -21,6 +21,8 @@ public:
 
     void OnGui();
 
+    //音解放
+    void AudioRelease();
 private:
     //スティック入力値から移動ベクトルを取得
     DirectX::XMFLOAT3 GetMoveVec();

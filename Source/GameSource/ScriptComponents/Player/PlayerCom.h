@@ -91,6 +91,9 @@ public:
     // sprite•`‰æ
     void Render2D(float elapsedTime) override;
 
+    //‰¹‰ð•ú
+    void AudioRelease()override;
+
     //PlayerComƒNƒ‰ƒX
 public:
     //mask
@@ -248,5 +251,5 @@ private:
     };
     std::vector<AnimSetSE> animSE;
 
-    std::unique_ptr<AudioSource> aSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/aVoice.wav");
+    std::unique_ptr<AudioSource> damageSE_ = Audio::Instance().LoadAudioSource("Data/Audio/Player/aVoice.wav");
 };
