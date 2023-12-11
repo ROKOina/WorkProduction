@@ -70,8 +70,8 @@ void EnemyGrapeFarCom::Start()
     {
         //hp
         std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
-        status->SetMaxHP(50);
-        status->SetHP(50);
+        status->SetMaxHP(30);
+        status->SetHP(30);
 
         //UŒ‚
         attackRange_ = 8;

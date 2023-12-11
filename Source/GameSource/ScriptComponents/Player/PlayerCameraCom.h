@@ -41,7 +41,7 @@ public:
     void SetForcusPos(DirectX::XMFLOAT3 focus) { lerpFocusPos_ = focus; }
     DirectX::XMFLOAT3 GetForcusPos() { return lerpFocusPos_; }
 
-    void SetIsJust(bool flag) { isJust = flag; }
+    void SetIsJust(bool flag) { isJust_ = flag; }
     void SetJustPos(DirectX::XMFLOAT3 pos) { justPos_ = pos; }
 
 private:
@@ -57,6 +57,6 @@ private:
     DirectX::XMFLOAT3 Eye_;
 
     //ジャスト回避中演出よう
-    bool isJust = false;
+    bool isJust_ = false;
     DirectX::XMFLOAT3 justPos_;
 };

@@ -219,11 +219,3 @@ private:
 private:
     std::weak_ptr<PlayerCom> player_;
 };
-
-/*
-コンボ図（＞:次の行動、＾:どちらでも繋がる）
-
-ダッシュ
-DASH＞△＞DASH＞□＾△
-
-*/

@@ -17,7 +17,7 @@ void PlayerCameraCom::Start()
 // 更新処理
 void PlayerCameraCom::Update(float elapsedTime)
 {
-    if (isJust)
+    if (isJust_)
     {
         //カメラに値を代入
         std::shared_ptr<GameObject> cameraObj = GameObjectManager::Instance().Find("Camera");
@@ -138,6 +138,6 @@ void PlayerCameraCom::OnGUI()
     ImGui::DragFloat("range", &range_, 0.1f);
     ImGui::DragFloat("lerpSpeed_", &lerpSpeed_, 0.1f);
 
-    ImGui::Checkbox("isJust", &isJust);
+    ImGui::Checkbox("isJust", &isJust_);
 }
 

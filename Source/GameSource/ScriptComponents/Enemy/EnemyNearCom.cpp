@@ -77,8 +77,8 @@ void EnemyNearCom::Start()
 
     //ステータス設定
     std::shared_ptr<CharacterStatusCom> status = GetGameObject()->GetComponent<CharacterStatusCom>();
-    status->SetMaxHP(100);
-    status->SetHP(100);
+    status->SetMaxHP(60);
+    status->SetHP(60);
 
 
     //移動パラメーター設定
