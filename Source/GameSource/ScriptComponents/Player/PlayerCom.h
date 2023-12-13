@@ -161,6 +161,9 @@ public:
     void SetLockOn(LOCK_TARGET target) { lockOnTarget_ = target; }
     LOCK_TARGET GetLockOn() { return lockOnTarget_; }
 
+    //ヒットカウント増やす
+    void AddHitCount();
+
 private:
     //アニメーションイベントでSE再生
     void PlayAnimationSE();
@@ -194,6 +197,9 @@ private:
     } vignetteHPPower_[3];
     float vignetteLowHP_;
 
+    //ヒットコンボカウント
+    int hitComboCount_ = 0;;
+
     //UI
     //ワイプ背景
     bool startUI_ = false;
@@ -222,6 +228,13 @@ private:
     DirectX::XMFLOAT2 buttonPos_ = {};
     DirectX::XMFLOAT2 offsetButtonPos_[5] = {};
     float buttonSize_[5] = {};  //演出用サイズ
+    //数字
+    std::unique_ptr<Sprite> numSprite_ = std::make_unique<Sprite>("./Data/Sprite/numberGra.png");
+    DirectX::XMFLOAT4 hitComboNumPos_ = { 1279,59,0.5f,79}; //xy:pos z:size w:間隔
+    float hitComboSize_ = 0.5f;      //デフォルトサイズ
+    float hitComboDirSize_ = 1.5f;   //演出時サイズ
+    float hitComboDirSpeed_ = 10.0f;
+    DirectX::XMFLOAT4 hitComboNumC_ = {2.0f,1.0f,0.1f,1.0f}; //xy:pos z:size w:間隔
     //文字
     std::unique_ptr<Sprite> attackStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/attackString.png");
     std::unique_ptr<Sprite> attackJumpStringSprite_ = std::make_unique<Sprite>("./Data/Sprite/GameUI/Player/button/attackJumpString.png");

@@ -234,9 +234,9 @@ void EnemyGrapeFarCom::SpawnGrapeBall()
         std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
         justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
         justCol->SetJudgeTag(COLLIDER_TAG::Player);
-        justCol->SetSize({ 2.0f,1,2.0f });
+        justCol->SetSize({ 1.3f,1,1.0f });
 
-        justAttack->transform_->SetLocalPosition({ 0 ,0 ,119.5f });
+        justAttack->transform_->SetLocalPosition({ 0 ,0 ,95.9f });
     }
 }
 

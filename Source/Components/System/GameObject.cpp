@@ -171,9 +171,9 @@ void GameObjectManager::Remove(std::shared_ptr<GameObject> obj)
 void GameObjectManager::AllRemove()
 {
 	for (auto& updateObj : updateGameObject_)
-		removeGameObject_.insert(updateObj);
+		Remove(updateObj);
 	for (auto& startObj : startGameObject_)
-		removeGameObject_.insert(startObj);
+		Remove(startObj);
 }
 
 bool GameObjectManager::EnemyObjFind(std::shared_ptr<GameObject> obj)

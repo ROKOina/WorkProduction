@@ -633,20 +633,6 @@ void MovePlayer::DashStateUpdate(float elapsedTime)
         break;
     }
     };
-
-    ////速力がなくなるかつ、ダッシュステートが10以下の場合（後ろダッシュ時は速力は0なので）
-    ////ダッシュ終了
-    //if (length < 0.1f && dashState_ < 10 && dashState_ > 1)
-    //{
-    //    move->SetGravity(GRAVITY_NORMAL);
-    //    isDashJudge_ = false;
-    //    dashState_ = -1;
-    //    player_.lock()->GetAttackPlayer()->isNormalAttack_ = true;
-
-    //    moveParamType_ = MOVE_PARAM::RUN;
-    //    move->SetMoveMaxSpeed(moveParam_[MOVE_PARAM::RUN].moveMaxSpeed);
-    //    move->SetMoveAcceleration(moveParam_[MOVE_PARAM::RUN].moveAcceleration);
-    //}
 }
 
 //走り切り替えし判定

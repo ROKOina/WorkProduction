@@ -133,9 +133,9 @@ void SceneGame::Initialize()
 			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
 			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
 			justCol->SetJudgeTag(COLLIDER_TAG::Player);
-			justCol->SetSize({ 1.3f,1,1.3f });
+			justCol->SetSize({ 1.0f,1,1.0f });
 
-			justAttack->transform_->SetLocalPosition({ -1.569f ,0 ,95.493f });
+			justAttack->transform_->SetLocalPosition({ -1.569f ,90.0f ,95.493f });
 		}
 
 		//押し出し用当たり判定
@@ -312,9 +312,9 @@ void SceneGame::Initialize()
 			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
 			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
 			justCol->SetJudgeTag(COLLIDER_TAG::Player);
-			justCol->SetSize({ 1.3f,1,1.3f });
+			justCol->SetSize({ 0.8f,1,0.8f });
 
-			justAttack->transform_->SetLocalPosition({ 0 ,5.5f ,11.8f });
+			justAttack->transform_->SetLocalPosition({ 0 ,5.5f ,6.8f });
 		}
 
 		//押し出し用当たり判定
@@ -477,9 +477,9 @@ void SceneGame::Initialize()
 			std::shared_ptr<BoxColliderCom> justCol = justAttack->AddComponent<BoxColliderCom>();
 			justCol->SetMyTag(COLLIDER_TAG::JustAvoid);
 			justCol->SetJudgeTag(COLLIDER_TAG::Player);
-			justCol->SetSize({ 2.0f,1,2.0f });
+			justCol->SetSize({ 1.3f,1,1.0f });
 
-			justAttack->transform_->SetLocalPosition({ 0 ,0 ,119.5f });
+			justAttack->transform_->SetLocalPosition({ 0 ,0 ,95.9f });
 		}
 	}
 

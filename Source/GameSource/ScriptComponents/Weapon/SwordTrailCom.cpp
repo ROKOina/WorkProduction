@@ -71,26 +71,44 @@ void SwordTrailCom::Update(float elapsedTime)
 	assert(rendererCom);
 	assert(nodeName_[0].size() > 0 && nodeName_[1].size() > 0);
 
-	//データを更新
-	for (size_t i = posArray_.size() - 1; i > 0; --i)
+	//トレイル終了処理
+	if (endTrail_)
 	{
-		posArray_[i] = posArray_[i - 1];
+		//データを更新
+		for (size_t i = posArray_.size() - 1; i > 0; --i)
+		{
+			posArray_[i] = posArray_[i - 1];
+		}
+		posArray_.front() = posArray_[0];
+
+		DirectX::XMVECTOR HeadStart = DirectX::XMLoadFloat3(&posArray_[0].head);
+		DirectX::XMVECTOR HeadEnd = DirectX::XMLoadFloat3(&posArray_[posArray_.size() - 1].head);
+		float length = DirectX::XMVector3Length(DirectX::XMVectorSubtract(HeadStart, HeadEnd)).m128_f32[0];
+
+		if (length < 0.1f)
+		{
+			SetEnabled(false);
+		}
 	}
-	//トレイルのポジションを登録
-	PosBuffer tempPos;
+	else
+	{
+		//データを更新
+		for (size_t i = posArray_.size() - 1; i > 0; --i)
+		{
+			posArray_[i] = posArray_[i - 1];
+		}
+		//トレイルのポジションを登録
+		PosBuffer tempPos;
 
-	//末端のポジションを見つける
-	Model::Node* node = rendererCom->GetModel()->FindNode(nodeName_[0].c_str());
-	tempPos.tail = { node->worldTransform._41,node->worldTransform._42,node->worldTransform._43 };
-	//先端のポジションを見つける
-	node = rendererCom->GetModel()->FindNode(nodeName_[1].c_str());
-	tempPos.head = { node->worldTransform._41,node->worldTransform._42,node->worldTransform._43 };
+		//末端のポジションを見つける
+		Model::Node* node = rendererCom->GetModel()->FindNode(nodeName_[0].c_str());
+		tempPos.tail = { node->worldTransform._41,node->worldTransform._42,node->worldTransform._43 };
+		//先端のポジションを見つける
+		node = rendererCom->GetModel()->FindNode(nodeName_[1].c_str());
+		tempPos.head = { node->worldTransform._41,node->worldTransform._42,node->worldTransform._43 };
 
-	//tempPos.tail = GetGameObject()->transform_->GetWorldPosition();
-	//DirectX::XMFLOAT3 up = GetGameObject()->transform_->GetWorldUp();
-	//tempPos.head = { tempPos.tail.x + up.x,tempPos.tail.y + up.y ,tempPos.tail.z + up.z };
-
-	posArray_.front() = tempPos;
+		posArray_.front() = tempPos;
+	}
 
 	//曲線を作る
 	std::vector<PosBuffer> usedPosArray = posArray_;
@@ -232,6 +250,8 @@ void SwordTrailCom::CreateCurveVertex(std::vector<PosBuffer>& usedPosArray, int 
 //トレイルの位置をリセットする
 void SwordTrailCom::ResetNodePos()
 {
+	endTrail_ = false;
+
 	std::shared_ptr<RendererCom> rendererCom = GetGameObject()->GetComponent<RendererCom>();
 	assert(rendererCom);
 	assert(nodeName_[0].size() > 0 && nodeName_[1].size() > 0);
@@ -250,4 +270,9 @@ void SwordTrailCom::ResetNodePos()
 		posArray_[i] = tempPos;
 	}
 
+}
+
+void SwordTrailCom::EndTrail()
+{
+	endTrail_ = true;
 }

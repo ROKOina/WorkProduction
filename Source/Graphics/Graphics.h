@@ -13,7 +13,7 @@
 
 #include <mutex>
 
-#define DEBUG_GUI_ false
+#define DEBUG_GUI_ true
 
 class CameraCom;
 

@@ -296,6 +296,14 @@ void PlayerCom::Update(float elapsedTime)
             hpDir_.z -= elapsedTime * 2;
             if (hpDir_.z < 0)isHpDirection_ = false;
         }
+
+        //ヒット数字演出
+        if (hitComboNumPos_.z > hitComboSize_)
+        {
+            hitComboNumPos_.z -= hitComboDirSpeed_*elapsedTime;
+            if (hitComboNumPos_.z <= hitComboSize_)
+                hitComboNumPos_.z = hitComboSize_;
+        }
     }
 
     //アニメーションイベントでSE
@@ -334,6 +342,11 @@ void PlayerCom::OnGUI()
         movePlayer_->OnGui();
         ImGui::TreePop();
     }
+
+    ImGui::DragInt("combo", &hitComboCount_);
+    ImGui::DragFloat("hitComboDirSpeed_", &hitComboDirSpeed_,0.1f);
+    ImGui::DragFloat4("pos", &hitComboNumPos_.x);
+    ImGui::DragFloat4("hitComboNumC_", &hitComboNumC_.x);
 
     ////ボタン配置用
     //ImGui::DragFloat2("buttonPos_", &buttonPos_.x);
@@ -430,6 +443,36 @@ void PlayerCom::Render2D(float elapsedTime)
             }
         }
     }
+
+
+    //ヒットコンボカウント
+    {
+        DirectX::XMFLOAT2 size = {
+            static_cast<float>(numSprite_->GetTextureWidth()) * 0.1f * hitComboNumPos_.z ,
+            static_cast<float>(numSprite_->GetTextureHeight()) * hitComboNumPos_.z
+        };
+        //１桁
+        numSprite_->Render(dc, hitComboNumPos_.x - (size.x * 0.8f), hitComboNumPos_.y - (size.y * 0.5f), size.x, size.y
+            , 170.0f * hitComboCount_, 0, static_cast<float>(numSprite_->GetTextureWidth()) * 0.1f, static_cast<float>(numSprite_->GetTextureHeight())
+            , 0, hitComboNumC_.x, hitComboNumC_.y, hitComboNumC_.z, hitComboNumC_.w);
+        //２桁
+        if (hitComboCount_ >= 10)
+        {
+            int keta = hitComboCount_ / 10 % 10;
+            numSprite_->Render(dc, hitComboNumPos_.x - hitComboNumPos_.w - (size.x * 0.8f), hitComboNumPos_.y - (size.y * 0.5f), size.x, size.y
+                , 170.0f * keta, 0, static_cast<float>(numSprite_->GetTextureWidth()) * 0.1f, static_cast<float>(numSprite_->GetTextureHeight())
+                , 0, hitComboNumC_.x, hitComboNumC_.y, hitComboNumC_.z, hitComboNumC_.w);
+        }
+        //３桁
+        if (hitComboCount_ >= 100)
+        {
+            int keta = hitComboCount_ / 100 % 10;
+            numSprite_->Render(dc, hitComboNumPos_.x - hitComboNumPos_.w * 2 - (size.x * 0.8f), hitComboNumPos_.y - (size.y * 0.5f), size.x, size.y
+                , 170.0f * keta, 0, static_cast<float>(numSprite_->GetTextureWidth()) * 0.1f, static_cast<float>(numSprite_->GetTextureHeight())
+                , 0, hitComboNumC_.x, hitComboNumC_.y, hitComboNumC_.z, hitComboNumC_.w);
+        }
+    }
+
 }
 
 void PlayerCom::AudioRelease()
@@ -828,6 +871,12 @@ void PlayerCom::VignetteStart(float power, float time)
     vignetteDamageTime_ = time;
     vignetteDamageTimer_ = time;
     vignetteDamagePower_ = power;
+}
+
+void PlayerCom::AddHitCount()
+{
+    hitComboCount_++;
+    hitComboNumPos_.z = hitComboDirSize_;
 }
 
 void PlayerCom::PlayAnimationSE()

@@ -39,6 +39,9 @@ public:
     //トレイルの位置をリセットする
     void ResetNodePos();
 
+    //トレイルを終わらせる
+    void EndTrail();
+
 private:
     //剣の位置を保存する構造体
     struct PosBuffer
@@ -84,4 +87,6 @@ private:
     //トレイルの先端と末端ノードの名前
     std::string nodeName_[2];   //0:末端　、1:先端
 
+    //トレイルを終了する
+    bool endTrail_ = false;
 };

@@ -10,6 +10,7 @@
 #include "Components\ParticleSystemCom.h"
 #include "SwordTrailCom.h"
 
+#include "../Player/PlayerCom.h"
 #include "../CharacterStatusCom.h"
 
 // 開始処理
@@ -306,6 +307,14 @@ void WeaponCom::AttackProcess(std::shared_ptr<GameObject> damageObj, bool useAni
     }
 
     onHit_ = true;
+
+    //親がプレイヤーの場合
+    std::shared_ptr<PlayerCom> player = parentObject_.lock()->GetComponent<PlayerCom>();
+    if (player)
+    {
+        //コンボカウントを増やす
+        player->AddHitCount();
+    }
 }
 
 //アニメイベント名から当たり判定を付けるか判断("AutoCollision"から始まるイベントを自動で取得)
@@ -341,8 +350,33 @@ bool WeaponCom::CollsionFromEventJudge()
                 animator->SetAnimationSpeedOffset(attackStatus_[animCom->GetCurrentAnimationIndex()].animSpeed);
                 isAnimSetting_ = true;
             }
+            else
+            {
+                //トレイル切る               
+                std::shared_ptr<SwordTrailCom> trail = GetGameObject()->GetComponent<SwordTrailCom>();
+                if (trail)
+                {
+                    if (trail->GetEnabled())
+                    {
+                        //trail->SetEnabled(false);
+                        trail->EndTrail();
+                    }
+                }
+            }
 
             if (!animCom->GetCurrentAnimationEvent(animEvent.name.c_str(), DirectX::XMFLOAT3(0, 0, 0)))continue;
+
+            //トレイル出す
+            std::shared_ptr<SwordTrailCom> trail = GetGameObject()->GetComponent<SwordTrailCom>();
+            if (trail)
+            {
+                if (!trail->GetEnabled())
+                {
+                    trail->SetEnabled(true);
+                    trail->ResetNodePos();
+                }
+            }
+
 
             return true;
         }
@@ -362,7 +396,7 @@ void WeaponCom::DirectionStart(float elapsedTime)
         isDirectionStart_ = false;
         directionState_ = -1;
     }
-    static int waitFrame = 0;
+
     //光らせる処理
     switch (directionState_)
     {
@@ -370,8 +404,6 @@ void WeaponCom::DirectionStart(float elapsedTime)
     {
         renderCom->SetEnabled(true);
         renderCom->GetModel()->SetMaterialColor({ 1,2,1,2 });
-
-        waitFrame = 2;
 
         directionState_++;
     }
@@ -390,18 +422,6 @@ void WeaponCom::DirectionStart(float elapsedTime)
         if (color.y < 1)color.y = 1;
         if (color.w < 1)color.w = 1;
         renderCom->GetModel()->SetMaterialColor(color);
-
-        waitFrame--;
-        if (waitFrame == 0)
-        {   
-            //トレイル出す
-            std::shared_ptr<SwordTrailCom> trail = GetGameObject()->GetComponent<SwordTrailCom>();
-            if (trail)
-            {
-                trail->SetEnabled(true);
-                trail->ResetNodePos();
-            }
-        }
     }
     break;
     }
