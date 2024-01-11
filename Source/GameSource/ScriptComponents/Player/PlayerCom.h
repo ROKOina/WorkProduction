@@ -228,9 +228,18 @@ private:
     DirectX::XMFLOAT2 buttonPos_ = {};
     DirectX::XMFLOAT2 offsetButtonPos_[5] = {};
     float buttonSize_[5] = {};  //演出用サイズ
+    //コンボ文字
+    std::unique_ptr<Sprite> comboSprite_ = std::make_unique<Sprite>("./Data/Sprite/COMBO.png");
+    std::unique_ptr<Sprite> comboBackSprite_ = std::make_unique<Sprite>("./Data/Sprite/COMBOGage.png");
+    std::unique_ptr<Sprite> comboMaskSprite_ = std::make_unique<Sprite>("./Data/Sprite/COMBOMask.png");
+    DirectX::XMFLOAT3 comboPos_ = { 1299,62,0.3f}; //xy:pos z:size
+    DirectX::XMFLOAT2 comboMaskOffsetSize_ = { 0.88f,0.62f };   //コンボマスクのサイズ調整用
+    float comboTime_ = 3;    //コンボ継続時間
+    float comboTimer_ = -1;  //コンボタイマー
+    float comboaa = 1;
     //数字
     std::unique_ptr<Sprite> numSprite_ = std::make_unique<Sprite>("./Data/Sprite/numberGra.png");
-    DirectX::XMFLOAT4 hitComboNumPos_ = { 1279,59,0.5f,79}; //xy:pos z:size w:間隔
+    DirectX::XMFLOAT4 hitComboNumPos_ = { 1270,89,0.5f,79}; //xy:pos z:size w:間隔
     float hitComboSize_ = 0.5f;      //デフォルトサイズ
     float hitComboDirSize_ = 1.5f;   //演出時サイズ
     float hitComboDirSpeed_ = 10.0f;

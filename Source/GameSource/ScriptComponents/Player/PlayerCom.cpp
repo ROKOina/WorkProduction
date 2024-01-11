@@ -304,6 +304,18 @@ void PlayerCom::Update(float elapsedTime)
             if (hitComboNumPos_.z <= hitComboSize_)
                 hitComboNumPos_.z = hitComboSize_;
         }
+
+        //ヒット継続タイマー
+        if (comboTimer_ > 0 
+            && justAvoidPlayer_->GetJustAvoidKey() == JustAvoidPlayer::JUST_AVOID_KEY::NULL_KEY)
+        {
+            comboTimer_ -= elapsedTime;
+            if (comboTimer_ <= 0)
+            {
+                comboTimer_ = 0;
+                hitComboCount_ = 0;
+            }
+        }
     }
 
     //アニメーションイベントでSE
@@ -347,6 +359,10 @@ void PlayerCom::OnGUI()
     ImGui::DragFloat("hitComboDirSpeed_", &hitComboDirSpeed_,0.1f);
     ImGui::DragFloat4("pos", &hitComboNumPos_.x);
     ImGui::DragFloat4("hitComboNumC_", &hitComboNumC_.x);
+
+    ImGui::DragFloat3("CCpos", &comboPos_.x);
+    ImGui::DragFloat2("comboMaskSize_", &comboMaskOffsetSize_.x,0.01f);
+    ImGui::DragFloat("comboaa", &comboaa,0.01f);
 
     ////ボタン配置用
     //ImGui::DragFloat2("buttonPos_", &buttonPos_.x);
@@ -447,6 +463,7 @@ void PlayerCom::Render2D(float elapsedTime)
 
     //ヒットコンボカウント
     {
+        //数字
         DirectX::XMFLOAT2 size = {
             static_cast<float>(numSprite_->GetTextureWidth()) * 0.1f * hitComboNumPos_.z ,
             static_cast<float>(numSprite_->GetTextureHeight()) * hitComboNumPos_.z
@@ -571,12 +588,47 @@ void PlayerCom::MaskRender(PostEffect* postEff, std::shared_ptr<CameraCom> maskC
         //マスクされる側描画
         postEff->StartBeMaskBuffer();
 
+
         //マスクオブジェ描画
         GameObjectManager::Instance().RenderMask();
 
 
         //マスク処理終了処理
         postEff->RestoreMaskBuffer({ -154 ,-72 }, { 0.3f,0.3f });
+
+        postEff->DrawMask();
+    }
+
+    DirectX::XMFLOAT2 comboSize = { static_cast<float>(comboBackSprite_->GetTextureWidth()) * comboPos_.z ,static_cast<float>(comboBackSprite_->GetTextureHeight()) * comboPos_.z };
+
+    //コンボ背景
+    comboBackSprite_->Render(dc, comboPos_.x, comboPos_.y
+        , comboSize.x, comboSize.y
+        , 0, 0, static_cast<float>(comboBackSprite_->GetTextureWidth()), static_cast<float>(comboBackSprite_->GetTextureHeight())
+        , 0, 1, 1, 1, 1);
+
+    //コンボ文字
+    {
+        //マスクする側描画
+        postEff->CacheMaskBuffer(maskCamera);
+
+        //コンボマスク用画像
+        comboMaskSprite_->Render(dc, comboPos_.x + comboSize.x, (comboPos_.y + comboSize.y)* comboMaskOffsetSize_.x
+            , comboSize.x, comboSize.y * comboMaskOffsetSize_.y* (comboTimer_/ comboTime_)
+            , 0, 0, static_cast<float>(comboMaskSprite_->GetTextureWidth()), static_cast<float>(comboMaskSprite_->GetTextureHeight())
+            , 180, 1, 1, 1, 0.001f);
+
+        //マスクされる側描画
+        postEff->StartBeMaskBuffer();
+
+        //コンボ文字
+        comboSprite_->Render(dc, comboPos_.x, comboPos_.y
+            , comboSize.x, comboSize.y
+            , 0, 0, static_cast<float>(comboSprite_->GetTextureWidth()), static_cast<float>(comboSprite_->GetTextureHeight())
+            , 0, 1, 1, 1, 1);
+
+        //マスク処理終了処理
+        postEff->RestoreMaskBuffer();
 
         postEff->DrawMask();
     }
@@ -877,6 +929,7 @@ void PlayerCom::AddHitCount()
 {
     hitComboCount_++;
     hitComboNumPos_.z = hitComboDirSize_;
+    comboTimer_ = comboTime_;
 }
 
 void PlayerCom::PlayAnimationSE()

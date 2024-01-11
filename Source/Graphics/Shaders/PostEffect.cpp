@@ -935,8 +935,6 @@ void PostEffect::RestoreMaskBuffer(DirectX::XMFLOAT2 pos, DirectX::XMFLOAT2 size
 
     graphics.RestoreRenderTargets();
 
-    //ƒƒCƒ“ƒJƒƒ‰‚É–ß‚·ˆ—
-
 }
 
 void PostEffect::DrawMask()
