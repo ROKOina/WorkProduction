@@ -42,5 +42,5 @@ private:
 	float startSpriteSize_;
 
 	//BGM
-	std::unique_ptr<AudioSource> BGM_ = Audio::Instance().LoadAudioSource("Data/Audio/gameBGM2.wav");
+	std::unique_ptr<AudioSource> BGM_ = Audio::Instance().LoadAudioSource("Data/Audio/gameBGM.wav");
 };

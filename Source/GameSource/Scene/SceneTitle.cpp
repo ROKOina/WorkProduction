@@ -17,13 +17,11 @@
 #include "Components\ColliderCom.h"
 #include "Components\ParticleSystemCom.h"
 #include "GameSource\Render\Effect\EffectManager.h"
-
+#include "../ScriptComponents/Score.h"
 
 //初期化
 void SceneTitle::Initialize()
 {
-    //スプライト初期化
-    //sprite_ = new Sprite("Data/Sprite/titleLogo.png");
 
     {   //ピコ
         std::shared_ptr<GameObject> obj = GameObjectManager::Instance().Create();
@@ -183,18 +181,14 @@ void SceneTitle::Initialize()
     //BGM
     BGM_->Stop();
     BGM_->Play(true);
+
+    //スコアを初期化
+    Score::Instance().ResetScore();
 }
 
 //終了化
 void SceneTitle::Finalize()
 {
-    //スプライト終了化
-    if (sprite_ != nullptr)
-    {
-        delete sprite_;
-        sprite_ = nullptr;
-    }       
-
     BGM_->AudioRelease();
     pushSE_->AudioRelease();
     //BGM_->Stop();

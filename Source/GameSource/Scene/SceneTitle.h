@@ -33,7 +33,6 @@ private:
 
 private:
     std::unique_ptr<PostEffect> postEff_;
-    Sprite* sprite_ = nullptr;
 
     bool firstFrameSkip_ = false;
     bool isSceneEndFlag_ = false;
@@ -76,7 +75,7 @@ private:
     bool frameDelayRender_ = false;
 
     //BGM
-    std::unique_ptr<AudioSource> BGM_ = Audio::Instance().LoadAudioSource("Data/Audio/titleBGM2.wav");
+    std::unique_ptr<AudioSource> BGM_ = Audio::Instance().LoadAudioSource("Data/Audio/titleBGM.wav");
     //SE
     std::unique_ptr<AudioSource> pushSE_ = Audio::Instance().LoadAudioSource("Data/Audio/push.wav");
 };

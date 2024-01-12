@@ -155,6 +155,7 @@
     <ClInclude Include="Source\Components\RendererCom.h" />
     <ClInclude Include="Source\Dialog.h" />
     <ClInclude Include="Source\GameSource\Math\easing.h" />
+    <ClInclude Include="Source\GameSource\Scene\SceneResult.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\CharacterStatusCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyAppleNearCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyFarCom.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="Source\Framework.h" />
     <ClInclude Include="Source\Components\CameraCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Player\PlayerWeapon\CandyPushCom.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Score.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\SwordTrailCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Weapon\WeaponCom.h" />
     <ClInclude Include="Source\GameSource\Stage\PathSearch.h" />
@@ -250,6 +252,7 @@
     <ClCompile Include="Source\Components\RendererCom.cpp" />
     <ClCompile Include="Source\Dialog.cpp" />
     <ClCompile Include="Source\GameSource\Math\easing.cpp" />
+    <ClCompile Include="Source\GameSource\Scene\SceneResult.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\CharacterStatusCom.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\ActionDerived.cpp" />
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\BehaviorTree\BehaviorData.cpp" />

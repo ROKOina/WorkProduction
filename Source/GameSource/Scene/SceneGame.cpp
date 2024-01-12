@@ -4,6 +4,7 @@
 
 #include "SceneGame.h"
 #include "SceneTitle.h"
+#include "SceneResult.h"
 #include "SceneManager.h"
 #include "SceneLoading.h"
 #include "imgui.h"
@@ -883,7 +884,7 @@ void SceneGame::Update(float elapsedTime)
 		if (transitionOutTimer_ < 0)
 		{
 			GameObjectManager::Instance().AllRemove();
-			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle));
+			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneResult));
 			SceneManager::Instance().SetParticleUpdate(false);
 		}
 	}

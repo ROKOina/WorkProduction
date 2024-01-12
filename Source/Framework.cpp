@@ -8,6 +8,7 @@
 #include "GameSource\Render\Effect\EffectManager.h"
 #include "GameSource\Scene\SceneGame.h"
 #include "GameSource\Scene\SceneTitle.h"
+#include "GameSource\Scene\SceneResult.h"
 #include "GameSource\Scene\SceneManager.h"
 
 #include "imgui.h"
@@ -29,6 +30,7 @@ Framework::Framework(HWND hWnd)
 	//sceneGame.Initialize();
 	//SceneManager::Instance().ChangeScene(new SceneGame);
 	SceneManager::Instance().ChangeScene(new SceneTitle);
+	//SceneManager::Instance().ChangeScene(new SceneResult);
 
 }
 

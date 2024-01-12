@@ -15,6 +15,7 @@
 
 #include "Graphics\Shaders\PostEffect.h"
 #include  "GameSource/Math/easing.h"
+#include "../Score.h"
 
 // 開始処理
 void PlayerCom::Start()
@@ -362,7 +363,6 @@ void PlayerCom::OnGUI()
 
     ImGui::DragFloat3("CCpos", &comboPos_.x);
     ImGui::DragFloat2("comboMaskSize_", &comboMaskOffsetSize_.x,0.01f);
-    ImGui::DragFloat("comboaa", &comboaa,0.01f);
 
     ////ボタン配置用
     //ImGui::DragFloat2("buttonPos_", &buttonPos_.x);
@@ -930,6 +930,12 @@ void PlayerCom::AddHitCount()
     hitComboCount_++;
     hitComboNumPos_.z = hitComboDirSize_;
     comboTimer_ = comboTime_;
+
+    //スコア
+    Score::Instance().AddScore(123456);
+    int maxCombo = Score::Instance().maxCombo_;
+    if (maxCombo < hitComboCount_)
+        Score::Instance().maxCombo_ = hitComboCount_;
 }
 
 void PlayerCom::PlayAnimationSE()

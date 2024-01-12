@@ -14,6 +14,7 @@
 #include "Components\ParticleSystemCom.h"
 #include "Components\ParticleComManager.h"
 #include "../CharacterStatusCom.h"
+#include "../Score.h"
 
 #include "../Enemy/EnemyManager.h"
 #include "../Enemy/EnemyCom.h"
@@ -1133,6 +1134,8 @@ void JustAvoidPlayer::JustAvoidJudge()
 //ジャスト回避を開始する
 void JustAvoidPlayer::StartJustAvoid()
 {
+    Score::Instance().AddScore(654321);
+
     //無敵時間
     player_.lock()->GetGameObject()->GetComponent<CharacterStatusCom>()
         ->SetInvincibleNonDamage(2);

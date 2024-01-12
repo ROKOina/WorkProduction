@@ -236,7 +236,7 @@ private:
     DirectX::XMFLOAT2 comboMaskOffsetSize_ = { 0.88f,0.62f };   //コンボマスクのサイズ調整用
     float comboTime_ = 3;    //コンボ継続時間
     float comboTimer_ = -1;  //コンボタイマー
-    float comboaa = 1;
+
     //数字
     std::unique_ptr<Sprite> numSprite_ = std::make_unique<Sprite>("./Data/Sprite/numberGra.png");
     DirectX::XMFLOAT4 hitComboNumPos_ = { 1270,89,0.5f,79}; //xy:pos z:size w:間隔

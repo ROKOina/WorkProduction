@@ -265,6 +265,8 @@
     <ClInclude Include="Source\Graphics\Shaders\3D\ShadowMapCasterShader.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyAppleNearCom.h" />
     <ClInclude Include="Source\GameSource\ScriptComponents\Enemy\EnemyGrapeFarCom.h" />
+    <ClInclude Include="Source\GameSource\Scene\SceneResult.h" />
+    <ClInclude Include="Source\GameSource\ScriptComponents\Score.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\DirectXTex\WICTextureLoader.cpp">
@@ -514,6 +516,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\GameSource\ScriptComponents\Enemy\EnemyGrapeFarCom.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GameSource\Scene\SceneResult.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
