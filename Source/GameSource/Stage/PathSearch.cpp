@@ -20,7 +20,7 @@ void EdgePath::initSub(int node, int& buf1)
 void SeachGraph::UpdatePath()
 {
 	//動的にコストを変えるので最初は0初期化する
-	for (auto& c : costMap)
+	for (auto& c : costMap_)
 	{
 		c = 0;
 	}
@@ -31,7 +31,7 @@ void SeachGraph::UpdatePath()
 	{
 		DirectX::XMFLOAT3 ePos = enemy.enemy.lock()->transform_->GetWorldPosition();
 		std::shared_ptr<NodePath> enemyNode = GetNodeVecFromWorldPos(ePos);
-		costMap[enemyNode->NodeID] = Enemy;
+		costMap_[enemyNode->NodeID] = Enemy;
 
 		if (enemy.enemy.lock()->GetComponent<EnemyNearCom>()->GetIsPathFlag())continue;
 
@@ -39,20 +39,20 @@ void SeachGraph::UpdatePath()
 		for (auto& e : enemyNode->edge)
 		{
 			if (e->distnationNode < 0)continue;
-			costMap[e->distnationNode] = EnemyMawari;
+			costMap_[e->distnationNode] = EnemyMawari;
 		}
 	}
 
 	//プレイヤーの場所の登録
 	DirectX::XMFLOAT3 pPos = player_.lock()->transform_->GetWorldPosition();
 	std::shared_ptr<NodePath> node = GetNodeVecFromWorldPos(pPos);
-	costMap[node->NodeID] = Player;
+	costMap_[node->NodeID] = Player;
 
 	//プレイヤー周りを登録
 	for (auto& e : node->edge)
 	{
 		if (e->distnationNode < 0)continue;
-		costMap[e->distnationNode] = PlayerMawari;
+		costMap_[e->distnationNode] = PlayerMawari;
 	}
 }
 
@@ -66,13 +66,13 @@ void SeachGraph::RenderPath()
 		{
 			if (i == goalId_)
 				Graphics::Instance().GetDebugRenderer()->DrawBox(n->pos, { meshSize_ * 0.4f ,0.01f,meshSize_ * 0.4f }, { 0,0,0,1 });
-			else if (costMap[i] == EnemyMawari)
+			else if (costMap_[i] == EnemyMawari)
 				Graphics::Instance().GetDebugRenderer()->DrawBox(n->pos, { meshSize_ * 0.4f ,0.01f,meshSize_ * 0.4f }, { 0,1,0,1 });
-			else if (costMap[i] == PlayerMawari)
+			else if (costMap_[i] == PlayerMawari)
 				Graphics::Instance().GetDebugRenderer()->DrawBox(n->pos, { meshSize_ * 0.4f ,0.01f,meshSize_ * 0.4f }, { 0,1,0,1 });
-			else if (costMap[i] == Enemy)
+			else if (costMap_[i] == Enemy)
 				Graphics::Instance().GetDebugRenderer()->DrawBox(n->pos, { meshSize_ * 0.4f ,0.01f,meshSize_ * 0.4f }, { 0,1,1,1 });
-			else if (costMap[i] == Player)
+			else if (costMap_[i] == Player)
 				Graphics::Instance().GetDebugRenderer()->DrawBox(n->pos, { meshSize_ * 0.4f ,0.01f,meshSize_ * 0.4f }, { 1,0,0,1 });
 			else
 				Graphics::Instance().GetDebugRenderer()->DrawBox(n->pos, { meshSize_ * 0.4f ,0.01f,meshSize_ * 0.4f }, { 1,1,1,1 });
@@ -87,7 +87,7 @@ void SeachGraph::RenderPath()
 
 			while (endNo != startId_)
 			{
-				endNo = m_Answer[startNo];
+				endNo = m_Answer_[startNo];
 
 				if (endNo == -1)break;
 
@@ -140,8 +140,8 @@ void SeachGraph::InitSub(int _sizeX, int _sizeZ, float _centerX, float _centerZ,
 			+(meshSize_ / 2.0f)) + meshCenterZ_;
 		nodeVec_.push_back(std::move(piece));
 
-		m_Answer.push_back(-1);
-		costMap.push_back(0);
+		m_Answer_.push_back(-1);
+		costMap_.push_back(0);
 
 	}
 
@@ -246,7 +246,7 @@ void SeachGraph::InitSub(int _sizeX, int _sizeZ, float _centerX, float _centerZ,
 	}
 
 	//動的にコストを変えるので最初は0初期化する
-	for (auto& c : costMap)
+	for (auto& c : costMap_)
 	{
 		c = 0;
 	}
@@ -254,12 +254,12 @@ void SeachGraph::InitSub(int _sizeX, int _sizeZ, float _centerX, float _centerZ,
 	//プレイヤーの場所のコスト１にする
 	DirectX::XMFLOAT3 pPos = player_.lock()->transform_->GetWorldPosition();
 	std::shared_ptr<NodePath> node = GetNodeVecFromWorldPos(pPos);
-	costMap[node->NodeID] = Player;
+	costMap_[node->NodeID] = Player;
 
 	//プレイヤー周りを２にする
 	for (auto& e : node->edge)
 	{
-		costMap[e->distnationNode] = PlayerMawari;
+		costMap_[e->distnationNode] = PlayerMawari;
 	}
 
 	//敵の場所を３にする
@@ -267,7 +267,7 @@ void SeachGraph::InitSub(int _sizeX, int _sizeZ, float _centerX, float _centerZ,
 	{
 		DirectX::XMFLOAT3 ePos = enemy.enemy.lock()->transform_->GetWorldPosition();
 		std::shared_ptr<NodePath> enemyNode = GetNodeVecFromWorldPos(ePos);
-		costMap[enemyNode->NodeID] = Enemy;
+		costMap_[enemyNode->NodeID] = Enemy;
 	}
 
 }
@@ -281,7 +281,7 @@ bool  SeachGraph::setSub(int node, int buf1, int eNo) {
 	if (buf1 < 0) {
 		return false;
 	}
-	if (costMap[node] == 1) {//繋いではダメなノードなら
+	if (costMap_[node] == 1) {//繋いではダメなノードなら
 		for (int i = 0; i < nodeVec_[buf1]->EDGE_NO; i++) {
 			nodeVec_[node]->edge[i]->distnationNode = -1;
 		}
@@ -290,8 +290,8 @@ bool  SeachGraph::setSub(int node, int buf1, int eNo) {
 	float nY = nodeVec_[node]->pos.y;
 	float bY = nodeVec_[buf1]->pos.y;
 	if (abs(nY - bY) > thresholdY_) {//段差があれば
-		costMap[node] = 1;
-		costMap[buf1] = 1;
+		costMap_[node] = 1;
+		costMap_[buf1] = 1;
 		for (int i = 0; i < nodeVec_[buf1]->EDGE_NO; i++) {
 			nodeVec_[buf1]->edge[i]->distnationNode = -1;
 			nodeVec_[node]->edge[i]->distnationNode = -1;
@@ -323,7 +323,7 @@ bool SeachGraph::DijkstraSseach()
 	for (int i = 0; i < cellNo_; i++) {
 		nodeVec_[i]->seachFg = false;
 		nodeVec_[i]->costFromStart = 0.0f;  //スタートからのコスト
-		m_Answer[i] = -1;
+		m_Answer_[i] = -1;
 	}
 
 	std::shared_ptr<EdgePath> edge = std::make_shared<EdgePath>();
@@ -332,17 +332,17 @@ bool SeachGraph::DijkstraSseach()
 
 
 	//前準備としてダミーエッジデータをセット
-	nowEdge = edge;
+	nowEdge_ = edge;
 	while (true)
 	{
 		//サーチしたEdgeの記録
-		m_Answer[nowEdge->distnationNode] = nowEdge->originNode;
-		if (nowEdge->distnationNode == goalId_) { return true; }
+		m_Answer_[nowEdge_->distnationNode] = nowEdge_->originNode;
+		if (nowEdge_->distnationNode == goalId_) { return true; }
 
 
 
 		//nowEdgeの先のノードを取得する。
-		std::shared_ptr<NodePath> node = nodeVec_[nowEdge->distnationNode];//進み先のノード
+		std::shared_ptr<NodePath> node = nodeVec_[nowEdge_->distnationNode];//進み先のノード
 
 		for (int edgeNo = 0; edgeNo < NodePath::EDGE_NO; edgeNo++) {
 			std::shared_ptr<EdgePath> e = node->edge[edgeNo];
@@ -352,13 +352,13 @@ bool SeachGraph::DijkstraSseach()
 				float totalCost = node->costFromStart + e->cost;
 
 				//進み先がプレイヤーの周りならコスト500
-				if (costMap[nextNode->NodeID] == PlayerMawari)
+				if (costMap_[nextNode->NodeID] == PlayerMawari)
 				{
 					if (nextNode->NodeID != goalId_)
 						totalCost += 500;
 				}
 				//進み先が敵周りならコスト50
-				if (costMap[nextNode->NodeID] == EnemyMawari)
+				if (costMap_[nextNode->NodeID] == EnemyMawari)
 				{
 					if (nextNode->NodeID != goalId_)
 						totalCost += 50;
@@ -367,7 +367,7 @@ bool SeachGraph::DijkstraSseach()
 				//進み先のコストがまだ計算されていないか、新しいコストの方が低ければ登録
 				if (nextNode->costFromStart == 0 || nextNode->costFromStart > totalCost) {
 					//プレイヤーの周りか何もない場所なら入れる
-					if (costMap[nextNode->NodeID] != Player||costMap[nextNode->NodeID] != Enemy)
+					if (costMap_[nextNode->NodeID] != Player||costMap_[nextNode->NodeID] != Enemy)
 					{
 						nextNode->costFromStart = totalCost;
 
@@ -376,16 +376,16 @@ bool SeachGraph::DijkstraSseach()
 				}
 			}
 		}
-		nowEdge = seachMinCostEdge(FNR, nowEdge);
+		nowEdge_ = seachMinCostEdge(FNR, nowEdge_);
 
-		if (nowEdge == NULL)return false;
+		if (nowEdge_ == NULL)return false;
 	}
 	//何も見つからなければfalse;
 	return false;
 }
 
 //FNRからコストを考慮して最短エッジ候補を返すサブルーチン
-std::shared_ptr<EdgePath>  SeachGraph::seachMinCostEdge(std::vector<std::shared_ptr<EdgePath>>& FNR, const std::shared_ptr<EdgePath> nowEdge) {
+std::shared_ptr<EdgePath>  SeachGraph::seachMinCostEdge(std::vector<std::shared_ptr<EdgePath>>& FNR, const std::shared_ptr<EdgePath> nowEdge_) {
 	std::shared_ptr<EdgePath> answer = NULL;//答えの入れ物
 	int  answerNo = 0;
 	float minCost = FLT_MAX;//最小のコストを保持するワーク
@@ -393,7 +393,7 @@ std::shared_ptr<EdgePath>  SeachGraph::seachMinCostEdge(std::vector<std::shared_
 	for (int fnrNo = 0; fnrNo < FNR.size(); fnrNo++) {
 
 		EdgePath* element = FNR[fnrNo].get();
-		float nowCost = nodeVec_[nowEdge->originNode]->costFromStart;
+		float nowCost = nodeVec_[nowEdge_->originNode]->costFromStart;
 		//接続先の「スタート位置からのコスト」をfrontCostに取り出す(まだ登録されていないなら０となる)
 		float frontCost = nodeVec_[element->distnationNode]->costFromStart;
 
@@ -449,7 +449,7 @@ std::vector<DirectX::XMFLOAT3> SeachGraph::SearchEnemySetPos(DirectX::XMFLOAT3 e
 
 			while (endNo != startId_)
 			{
-				endNo = m_Answer[startNo];
+				endNo = m_Answer_[startNo];
 
 				if (dir == -1)
 				{

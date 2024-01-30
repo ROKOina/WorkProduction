@@ -57,7 +57,7 @@ private:
         DirectX::XMFLOAT4 color;
     };
     std::vector<LineData> lineData_;
-    DirectX::XMFLOAT4 lineYou = { 0,626.7f,755.7f,4 };
+    DirectX::XMFLOAT4 linePosData_ = { 0,626.7f,755.7f,4 };
     //”š
     int ketaCount_; //Œ…”
     std::unique_ptr<Sprite> numSprite_ = std::make_unique<Sprite>("./Data/Sprite/number.png");

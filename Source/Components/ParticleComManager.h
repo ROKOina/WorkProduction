@@ -36,6 +36,7 @@ public:
 		DAMAGE_SWETTS_ENEMY,
 		JUST_SPARK,
 		JUST_UNDER,
+		HIT_EFF,
 
 		MAX_EFFECT,
 	};
@@ -74,6 +75,7 @@ private:
 		InializeParticle("Data/Effect/para/damageSweetsEnemy.ipff", false, 10, true),
 		InializeParticle("Data/Effect/para/justSpark.ipff",true,100),
 		InializeParticle("Data/Effect/para/justSpawnUnder.ipff", false, 500, true),
+		InializeParticle("Data/Effect/para/hitEff.ipff", false, 500),
 	};
 
 	struct ParticleDataMove

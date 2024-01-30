@@ -110,7 +110,10 @@ void AttackPlayer::Render2D(float elapsedTime)
         if (!lockOnUIEnemy_.expired())
         {
             DirectX::XMFLOAT3 enemyPos = lockOnUIEnemy_.lock()->transform_->GetWorldPosition();
-            enemyPos.y += 1;
+            if (std::strcmp(lockOnUIEnemy_.lock()->GetName(), "appleNear") == 0)
+                enemyPos.y += 0.5f;
+            else
+                enemyPos.y += 1;
             std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
             enemyPos = Graphics::Instance().WorldToScreenPos(enemyPos, camera);
 
@@ -118,7 +121,7 @@ void AttackPlayer::Render2D(float elapsedTime)
             lockOnSprite->Render(dc, enemyPos.x - size / 2.0f, enemyPos.y - size / 2.0f
                 , size, size
                 , 0, 0, static_cast<float>(lockOnSprite->GetTextureWidth()), static_cast<float>(lockOnSprite->GetTextureHeight())
-                , 0, 1, 1, 1, 1);
+                , 0, 2, 2, 0, 1);
         }
     }
 }
@@ -593,6 +596,10 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
     std::shared_ptr<WeaponCom> weapon2 = playerObj->GetChildFind("CandyCircle")->GetComponent<WeaponCom>();
     std::shared_ptr<WeaponCom> weapon3 = playerObj->GetChildFind("CandyStick")->GetComponent<WeaponCom>();
 
+    std::shared_ptr<WeaponCom> w[3] = {
+        weapon1,weapon2,weapon3
+    };
+
     //一回でも攻撃が当たっているなら次の攻撃が来るまで、trueにする
     if (weapon1->GetOnHit()||weapon2->GetOnHit()||weapon3->GetOnHit())
     {
@@ -602,6 +609,37 @@ void AttackPlayer::AttackMoveUpdate(float elapsedTime)
 
             //ヒット時カメラストップ
             GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>()->HitStop(0.1f);
+        }
+
+        ////ヒットエフェクト用
+        //for (int i = 0; i < 3; ++i)
+        //{
+        //    if (w[i]->GetOnHit())
+        //    {
+        //        weaponNum_ = i;
+        //        startHitEff_ = true;
+        //        delayTimer_ = 0.02f;
+        //        break;
+        //    }
+        //}
+    }
+
+    //ヒットエフェクト用
+    if (startHitEff_)
+    {
+        delayTimer_ -= elapsedTime;
+        if (delayTimer_ < 0)
+        {
+            startHitEff_ = false;
+            DirectX::XMFLOAT3 hitPos = { 0,0,0 };
+
+            DirectX::XMFLOAT4X4 world = w[weaponNum_]->GetGameObject()->GetComponent<RendererCom>()->GetModel()->FindNode("head")->worldTransform;
+            hitPos.x = world._41;
+            hitPos.y = world._42;
+            hitPos.z = world._43;
+
+            std::shared_ptr<GameObject> particle = ParticleComManager::Instance().SetEffect(ParticleComManager::HIT_EFF);
+            particle->GetComponent<TransformCom>()->SetWorldPosition(hitPos);
         }
     }
 

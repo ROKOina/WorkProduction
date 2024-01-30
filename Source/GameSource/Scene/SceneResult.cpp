@@ -248,8 +248,8 @@ void SceneResult::Render(float elapsedTime)
             , 0, 0, static_cast<float>(lineSprite_->GetTextureWidth()), static_cast<float>(lineSprite_->GetTextureHeight())
             , 0, lineData.color.x, lineData.color.y, lineData.color.z, lineData.color.w);
     }
-    lineSprite_->Render(dc, lineYou.x, lineYou.y
-        , lineYou.z, lineYou.w
+    lineSprite_->Render(dc, linePosData_.x, linePosData_.y
+        , linePosData_.z, linePosData_.w
         , 0, 0, static_cast<float>(lineSprite_->GetTextureWidth()), static_cast<float>(lineSprite_->GetTextureHeight())
         , 0, 1, 1, 1, 1);
 
@@ -342,7 +342,7 @@ void SceneResult::Render(float elapsedTime)
             ImGui::DragFloat3("maxComboPos_", &maxComboPos_.x);
             ImGui::DragFloat3("buttonPos_", &buttonPos_.x);
 
-            ImGui::DragFloat4("abc", &lineYou.x, 0.1f);
+            ImGui::DragFloat4("abc", &linePosData_.x, 0.1f);
 
         }
         ImGui::End();

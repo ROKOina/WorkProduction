@@ -734,14 +734,14 @@ void SceneGame::Initialize()
 
 
 	////particle
-	//for (int i = 0; i < 0; ++i)
+	//for (int i = 0; i < 1; ++i)
 	//{
 	//	std::shared_ptr<GameObject> p = GameObjectManager::Instance().Create();
 	//	std::string n = "Particle" + std::to_string(i);
 	//	p->SetName(n.c_str());
 	//	p->transform_->SetWorldPosition(DirectX::XMFLOAT3(i * 1.0f, 1, 0));
 
-	//	std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(100000);
+	//	std::shared_ptr<ParticleSystemCom> c = p->AddComponent<ParticleSystemCom>(10000);
 	//	c->SetSweetsParticle(true);	//‚¨‰ÙŽq—p
 
 	//	c->LoadTexture("./Data/Sprite/sweetsParticle.png");

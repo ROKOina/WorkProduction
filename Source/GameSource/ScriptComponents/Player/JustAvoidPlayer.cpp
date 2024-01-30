@@ -106,7 +106,10 @@ void JustAvoidPlayer::Render2D(float elapsedTime)
         if (enemy)
         {
             DirectX::XMFLOAT3 enemyPos = enemy->transform_->GetWorldPosition();
-            enemyPos.y += 1;
+            if (std::strcmp(enemy->GetName(), "appleNear") == 0)
+                enemyPos.y += 0.5f;
+            else
+                enemyPos.y += 1;
             std::shared_ptr<CameraCom> camera = GameObjectManager::Instance().Find("Camera")->GetComponent<CameraCom>();
             enemyPos = Graphics::Instance().WorldToScreenPos(enemyPos, camera);
 
@@ -114,7 +117,7 @@ void JustAvoidPlayer::Render2D(float elapsedTime)
             lockOnSprite->Render(dc, enemyPos.x - size / 2.0f, enemyPos.y - size / 2.0f
                 , size, size
                 , 0, 0, static_cast<float>(lockOnSprite->GetTextureWidth()), static_cast<float>(lockOnSprite->GetTextureHeight())
-                , 0, 1, 1, 1, 1);
+                , 0, 2, 2, 0, 1);
         }
     }
 }

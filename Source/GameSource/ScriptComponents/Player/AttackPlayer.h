@@ -207,6 +207,11 @@ private:
     //攻撃の動きを管理
     int state_ = -1;
 
+    //ヒットエフェクト用
+    float delayTimer_;   //少し遅らせる
+    int weaponNum_ = -1;
+    bool startHitEff_ = false; //ヒット確認
+
     //ロックオンUI用
     std::weak_ptr<GameObject> lockOnUIEnemy_;
 

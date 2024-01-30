@@ -105,7 +105,7 @@ public:
 
 	//経路探査
 	bool	DijkstraSseach();
-	std::shared_ptr<EdgePath>  seachMinCostEdge(std::vector<std::shared_ptr<EdgePath>>& FNR, const std::shared_ptr<EdgePath> nowEdge);
+	std::shared_ptr<EdgePath>  seachMinCostEdge(std::vector<std::shared_ptr<EdgePath>>& FNR, const std::shared_ptr<EdgePath> nowEdge_);
 
 	//プレイヤーの周りに配置するための道順を返す
 	std::vector<DirectX::XMFLOAT3> SearchEnemySetPos(DirectX::XMFLOAT3 enemyPos, DirectX::XMFLOAT3 goalPos, DIRECTION dirSet = NONE_DIR);
@@ -130,10 +130,10 @@ public:
 
 
 	//答えルートのエッジを記憶するワーク
-	std::vector<int>  m_Answer;
-	std::shared_ptr<EdgePath> nowEdge;
+	std::vector<int>  m_Answer_;
+	std::shared_ptr<EdgePath> nowEdge_;
 
-	std::vector<int>	costMap;
+	std::vector<int>	costMap_;
 
 
 	//プレイヤー保存
